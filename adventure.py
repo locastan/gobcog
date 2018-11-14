@@ -287,7 +287,7 @@ class Adventure:
                 failed = True
                 for user in Adventure.userslist["fight"]: #check if any fighter has an equipped mirror shield to give them a chance.
                     member = discord.utils.find(lambda m: m.display_name == user, ctx.guild.members)
-                    if 'mirror shield' in users[str(member.id)]['items']['left']:
+                    if 'mirror_shield' in users[str(member.id)]['items']['left']:
                         failed = False
                         break
             else:
@@ -332,6 +332,8 @@ class Adventure:
             else:
                 if len(critlist) != 0:
                     treasure = [1,0,0]
+                else:
+                    treasure = False
         if Adventure.challenge == "Basilisk" and failed:
             await ctx.send("The Basilisk's gaze turned everyone to stone.")
             return
@@ -381,7 +383,7 @@ class Adventure:
             else:
                 Adventure.rewards[user]["special"] = False
         if special != False:
-            types = ["normal","rare","n epic"]
+            types = [" normal"," rare","n epic"]
             type = types[special.index(1)]
             return "\nYou have been awarded {} xp and found {} copperpieces. You also secured a{} treasure chest!".format(xp,cp,type)
         else:
