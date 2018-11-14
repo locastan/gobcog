@@ -140,7 +140,7 @@ class GobCog(BaseCog):
         elif type == "epic":
             redux = [0,0,1]
         else:
-            await ctx.send("Not a proper treasure type. You made a typo?")
+            await ctx.send("There is talk of a {} treasure chest but nobody ever saw one.".format(type))
             return
         with open('users.json', 'r') as f:
             users = json.load(f)

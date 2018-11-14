@@ -290,6 +290,8 @@ class Adventure:
                     if 'mirror shield' in users[str(member.id)]['items']['left']:
                         failed = False
                         break
+            else:
+                failed = False
             return failed
 
         with open('users.json', 'r') as f:
@@ -322,9 +324,9 @@ class Adventure:
         talkers = " and ".join([", ".join(Adventure.userslist["talk"][:-1]),Adventure.userslist["talk"][-1]] if len(Adventure.userslist["talk"]) > 2 else Adventure.userslist["talk"])
         text = ""
 
-        if slain or persuaded:
+        if slain or persuaded and not failed:
             if Adventure.challenge == "Basilisk": #rewards 50:50 epic:normal chest for killing the basilisk
-                treasure = random.choice([0,1,0],[1,0,0])
+                treasure = random.choice([[0,1,0],[1,0,0]])
             elif Adventure.challenge == "Dragon": #always rewards an epic chest.
                 treasure = [0,0,1]
             else:
