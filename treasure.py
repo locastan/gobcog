@@ -23,6 +23,8 @@ class Treasure:
             "ringlet of charisma":{"slot":["ring"],"att":0,"cha":1},
             "amulet of strength":{"slot":["charm"],"att":1,"cha":0},
             "simple axe":{"slot":["right"],"att":2,"cha":0},
+            "peg leg":{"slot":["left"],"att":2,"cha":-1},
+            "tambourine":{"slot":["left"],"att":0,"cha":2},
             }
     rare = {"ceremonial dagger":{"slot":["right"],"att":2,"cha":2},
             "tower shield":{"slot":["left"],"att":3,"cha":1},
@@ -39,6 +41,8 @@ class Treasure:
             "silver tongued chain":{"slot":["charm"],"att":-1,"cha":3},
             "greataxe":{"slot":["right","left"],"att":2,"cha":1},
             "spiked mace":{"slot":["right"],"att":3,"cha":-1},
+            "buckler":{"slot":["left"],"att":3,"cha":0},
+            "tuba":{"slot":["right","left"],"att":2,"cha":1},
             }
     unique = {"troll banhammer":{"slot":["right","left"],"att":2,"cha":2},
             "scythe of death":{"slot":["right","left"],"att":3,"cha":-2},
@@ -47,17 +51,31 @@ class Treasure:
             "booklet of jokes":{"slot":["charm"],"att":0,"cha":5},
             "great bulwark":{"slot":["left"],"att":5,"cha":0},
             "dragon ring":{"slot":["ring"],"att":4,"cha":3},
+            "mandachord":{"slot":["right", "left"],"att":1,"cha":3},
             }
 
-    async def open_chest(ctx, user):
+    async def open_chest(ctx, user, type):
         await ctx.send("{} is opening a treasure chest. What riches lay inside?".format(user.display_name))
         roll = random.randint(1,100)
-        if roll <= 5:
-            chance = Treasure.unique
-        elif roll > 5 and roll <= 25:
-            chance = Treasure.rare
-        else:
-            chance = Treasure.common
+        if type == "normal":
+            if roll <= 5:
+                chance = Treasure.unique
+            elif roll > 5 and roll <= 25:
+                chance = Treasure.rare
+            else:
+                chance = Treasure.common
+        if type == "rare":
+            if roll <= 15:
+                chance = Treasure.unique
+            elif roll > 15 and roll <= 45:
+                chance = Treasure.rare
+            else:
+                chance = Treasure.common
+        if type == "epic":
+            if roll <= 25:
+                chance = Treasure.unique
+            else:
+                chance = Treasure.rare
         itemname = random.choice(list(chance.keys()))
         item = chance[itemname]
         if len(item["slot"]) == 2: # two handed weapons add their bonuses twice

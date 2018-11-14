@@ -70,10 +70,11 @@ class GobCog(BaseCog):
 
     @commands.command()
     @checks.admin_or_permissions(administrator=True)
-    async def give_loot(self, ctx, user: discord.Member=None):
+    async def give_loot(self, ctx, user: discord.Member=None, type: str="normal"):
         """[Admin] This rewards a treasure chest to a specified member.
             !give_loot @locastan
-            will give locastan a chest.
+            will give locastan a normal chest.
+            (Adding "rare" or "epic" to command, creates rare and epic chests.)
             *If you do not wish to tag the user, remove the @ after selecting
             his name from the @ mention menu. If the user has spaces in his
             username, please add " around the name so the bot knows where the
@@ -84,11 +85,16 @@ class GobCog(BaseCog):
         if user is None:
             user = ctx.author
         if not 'treasure' in users[str(user.id)].keys():
-            users[str(user.id)]['treasure'] = 0
-        users[str(user.id)]['treasure'] += 1
+            users[str(user.id)]['treasure'] = [0,0,0]
+        if type == "rare":
+            users[str(user.id)]['treasure'][1] += 1
+        elif type == "epic":
+            users[str(user.id)]['treasure'][2] += 1
+        else:
+            users[str(user.id)]['treasure'][0] += 1
         await ctx.send(
-            "```{} now owns {} chests.```".format(
-                user.display_name, str(users[str(user.id)]['treasure'])))
+            "```{} now owns {} normal, {} rare and {} epic chests.```".format(
+                user.display_name, str(users[str(user.id)]['treasure'][0]),str(users[str(user.id)]['treasure'][1]),str(users[str(user.id)]['treasure'][2])))
         with open('users.json', 'w') as f:
             json.dump(users, f)
 
@@ -113,25 +119,40 @@ class GobCog(BaseCog):
                     diplomacy += users[str(user)]['items'][slot][item]['cha']
             users[str(user)]['att'] = attack
             users[str(user)]['cha'] = diplomacy
+            if type(users[str(user)]['treasure']) == int:
+                normal = users[str(user)]['treasure']
+                users[str(user)]['treasure'] = [0,0,0]
+                users[str(user)]['treasure'][0] = normal
         with open('users.json', 'w') as f:
             json.dump(users, f)
 
     @commands.command()
     @commands.guild_only()
-    async def loot(self, ctx):
+    async def loot(self, ctx, type: str="normal"):
         """This opens one of your precious treasure chests.
+            (If you have rare or epic chests, type "rare" or
+            "epic" after the command to open those.)
         """
+        if type == "normal":
+            redux = [1,0,0]
+        elif type == "rare":
+            redux = [0,1,0]
+        elif type == "epic":
+            redux = [0,0,1]
+        else:
+            await ctx.send("Not a proper treasure type. You made a typo?")
+            return
         with open('users.json', 'r') as f:
             users = json.load(f)
         user = ctx.author
         if not 'treasure' in users[str(user.id)].keys():
-            users[str(user.id)]['treasure'] = 0
-        treasure = users[str(user.id)]['treasure']
+            users[str(user.id)]['treasure'] = [0,0,0]
+        treasure = users[str(user.id)]['treasure'][redux.index(1)]
         if treasure == 0:
-            await ctx.send("You have no treasure chest to open.")
+            await ctx.send("You have no {} treasure chest to open.".format(type))
         else:
-            item = await Treasure.open_chest(ctx, user)
-            users[str(user.id)]['treasure'] -= 1
+            item = await Treasure.open_chest(ctx, user, type)
+            users[str(user.id)]['treasure'] = [x-y for x,y in zip(users[str(user.id)]['treasure'], redux)]
             if item['equip']:
                 equip = {"itemname": item['itemname'],"item": item['item']}
                 with open('users.json', 'w') as f:
@@ -182,7 +203,9 @@ class GobCog(BaseCog):
         await ctx.send(
             "```css\n[{}'s Character Sheet] \n\n```".format(user.display_name) + "```css\nA level {} Hero. \n\n- ATTACK: {} - DIPLOMACY: {} -\n\n- Credits: {} {} \n- Experience: {}/{} \n```".format(
                 lvl, att, cha, bal, currency, xp, next_lvl
-            ) + "```css\n" + equip + "```"
+            ) + "```css\n" + equip + "```" +
+            "```css\n" + "You own {} normal, {} rare and {} epic chests.```".format(
+                str(users[str(user.id)]['treasure'][0]),str(users[str(user.id)]['treasure'][1]),str(users[str(user.id)]['treasure'][2]))
         )
 
     @commands.command()
@@ -358,7 +381,7 @@ class GobCog(BaseCog):
             users[str(user.id)]['lvl'] = 1
             users[str(user.id)]['att'] = 0
             users[str(user.id)]['cha'] = 0
-            users[str(user.id)]['treasure'] = 0
+            users[str(user.id)]['treasure'] = [0,0,0]
             users[str(user.id)]['items'] = {"left":{},"right":{},"ring":{},"charm":{},"backpack": {}}
 
 
@@ -370,11 +393,10 @@ class GobCog(BaseCog):
         users[str(user.id)]['exp'] += exp
         await bank.deposit_credits(user, cp)
         await GobCog.level_up(ctx, users, user)
-        print("Added {}xp and {}cp for user {}".format(exp,cp,user.display_name))
-        if special:
+        if special != False:
             if not 'treasure' in users[str(user.id)].keys():
-                users[str(user.id)]['treasure'] = 0
-            users[str(user.id)]['treasure'] += 1
+                users[str(user.id)]['treasure'] = [0,0,0]
+            users[str(user.id)]['treasure'] = [sum(x) for x in zip(users[str(user.id)]['treasure'], special)]
 
         with open('users.json', 'w') as f:
             json.dump(users, f)

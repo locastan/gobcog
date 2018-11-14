@@ -192,11 +192,11 @@ class Adventure:
                 await message.remove_reaction(symbol, user)
         if user.display_name not in Adventure.userslist[call_from]:
             Adventure.userslist[call_from].append(user.display_name)
-        try: #this might be tripping up stuff...check if it works without the reiteration of the wait_for. Nope...doesn't start result then after initial timeout.
+        try:
             react, user = await ctx.bot.wait_for(
                 "reaction_add",
                 check=CustomPredicate.with_emojis(tuple(controls.keys()), message),
-                timeout=10,
+                timeout=15,
             )
         except asyncio.TimeoutError:
             return await Adventure.result(ctx, pages, controls, message, page, timeout)
@@ -321,6 +321,15 @@ class Adventure:
         fighters = " and ".join([", ".join(Adventure.userslist["fight"][:-1]),Adventure.userslist["fight"][-1]] if len(Adventure.userslist["fight"]) > 2 else Adventure.userslist["fight"])
         talkers = " and ".join([", ".join(Adventure.userslist["talk"][:-1]),Adventure.userslist["talk"][-1]] if len(Adventure.userslist["talk"]) > 2 else Adventure.userslist["talk"])
         text = ""
+
+        if slain or persuaded:
+            if Adventure.challenge == "Basilisk": #rewards 50:50 epic:normal chest for killing the basilisk
+                treasure = random.choice([0,1,0],[1,0,0])
+            elif Adventure.challenge == "Dragon": #always rewards an epic chest.
+                treasure = [0,0,1]
+            else:
+                if len(critlist) != 0:
+                    treasure = [1,0,0]
         if Adventure.challenge == "Basilisk" and failed:
             await ctx.send("The Basilisk's gaze turned everyone to stone.")
             return
@@ -330,11 +339,11 @@ class Adventure:
         if people == 1:
             if slain:
                 text= ("{} has slain the {} in epic battle!").format(fighters,Adventure.challenge)
-                text += await Adventure.reward(ctx, Adventure.userslist["fight"]+Adventure.userslist["pray"],((Adventure.str+Adventure.dipl)//people),(attack/Adventure.str),(len(critlist) != 0))
+                text += await Adventure.reward(ctx, Adventure.userslist["fight"]+Adventure.userslist["pray"],((Adventure.str+Adventure.dipl)//people),(attack/Adventure.str),treasure)
 
             if  persuaded:
                 text= ("{} almost died in battle,").format(talkers) + (" but confounded the {} in the last second.").format(Adventure.challenge)
-                text += await Adventure.reward(ctx, Adventure.userslist["talk"]+Adventure.userslist["pray"],((Adventure.str+Adventure.dipl)//people),(diplomacy/Adventure.dipl),(len(critlist) != 0))
+                text += await Adventure.reward(ctx, Adventure.userslist["talk"]+Adventure.userslist["pray"],((Adventure.str+Adventure.dipl)//people),(diplomacy/Adventure.dipl),treasure)
 
             if not slain and not persuaded:
                 options = ["No amount of diplomacy or valiant fighting could save you. You died.", "This challenge was too much for one hero.", "You tried your best, but couldn't succeed alone."]
@@ -342,15 +351,15 @@ class Adventure:
         else:
             if slain and persuaded:
                 text= ("{} slayed the {} in battle,").format(fighters,Adventure.challenge) + ("while {} distracted with insults.").format(talkers)
-                text += await Adventure.reward(ctx, Adventure.userslist["fight"]+Adventure.userslist["talk"]+Adventure.userslist["pray"],((Adventure.str+Adventure.dipl)//people),(attack/Adventure.str+diplomacy/Adventure.dipl),(len(critlist) != 0))
+                text += await Adventure.reward(ctx, Adventure.userslist["fight"]+Adventure.userslist["talk"]+Adventure.userslist["pray"],((Adventure.str+Adventure.dipl)//people),(attack/Adventure.str+diplomacy/Adventure.dipl),treasure)
 
             if  not slain and persuaded:
                 text= ("{} talked the {} down.").format(talkers,Adventure.challenge)
-                text += await Adventure.reward(ctx, Adventure.userslist["talk"]+Adventure.userslist["pray"],((Adventure.str+Adventure.dipl)//people),(diplomacy/Adventure.dipl),(len(critlist) != 0))
+                text += await Adventure.reward(ctx, Adventure.userslist["talk"]+Adventure.userslist["pray"],((Adventure.str+Adventure.dipl)//people),(diplomacy/Adventure.dipl),treasure)
 
             if slain and not persuaded:
                 text= ("{} killed the {} in a most heroic battle.").format(fighters,Adventure.challenge)
-                text += await Adventure.reward(ctx, Adventure.userslist["fight"]+Adventure.userslist["pray"],((Adventure.str+Adventure.dipl)//people),(attack/Adventure.str),(len(critlist) != 0))
+                text += await Adventure.reward(ctx, Adventure.userslist["fight"]+Adventure.userslist["pray"],((Adventure.str+Adventure.dipl)//people),(attack/Adventure.str),treasure)
 
             if not slain and not persuaded:
                 options = ["No amount of diplomacy or valiant fighting could save you. Everyone died.", "This challenge was too much for this group.", "You tried your best, but succumbed to overwhelming forces in the end."]
@@ -365,12 +374,14 @@ class Adventure:
             Adventure.rewards[user] = {}
             Adventure.rewards[user]["xp"] = xp
             Adventure.rewards[user]["cp"] = cp
-            if special:
-                Adventure.rewards[user]["special"] = True
+            if special != False:
+                Adventure.rewards[user]["special"] = special
             else:
                 Adventure.rewards[user]["special"] = False
-        if special:
-            return "\nYou have been awarded {} xp and found {} copperpieces. You also secured a treasure chest!".format(xp,cp)
+        if special != False:
+            types = ["normal","rare","n epic"]
+            type = types[special.index(1)]
+            return "\nYou have been awarded {} xp and found {} copperpieces. You also secured a{} treasure chest!".format(xp,cp,type)
         else:
             return "\nYou have been awarded {} xp and found {} copperpieces.".format(xp,cp)
 
