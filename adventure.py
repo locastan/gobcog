@@ -1,5 +1,5 @@
 import json
-import os
+from redbot.core.data_manager import cog_data_path
 from redbot.core import commands
 import asyncio
 import contextlib
@@ -10,14 +10,14 @@ import calendar
 import time
 from .custompredicate import CustomPredicate
 
-os.chdir(r'C:\RedBot\cogs\CogManager\cogs\gobcog')
-
 _ReactableEmoji = Union[str, discord.Emoji]
 
 class Adventure:
 
+    fp = cog_data_path(None, "gobcog") / 'users.json'
+
     attribs = {" terrifying":[1,1.2]," hideous":[1,1]," weak":[0.5,1]," sick":[0.3,0.9]," stupid":[1,0.5]," cunning":[1.2,1.2]," fat":[1.1,0.9]," fairly intelligent":[1,1.2]," dumb":[1,0.8],"n old":[0.8,1.5],"n ancient":[0.8,2]}
-    monsters = {"Ogre":{"str":18,"dipl":10},"Gnoll":{"str":12,"dipl":8},"Wizard":{"str":8,"dipl":15},"Demon":{"str":30,"dipl":17},"Cave Rat":{"str":5,"dipl":99},"Fire Elemental":{"str":13,"dipl":13},"Bandit":{"str":10,"dipl":10},"Basilisk":{"str":50,"dipl":50},"Red Dragon":{"str":95,"dipl":95}}
+    monsters = {"Ogre":{"str":18,"dipl":10},"Gnoll":{"str":12,"dipl":8},"Wizard":{"str":8,"dipl":15},"Demon":{"str":30,"dipl":17},"Cave Rat":{"str":5,"dipl":30},"Fire Elemental":{"str":13,"dipl":13},"Bandit":{"str":10,"dipl":10},"Basilisk":{"str":50,"dipl":50},"Red Dragon":{"str":95,"dipl":95}}
     challenge = ""
     attrib = ""
     userslist = {}
@@ -39,11 +39,11 @@ class Adventure:
         Adventure.userslist = {"fight":[],"pray":[],"talk":[],"run":[]}
         Adventure.rewards = {}
         if Adventure.challenge == "Red Dragon":
-            await Adventure.menu(ctx, [("a{} {} just landed in front of you glaring! \n\nWhat will you do and will other heroes be brave enough to help you? (Str: {}, Dipl: {}) \nHeroes have 30s to participate via reaction:").format(Adventure.attrib,Adventure.challenge,str(int(Adventure.str)),str(int(Adventure.dipl)))], {"🗡": Adventure.fight, "🗨": Adventure.talk, "🛐": Adventure.pray, "❌": Adventure.run})
+            await Adventure.menu(ctx, [("a{} {} just landed in front of you glaring! \n\nWhat will you do and will other heroes be brave enough to help you?\nHeroes have 30s to participate via reaction:").format(Adventure.attrib,Adventure.challenge)], {"🗡": Adventure.fight, "🗨": Adventure.talk, "🛐": Adventure.pray, "❌": Adventure.run})
         elif Adventure.challenge == "Basilisk":
-            await Adventure.menu(ctx, [("a{} {} stepped out looking around. \n\nWhat will you do and will other heroes help your cause? (Str: {}, Dipl: {}) \nHeroes have 30s to participate via reaction:").format(Adventure.attrib,Adventure.challenge,str(int(Adventure.str)),str(int(Adventure.dipl)))], {"🗡": Adventure.fight, "🗨": Adventure.talk, "🛐": Adventure.pray, "❌": Adventure.run})
+            await Adventure.menu(ctx, [("a{} {} stepped out looking around. \n\nWhat will you do and will other heroes help your cause?\nHeroes have 30s to participate via reaction:").format(Adventure.attrib,Adventure.challenge)], {"🗡": Adventure.fight, "🗨": Adventure.talk, "🛐": Adventure.pray, "❌": Adventure.run})
         else:
-            await Adventure.menu(ctx, [("a{} {} is guarding it with menace. \n\nWhat will you do and will other heroes help your cause? (Str: {}, Dipl: {}) \nHeroes have 30s to participate via reaction:").format(Adventure.attrib,Adventure.challenge,str(int(Adventure.str)),str(int(Adventure.dipl)))], {"🗡": Adventure.fight, "🗨": Adventure.talk, "🛐": Adventure.pray, "❌": Adventure.run})
+            await Adventure.menu(ctx, [("a{} {} is guarding it with menace. \n\nWhat will you do and will other heroes help your cause?\nHeroes have 30s to participate via reaction:").format(Adventure.attrib,Adventure.challenge)], {"🗡": Adventure.fight, "🗨": Adventure.talk, "🛐": Adventure.pray, "❌": Adventure.run})
 
 
     async def menu(
@@ -116,7 +116,7 @@ class Adventure:
             react, user = await ctx.bot.wait_for(
                 "reaction_add",
                 check=CustomPredicate.with_emojis(tuple(controls.keys()), message),
-                timeout=timeout,
+                timeout=timeout
             )
         except asyncio.TimeoutError:  #the timeout only applies if no reactions are made!
             try:
@@ -287,14 +287,14 @@ class Adventure:
                 failed = True
                 for user in Adventure.userslist["fight"]: #check if any fighter has an equipped mirror shield to give them a chance.
                     member = discord.utils.find(lambda m: m.display_name == user, ctx.guild.members)
-                    if 'mirror_shield' in users[str(member.id)]['items']['left']:
+                    if '.mirror_shield' in users[str(member.id)]['items']['left']:
                         failed = False
                         break
             else:
                 failed = False
             return failed
 
-        with open('users.json', 'r') as f:
+        with Adventure.fp.open('r') as f:
             users = json.load(f)
         try:
             await message.clear_reactions()
@@ -340,14 +340,15 @@ class Adventure:
         if Adventure.challenge == "Basilisk" and not slain and not persuaded:
             await ctx.send("The mirror shield reflected the Basilisks gaze, but he still managed to kill you.")
             return
+        amount = ((Adventure.str+Adventure.dipl)*people)
         if people == 1:
             if slain:
                 text= ("{} has slain the {} in epic battle!").format(fighters,Adventure.challenge)
-                text += await Adventure.reward(ctx, Adventure.userslist["fight"]+Adventure.userslist["pray"],((Adventure.str+Adventure.dipl)//people),(attack/Adventure.str),treasure)
+                text += await Adventure.reward(ctx, Adventure.userslist["fight"]+Adventure.userslist["pray"],amount,(attack/Adventure.str),treasure)
 
             if  persuaded:
                 text= ("{} almost died in battle,").format(talkers) + (" but confounded the {} in the last second.").format(Adventure.challenge)
-                text += await Adventure.reward(ctx, Adventure.userslist["talk"]+Adventure.userslist["pray"],((Adventure.str+Adventure.dipl)//people),(diplomacy/Adventure.dipl),treasure)
+                text += await Adventure.reward(ctx, Adventure.userslist["talk"]+Adventure.userslist["pray"],amount,(diplomacy/Adventure.dipl),treasure)
 
             if not slain and not persuaded:
                 options = ["No amount of diplomacy or valiant fighting could save you. You died.", "This challenge was too much for one hero.", "You tried your best, but couldn't succeed alone."]
@@ -355,15 +356,15 @@ class Adventure:
         else:
             if slain and persuaded:
                 text= ("{} slayed the {} in battle,").format(fighters,Adventure.challenge) + ("while {} distracted with insults.").format(talkers)
-                text += await Adventure.reward(ctx, Adventure.userslist["fight"]+Adventure.userslist["talk"]+Adventure.userslist["pray"],((Adventure.str+Adventure.dipl)//people),(attack/Adventure.str+diplomacy/Adventure.dipl),treasure)
+                text += await Adventure.reward(ctx, Adventure.userslist["fight"]+Adventure.userslist["talk"]+Adventure.userslist["pray"],amount,(attack/Adventure.str+diplomacy/Adventure.dipl),treasure)
 
             if  not slain and persuaded:
                 text= ("{} talked the {} down.").format(talkers,Adventure.challenge)
-                text += await Adventure.reward(ctx, Adventure.userslist["talk"]+Adventure.userslist["pray"],((Adventure.str+Adventure.dipl)//people),(diplomacy/Adventure.dipl),treasure)
+                text += await Adventure.reward(ctx, Adventure.userslist["talk"]+Adventure.userslist["pray"],amount,(diplomacy/Adventure.dipl),treasure)
 
             if slain and not persuaded:
                 text= ("{} killed the {} in a most heroic battle.").format(fighters,Adventure.challenge)
-                text += await Adventure.reward(ctx, Adventure.userslist["fight"]+Adventure.userslist["pray"],((Adventure.str+Adventure.dipl)//people),(attack/Adventure.str),treasure)
+                text += await Adventure.reward(ctx, Adventure.userslist["fight"]+Adventure.userslist["pray"],amount,(attack/Adventure.str),treasure)
 
             if not slain and not persuaded:
                 options = ["No amount of diplomacy or valiant fighting could save you. Everyone died.", "This challenge was too much for this group.", "You tried your best, but succumbed to overwhelming forces in the end."]
@@ -372,7 +373,7 @@ class Adventure:
         await ctx.send(text)
 
     async def reward(ctx, list, amount, modif, special):
-        xp = max(1,round(amount / modif))
+        xp = max(1,round(amount))
         cp = max(1,round(amount * modif))
         for user in list:
             Adventure.rewards[user] = {}

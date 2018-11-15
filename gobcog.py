@@ -1,19 +1,21 @@
 import json
-import os
+from redbot.core.data_manager import cog_data_path
 import random
 import discord
 import asyncio
 from redbot.core.utils.predicates import MessagePredicate
+from redbot.core.utils.menus import start_adding_reactions
+from redbot.core.utils.predicates import ReactionPredicate
 from redbot.core import commands, bank, checks
 from .adventure import Adventure
 from .treasure import Treasure
 
 BaseCog = getattr(commands, "Cog", object)
-os.chdir(r'C:\RedBot\cogs\CogManager\cogs\gobcog')
-
-adv = Adventure()
 
 class GobCog(BaseCog):
+
+    fp = cog_data_path(None, "gobcog") / 'users.json'
+
     """Goblins COG test"""
 
     @commands.command()
@@ -47,7 +49,7 @@ class GobCog(BaseCog):
 
             !unequip "name of item"
         """
-        with open('users.json', 'r') as f:
+        with GobCog.fp.open('r') as f:
             users = json.load(f)
         user = ctx.author
         if item == "None":
@@ -64,7 +66,7 @@ class GobCog(BaseCog):
                         users[str(user.id)]['items']['backpack'].update(olditem) # TODO: Change data structure of items dict so you can have duplicate items because of key duplicate overwrite in dicts.
                         await ctx.send("You removed {} and put it into your backpack.".format(list(olditem.keys())[0]))
                         await ctx.send("Your new stats: **Attack**: {}, **Diplomacy**: {}.".format(users[str(user.id)]['att'],users[str(user.id)]['cha']))
-        with open('users.json', 'w') as f:
+        with GobCog.fp.open('w') as f:
             json.dump(users, f)
 
 
@@ -80,7 +82,7 @@ class GobCog(BaseCog):
             username, please add " around the name so the bot knows where the
             name starts and ends.*
         """
-        with open('users.json', 'r') as f:
+        with GobCog.fp.open('r') as f:
             users = json.load(f)
         if user is None:
             user = ctx.author
@@ -95,7 +97,7 @@ class GobCog(BaseCog):
         await ctx.send(
             "```{} now owns {} normal, {} rare and {} epic chests.```".format(
                 user.display_name, str(users[str(user.id)]['treasure'][0]),str(users[str(user.id)]['treasure'][1]),str(users[str(user.id)]['treasure'][2])))
-        with open('users.json', 'w') as f:
+        with GobCog.fp.open('w') as f:
             json.dump(users, f)
 
     @commands.command()
@@ -104,7 +106,7 @@ class GobCog(BaseCog):
         """[Admin] This recalulates each members stats based on equipped items.
             (Meant for stat cleanup after a messup error appeared.)
         """
-        with open('users.json', 'r') as f:
+        with GobCog.fp.open('r') as f:
             users = json.load(f)
         if user is None:
             user = ctx.author
@@ -123,7 +125,7 @@ class GobCog(BaseCog):
                 normal = users[str(user)]['treasure']
                 users[str(user)]['treasure'] = [0,0,0]
                 users[str(user)]['treasure'][0] = normal
-        with open('users.json', 'w') as f:
+        with GobCog.fp.open('w') as f:
             json.dump(users, f)
 
     @commands.command()
@@ -142,7 +144,7 @@ class GobCog(BaseCog):
         else:
             await ctx.send("There is talk of a {} treasure chest but nobody ever saw one.".format(type))
             return
-        with open('users.json', 'r') as f:
+        with GobCog.fp.open('r') as f:
             users = json.load(f)
         user = ctx.author
         if not 'treasure' in users[str(user.id)].keys():
@@ -155,13 +157,13 @@ class GobCog(BaseCog):
             users[str(user.id)]['treasure'] = [x-y for x,y in zip(users[str(user.id)]['treasure'], redux)]
             if item['equip']:
                 equip = {"itemname": item['itemname'],"item": item['item']}
-                with open('users.json', 'w') as f:
+                with GobCog.fp.open('w') as f:
                     json.dump(users, f)
                 await self.equip_item(ctx, equip, False)
             else:
                 users[str(user.id)]['items']['backpack'].update({item['itemname']: item['item']})
                 await ctx.send("You put your {} into the backpack.".format(item['itemname']))
-                with open('users.json', 'w') as f:
+                with GobCog.fp.open('w') as f:
                     json.dump(users, f)
 
 
@@ -183,7 +185,7 @@ class GobCog(BaseCog):
             return
         bal = await bank.get_balance(user)
         currency = await bank.get_currency_name(ctx.guild)
-        with open('users.json', 'r') as f:
+        with GobCog.fp.open('r') as f:
             users = json.load(f)
         xp = round(users[str(user.id)]['exp'])
         lvl = users[str(user.id)]['lvl']
@@ -210,18 +212,17 @@ class GobCog(BaseCog):
 
     @commands.command()
     @commands.guild_only()
-    async def backpack(self, ctx, switch: str="None", item: str="None"):
+    async def backpack(self, ctx, switch: str="None", item: str="None", asking: int=100, buyer: discord.Member=None):
         """This draws up the contents of your backpack.
-            (It also waits for you to spell out the item
-            you wish to equip in a response to the bots
-            backpack listing.)
             If you want to sell an item in your backpack, use
             !backpack sell "name of item"
+            If you want to trade an item to a user, use
+            !backpack trade "name of item" cp @buyer
         """
         user = ctx.author
         if user.bot:
             return
-        with open('users.json', 'r') as f:
+        with GobCog.fp.open('r') as f:
             users = json.load(f)
         bkpk = "Items in Backpack: \n"
         if switch == "None":
@@ -242,7 +243,7 @@ class GobCog(BaseCog):
             if not reply:
                 return
             else:
-                if not " sell " in reply.content.lower():
+                if not " sell " in reply.content.lower() and not " trade " in reply.content.lower():
                     equip = {}
                     for item in users[str(user.id)]['items']['backpack']:
                         if item in reply.content.lower():
@@ -251,12 +252,54 @@ class GobCog(BaseCog):
                     if equip != {}: #not good to change dict size during iteration so I moved this outside the for loop.
                         await self.equip_item(ctx, equip, True)
         elif switch == "sell":
+            if item == "None" or item not in users[str(user.id)]['items']['backpack']:
+                await ctx.send("You have to specify an item from your backpack to sell.")
+                return
             price = random.randint(1,100)*(users[str(user.id)]['items']['backpack'][item]['att']+users[str(user.id)]['items']['backpack'][item]['cha'])
             await bank.deposit_credits(user, price)
             del users[str(user.id)]['items']['backpack'][item]
-            with open('users.json', 'w') as f:
+            with GobCog.fp.open('w') as f:
                 json.dump(users, f)
             await ctx.send("You sold your {} for {} copperpieces.".format(item,price))
+        elif switch == "trade":
+            if item == "None" or item not in users[str(user.id)]['items']['backpack']:
+                await ctx.send("You have to specify an item from your backpack to trade.")
+                return
+            if len(users[str(user.id)]['items']['backpack'][item]["slot"]) == 2: # two handed weapons add their bonuses twice
+                hand = "two handed"
+                att = users[str(user.id)]['items']['backpack'][item]["att"]*2
+                cha = users[str(user.id)]['items']['backpack'][item]["cha"]*2
+            else:
+                if users[str(user.id)]['items']['backpack'][item]["slot"][0] == "right" or users[str(user.id)]['items']['backpack'][item]["slot"][0] == "left":
+                    hand = users[str(user.id)]['items']['backpack'][item]["slot"][0] + " handed"
+                else:
+                    hand = users[str(user.id)]['items']['backpack'][item]["slot"][0] + " slot"
+                att = users[str(user.id)]['items']['backpack'][item]["att"]
+                cha = users[str(user.id)]['items']['backpack'][item]["cha"]
+            await ctx.send("{} wants to sell his {}. (Attack: {}, Charisma: {} [{}])".format(user.display_name,item,str(att),str(cha),hand))
+            msg = await ctx.send("Do you want to buy this item for {} cp?".format(str(asking)))
+            start_adding_reactions(msg, ReactionPredicate.YES_OR_NO_EMOJIS)
+            pred = ReactionPredicate.yes_or_no(msg, buyer)
+            await ctx.bot.wait_for("reaction_add", check=pred)
+            try:
+                await msg.delete()
+            except discord.Forbidden:  # cannot remove message try remove emojis
+                for key in ReactionPredicate.YES_OR_NO_EMOJIS:
+                    await msg.remove_reaction(key, ctx.bot.user)
+            if pred.result: #buyer reacted with Yes.
+                spender = buyer
+                to = user
+                if await bank.can_spend(spender,asking):
+                    bal = await bank.transfer_credits(spender, to, asking)
+                currency = await bank.get_currency_name(ctx.guild)
+                tradeitem = users[str(user.id)]['items']['backpack'].pop(item)
+                users[str(buyer.id)]['items']['backpack'].update({item: tradeitem})
+                with GobCog.fp.open('w') as f:
+                    json.dump(users, f)
+                await ctx.send(
+                    "```css\n" + "{} traded to {} for {} {}```".format(
+                        item, buyer.display_name, asking, currency
+                    ))
 
 
 
@@ -275,7 +318,7 @@ class GobCog(BaseCog):
         if to is None:
             await ctx.send("You need to specify who you want me to give your money to, " + ctx.author.name + ".")
         spender = ctx.author
-        if bank.can_spend(spender,amount):
+        if await bank.can_spend(spender,amount):
             bal = await bank.transfer_credits(spender, to, amount)
         currency = await bank.get_currency_name(ctx.guild)
         await ctx.send(
@@ -326,26 +369,26 @@ class GobCog(BaseCog):
             pass
 
     async def on_message(self, message):
-        with open('users.json', 'r') as f:
+        with GobCog.fp.open('r') as f:
             users = json.load(f)
         if not message.author.bot:
             await self.update_data(users, message.author)
 
-        with open('users.json', 'w') as f:
+        with GobCog.fp.open('w') as f:
             json.dump(users, f)
 
     async def on_member_join(self, member):
-        with open('users.json', 'r') as f:
+        with GobCog.fp.open('r') as f:
             users = json.load(f)
 
         await self.update_data(users, member)
 
-        with open('users.json', 'w') as f:
+        with GobCog.fp.open('w') as f:
             json.dump(users, f)
 
     @staticmethod
     async def equip_item(ctx, item, from_backpack):
-        with open('users.json', 'r') as f:
+        with GobCog.fp.open('r') as f:
             users = json.load(f)
         user = ctx.author
         if not 'items' in users[str(user.id)].keys(): # if the user has an older account or something went wrong, create empty items slot.
@@ -369,7 +412,7 @@ class GobCog(BaseCog):
         if from_backpack:
             del users[str(user.id)]['items']['backpack'][item['itemname']]
         await ctx.send("Your new stats: **Attack**: {}, **Diplomacy**: {}.".format(users[str(user.id)]['att'],users[str(user.id)]['cha']))
-        with open('users.json', 'w') as f:
+        with GobCog.fp.open('w') as f:
             json.dump(users, f)
 
     @staticmethod
@@ -387,7 +430,7 @@ class GobCog(BaseCog):
 
     @staticmethod
     async def add_rewards(ctx, user, exp, cp, special):
-        with open('users.json', 'r') as f:
+        with GobCog.fp.open('r') as f:
             users = json.load(f)
 
         users[str(user.id)]['exp'] += exp
@@ -398,7 +441,7 @@ class GobCog(BaseCog):
                 users[str(user.id)]['treasure'] = [0,0,0]
             users[str(user.id)]['treasure'] = [sum(x) for x in zip(users[str(user.id)]['treasure'], special)]
 
-        with open('users.json', 'w') as f:
+        with GobCog.fp.open('w') as f:
             json.dump(users, f)
 
     @staticmethod
