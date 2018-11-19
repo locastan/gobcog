@@ -15,19 +15,34 @@ _ReactableEmoji = Union[str, discord.Emoji]
 class Adventure:
 
     fp = cog_data_path(None, "gobcog") / 'users.json'
+    users = {}
 
     attribs = {" terrifying":[1,1.2]," hideous":[1,1]," weak":[0.5,1]," sick":[0.3,0.9]," stupid":[1,0.5]," cunning":[1.2,1.2]," fat":[1.1,0.9]," fairly intelligent":[1,1.2]," dumb":[1,0.8],"n old":[0.8,1.5],"n ancient":[0.8,2]}
-    monsters = {"Ogre":{"str":18,"dipl":10},"Gnoll":{"str":12,"dipl":8},"Wizard":{"str":8,"dipl":15},"Demon":{"str":30,"dipl":17},"Cave Rat":{"str":5,"dipl":30},"Fire Elemental":{"str":13,"dipl":13},"Bandit":{"str":10,"dipl":10},"Basilisk":{"str":50,"dipl":50},"Red Dragon":{"str":95,"dipl":95}}
+    monsters = {"Ogre":{"str":18,"dipl":10},
+                "Gnoll":{"str":12,"dipl":8},
+                "Wood Spider":{"str":20,"dipl":20},
+                "Mountain Troll":{"str":25,"dipl":10},
+                "Cobold":{"str":15,"dipl":18},
+                "Orc":{"str":16,"dipl":10},
+                "Wizard":{"str":8,"dipl":15},
+                "Demon":{"str":30,"dipl":17},
+                "Cave Rat":{"str":5,"dipl":30},
+                "Pack of Wolves":{"str":19,"dipl":35},
+                "Fire Elemental":{"str":20,"dipl":20},
+                "Bandit":{"str":10,"dipl":10},
+                "Basilisk":{"str":50,"dipl":50},
+                "Red Dragon":{"str":95,"dipl":95}}
     challenge = ""
     attrib = ""
     userslist = {}
     emoji_lookup = {"fight": "🗡", "talk" : "🗨", "pray" : "🛐", "run" : "❌"}
     finish = 0
 
-    async def simple(ctx):
+    async def simple(ctx, users):
+        Adventure.users = users
         locations = ["There is telling of a dangerous cave nearby, holding immense riches. ", "You found a small clearing. ", "A bridge crosses over a deep gorge. ", "This towns inn looks very inviting. "]
-        raisins = [" is going to investigate, but ", " is curious to have a peek, but ", " would like to have a look, but ", " wants to go there, but "]
-        await ctx.send(random.choice(locations) + ctx.author.name + random.choice(raisins))
+        raisins = [" is going to investigate,", " is curious to have a peek,", " would like to have a look,", " wants to go there,"]
+        await ctx.send(random.choice(locations)+ "\n" + "**" + ctx.author.name + "**" + random.choice(raisins))
         await Adventure.choice(ctx)
         return Adventure.rewards
 
@@ -39,11 +54,12 @@ class Adventure:
         Adventure.userslist = {"fight":[],"pray":[],"talk":[],"run":[]}
         Adventure.rewards = {}
         if Adventure.challenge == "Red Dragon":
-            await Adventure.menu(ctx, [("a{} {} just landed in front of you glaring! \n\nWhat will you do and will other heroes be brave enough to help you?\nHeroes have 30s to participate via reaction:").format(Adventure.attrib,Adventure.challenge)], {"🗡": Adventure.fight, "🗨": Adventure.talk, "🛐": Adventure.pray, "❌": Adventure.run})
+            await Adventure.menu(ctx, [("but **a{} {}** just landed in front of you glaring! \n\nWhat will you do and will other heroes be brave enough to help you?\nHeroes have 30s to participate via reaction:").format(Adventure.attrib,Adventure.challenge)], {"🗡": Adventure.fight, "🗨": Adventure.talk, "🛐": Adventure.pray, "❌": Adventure.run})
         elif Adventure.challenge == "Basilisk":
-            await Adventure.menu(ctx, [("a{} {} stepped out looking around. \n\nWhat will you do and will other heroes help your cause?\nHeroes have 30s to participate via reaction:").format(Adventure.attrib,Adventure.challenge)], {"🗡": Adventure.fight, "🗨": Adventure.talk, "🛐": Adventure.pray, "❌": Adventure.run})
+            await Adventure.menu(ctx, [("but **a{} {}** stepped out looking around. \n\nWhat will you do and will other heroes help your cause?\nHeroes have 30s to participate via reaction:").format(Adventure.attrib,Adventure.challenge)], {"🗡": Adventure.fight, "🗨": Adventure.talk, "🛐": Adventure.pray, "❌": Adventure.run})
         else:
-            await Adventure.menu(ctx, [("a{} {} is guarding it with menace. \n\nWhat will you do and will other heroes help your cause?\nHeroes have 30s to participate via reaction:").format(Adventure.attrib,Adventure.challenge)], {"🗡": Adventure.fight, "🗨": Adventure.talk, "🛐": Adventure.pray, "❌": Adventure.run})
+            threatee = [" menace", " glee", " malice", " all he got", " a couple of friends", " a crosseyed squint", " steady pace"]
+            await Adventure.menu(ctx, [("but **a{} {}** is guarding it with{}. \n\nWhat will you do and will other heroes help your cause?\nHeroes have 30s to participate via reaction:").format(Adventure.attrib,Adventure.challenge,random.choice(threatee))], {"🗡": Adventure.fight, "🗨": Adventure.talk, "🛐": Adventure.pray, "❌": Adventure.run})
 
 
     async def menu(
@@ -294,8 +310,9 @@ class Adventure:
                 failed = False
             return failed
 
-        with Adventure.fp.open('r') as f:
-            users = json.load(f)
+        users = Adventure.users
+        #with Adventure.fp.open('r') as f:
+        #    users = json.load(f)
         try:
             await message.clear_reactions()
         except discord.Forbidden:  # cannot remove all reactions
@@ -325,15 +342,20 @@ class Adventure:
         text = ""
 
         if slain or persuaded and not failed:
-            if Adventure.challenge == "Basilisk": #rewards 50:50 epic:normal chest for killing the basilisk
+            CR = Adventure.str + Adventure.dipl
+            treasure = [0,0,0]
+            if CR >= 80 or Adventure.challenge == "Basilisk": #rewards 50:50 rare:normal chest for killing something like the basilisk
                 treasure = random.choice([[0,1,0],[1,0,0]])
-            elif Adventure.challenge == "Dragon": #always rewards an epic chest.
+            elif CR >= 180: #rewards 50:50 epic:rare chest for killing hard stuff.
+                treasure = random.choice([[0,0,1],[0,1,0]])
+            elif Adventure.challenge == "Red Dragon": #always rewards an epic chest.
                 treasure = [0,0,1]
             else:
                 if len(critlist) != 0:
-                    treasure = [1,0,0]
+                    treasure[0] += 1
                 else:
-                    treasure = False
+                    if treasure == [0,0,0]:
+                        treasure = False
         if Adventure.challenge == "Basilisk" and failed:
             await ctx.send("The Basilisk's gaze turned everyone to stone.")
             return
@@ -343,11 +365,11 @@ class Adventure:
         amount = ((Adventure.str+Adventure.dipl)*people)
         if people == 1:
             if slain:
-                text= ("{} has slain the {} in epic battle!").format(fighters,Adventure.challenge)
+                text= ("**{}** has slain the {} in epic battle!").format(fighters,Adventure.challenge)
                 text += await Adventure.reward(ctx, Adventure.userslist["fight"]+Adventure.userslist["pray"],amount,(attack/Adventure.str),treasure)
 
             if  persuaded:
-                text= ("{} almost died in battle,").format(talkers) + (" but confounded the {} in the last second.").format(Adventure.challenge)
+                text= ("**{}** almost died in battle,").format(talkers) + (" but confounded the {} in the last second.").format(Adventure.challenge)
                 text += await Adventure.reward(ctx, Adventure.userslist["talk"]+Adventure.userslist["pray"],amount,(diplomacy/Adventure.dipl),treasure)
 
             if not slain and not persuaded:
@@ -355,15 +377,15 @@ class Adventure:
                 text= random.choice(options)
         else:
             if slain and persuaded:
-                text= ("{} slayed the {} in battle,").format(fighters,Adventure.challenge) + ("while {} distracted with insults.").format(talkers)
+                text= ("**{}** slayed the {} in battle,").format(fighters,Adventure.challenge) + ("while {} distracted with insults.").format(talkers)
                 text += await Adventure.reward(ctx, Adventure.userslist["fight"]+Adventure.userslist["talk"]+Adventure.userslist["pray"],amount,(attack/Adventure.str+diplomacy/Adventure.dipl),treasure)
 
             if  not slain and persuaded:
-                text= ("{} talked the {} down.").format(talkers,Adventure.challenge)
+                text= ("**{}** talked the {} down.").format(talkers,Adventure.challenge)
                 text += await Adventure.reward(ctx, Adventure.userslist["talk"]+Adventure.userslist["pray"],amount,(diplomacy/Adventure.dipl),treasure)
 
             if slain and not persuaded:
-                text= ("{} killed the {} in a most heroic battle.").format(fighters,Adventure.challenge)
+                text= ("**{}** killed the {} in a most heroic battle.").format(fighters,Adventure.challenge)
                 text += await Adventure.reward(ctx, Adventure.userslist["fight"]+Adventure.userslist["pray"],amount,(attack/Adventure.str),treasure)
 
             if not slain and not persuaded:
@@ -386,7 +408,7 @@ class Adventure:
         if special != False:
             types = [" normal"," rare","n epic"]
             type = types[special.index(1)]
-            return "\nYou have been awarded {} xp and found {} copperpieces. You also secured a{} treasure chest!".format(xp,cp,type)
+            return "\nYou have been awarded {} xp and found {} copperpieces. You also secured **a{} treasure chest**!".format(xp,cp,type)
         else:
             return "\nYou have been awarded {} xp and found {} copperpieces.".format(xp,cp)
 

@@ -11,12 +11,16 @@ from .adventure import Adventure
 from .treasure import Treasure
 
 BaseCog = getattr(commands, "Cog", object)
+users = {}
 
 class GobCog(BaseCog):
 
     fp = cog_data_path(None, "gobcog") / 'users.json'
+    global users
+    with fp.open('r') as f:
+        users = json.load(f)
 
-    """Goblins COG test"""
+    """Goblins Adventure bot"""
 
     @commands.command()
     @commands.guild_only()
@@ -49,8 +53,7 @@ class GobCog(BaseCog):
 
             !unequip "name of item"
         """
-        with GobCog.fp.open('r') as f:
-            users = json.load(f)
+        global users
         user = ctx.author
         if item == "None":
             return await ctx.send("You need to name the item you want to put in your backpack.")
@@ -66,24 +69,19 @@ class GobCog(BaseCog):
                         users[str(user.id)]['items']['backpack'].update(olditem) # TODO: Change data structure of items dict so you can have duplicate items because of key duplicate overwrite in dicts.
                         await ctx.send("You removed {} and put it into your backpack.".format(list(olditem.keys())[0]))
                         await ctx.send("Your new stats: **Attack**: {}, **Diplomacy**: {}.".format(users[str(user.id)]['att'],users[str(user.id)]['cha']))
-        with GobCog.fp.open('w') as f:
-            json.dump(users, f)
 
 
     @commands.command()
     @checks.admin_or_permissions(administrator=True)
-    async def give_loot(self, ctx, user: discord.Member=None, type: str="normal"):
+    async def give_loot(self, ctx, type: str="normal", user: discord.Member=None):
         """[Admin] This rewards a treasure chest to a specified member.
-            !give_loot @locastan
+            !give_loot normal @locastan
             will give locastan a normal chest.
             (Adding "rare" or "epic" to command, creates rare and epic chests.)
-            *If you do not wish to tag the user, remove the @ after selecting
-            his name from the @ mention menu. If the user has spaces in his
-            username, please add " around the name so the bot knows where the
-            name starts and ends.*
+            If you do not wish to tag the user, remove the @ after selecting
+            his name from the @ mention menu.
         """
-        with GobCog.fp.open('r') as f:
-            users = json.load(f)
+        global users
         if user is None:
             user = ctx.author
         if not 'treasure' in users[str(user.id)].keys():
@@ -106,8 +104,7 @@ class GobCog(BaseCog):
         """[Admin] This recalulates each members stats based on equipped items.
             (Meant for stat cleanup after a messup error appeared.)
         """
-        with GobCog.fp.open('r') as f:
-            users = json.load(f)
+        global users
         if user is None:
             user = ctx.author
         for user in users:
@@ -125,6 +122,10 @@ class GobCog(BaseCog):
                 normal = users[str(user)]['treasure']
                 users[str(user)]['treasure'] = [0,0,0]
                 users[str(user)]['treasure'][0] = normal
+            member = discord.utils.get(ctx.guild.members, id=int(user))
+            if member:
+                users[str(user)]['name'] = {}
+                users[str(user)]['name'] = member.name
         with GobCog.fp.open('w') as f:
             json.dump(users, f)
 
@@ -144,8 +145,7 @@ class GobCog(BaseCog):
         else:
             await ctx.send("There is talk of a {} treasure chest but nobody ever saw one.".format(type))
             return
-        with GobCog.fp.open('r') as f:
-            users = json.load(f)
+        global users
         user = ctx.author
         if not 'treasure' in users[str(user.id)].keys():
             users[str(user.id)]['treasure'] = [0,0,0]
@@ -155,16 +155,16 @@ class GobCog(BaseCog):
         else:
             item = await Treasure.open_chest(ctx, user, type)
             users[str(user.id)]['treasure'] = [x-y for x,y in zip(users[str(user.id)]['treasure'], redux)]
-            if item['equip']:
+            if item['equip'] == "sell":
+                price = random.randint(1,100)*(item['item']['att']+item['item']['cha'])
+                await bank.deposit_credits(user, price)
+                await ctx.send("{} sold the {} for {} copperpieces.".format(user.display_name,item['itemname'],price))
+            elif item['equip'] == "equip":
                 equip = {"itemname": item['itemname'],"item": item['item']}
-                with GobCog.fp.open('w') as f:
-                    json.dump(users, f)
                 await self.equip_item(ctx, equip, False)
             else:
                 users[str(user.id)]['items']['backpack'].update({item['itemname']: item['item']})
-                await ctx.send("You put your {} into the backpack.".format(item['itemname']))
-                with GobCog.fp.open('w') as f:
-                    json.dump(users, f)
+                await ctx.send("{} put the {} into the backpack.".format(user.display_name,item['itemname']))
 
 
     @commands.command()
@@ -185,8 +185,7 @@ class GobCog(BaseCog):
             return
         bal = await bank.get_balance(user)
         currency = await bank.get_currency_name(ctx.guild)
-        with GobCog.fp.open('r') as f:
-            users = json.load(f)
+        global users
         xp = round(users[str(user.id)]['exp'])
         lvl = users[str(user.id)]['lvl']
         att = users[str(user.id)]['att']
@@ -222,8 +221,7 @@ class GobCog(BaseCog):
         user = ctx.author
         if user.bot:
             return
-        with GobCog.fp.open('r') as f:
-            users = json.load(f)
+        global users
         bkpk = "Items in Backpack: \n"
         if switch == "None":
             for item in users[str(user.id)]['items']['backpack']: # added second if level for two handed weapons so their slots show properly.
@@ -258,8 +256,6 @@ class GobCog(BaseCog):
             price = random.randint(1,100)*(users[str(user.id)]['items']['backpack'][item]['att']+users[str(user.id)]['items']['backpack'][item]['cha'])
             await bank.deposit_credits(user, price)
             del users[str(user.id)]['items']['backpack'][item]
-            with GobCog.fp.open('w') as f:
-                json.dump(users, f)
             await ctx.send("You sold your {} for {} copperpieces.".format(item,price))
         elif switch == "trade":
             if item == "None" or item not in users[str(user.id)]['items']['backpack']:
@@ -309,7 +305,7 @@ class GobCog(BaseCog):
     async def give(self, ctx, amount: int=1, to: discord.Member=None):
         """This will transfer cp from you to a specified member.
             !give 10 @Elder Aramis
-            will transfer 10 coins to Elder Aramis.
+            will transfer 10 cp to Elder Aramis.
             *If you do not wish to tag the user, remove the @ after selecting
             his name from the @ mention menu. If the user has spaces in his
             username, please add " around the name so the bot knows where the
@@ -333,10 +329,11 @@ class GobCog(BaseCog):
         """This will send you on an adventure!
             You play by reacting with the offered emojis.
         """
-        await ctx.send("You feel adventurous, " + ctx.author.name + "?")
+        global users
+        await ctx.send("You feel adventurous, " + ctx.author.display_name + "?")
         Adventure.countdown(ctx, 30, "Time remaining: ")
         await asyncio.sleep(0.5)
-        reward = await Adventure.simple(ctx)
+        reward = await Adventure.simple(ctx, users) #Adventure class doesn't change any user info, so no need to return the users object in rewards.
         print(reward)
         for user in reward.keys():
             member = discord.utils.find(lambda m: m.display_name == user, ctx.guild.members)
@@ -364,23 +361,18 @@ class GobCog(BaseCog):
 
     async def __error(self, ctx: commands.Context, error):
         if isinstance(error, commands.CommandOnCooldown):
-            await ctx.send("I feel a little tired now. Ask me again in {:.0f}s".format(error.retry_after))
+            await Adventure.countdown(ctx, error.retry_after, "I feel a little tired now. Ask me again in: ")
         else:
             pass
 
     async def on_message(self, message):
-        with GobCog.fp.open('r') as f:
-            users = json.load(f)
+        global users
         if not message.author.bot:
             await self.update_data(users, message.author)
 
-        with GobCog.fp.open('w') as f:
-            json.dump(users, f)
 
     async def on_member_join(self, member):
-        with GobCog.fp.open('r') as f:
-            users = json.load(f)
-
+        global users
         await self.update_data(users, member)
 
         with GobCog.fp.open('w') as f:
@@ -388,8 +380,7 @@ class GobCog(BaseCog):
 
     @staticmethod
     async def equip_item(ctx, item, from_backpack):
-        with GobCog.fp.open('r') as f:
-            users = json.load(f)
+        global users
         user = ctx.author
         if not 'items' in users[str(user.id)].keys(): # if the user has an older account or something went wrong, create empty items slot.
             users[str(user.id)]['items'] = {"left":{},"right":{},"ring":{},"charm":{},"backpack": {}}
@@ -426,13 +417,13 @@ class GobCog(BaseCog):
             users[str(user.id)]['cha'] = 0
             users[str(user.id)]['treasure'] = [0,0,0]
             users[str(user.id)]['items'] = {"left":{},"right":{},"ring":{},"charm":{},"backpack": {}}
+            with GobCog.fp.open('w') as f:
+                json.dump(users, f)
 
 
     @staticmethod
     async def add_rewards(ctx, user, exp, cp, special):
-        with GobCog.fp.open('r') as f:
-            users = json.load(f)
-
+        global users
         users[str(user.id)]['exp'] += exp
         await bank.deposit_credits(user, cp)
         await GobCog.level_up(ctx, users, user)

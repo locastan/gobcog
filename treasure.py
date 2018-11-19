@@ -7,6 +7,7 @@ from redbot.core.utils.menus import start_adding_reactions
 
 class Treasure:
 
+    controls = {"✅": "equip", "❎": "backpack", "💰": "sell"}
     #attribs= {"old":{"att":{0},"cha":{-1}}} not sure if I want to use these or hardcode the prefixes...
     common = {"rusty sword":{"slot":["right"],"att":1,"cha":-1},
             "shiny sword":{"slot":["right"],"att":1,"cha":1},
@@ -90,13 +91,13 @@ class Treasure:
             att = item["att"]
             cha = item["cha"]
         await ctx.send("{} found a {}. (Attack: {}, Charisma: {} [{}])".format(user.display_name,itemname,str(att),str(cha),hand))
-        msg = await ctx.send("Do you want to equip this item?")
-        start_adding_reactions(msg, ReactionPredicate.YES_OR_NO_EMOJIS)
-        pred = ReactionPredicate.yes_or_no(msg, user)
-        await ctx.bot.wait_for("reaction_add", check=pred)
+        msg = await ctx.send("Do you want to equip, put in backpack or sell this item?")
+        start_adding_reactions(msg, Treasure.controls.keys())
+        pred = ReactionPredicate.with_emojis(tuple(Treasure.controls.keys()), msg, user)
+        react, user = await ctx.bot.wait_for("reaction_add", check=pred)
         try:
             await msg.clear_reactions()
         except discord.Forbidden:  # cannot remove all reactions
-            for key in ReactionPredicate.YES_OR_NO_EMOJIS:
+            for key in Treasure.controls.keys():
                 await msg.remove_reaction(key, ctx.bot.user)
-        return {"itemname": itemname,"item":item,"equip":pred.result}
+        return {"itemname": itemname,"item":item,"equip":Treasure.controls[react.emoji]}
