@@ -257,6 +257,10 @@ class Adventure:
             return (attack,diplomacy)
 
         async def handle_fight(fumblelist, critlist, attack):
+            if len(Adventure.userslist["fight"]) > 0:
+                report = "Attack Party: "
+            else:
+                return (fumblelist, critlist, attack)
             for user in Adventure.userslist["fight"]:
                 roll = random.randint(1,20)
                 member = discord.utils.find(lambda m: m.display_name == user, ctx.guild.members)
@@ -266,9 +270,13 @@ class Adventure:
                 elif roll == 20:
                     await ctx.send("**" + user + "**" + " landed a critical hit.")
                     critlist.append(user)
-                    attack += roll + random.randint(5,10) + users[str(member.id)]['att']
+                    bonus = random.randint(5,15)
+                    attack += roll + bonus + users[str(member.id)]['att']
+                    report += "| **" + user + "**: " +  "🎲({})+".format(roll) + " + {bonus} ".format(bonus) + "🗡" + str(users[str(member.id)]['att']) + " |"
                 else:
                     attack += roll + users[str(member.id)]['att']
+                    report += "| **" + user + "**: " +  "🎲({})+".format(roll) + "🗡" + str(users[str(member.id)]['att']) + " |"
+            await ctx.send(report)
             return (fumblelist, critlist, attack)
 
         async def handle_pray(attack, diplomacy):
@@ -284,6 +292,10 @@ class Adventure:
             return (attack, diplomacy)
 
         async def handle_talk(fumblelist, critlist, diplomacy):
+            if len(Adventure.userslist["talk"]) > 0:
+                report = "Talking Party: "
+            else:
+                return (fumblelist, critlist, diplomacy)
             for user in Adventure.userslist["talk"]:
                 roll = random.randint(1,20)
                 member = discord.utils.find(lambda m: m.display_name == user, ctx.guild.members)
@@ -293,9 +305,13 @@ class Adventure:
                 elif roll == 20:
                     await ctx.send("**" + user + "**" + " made a compelling argument.")
                     critlist.append(user)
-                    diplomacy += roll + random.randint(5,10) + users[str(member.id)]['cha']
+                    bonus = random.randint(5,15)
+                    diplomacy += roll + bonus + users[str(member.id)]['cha']
+                    report += "| **" + user + "**: " +  "🎲({})+".format(roll) + " + {bonus} ".format(bonus) + "🗨" +str(users[str(member.id)]['cha']) + " |"
                 else:
                     diplomacy += roll + users[str(member.id)]['cha']
+                    report += "| **" + user + "**: " +  "🎲({})+".format(roll) + "🗨" + str(users[str(member.id)]['cha']) + " |"
+            await ctx.send(report)
             return (fumblelist, critlist, diplomacy)
 
         async def handle_basilisk(failed):
@@ -348,7 +364,7 @@ class Adventure:
                 treasure = random.choice([[0,1,0],[1,0,0]])
             elif CR >= 180: #rewards 50:50 epic:rare chest for killing hard stuff.
                 treasure = random.choice([[0,0,1],[0,1,0]])
-            elif Adventure.challenge == "Red Dragon": #always rewards an epic chest.
+            if Adventure.challenge == "Red Dragon": #always rewards an epic chest.
                 treasure = [0,0,1]
             else:
                 if len(critlist) != 0:
@@ -429,7 +445,7 @@ class Adventure:
                     if done:
                         await message.delete()
                         break
-                    await message.edit(content=("[" + title + "] {0}s".format(timer)))
+                    await message.edit(content=("⏳ [" + title + "] {0}s".format(timer)))
                     await asyncio.sleep(1)
             except ValueError:
                 await ctx.send("Must be a number!")
