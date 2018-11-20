@@ -392,9 +392,10 @@ class GobCog(BaseCog):
                 await ctx.send("You equipped {}.".format(item['itemname']))
             else:
                 olditem = users[str(user.id)]['items'][slot]
-                users[str(user.id)]['items'][slot] = {}
-                users[str(user.id)]['att'] -= olditem[list(olditem.keys())[0]]['att']     # keep in mind that double handed items grant their bonus twice so they remove twice
-                users[str(user.id)]['cha'] -= olditem[list(olditem.keys())[0]]['cha']
+                for oslot in olditem[list(olditem.keys())[0]]['slot']:
+                    users[str(user.id)]['items'][oslot] = {}
+                    users[str(user.id)]['att'] -= olditem[list(olditem.keys())[0]]['att']     # keep in mind that double handed items grant their bonus twice so they remove twice
+                    users[str(user.id)]['cha'] -= olditem[list(olditem.keys())[0]]['cha']
                 users[str(user.id)]['items']['backpack'].update(olditem)
                 users[str(user.id)]['items'][slot][item['itemname']] = item['item']
                 users[str(user.id)]['att'] += item['item']['att']
