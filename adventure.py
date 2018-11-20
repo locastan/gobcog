@@ -272,7 +272,7 @@ class Adventure:
                     critlist.append(user)
                     bonus = random.randint(5,15)
                     attack += roll + bonus + users[str(member.id)]['att']
-                    report += "| **" + user + "**: " +  "🎲({})+".format(roll) + " + {bonus} ".format(bonus) + "🗡" + str(users[str(member.id)]['att']) + " |"
+                    report += "| **" + user + "**: " +  "🎲({})+".format(roll) + " + {} ".format(bonus) + "🗡" + str(users[str(member.id)]['att']) + " |"
                 else:
                     attack += roll + users[str(member.id)]['att']
                     report += "| **" + user + "**: " +  "🎲({})+".format(roll) + "🗡" + str(users[str(member.id)]['att']) + " |"
@@ -307,7 +307,7 @@ class Adventure:
                     critlist.append(user)
                     bonus = random.randint(5,15)
                     diplomacy += roll + bonus + users[str(member.id)]['cha']
-                    report += "| **" + user + "**: " +  "🎲({})+".format(roll) + " + {bonus} ".format(bonus) + "🗨" +str(users[str(member.id)]['cha']) + " |"
+                    report += "| **" + user + "**: " +  "🎲({})+".format(roll) + " + {} ".format(bonus) + "🗨" +str(users[str(member.id)]['cha']) + " |"
                 else:
                     diplomacy += roll + users[str(member.id)]['cha']
                     report += "| **" + user + "**: " +  "🎲({})+".format(roll) + "🗨" + str(users[str(member.id)]['cha']) + " |"
