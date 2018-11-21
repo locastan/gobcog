@@ -140,7 +140,7 @@ class Adventure:
             except discord.Forbidden:  # cannot remove all reactions
                 for key in controls.keys():
                     await message.remove_reaction(key, ctx.bot.user)
-            pages = ["nobody did anything. You failed."]
+            pages = ["but nobody did anything. You failed."]
             return await Adventure.menu(ctx, pages, controls, message=message, page=page, timeout=timeout)
         await controls[react.emoji](ctx, pages, controls, message, page, timeout, react.emoji, user)
 
@@ -458,7 +458,12 @@ class Adventure:
             s = int(s)
             m = int(m)
             h = int(h)
-            out = "{:02d}".format(s)
+            if h == 0 and m == 0:
+                out = "{:02d}".format(s)
+            elif h == 0:
+                out = "{:02d}:{:02d}".format(m, s)
+            else:
+                out = "{:01d}:{:02d}:{:02d}".format(h, m, s)
             return out, finish
 
         def getEpoch(seconds : int):

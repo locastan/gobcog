@@ -101,3 +101,61 @@ class Treasure:
             for key in Treasure.controls.keys():
                 await msg.remove_reaction(key, ctx.bot.user)
         return {"itemname": itemname,"item":item,"equip":Treasure.controls[react.emoji]}
+
+
+    async def trader_get_items():
+        items = {}
+        type = random.randint(1,100)
+        for x in range(4):
+            roll = random.randint(1,100)
+            if type <= 80:
+                if roll <= 5:
+                    chance = Treasure.unique
+                elif roll > 5 and roll <= 25:
+                    chance = Treasure.rare
+                elif roll == 100:
+                    chest = [1,0,0]
+                    items.update({x: {"itemname": "normal chest","item":chest, "price": 10000}})
+                    continue
+                else:
+                    chance = Treasure.common
+            elif type <= 95:
+                if roll <= 15:
+                    chance = Treasure.unique
+                elif roll > 15 and roll <= 45:
+                    chance = Treasure.rare
+                elif roll == 100:
+                    treasure = random.choice([[0,1,0],[1,0,0]])
+                    types = ["normal chest",".rare_chest","[epic chest]"]
+                    prices = [10000,50000,100000]
+                    chesttext = types[treasure.index(1)]
+                    price = prices[treasure.index(1)]
+                    items.update({x: {"itemname": "{}".format(chesttext),"item":chest, "price": price}})
+                    continue
+                else:
+                    chance = Treasure.common
+            elif type <= 100:
+                if roll <= 25:
+                    chance = Treasure.unique
+                elif roll == 100:
+                    treasure = random.choice([[0,1,0],[0,0,1]])
+                    types = ["normal chest",".rare_chest","[epic chest]"]
+                    prices = [10000,50000,100000]
+                    chesttext = types[treasure.index(1)]
+                    price = prices[treasure.index(1)]
+                    items.update({x: {"itemname": "{}".format(chesttext),"item":chest, "price": price}})
+                    continue
+                else:
+                    chance = Treasure.rare
+            itemname = random.choice(list(chance.keys()))
+            item = chance[itemname]
+            if len(item["slot"]) == 2: # two handed weapons add their bonuses twice
+                hand = "two handed"
+                att = item["att"]*2
+                cha = item["cha"]*2
+            else:
+                att = item["att"]
+                cha = item["cha"]
+            price = random.randint(100,10000)*max(att+cha, 1)
+            items.update({x:{"itemname": itemname,"item":item, "price": price}})
+        return items

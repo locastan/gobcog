@@ -3,9 +3,12 @@ from redbot.core.data_manager import cog_data_path
 import random
 import discord
 import asyncio
+import time
 from redbot.core.utils.predicates import MessagePredicate
 from redbot.core.utils.menus import start_adding_reactions
 from redbot.core.utils.predicates import ReactionPredicate
+from .custompredicate import CustomPredicate
+from redbot.core.commands.context import Context
 from redbot.core import commands, bank, checks
 from .adventure import Adventure
 from .treasure import Treasure
@@ -19,6 +22,8 @@ class GobCog(BaseCog):
     global users
     with fp.open('r') as f:
         users = json.load(f)
+    last_trade = 0
+    bot = None
 
     """Goblins Adventure bot"""
 
@@ -39,7 +44,7 @@ class GobCog(BaseCog):
         bal = await bank.get_balance(user)
         currency = await bank.get_currency_name(ctx.guild)
         await ctx.send(
-            "```{} owns {} {}```".format(
+            "```css\n{} owns {} {}```".format(
                 user.display_name, bal, currency
             )
         )
@@ -128,6 +133,13 @@ class GobCog(BaseCog):
                 users[str(user)]['name'] = member.name
         with GobCog.fp.open('w') as f:
             json.dump(users, f)
+
+    @commands.command()
+    @checks.admin_or_permissions(administrator=True)
+    async def hawl(self, ctx):
+        """[Admin] This manually summons the trader.
+        """
+        await self.trader(ctx)
 
     @commands.command()
     @commands.guild_only()
@@ -287,18 +299,17 @@ class GobCog(BaseCog):
                 to = user
                 if await bank.can_spend(spender,asking):
                     bal = await bank.transfer_credits(spender, to, asking)
-                currency = await bank.get_currency_name(ctx.guild)
-                tradeitem = users[str(user.id)]['items']['backpack'].pop(item)
-                users[str(buyer.id)]['items']['backpack'].update({item: tradeitem})
-                with GobCog.fp.open('w') as f:
-                    json.dump(users, f)
-                await ctx.send(
-                    "```css\n" + "{} traded to {} for {} {}```".format(
-                        item, buyer.display_name, asking, currency
-                    ))
-
-
-
+                    currency = await bank.get_currency_name(ctx.guild)
+                    tradeitem = users[str(user.id)]['items']['backpack'].pop(item)
+                    users[str(buyer.id)]['items']['backpack'].update({item: tradeitem})
+                    with GobCog.fp.open('w') as f:
+                        json.dump(users, f)
+                    await ctx.send(
+                        "```css\n" + "{} traded to {} for {} {}```".format(
+                            item, buyer.display_name, asking, currency
+                        ))
+                else:
+                    await ctx.send("You do not have enough copperpieces.")
 
     @commands.command()
     @commands.guild_only()
@@ -369,6 +380,10 @@ class GobCog(BaseCog):
         global users
         if not message.author.bot:
             await self.update_data(users, message.author)
+            roll = random.randint(1,20)
+            if roll == 20:
+                ctx = await self.bot.get_context(message)
+                await self.trader(ctx)
 
 
     async def on_member_join(self, member):
@@ -445,3 +460,92 @@ class GobCog(BaseCog):
         if lvl_start < lvl_end:
             await ctx.send('{} is now level {}!'.format(user.mention,lvl_end))
             users[str(user.id)]['lvl'] = lvl_end
+
+    @staticmethod
+    async def trader(ctx):
+
+        async def handle_buy(itemindex, user, stock, msg):
+            global users
+            item = stock[itemindex]
+            spender = user
+            if await bank.can_spend(spender,int(item['price'])):
+                await bank.withdraw_credits(spender, int(item['price']))
+                if 'chest' in item['itemname']:
+                    if item['itemname'] == ".rare_chest":
+                        users[str(user.id)]['treasure'][1] += 1
+                    elif item['itemname'] == "[epic chest]":
+                        users[str(user.id)]['treasure'][2] += 1
+                    else:
+                        users[str(user.id)]['treasure'][0] += 1
+                else:
+                    users[str(user.id)]['items']['backpack'].update({item['itemname']: item['item']})
+                with GobCog.fp.open('w') as f:
+                    json.dump(users, f)
+                await ctx.send("{} bought the {} for {} cp and put it into the backpack.".format(user.display_name,item['itemname'],str(item['price'])))
+            else:
+                await ctx.send("You do not have enough copperpieces.")
+            try:
+                timeout = GobCog.last_trade+1200-time.time()
+                if timeout < 0:
+                    timeout = 0
+                react, user = await ctx.bot.wait_for(
+                    "reaction_add",
+                    check=CustomPredicate.with_emojis(tuple(controls.keys()), msg),
+                    timeout=timeout
+                )
+            except asyncio.TimeoutError:  #the timeout only applies if no reactions are made!
+                try:
+                    await msg.delete()
+                except discord.Forbidden:  # cannot remove all reactions
+                    for key in controls.keys():
+                        await message.remove_reaction(key, ctx.bot.user)
+            await handle_buy(controls[react.emoji], user, stock, msg)
+
+        em_list = ReactionPredicate.NUMBER_EMOJIS[:5]
+        controls = {em_list[1]: 0, em_list[2]: 1, em_list[3]: 2, em_list[4]: 3}
+        modRole = discord.utils.get(ctx.guild.roles, name='Goblin Adventurer!')
+        text = modRole.mention + "\n" + "```css\n [Hawls brother is bringing the cart around!]```"
+        if GobCog.last_trade == 0:
+            GobCog.last_trade = time.time()
+        elif GobCog.last_trade >= time.time()-10800: #trader can return after 3 hours have passed since last visit.
+            return #silent return.
+        GobCog.last_trade = time.time()
+        stock = await Treasure.trader_get_items()
+        print(str(stock))
+        for index, item in enumerate(stock):
+            item = stock[index]
+            if "chest" not in item['itemname']:
+                if len(item['item']["slot"]) == 2: # two handed weapons add their bonuses twice
+                    hand = "two handed"
+                    att = item['item']["att"]*2
+                    cha = item['item']["cha"]*2
+                else:
+                    if item['item']["slot"][0] == "right" or item['item']["slot"][0] == "left":
+                        hand = item['item']["slot"][0] + " handed"
+                    else:
+                        hand = item['item']["slot"][0] + " slot"
+                    att = item['item']["att"]
+                    cha = item['item']["cha"]
+                text += "```css\n" + "[{}] {} (Attack: {}, Charisma: {} [{}]) for {} cp.".format(str(index+1),item['itemname'],str(item['item']['att']),str(item['item']['cha']),hand,item['price'])+ " ```"
+            else:
+                text += "```css\n" + "[{}] {} for {} cp.".format(str(index+1),item['itemname'],item['price'])+ " ```"
+        text += "Do you want to buy any of these fine items? Tell me which one below:"
+        msg = await ctx.send(text)
+        Adventure.start_adding_reactions(msg, controls.keys(), ctx.bot.loop)
+        try:
+            timeout = GobCog.last_trade+1200-time.time()
+            if timeout < 0:
+                timeout = 0
+            Adventure.countdown(ctx, timeout, "Time remaining for trading: ")
+            react, user = await ctx.bot.wait_for(
+                "reaction_add",
+                check=CustomPredicate.with_emojis(tuple(controls.keys()), msg),
+                timeout=timeout
+            )
+        except asyncio.TimeoutError:  #the timeout only applies if no reactions are made!
+            try:
+                await msg.delete()
+            except discord.Forbidden:  # cannot remove all reactions
+                for key in controls.keys():
+                    await message.remove_reaction(key, ctx.bot.user)
+        await handle_buy(controls[react.emoji], user, stock, msg)
