@@ -17,12 +17,23 @@ class Adventure:
     fp = cog_data_path(None, "gobcog") / 'users.json'
     users = {}
 
-    attribs = {" terrifying":[1,1.2]," hideous":[1,1]," weak":[0.5,1]," sick":[0.3,0.9]," stupid":[1,0.5]," cunning":[1.2,1.2]," fat":[1.1,0.9]," fairly intelligent":[1,1.2]," dumb":[1,0.8],"n old":[0.8,1.5],"n ancient":[0.8,2]}
+    attribs = {" terrifying":[1,1.2],
+                " hideous":[1,1],
+                " weak":[0.5,1],
+                " sick":[0.3,0.9],
+                " stupid":[1,0.5],
+                " cunning":[1.2,1.2],
+                " fat":[1.1,0.9],
+                " fairly intelligent":[1,1.2],
+                " dumb":[1,0.8],
+                "n old":[0.8,1.5],
+                "n ancient":[0.8,2],
+                " savage":[1.8,0.9]}
     monsters = {"Ogre":{"str":18,"dipl":10},
                 "Gnoll":{"str":12,"dipl":8},
                 "Wood Spider":{"str":20,"dipl":20},
                 "Mountain Troll":{"str":25,"dipl":10},
-                "Cobold":{"str":15,"dipl":18},
+                "Kobold":{"str":15,"dipl":18},
                 "Orc":{"str":16,"dipl":10},
                 "Wizard":{"str":8,"dipl":15},
                 "Demon":{"str":30,"dipl":17},
@@ -58,7 +69,7 @@ class Adventure:
         elif Adventure.challenge == "Basilisk":
             await Adventure.menu(ctx, [("but **a{} {}** stepped out looking around. \n\nWhat will you do and will other heroes help your cause?\nHeroes have 30s to participate via reaction:").format(Adventure.attrib,Adventure.challenge)], {"🗡": Adventure.fight, "🗨": Adventure.talk, "🛐": Adventure.pray, "❌": Adventure.run})
         else:
-            threatee = [" menace", " glee", " malice", " all he got", " a couple of friends", " a crosseyed squint", " steady pace"]
+            threatee = [" menace", " glee", " malice", " all means necessary", " a couple of friends", " a crosseyed squint", " steady pace"]
             await Adventure.menu(ctx, [("but **a{} {}** is guarding it with{}. \n\nWhat will you do and will other heroes help your cause?\nHeroes have 30s to participate via reaction:").format(Adventure.attrib,Adventure.challenge,random.choice(threatee))], {"🗡": Adventure.fight, "🗨": Adventure.talk, "🛐": Adventure.pray, "❌": Adventure.run})
 
 
@@ -265,7 +276,7 @@ class Adventure:
                 roll = random.randint(1,20)
                 member = discord.utils.find(lambda m: m.display_name == user, ctx.guild.members)
                 if roll== 1:
-                    await ctx.send("**" + user + "**" + " fumbled his attack.")
+                    await ctx.send("**" + user + "**" + " fumbled the attack.")
                     fumblelist.append(user)
                 elif roll == 20:
                     await ctx.send("**" + user + "**" + " landed a critical hit.")
@@ -281,8 +292,8 @@ class Adventure:
 
         async def handle_pray(attack, diplomacy):
             for user in Adventure.userslist["pray"]:
-                roll = random.randint(1,20)
-                if roll == 20:
+                roll = random.randint(1,4)
+                if roll == 4:
                     attack += 20
                     diplomacy += 20
                     await ctx.send("**" + user + "**" + "'s prayer called upon the mighty Herbert to help you.")
@@ -317,7 +328,7 @@ class Adventure:
         async def handle_basilisk(failed):
             if Adventure.challenge == "Basilisk":
                 failed = True
-                for user in Adventure.userslist["fight"]: #check if any fighter has an equipped mirror shield to give them a chance.
+                for user in Adventure.userslist["fight"]+Adventure.userslist["talk"]+Adventure.userslist["pray"]: #check if any fighter has an equipped mirror shield to give them a chance.
                     member = discord.utils.find(lambda m: m.display_name == user, ctx.guild.members)
                     if '.mirror_shield' in users[str(member.id)]['items']['left']:
                         failed = False

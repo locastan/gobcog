@@ -18,7 +18,7 @@ users = {}
 
 class GobCog(BaseCog):
 
-    fp = cog_data_path(None, "gobcog") / 'users.json'
+    fp = cog_data_path(None, "gobcog") / 'users.json'  # this looks for users.json inside your RedBot/cogs/gobcog folder. Needs to be setup once: create the folder, make a users.json with just an empty {} inside.
     global users
     with fp.open('r') as f:
         users = json.load(f)
@@ -34,10 +34,6 @@ class GobCog(BaseCog):
             !cp @locastan
             will bring up locastans balance.
             !cp without user will display your balance.
-            *If you do not wish to tag the user, remove the @ after selecting
-            his name from the @ mention menu. If the user has spaces in his
-            username, please add " around the name so the bot knows where the
-            name starts and ends.*
         """
         if user is None:
             user = ctx.author
@@ -83,8 +79,6 @@ class GobCog(BaseCog):
             !give_loot normal @locastan
             will give locastan a normal chest.
             (Adding "rare" or "epic" to command, creates rare and epic chests.)
-            If you do not wish to tag the user, remove the @ after selecting
-            his name from the @ mention menu.
         """
         global users
         if user is None:
@@ -168,7 +162,7 @@ class GobCog(BaseCog):
             item = await Treasure.open_chest(ctx, user, type)
             users[str(user.id)]['treasure'] = [x-y for x,y in zip(users[str(user.id)]['treasure'], redux)]
             if item['equip'] == "sell":
-                price = random.randint(1,100)*(item['item']['att']+item['item']['cha'])
+                price = random.randint(10,1000)*max(item['item']['att']+item['item']['cha'],1)
                 await bank.deposit_credits(user, price)
                 await ctx.send("{} sold the {} for {} copperpieces.".format(user.display_name,item['itemname'],price))
             elif item['equip'] == "equip":
@@ -186,10 +180,6 @@ class GobCog(BaseCog):
             !stats @locastan
             will bring up locastans stats.
             !stats without user will open your stats.
-            *If you do not wish to tag the user, remove the @ after selecting
-            his name from the @ mention menu. If the user has spaces in his
-            username, please add " around the name so the bot knows where the
-            name starts and ends.*
         """
         if user is None:
             user = ctx.author
@@ -223,12 +213,12 @@ class GobCog(BaseCog):
 
     @commands.command()
     @commands.guild_only()
-    async def backpack(self, ctx, switch: str="None", item: str="None", asking: int=100, buyer: discord.Member=None):
+    async def backpack(self, ctx, switch: str="None", item: str="None", asking: int=10, buyer: discord.Member=None):
         """This draws up the contents of your backpack.
-            If you want to sell an item in your backpack, use
-            !backpack sell "name of item"
-            If you want to trade an item to a user, use
-            !backpack trade "name of item" cp @buyer
+            Selling: !backpack sell "name of item"
+            Trading: !backpack trade "name of item" cp @buyer
+            Equip:   !backpack equip "name of item"
+            or respond with "name of item" to backpack.
         """
         user = ctx.author
         if user.bot:
@@ -261,11 +251,18 @@ class GobCog(BaseCog):
                             break
                     if equip != {}: #not good to change dict size during iteration so I moved this outside the for loop.
                         await self.equip_item(ctx, equip, True)
+        elif switch == "equip":
+            if item == "None" or item not in users[str(user.id)]['items']['backpack']:
+                await ctx.send("You have to specify an item from your backpack to equip.")
+                return
+            else:
+                equip = {"itemname": item,"item": users[str(user.id)]['items']['backpack'][item]}
+                await self.equip_item(ctx, equip, True)
         elif switch == "sell":
             if item == "None" or item not in users[str(user.id)]['items']['backpack']:
                 await ctx.send("You have to specify an item from your backpack to sell.")
                 return
-            price = random.randint(1,100)*(users[str(user.id)]['items']['backpack'][item]['att']+users[str(user.id)]['items']['backpack'][item]['cha'])
+            price = random.randint(10,1000)*max(users[str(user.id)]['items']['backpack'][item]['att']+users[str(user.id)]['items']['backpack'][item]['cha'],1)
             await bank.deposit_credits(user, price)
             del users[str(user.id)]['items']['backpack'][item]
             await ctx.send("You sold your {} for {} copperpieces.".format(item,price))
@@ -486,7 +483,7 @@ class GobCog(BaseCog):
                 await ctx.send("You do not have enough copperpieces.")
             try:
                 timeout = GobCog.last_trade+1200-time.time()
-                if timeout < 0:
+                if timeout <= 0:
                     timeout = 0
                 react, user = await ctx.bot.wait_for(
                     "reaction_add",
@@ -499,15 +496,20 @@ class GobCog(BaseCog):
                 except discord.Forbidden:  # cannot remove all reactions
                     for key in controls.keys():
                         await message.remove_reaction(key, ctx.bot.user)
-            await handle_buy(controls[react.emoji], user, stock, msg)
+            if react and user:
+                await handle_buy(controls[react.emoji], user, stock, msg)
 
         em_list = ReactionPredicate.NUMBER_EMOJIS[:5]
         controls = {em_list[1]: 0, em_list[2]: 1, em_list[3]: 2, em_list[4]: 3}
         modRole = discord.utils.get(ctx.guild.roles, name='Goblin Adventurer!')
-        text = modRole.mention + "\n" + "```css\n [Hawls brother is bringing the cart around!]```"
+        if modRole is not None:
+            text = modRole.mention + "\n" + "```css\n [Hawls brother is bringing the cart around!]```"
+        else:
+            text = "```css\n [Hawls brother is bringing the cart around!]```"
         if GobCog.last_trade == 0:
             GobCog.last_trade = time.time()
         elif GobCog.last_trade >= time.time()-10800: #trader can return after 3 hours have passed since last visit.
+            print("Last Trade Visit: {}, current time: {}".format(str(GobCog.last_trade), str(time.time())))
             return #silent return.
         GobCog.last_trade = time.time()
         stock = await Treasure.trader_get_items()
@@ -526,7 +528,7 @@ class GobCog(BaseCog):
                         hand = item['item']["slot"][0] + " slot"
                     att = item['item']["att"]
                     cha = item['item']["cha"]
-                text += "```css\n" + "[{}] {} (Attack: {}, Charisma: {} [{}]) for {} cp.".format(str(index+1),item['itemname'],str(item['item']['att']),str(item['item']['cha']),hand,item['price'])+ " ```"
+                text += "```css\n" + "[{}] {} (Attack: {}, Charisma: {} [{}]) for {} cp.".format(str(index+1),item['itemname'],str(att),str(cha),hand,item['price'])+ " ```"
             else:
                 text += "```css\n" + "[{}] {} for {} cp.".format(str(index+1),item['itemname'],item['price'])+ " ```"
         text += "Do you want to buy any of these fine items? Tell me which one below:"
@@ -534,9 +536,9 @@ class GobCog(BaseCog):
         Adventure.start_adding_reactions(msg, controls.keys(), ctx.bot.loop)
         try:
             timeout = GobCog.last_trade+1200-time.time()
-            if timeout < 0:
+            if timeout <= 0:
                 timeout = 0
-            Adventure.countdown(ctx, timeout, "Time remaining for trading: ")
+            Treasure.countdown(ctx, timeout, "The cart will leave in: ") #need unique countdown or else adventure countdown will overwrite the ticker...
             react, user = await ctx.bot.wait_for(
                 "reaction_add",
                 check=CustomPredicate.with_emojis(tuple(controls.keys()), msg),
@@ -548,4 +550,5 @@ class GobCog(BaseCog):
             except discord.Forbidden:  # cannot remove all reactions
                 for key in controls.keys():
                     await message.remove_reaction(key, ctx.bot.user)
-        await handle_buy(controls[react.emoji], user, stock, msg)
+        if react and user:
+            await handle_buy(controls[react.emoji], user, stock, msg)
