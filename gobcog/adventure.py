@@ -54,7 +54,7 @@ class Adventure:
     async def simple(ctx, users):
         Adventure.users = users
         if Adventure.timeout != 0:
-            return False
+            return None
         Adventure.challenge = random.choice(list(Adventure.monsters.keys())) #if you want the dict with accompanying subkeys use: Adventure.monsters[random.choice(list(Adventure.monsters.keys()))]
         Adventure.attrib = random.choice(list(Adventure.attribs.keys()))
         Adventure.str = Adventure.monsters[Adventure.challenge]["str"]*Adventure.attribs[Adventure.attrib][0]
@@ -68,7 +68,7 @@ class Adventure:
             Adventure.timeout = 60
         else:
             Adventure.timeout = 30
-        Adventure.countdown(ctx, "Time remaining: ")
+        Adventure.countdown(ctx, 0, "Time remaining: ")
         await asyncio.sleep(0.2)
         locations = ["There is telling of a dangerous cave nearby, holding immense riches. ", "You found a small clearing. ", "A bridge crosses over a deep gorge. ", "This towns inn looks very inviting. "]
         raisins = [" is going to investigate,", " is curious to have a peek,", " would like to have a look,", " wants to go there,"]
@@ -452,27 +452,47 @@ class Adventure:
         else:
             return "\nYou have been awarded {} xp and found {} copperpieces.".format(xp,cp)
 
-    def countdown(ctx, title, loop: Optional[asyncio.AbstractEventLoop] = None,) -> asyncio.Task:
+    def countdown(ctx, seconds = 0, title = "Remaining: ", loop: Optional[asyncio.AbstractEventLoop] = None,) -> asyncio.Task:
 
         async def countdown():
-            counter = 0
-            try:
-                secondint = int(Adventure.timeout)
-                Adventure.finish = getEpoch()
-                if secondint < 0 or secondint == 0:
-                    await ctx.send("I dont think im allowed to do negatives \U0001f914")
-                    raise BaseException
+            if seconds != 0:
+                counter = 0
+                try:
+                    secondint = int(seconds)
+                    finish = getEpoch(secondint)
+                    if secondint < 0 or secondint == 0:
+                        await ctx.send("I dont think im allowed to do negatives \U0001f914")
+                        raise BaseException
 
-                message = await ctx.send("[" + title +"] " + remaining(Adventure.finish)[0])
-                while True:
-                    timer, done = remaining(Adventure.finish)
-                    if done:
-                        await message.delete()
-                        break
-                    await message.edit(content=("⏳ [" + title + "] {0}s".format(timer)))
-                    await asyncio.sleep(1)
-            except ValueError:
-                await ctx.send("Must be a number!")
+                    message = await ctx.send("[" + title +"] " + remaining(finish)[0])
+                    while True:
+                        timer, done = remaining(finish)
+                        if done:
+                            await message.delete()
+                            break
+                        await message.edit(content=("⏳ [" + title + "] {0}s".format(timer)))
+                        await asyncio.sleep(1)
+                except ValueError:
+                    await ctx.send("Must be a number!")
+            else:
+                counter = 0
+                try:
+                    secondint = int(Adventure.timeout)
+                    Adventure.finish = getEpoch()
+                    if secondint < 0 or secondint == 0:
+                        await ctx.send("I dont think im allowed to do negatives \U0001f914")
+                        raise BaseException
+
+                    message = await ctx.send("[" + title +"] " + remaining(Adventure.finish)[0])
+                    while True:
+                        timer, done = remaining(Adventure.finish)
+                        if done:
+                            await message.delete()
+                            break
+                        await message.edit(content=("⏳ [" + title + "] {0}s".format(timer)))
+                        await asyncio.sleep(1)
+                except ValueError:
+                    await ctx.send("Must be a number!")
 
         def remaining(epoch):
             remaining = epoch - time.time()

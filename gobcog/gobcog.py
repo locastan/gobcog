@@ -340,10 +340,11 @@ class GobCog(BaseCog):
         global users
         await ctx.send("You feel adventurous, " + ctx.author.display_name + "?")
         reward = await Adventure.simple(ctx, users) #Adventure class doesn't change any user info, so no need to return the users object in rewards.
-        print(reward)
-        for user in reward.keys():
-            member = discord.utils.find(lambda m: m.display_name == user, ctx.guild.members)
-            await self.add_rewards(ctx, member, reward[user]["xp"], reward[user]["cp"], reward[user]["special"])
+        if reward is not None:
+            print(reward)
+            for user in reward.keys():
+                member = discord.utils.find(lambda m: m.display_name == user, ctx.guild.members)
+                await self.add_rewards(ctx, member, reward[user]["xp"], reward[user]["cp"], reward[user]["special"])
 
 
     @commands.command()
@@ -463,6 +464,7 @@ class GobCog(BaseCog):
             global users
             item = stock[itemindex]
             spender = user
+            react = None
             if await bank.can_spend(spender,int(item['price'])):
                 await bank.withdraw_credits(spender, int(item['price']))
                 if 'chest' in item['itemname']:
@@ -494,7 +496,7 @@ class GobCog(BaseCog):
                 except discord.Forbidden:  # cannot remove all reactions
                     for key in controls.keys():
                         await message.remove_reaction(key, ctx.bot.user)
-            if react and user:
+            if react != None and user:
                 await handle_buy(controls[react.emoji], user, stock, msg)
 
         em_list = ReactionPredicate.NUMBER_EMOJIS[:5]
