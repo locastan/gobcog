@@ -1,10 +1,8 @@
 {
     "author" : ["locastan"],
-    "install_msg" : "Thank you for installing the GoblinsComic Adventure Party cog.",
-    "name" : "GobCog",
-    "short" : "GoblinsComic inspired RPG bot.",
+    "install_msg" : "Thank you for installing my repository.",
+    "name" : "LocaCogs",
+    "short" : "Repo for just the GoblinsComic inspired RPG bot for now.",
     "description" : "Play a RPG character and get loot by killing monsters.",
-    "permissions" : ["Manage Messages","Add Reactions"],
     "tags" : ["Games", "Economy", "Fun", "RPG"],
-    "min_python_version": [3, 6, 0]
 }
