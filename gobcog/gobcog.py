@@ -345,6 +345,8 @@ class GobCog(BaseCog):
             for user in reward.keys():
                 member = discord.utils.find(lambda m: m.display_name == user, ctx.guild.members)
                 await self.add_rewards(ctx, member, reward[user]["xp"], reward[user]["cp"], reward[user]["special"])
+        else:
+            await ctx.send("There is an ongoing Adventure. Please wait for it to finish. {}".format(Adventure.timeout))
 
 
     @commands.command()

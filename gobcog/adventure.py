@@ -52,6 +52,7 @@ class Adventure:
     started = 0
 
     async def simple(ctx, users):
+        text = ""
         Adventure.users = users
         if Adventure.timeout != 0:
             return None
@@ -64,6 +65,9 @@ class Adventure:
         Adventure.started = time.time()
         if Adventure.challenge == "Red Dragon":
             Adventure.timeout = 120
+            modRole = discord.utils.get(ctx.guild.roles, name='Goblin Adventurer!')
+            if modRole is not None:
+                text = modRole.mention + "\n" + "```css\n [Dragon Alarm!]```"
         elif Adventure.challenge == "Basilisk":
             Adventure.timeout = 60
         else:
@@ -72,7 +76,7 @@ class Adventure:
         await asyncio.sleep(0.2)
         locations = ["There is telling of a dangerous cave nearby, holding immense riches. ", "You found a small clearing. ", "A bridge crosses over a deep gorge. ", "This towns inn looks very inviting. "]
         raisins = [" is going to investigate,", " is curious to have a peek,", " would like to have a look,", " wants to go there,"]
-        await ctx.send(random.choice(locations)+ "\n" + "**" + ctx.author.name + "**" + random.choice(raisins))
+        await ctx.send(text + random.choice(locations)+ "\n" + "**" + ctx.author.name + "**" + random.choice(raisins))
         await Adventure.choice(ctx)
         return Adventure.rewards
 
@@ -459,18 +463,18 @@ class Adventure:
                 counter = 0
                 try:
                     secondint = int(seconds)
-                    finish = getEpoch(secondint)
+                    finish = getEpochS(secondint)
                     if secondint < 0 or secondint == 0:
                         await ctx.send("I dont think im allowed to do negatives \U0001f914")
                         raise BaseException
 
-                    message = await ctx.send("[" + title +"] " + remaining(finish)[0])
+                    message = await ctx.send(title +" " + remaining(finish, False)[0])
                     while True:
-                        timer, done = remaining(finish)
+                        timer, done = remaining(finish, False)
                         if done:
                             await message.delete()
                             break
-                        await message.edit(content=("⏳ [" + title + "] {0}s".format(timer)))
+                        await message.edit(content=("⏳ " + title + " {0}s".format(timer)))
                         await asyncio.sleep(1)
                 except ValueError:
                     await ctx.send("Must be a number!")
@@ -483,18 +487,19 @@ class Adventure:
                         await ctx.send("I dont think im allowed to do negatives \U0001f914")
                         raise BaseException
 
-                    message = await ctx.send("[" + title +"] " + remaining(Adventure.finish)[0])
+                    message = await ctx.send(title + " " + remaining(Adventure.finish, True)[0])
                     while True:
-                        timer, done = remaining(Adventure.finish)
+                        timer, done = remaining(Adventure.finish, True)
                         if done:
+                            Adventure.timeout = 0
                             await message.delete()
                             break
-                        await message.edit(content=("⏳ [" + title + "] {0}s".format(timer)))
+                        await message.edit(content=("⏳ " + title + " {0}s".format(timer)))
                         await asyncio.sleep(1)
                 except ValueError:
                     await ctx.send("Must be a number!")
 
-        def remaining(epoch):
+        def remaining(epoch, fromAdv):
             remaining = epoch - time.time()
             finish = (remaining < 0)
             m, s = divmod(remaining, 60)
@@ -502,9 +507,8 @@ class Adventure:
             s = int(s)
             m = int(m)
             h = int(h)
-            Adventure.timeout = remaining
-            if h == 0 and m == 0 and s == 0:
-                Adventure.timeout = 0
+            if fromAdv:
+                Adventure.timeout = remaining
             if h == 0 and m == 0:
                 out = "{:02d}".format(s)
             elif h == 0:
@@ -517,6 +521,11 @@ class Adventure:
             #epoch = time.time()
             epoch = Adventure.started
             epoch += Adventure.timeout
+            return epoch
+
+        def getEpochS(seconds : int):
+            epoch = time.time()
+            epoch += seconds
             return epoch
 
         if loop is None:
