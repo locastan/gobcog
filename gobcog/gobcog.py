@@ -12,6 +12,7 @@ from redbot.core.commands.context import Context
 from redbot.core import commands, bank, checks
 from .adventure import Adventure
 from .treasure import Treasure
+from .classes import Classes
 
 BaseCog = getattr(commands, "Cog", object)
 users = {}
@@ -99,13 +100,11 @@ class GobCog(BaseCog):
 
     @commands.command()
     @checks.admin_or_permissions(administrator=True)
-    async def clean_stats(self, ctx, user: discord.Member=None):
+    async def clean_stats(self, ctx):
         """[Admin] This recalulates each members stats based on equipped items.
             (Meant for stat cleanup after a messup error appeared.)
         """
         global users
-        if user is None:
-            user = ctx.author
         for user in users:
             i = iter(users[str(user)]['items'])
             attack = 0
@@ -117,23 +116,68 @@ class GobCog(BaseCog):
                     diplomacy += users[str(user)]['items'][slot][item]['cha']
             users[str(user)]['att'] = attack
             users[str(user)]['cha'] = diplomacy
-            if type(users[str(user)]['treasure']) == int:
-                normal = users[str(user)]['treasure']
-                users[str(user)]['treasure'] = [0,0,0]
-                users[str(user)]['treasure'][0] = normal
             member = discord.utils.get(ctx.guild.members, id=int(user))
             if member:
                 users[str(user)]['name'] = {}
                 users[str(user)]['name'] = member.name
+            users[str(user)]['class'] = {}
+            users[str(user)]['skill'] = {}
+            pool = int(users[str(user)]['lvl']/5)
+            users[str(user)]['skill'] = {'pool': pool, 'att': 0, 'cha': 0}
         with GobCog.fp.open('w') as f:
             json.dump(users, f)
 
     @commands.command()
-    @checks.admin_or_permissions(administrator=True)
-    async def hawl(self, ctx):
-        """[Admin] This manually summons the trader.
+    @commands.guild_only()
+    async def heroclass(self, ctx, clz:str=None):
+        """This allows you to select a class.
+            You need to be level 10 to select one.
         """
-        await self.trader(ctx)
+        global users
+        classes = {'Tinkerer': {'name': "Tinkerer", 'ability': Classes.forge},
+                    'Berserker':{'name': "Berserker", 'ability': Classes.rage},
+                    'Cleric': {'name': "Cleric", 'ability': Classes.bless},
+                    'Ranger': {'name': "Ranger", 'ability': Classes.pet},
+                    'Bard': {'name': "Bard", 'ability': Classes.sing}}
+        user = ctx.author
+        if users[str(user.id)]['lvl'] >= 10:
+            await ctx.send("So you feel like taking on a class, **{}**?".format(user.display_name))
+            if clz == None:
+                await ctx.send("Available classes are: Tinkerer, Berserker, Cleric, Ranger and Bard.\n Use !heroclass \"name-of-class\" to choose one.")
+            else:
+                users[str(user.id)]['class'] = {}
+                users[str(user.id)]['class'] = classes[clz]
+                await ctx.send("Congratulations. You are now a {}.".format(classes[clz]['name']))
+                with GobCog.fp.open('w') as f:
+                    json.dump(users, f)
+        else:
+            await ctx.send("You need to be at least level 10 to choose a class.")
+
+    @commands.command()
+    @commands.guild_only()
+    async def skill(self, ctx, spend:str=None):
+        """This allows you to spend skillpoints.
+            !skill attack/diplomacy
+        """
+        global users
+        user = ctx.author
+        if users[str(user.id)]['skill']['pool'] == 0:
+            return await ctx.send("You do not have unspent skillpoints.")
+        if spend == None:
+            await ctx.send("You currently have **{}** unspent skillpoints.\nIf you want to put them towards a permanent attack or diplomacy bonus,\nuse !skill attack or !skill diplomacy".format(str(users[str(user.id)]['skill']['pool'])))
+        else:
+            if spend not in ['attack','diplomacy']:
+                return await ctx.send("Don't try to fool me! There is no such thing as {}.".format(spend))
+            elif spend == "attack":
+                users[str(user.id)]['skill']['pool'] -= 1
+                users[str(user.id)]['skill']['att'] += 1
+            elif spend == "diplomacy":
+                users[str(user.id)]['skill']['pool'] -= 1
+                users[str(user.id)]['skill']['cha'] += 1
+            await ctx.send("You permanently raised your {} value by one.".format(spend))
+            with GobCog.fp.open('w') as f:
+                json.dump(users, f)
+
 
     @commands.command()
     @commands.guild_only()
@@ -191,7 +235,10 @@ class GobCog(BaseCog):
         xp = round(users[str(user.id)]['exp'])
         lvl = users[str(user.id)]['lvl']
         att = users[str(user.id)]['att']
+        satt = users[str(user.id)]['skill']['att']
         cha = users[str(user.id)]['cha']
+        scha = users[str(user.id)]['skill']['cha']
+        pool = users[str(user.id)]['skill']['pool']
         equip = "Equipped Items: \n"
         i = iter(users[str(user.id)]['items'])
         for slot in i:
@@ -203,9 +250,13 @@ class GobCog(BaseCog):
                     equip += " - " + item + " -(ATT: "+ str(users[str(user.id)]['items'][slot][item]['att']*2) + " | CHA: "+ str(users[str(user.id)]['items'][slot][item]['cha']*2) +" [two handed])\n"
                     next(i, None)
         next_lvl = int((lvl+1) ** 4)
+        if users[str(user.id)]['class'] != {}:
+            clazz = users[str(user.id)]['class']['name']
+        else:
+            clazz = "Hero"
         await ctx.send(
-            "```css\n[{}'s Character Sheet] \n\n```".format(user.display_name) + "```css\nA level {} Hero. \n\n- ATTACK: {} - DIPLOMACY: {} -\n\n- Credits: {} {} \n- Experience: {}/{} \n```".format(
-                lvl, att, cha, bal, currency, xp, next_lvl
+            "```css\n[{}'s Character Sheet] \n\n```".format(user.display_name) + "```css\nA level {} {}. \n\n- ATTACK: {} [+{}] - DIPLOMACY: {} [+{}] -\n\n- Credits: {} {} \n- Experience: {}/{} \n- Unspent skillpoints: {} \n```".format(
+                lvl, clazz, att, satt, cha, scha, bal, currency, xp, next_lvl, pool
             ) + "```css\n" + equip + "```" +
             "```css\n" + "You own {} normal, {} rare and {} epic chests.```".format(
                 str(users[str(user.id)]['treasure'][0]),str(users[str(user.id)]['treasure'][1]),str(users[str(user.id)]['treasure'][2]))
@@ -234,7 +285,7 @@ class GobCog(BaseCog):
             await ctx.send(
                 "```css\n[{}'s baggage] \n\n```".format(
                     user.display_name
-                ) + "```css\n" + bkpk + "\n (Reply with the name of an item to equip it.)```"
+                ) + "```css\n" + bkpk + "\n (Reply with the name of an item or use !backpack equip \"name of item\" to equip it.)```"
             )
             try:
                 reply = await ctx.bot.wait_for("message", check=MessagePredicate.same_context(ctx), timeout=30)
@@ -314,10 +365,6 @@ class GobCog(BaseCog):
         """This will transfer cp from you to a specified member.
             !give 10 @Elder Aramis
             will transfer 10 cp to Elder Aramis.
-            *If you do not wish to tag the user, remove the @ after selecting
-            his name from the @ mention menu. If the user has spaces in his
-            username, please add " around the name so the bot knows where the
-            name starts and ends.*
         """
         if to is None:
             await ctx.send("You need to specify who you want me to give your money to, " + ctx.author.name + ".")
@@ -349,22 +396,30 @@ class GobCog(BaseCog):
             await ctx.send("There is an ongoing Adventure. Please wait for it to finish. {}".format(Adventure.timeout))
 
 
-    @commands.command()
-    @commands.cooldown(rate=1, per=120, type=commands.BucketType.user)
-    async def negaverse(self, ctx):
+    @commands.command(name="negaverse", aliases=['nv'])
+    @commands.cooldown(rate=1, per=60, type=commands.BucketType.user)
+    async def _negaverse(self, ctx, amount: int = None):
         """This will send you to fight a nega-member!
+            !nv amount_of_cp
         """
+        spender = ctx.message.author
+        if amount == None:
+            return await ctx.send("You need to specify some cp to convert into energy before entering.")
+        if await bank.can_spend(spender,amount):
+            await bank.withdraw_credits(spender, amount)
+        else:
+            return await ctx.send("You don't have enough copperpieces.")
         negachar = "**Nega-" + random.choice(ctx.message.guild.members).name + "**"
         await ctx.send("You enter the negaverse and meet " + negachar + ".")
         roll = random.randint(1,20)
         if roll== 1:
             await ctx.send("**" + ctx.author.name + "**" + " fumbled and died to " + negachar + "'s savagery.")
         elif roll == 20:
-            await ctx.send("**" + ctx.author.name + "**" + " decapitated " + negachar + ".")
-            await self.add_rewards(ctx, ctx.message.author, 20, 0, False)
+            await ctx.send("**" + ctx.author.name + "**" + " decapitated " + negachar + ". You gain {} xp and {} cp.".format(amount*2, amount))
+            await self.add_rewards(ctx, ctx.message.author, amount*2, amount, False)
         elif roll >=10:
-            await ctx.send("**" + ctx.author.name + "**" + " bravely defeated " + negachar + ". You gain 5 xp.")
-            await self.add_rewards(ctx, ctx.message.author, 5, 0, False)
+            await ctx.send("**" + ctx.author.name + "**" + " bravely defeated " + negachar + ". You gain {} xp.".format(amount))
+            await self.add_rewards(ctx, ctx.message.author, amount, 0, False)
         else:
             await ctx.send("**" + ctx.author.name + "**" + " was killed by " + negachar + ".")
 
@@ -378,6 +433,8 @@ class GobCog(BaseCog):
         global users
         if not message.author.bot:
             await self.update_data(users, message.author)
+            if GobCog.last_trade == 0: #this shuts hawls bro up for 3 hours after a cog reload
+                GobCog.last_trade = time.time()
             roll = random.randint(1,20)
             if roll == 20:
                 ctx = await self.bot.get_context(message)
@@ -416,7 +473,7 @@ class GobCog(BaseCog):
                 await ctx.send("You equipped {} and put {} into your backpack.".format(item['itemname'],list(olditem.keys())[0]))
         if from_backpack:
             del users[str(user.id)]['items']['backpack'][item['itemname']]
-        await ctx.send("Your new stats: **Attack**: {}, **Diplomacy**: {}.".format(users[str(user.id)]['att'],users[str(user.id)]['cha']))
+        await ctx.send("Your new stats: **Attack**: {} [+{}], **Diplomacy**: {} [+{}].".format(users[str(user.id)]['att'],users[str(user.id)]['skill']['att'],users[str(user.id)]['cha'],users[str(user.id)]['skill']['cha']))
         with GobCog.fp.open('w') as f:
             json.dump(users, f)
 
@@ -458,6 +515,9 @@ class GobCog(BaseCog):
         if lvl_start < lvl_end:
             await ctx.send('{} is now level {}!'.format(user.mention,lvl_end))
             users[str(user.id)]['lvl'] = lvl_end
+            if lvl_end % 5 == 0:
+                users[str(user.id)]['skill']['pool'] += 1
+                await ctx.send('You gained a skillpoint!')
 
     @staticmethod
     async def trader(ctx):
@@ -516,7 +576,6 @@ class GobCog(BaseCog):
             return #silent return.
         GobCog.last_trade = time.time()
         stock = await Treasure.trader_get_items()
-        print(str(stock))
         for index, item in enumerate(stock):
             item = stock[index]
             if "chest" not in item['itemname']:

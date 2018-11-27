@@ -30,6 +30,8 @@ class Treasure:
             "simple axe":{"slot":["right"],"att":2,"cha":0},
             "peg leg":{"slot":["left"],"att":2,"cha":-1},
             "tambourine":{"slot":["left"],"att":0,"cha":2},
+            "twig bow":{"slot":["right"],"att":1,"cha":-1},
+            "short bow":{"slot":["right"],"att":2,"cha":0}
             }
     rare = {".ceremonial_dagger":{"slot":["right"],"att":2,"cha":2},
             ".tower_shield":{"slot":["left"],"att":3,"cha":1},
@@ -48,6 +50,7 @@ class Treasure:
             ".spiked_mace":{"slot":["right"],"att":3,"cha":-1},
             ".buckler":{"slot":["left"],"att":3,"cha":0},
             ".tuba":{"slot":["right","left"],"att":2,"cha":1},
+            ".pistol crossbow":{"slot":["right"],"att":2,"cha":1}
             }
     unique = {"[troll banhammer]":{"slot":["right","left"],"att":2,"cha":2},
             "[scythe of death]":{"slot":["right","left"],"att":3,"cha":-2},
@@ -59,6 +62,7 @@ class Treasure:
             "[great bulwark]":{"slot":["left"],"att":5,"cha":0},
             "[dragon ring]":{"slot":["ring"],"att":4,"cha":3},
             "[mandachord]":{"slot":["right", "left"],"att":1,"cha":4},
+            "[repeater crossbow]":{"slot":["right","left"],"att":3,"cha":1}
             }
 
     async def open_chest(ctx, user, type):

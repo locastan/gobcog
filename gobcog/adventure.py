@@ -291,6 +291,7 @@ class Adventure:
             for user in Adventure.userslist["fight"]:
                 roll = random.randint(1,20)
                 member = discord.utils.find(lambda m: m.display_name == user, ctx.guild.members)
+                att_value = users[str(member.id)]['att'] + users[str(member.id)]['skill']['att']
                 if roll== 1:
                     await ctx.send("**" + user + "**" + " fumbled the attack.")
                     fumblelist.append(user)
@@ -298,11 +299,11 @@ class Adventure:
                     await ctx.send("**" + user + "**" + " landed a critical hit.")
                     critlist.append(user)
                     bonus = random.randint(5,15)
-                    attack += roll + bonus + users[str(member.id)]['att']
-                    report += "| **" + user + "**: " +  "🎲({})+".format(roll) + " + {} ".format(bonus) + "🗡" + str(users[str(member.id)]['att']) + " |"
+                    attack += roll + bonus + att_value
+                    report += "| **" + user + "**: " +  "🎲({})+".format(roll) + " + {} ".format(bonus) + "🗡" + str(att_value) + " |"
                 else:
-                    attack += roll + users[str(member.id)]['att']
-                    report += "| **" + user + "**: " +  "🎲({})+".format(roll) + "🗡" + str(users[str(member.id)]['att']) + " |"
+                    attack += roll + att_value
+                    report += "| **" + user + "**: " +  "🎲({})+".format(roll) + "🗡" + str(att_value) + " |"
             await ctx.send(report)
             return (fumblelist, critlist, attack)
 
@@ -326,6 +327,7 @@ class Adventure:
             for user in Adventure.userslist["talk"]:
                 roll = random.randint(1,20)
                 member = discord.utils.find(lambda m: m.display_name == user, ctx.guild.members)
+                dipl_value = users[str(member.id)]['cha'] + users[str(member.id)]['skill']['cha']
                 if roll== 1:
                     await ctx.send("**" + user + "**" + (" accidentally offended the {}.").format(Adventure.challenge))
                     fumblelist.append(user)
@@ -333,11 +335,11 @@ class Adventure:
                     await ctx.send("**" + user + "**" + " made a compelling argument.")
                     critlist.append(user)
                     bonus = random.randint(5,15)
-                    diplomacy += roll + bonus + users[str(member.id)]['cha']
-                    report += "| **" + user + "**: " +  "🎲({})+".format(roll) + " + {} ".format(bonus) + "🗨" +str(users[str(member.id)]['cha']) + " |"
+                    diplomacy += roll + bonus + dipl_value
+                    report += "| **" + user + "**: " +  "🎲({})+".format(roll) + " + {} ".format(bonus) + "🗨" +str(dipl_value) + " |"
                 else:
-                    diplomacy += roll + users[str(member.id)]['cha']
-                    report += "| **" + user + "**: " +  "🎲({})+".format(roll) + "🗨" + str(users[str(member.id)]['cha']) + " |"
+                    diplomacy += roll + dipl_value
+                    report += "| **" + user + "**: " +  "🎲({})+".format(roll) + "🗨" + str(dipl_value) + " |"
             await ctx.send(report)
             return (fumblelist, critlist, diplomacy)
 
@@ -369,7 +371,7 @@ class Adventure:
             await message.edit(content=current_page)
         if people == 0:
             pages = ["everyone ran away. You failed."]
-            return await Adventure.menu(ctx, pages, controls, message=message, page=page, timeout=Adventure.timeout)
+            return await Adventure.menu(ctx, pages, controls, message=message, page=page)
 
         attack,diplomacy = await handle_run(attack, diplomacy)
         attack, diplomacy = await handle_pray(attack, diplomacy)
