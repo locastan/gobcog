@@ -31,7 +31,7 @@ class Treasure:
             "peg leg":{"slot":["left"],"att":2,"cha":-1},
             "tambourine":{"slot":["left"],"att":0,"cha":2},
             "twig bow":{"slot":["right"],"att":1,"cha":-1},
-            "short bow":{"slot":["right"],"att":2,"cha":0}
+            "short bow":{"slot":["right","left"],"att":1,"cha":0}
             }
     rare = {".ceremonial_dagger":{"slot":["right"],"att":2,"cha":2},
             ".tower_shield":{"slot":["left"],"att":3,"cha":1},
@@ -50,7 +50,7 @@ class Treasure:
             ".spiked_mace":{"slot":["right"],"att":3,"cha":-1},
             ".buckler":{"slot":["left"],"att":3,"cha":0},
             ".tuba":{"slot":["right","left"],"att":2,"cha":1},
-            ".pistol crossbow":{"slot":["right"],"att":2,"cha":1}
+            ".pistol_crossbow":{"slot":["right"],"att":2,"cha":1}
             }
     unique = {"[troll banhammer]":{"slot":["right","left"],"att":2,"cha":2},
             "[scythe of death]":{"slot":["right","left"],"att":3,"cha":-2},
@@ -189,7 +189,7 @@ class Treasure:
                 Treasure.finish = getEpoch(secondint)
                 if secondint < 0 or secondint == 0:
                     await ctx.send("I dont think im allowed to do negatives \U0001f914")
-                    raise BaseException
+                    return
 
                 message = await ctx.send("[" + title +"] " + remaining(Treasure.finish)[0])
                 while True:

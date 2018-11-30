@@ -72,7 +72,7 @@ class Adventure:
             Adventure.timeout = 60
         else:
             Adventure.timeout = 30
-        Adventure.countdown(ctx, 0, "Time remaining: ")
+        Adventure.countdown(ctx, None, "Time remaining: ")
         await asyncio.sleep(0.2)
         locations = ["There is telling of a dangerous cave nearby, holding immense riches. ", "You found a small clearing. ", "A bridge crosses over a deep gorge. ", "This towns inn looks very inviting. "]
         raisins = [" is going to investigate,", " is curious to have a peek,", " would like to have a look,", " wants to go there,"]
@@ -182,7 +182,6 @@ class Adventure:
         user: discord.User,
     ):
         check_other = ["talk","pray","run"]
-        #Adventure.finish = Adventure.started + Adventure.timeout
         await Adventure.check(check_other,"fight", ctx, pages, controls, message, page, Adventure.timeout, emoji, user)
 
     async def run(
@@ -196,7 +195,6 @@ class Adventure:
         user: discord.User,
     ):
         check_other = ["talk","pray","fight"]
-        #Adventure.finish = Adventure.started + Adventure.timeout
         await Adventure.check(check_other,"run", ctx, pages, controls, message, page, Adventure.timeout, emoji, user)
 
     async def pray(
@@ -210,7 +208,6 @@ class Adventure:
         user: discord.User,
     ):
         check_other = ["talk","fight","run"]
-        #Adventure.finish = Adventure.started + Adventure.timeout
         await Adventure.check(check_other,"pray", ctx, pages, controls, message, page, Adventure.timeout, emoji, user)
 
     async def talk(
@@ -224,7 +221,6 @@ class Adventure:
         user: discord.User,
     ):
         check_other = ["fight","pray","run"]
-        #Adventure.finish = Adventure.started + Adventure.timeout
         await Adventure.check(check_other,"talk", ctx, pages, controls, message, page, Adventure.timeout, emoji, user)
 
     async def check(check_lists,call_from, ctx, pages, controls, message, page, timeout, emoji, user):
@@ -294,13 +290,14 @@ class Adventure:
                 att_value = users[str(member.id)]['att'] + users[str(member.id)]['skill']['att']
                 if roll== 1:
                     await ctx.send("**" + user + "**" + " fumbled the attack.")
+                    Adventure.userslist["fight"].remove(user)
                     fumblelist.append(user)
                 elif roll == 20:
                     await ctx.send("**" + user + "**" + " landed a critical hit.")
                     critlist.append(user)
                     bonus = random.randint(5,15)
                     attack += roll + bonus + att_value
-                    report += "| **" + user + "**: " +  "🎲({})+".format(roll) + " + {} ".format(bonus) + "🗡" + str(att_value) + " |"
+                    report += "| **" + user + "**: " +  "🎲({})+".format(roll) + "{} + ".format(bonus) + "🗡" + str(att_value) + " |"
                 else:
                     attack += roll + att_value
                     report += "| **" + user + "**: " +  "🎲({})+".format(roll) + "🗡" + str(att_value) + " |"
@@ -330,13 +327,14 @@ class Adventure:
                 dipl_value = users[str(member.id)]['cha'] + users[str(member.id)]['skill']['cha']
                 if roll== 1:
                     await ctx.send("**" + user + "**" + (" accidentally offended the {}.").format(Adventure.challenge))
+                    Adventure.userslist["talk"].remove(user)
                     fumblelist.append(user)
                 elif roll == 20:
                     await ctx.send("**" + user + "**" + " made a compelling argument.")
                     critlist.append(user)
                     bonus = random.randint(5,15)
                     diplomacy += roll + bonus + dipl_value
-                    report += "| **" + user + "**: " +  "🎲({})+".format(roll) + " + {} ".format(bonus) + "🗨" +str(dipl_value) + " |"
+                    report += "| **" + user + "**: " +  "🎲({})+".format(roll) + "{} + ".format(bonus) + "🗨" +str(dipl_value) + " |"
                 else:
                     diplomacy += roll + dipl_value
                     report += "| **" + user + "**: " +  "🎲({})+".format(roll) + "🗨" + str(dipl_value) + " |"
@@ -398,9 +396,8 @@ class Adventure:
             else:
                 if len(critlist) != 0:
                     treasure[0] += 1
-                else:
-                    if treasure == [0,0,0]:
-                        treasure = False
+            if treasure == [0,0,0]:
+                treasure = False
         if Adventure.challenge == "Basilisk" and failed:
             await ctx.send("The Basilisk's gaze turned everyone to stone.")
             return
@@ -422,7 +419,7 @@ class Adventure:
                 text= random.choice(options)
         else:
             if slain and persuaded:
-                text= ("**{}** slayed the {} in battle,").format(fighters,Adventure.challenge) + ("while {} distracted with insults.").format(talkers)
+                text= ("**{}** slayed the {} in battle,").format(fighters,Adventure.challenge) + ("while **{}** distracted with insults.").format(talkers)
                 text += await Adventure.reward(ctx, Adventure.userslist["fight"]+Adventure.userslist["talk"]+Adventure.userslist["pray"],amount,(attack/Adventure.str+diplomacy/Adventure.dipl),treasure)
 
             if  not slain and persuaded:
@@ -458,17 +455,17 @@ class Adventure:
         else:
             return "\nYou have been awarded {} xp and found {} copperpieces.".format(xp,cp)
 
-    def countdown(ctx, seconds = 0, title = "Remaining: ", loop: Optional[asyncio.AbstractEventLoop] = None,) -> asyncio.Task:
+    def countdown(ctx, seconds = None, title = "Remaining: ", loop: Optional[asyncio.AbstractEventLoop] = None,) -> asyncio.Task:
 
         async def countdown():
-            if seconds != 0:
+            if seconds != None:
                 counter = 0
                 try:
                     secondint = int(seconds)
                     finish = getEpochS(secondint)
-                    if secondint < 0 or secondint == 0:
+                    if secondint < 0:
                         await ctx.send("I dont think im allowed to do negatives \U0001f914")
-                        raise BaseException
+                        return
 
                     message = await ctx.send(title +" " + remaining(finish, False)[0])
                     while True:
@@ -485,9 +482,9 @@ class Adventure:
                 try:
                     secondint = int(Adventure.timeout)
                     Adventure.finish = getEpoch()
-                    if secondint < 0 or secondint == 0:
+                    if secondint < 0:
                         await ctx.send("I dont think im allowed to do negatives \U0001f914")
-                        raise BaseException
+                        return
 
                     message = await ctx.send(title + " " + remaining(Adventure.finish, True)[0])
                     while True:

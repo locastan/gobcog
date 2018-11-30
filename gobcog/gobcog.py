@@ -116,40 +116,39 @@ class GobCog(BaseCog):
                     diplomacy += users[str(user)]['items'][slot][item]['cha']
             users[str(user)]['att'] = attack
             users[str(user)]['cha'] = diplomacy
-            member = discord.utils.get(ctx.guild.members, id=int(user))
-            if member:
-                users[str(user)]['name'] = {}
-                users[str(user)]['name'] = member.name
-            users[str(user)]['class'] = {}
-            users[str(user)]['skill'] = {}
-            pool = int(users[str(user)]['lvl']/5)
-            users[str(user)]['skill'] = {'pool': pool, 'att': 0, 'cha': 0}
+            print(users[str(user)]['name']+": "+str(int(users[str(user)]['lvl'] / 5)) + "-" + str(users[str(user)]['skill']['att']+users[str(user)]['skill']['cha']))
+            users[str(user)]['skill']['pool'] = int(users[str(user)]['lvl'] / 5) - (users[str(user)]['skill']['att']+users[str(user)]['skill']['cha'])
         with GobCog.fp.open('w') as f:
             json.dump(users, f)
 
     @commands.command()
     @commands.guild_only()
-    async def heroclass(self, ctx, clz:str=None):
+    async def heroclass(self, ctx, clz:str=None, action:str=None):
         """This allows you to select a class.
             You need to be level 10 to select one.
+            For information on class use: !heroclass "classname" info
         """
         global users
-        classes = {'Tinkerer': {'name': "Tinkerer", 'ability': Classes.forge},
-                    'Berserker':{'name': "Berserker", 'ability': Classes.rage},
-                    'Cleric': {'name': "Cleric", 'ability': Classes.bless},
-                    'Ranger': {'name': "Ranger", 'ability': Classes.pet},
-                    'Bard': {'name': "Bard", 'ability': Classes.sing}}
+        classes = {'Tinkerer': {'name': "Tinkerer", 'ability': "forge", 'desc': "Tinkerers can forge two different items into a device bound to their very soul."},
+                    'Berserker':{'name': "Berserker", 'ability': "rage", 'desc': "Berserker have the option to rage and add big bonuses to attacks, but fumbles hurt."},
+                    'Cleric': {'name': "Cleric", 'ability': "bless", 'desc': "Clerics can bless the entire group when praying."},
+                    'Ranger': {'name': "Ranger", 'ability': "pet", 'desc': "Rangers can gain a special pet in adventures."},
+                    'Bard': {'name': "Bard", 'ability': "sing", 'desc': "Bards can perform to aid their comrades in diplomacy."}}
         user = ctx.author
         if users[str(user.id)]['lvl'] >= 10:
-            await ctx.send("So you feel like taking on a class, **{}**?".format(user.display_name))
             if clz == None:
-                await ctx.send("Available classes are: Tinkerer, Berserker, Cleric, Ranger and Bard.\n Use !heroclass \"name-of-class\" to choose one.")
+                await ctx.send("So you feel like taking on a class, **{}**?\nAvailable classes are: Tinkerer, Berserker, Cleric, Ranger and Bard.\n Use !heroclass \"name-of-class\" to choose one.".format(user.display_name))
             else:
-                users[str(user.id)]['class'] = {}
-                users[str(user.id)]['class'] = classes[clz]
-                await ctx.send("Congratulations. You are now a {}.".format(classes[clz]['name']))
-                with GobCog.fp.open('w') as f:
-                    json.dump(users, f)
+                if clz in classes and action == None:
+                    users[str(user.id)]['class'] = {}
+                    users[str(user.id)]['class'] = classes[clz]
+                    await ctx.send("Congratulations. You are now a {}.".format(classes[clz]['name']))
+                    with GobCog.fp.open('w') as f:
+                        json.dump(users, f)
+                elif clz in classes and action == "info":
+                    await ctx.send("{}".format(classes[clz]['desc']))
+                else:
+                    await ctx.send("{} may be a class somewhere, but not on my watch.".format(clz))
         else:
             await ctx.send("You need to be at least level 10 to choose a class.")
 
@@ -488,6 +487,11 @@ class GobCog(BaseCog):
             users[str(user.id)]['cha'] = 0
             users[str(user.id)]['treasure'] = [0,0,0]
             users[str(user.id)]['items'] = {"left":{},"right":{},"ring":{},"charm":{},"backpack": {}}
+            users[str(user)]['name'] = {}
+            users[str(user)]['name'] = user.display_name
+            users[str(user)]['class'] = {}
+            users[str(user)]['skill'] = {}
+            users[str(user)]['skill'] = {'pool': 0, 'att': 0, 'cha': 0}
             with GobCog.fp.open('w') as f:
                 json.dump(users, f)
 
@@ -512,12 +516,12 @@ class GobCog(BaseCog):
         lvl_start = users[str(user.id)]['lvl']
         lvl_end = int(exp ** (1/4))
 
-        if lvl_start < lvl_end:
+        if lvl_start < lvl_end: #recalculate free skillpoint pool based on new level and already spent points.
             await ctx.send('{} is now level {}!'.format(user.mention,lvl_end))
             users[str(user.id)]['lvl'] = lvl_end
-            if lvl_end % 5 == 0:
-                users[str(user.id)]['skill']['pool'] += 1
-                await ctx.send('You gained a skillpoint!')
+            users[str(user.id)]['skill']['pool'] = int(lvl_end / 5) - (users[str(user.id)]['skill']['att']+users[str(user.id)]['skill']['cha'])
+            if users[str(user.id)]['skill']['pool'] > 0:
+                await ctx.send('You have skillpoints available.')
 
     @staticmethod
     async def trader(ctx):
