@@ -447,7 +447,7 @@ class Adventure:
                 Adventure.rewards[user]["special"] = special
             else:
                 Adventure.rewards[user]["special"] = False
-        if special != False and sum(special) = 1:
+        if special != False and sum(special) == 1:
             types = [" normal"," rare","n epic"]
             type = types[special.index(1)]
             return "\nYou have been awarded {} xp and found {} copperpieces. You also secured **a{} treasure chest**!".format(xp,cp,type)
