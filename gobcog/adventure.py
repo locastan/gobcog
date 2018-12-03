@@ -288,7 +288,7 @@ class Adventure:
                 roll = random.randint(1,20)
                 member = discord.utils.find(lambda m: m.display_name == user, ctx.guild.members)
                 att_value = users[str(member.id)]['att'] + users[str(member.id)]['skill']['att']
-                if roll== 1:
+                if roll == 1:
                     await ctx.send("**" + user + "**" + " fumbled the attack.")
                     Adventure.userslist["fight"].remove(user)
                     fumblelist.append(user)
@@ -392,10 +392,9 @@ class Adventure:
             elif CR >= 180: #rewards 50:50 epic:rare chest for killing hard stuff.
                 treasure = random.choice([[0,0,1],[0,1,0]])
             if Adventure.challenge == "Red Dragon": #always rewards an epic chest.
-                treasure = [0,0,1]
-            else:
-                if len(critlist) != 0:
-                    treasure[0] += 1
+                treasure[2] += 1
+            if len(critlist) != 0:
+                treasure[0] += 1
             if treasure == [0,0,0]:
                 treasure = False
         if Adventure.challenge == "Basilisk" and failed:

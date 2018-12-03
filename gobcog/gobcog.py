@@ -400,6 +400,23 @@ class GobCog(BaseCog):
             )
         )
 
+    @commands.command()
+    @checks.admin_or_permissions(administrator=True)
+    async def fund(self, ctx, amount: int=1, to: discord.Member=None):
+        """This will create cp for a specified member.
+            !fund 10 @Elder Aramis
+            will create 10 cp and add to Elder Aramis.
+        """
+        if to is None:
+            await ctx.send("You need to specify who you want me to give the money to, " + ctx.author.name + ".")
+        bal = await bank.deposit_credits(to, amount)
+        currency = await bank.get_currency_name(ctx.guild)
+        await ctx.send(
+            "```You funded {3} {2}. {0} now has {1} {2}```".format(
+                to.display_name, bal, currency, amount
+            )
+        )
+
     @commands.command(name="adventure", aliases=['a'])
     @commands.cooldown(rate=1, per=120, type=commands.BucketType.guild)
     async def _adventure(self, ctx):
