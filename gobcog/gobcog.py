@@ -458,12 +458,12 @@ class GobCog(BaseCog):
             await ctx.send("**" + ctx.author.name + "**" + " decapitated " + negachar + ". You gain {} xp and {} cp.".format(amount*2, amount))
             await self.add_rewards(ctx, ctx.message.author, amount*2, amount, False)
         elif roll > versus:
-            await ctx.send("**" + ctx.author.name + "** 🎲({})" + " bravely defeated " + negachar + " 🎲({}). You gain {} xp.".format(roll, versus, amount))
+            await ctx.send("**" + ctx.author.name + "** 🎲({})".format(roll) + " bravely defeated " + negachar + " 🎲({}). You gain {} xp.".format(versus, amount))
             await self.add_rewards(ctx, ctx.message.author, amount, 0, False)
         elif roll == versus:
-            await ctx.send("**" + ctx.author.name + "** 🎲({})" + " almost killed " + negachar + " 🎲({}).".format(roll, versus))
+            await ctx.send("**" + ctx.author.name + "** 🎲({})".format(roll) + " almost killed " + negachar + " 🎲({}).".format(versus))
         else:
-            await ctx.send("**" + ctx.author.name + "** 🎲({})" + " was killed by " + negachar + " 🎲({}).".format(roll, versus))
+            await ctx.send("**" + ctx.author.name + "** 🎲({})".format(roll) + " was killed by " + negachar + " 🎲({}).".format(versus))
 
     async def __error(self, ctx: commands.Context, error):
         if isinstance(error, commands.CommandOnCooldown):
