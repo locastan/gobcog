@@ -265,9 +265,9 @@ class GobCog(BaseCog):
     @commands.guild_only()
     async def backpack(self, ctx, switch: str="None", item: str="None", asking: int=10, buyer: discord.Member=None):
         """This draws up the contents of your backpack.
-            Selling: !backpack sell "name of item"
+            Selling: !backpack sell "(partial) name of item"
             Trading: !backpack trade "name of item" cp @buyer
-            Equip:   !backpack equip "name of item"
+            Equip:   !backpack equip "(partial) name of item"
             or respond with "name of item" to backpack.
         """
         user = ctx.author
@@ -302,37 +302,23 @@ class GobCog(BaseCog):
                     if equip != {}: #not good to change dict size during iteration so I moved this outside the for loop.
                         await self.equip_item(ctx, equip, True)
         elif switch == "equip":
-            if item == "None" or item not in users[str(user.id)]['items']['backpack']:
+            if item == "None" or not any([x for x in users[str(user.id)]['items']['backpack'] if item in x.lower()]):
                 await ctx.send("You have to specify an item from your backpack to equip.")
                 return
+            lookup = list(x for x in users[str(user.id)]['items']['backpack'] if item in x.lower())
+            if len(lookup) > 1:
+                await ctx.send("I found multiple items ({}) matching that name in your backpack.\nPlease be more specific.".format(" and ".join([", ".join(lookup[:-1]),lookup[-1]] if len(lookup) > 2 else lookup)))
+                return
             else:
+                item == lookup[0]
                 equip = {"itemname": item,"item": users[str(user.id)]['items']['backpack'][item]}
                 await self.equip_item(ctx, equip, True)
-        elif switch == "sell":
-            if item == "None" or item not in users[str(user.id)]['items']['backpack']:
-                await ctx.send("You have to specify an item from your backpack to sell.")
+        elif switch == "sell": #new logic allows for bulk sales. It also always confirms the sale by yes/no query to avoid accidents.
+            if item == "None" or not any([x for x in users[str(user.id)]['items']['backpack'] if item in x.lower()]):
+                await ctx.send("You have to specify an item (or partial name) from your backpack to sell.")
                 return
-            price = random.randint(10,1000)*max(users[str(user.id)]['items']['backpack'][item]['att']+users[str(user.id)]['items']['backpack'][item]['cha'],1)
-            await bank.deposit_credits(user, price)
-            del users[str(user.id)]['items']['backpack'][item]
-            await ctx.send("You sold your {} for {} copperpieces.".format(item,price))
-        elif switch == "trade":
-            if item == "None" or item not in users[str(user.id)]['items']['backpack']:
-                await ctx.send("You have to specify an item from your backpack to trade.")
-                return
-            if len(users[str(user.id)]['items']['backpack'][item]["slot"]) == 2: # two handed weapons add their bonuses twice
-                hand = "two handed"
-                att = users[str(user.id)]['items']['backpack'][item]["att"]*2
-                cha = users[str(user.id)]['items']['backpack'][item]["cha"]*2
-            else:
-                if users[str(user.id)]['items']['backpack'][item]["slot"][0] == "right" or users[str(user.id)]['items']['backpack'][item]["slot"][0] == "left":
-                    hand = users[str(user.id)]['items']['backpack'][item]["slot"][0] + " handed"
-                else:
-                    hand = users[str(user.id)]['items']['backpack'][item]["slot"][0] + " slot"
-                att = users[str(user.id)]['items']['backpack'][item]["att"]
-                cha = users[str(user.id)]['items']['backpack'][item]["cha"]
-            await ctx.send("{} wants to sell his {}. (Attack: {}, Charisma: {} [{}])".format(user.display_name,item,str(att),str(cha),hand))
-            msg = await ctx.send("Do you want to buy this item for {} cp?".format(str(asking)))
+            lookup = list(x for x in users[str(user.id)]['items']['backpack'] if item in x.lower())
+            msg = await ctx.send("Do you want to sell these items {}?".format(str(lookup)))
             start_adding_reactions(msg, ReactionPredicate.YES_OR_NO_EMOJIS)
             pred = ReactionPredicate.yes_or_no(msg, buyer)
             await ctx.bot.wait_for("reaction_add", check=pred)
@@ -341,22 +327,59 @@ class GobCog(BaseCog):
             except discord.Forbidden:  # cannot remove message try remove emojis
                 for key in ReactionPredicate.YES_OR_NO_EMOJIS:
                     await msg.remove_reaction(key, ctx.bot.user)
-            if pred.result: #buyer reacted with Yes.
-                spender = buyer
-                to = user
-                if await bank.can_spend(spender,asking):
-                    bal = await bank.transfer_credits(spender, to, asking)
-                    currency = await bank.get_currency_name(ctx.guild)
-                    tradeitem = users[str(user.id)]['items']['backpack'].pop(item)
-                    users[str(buyer.id)]['items']['backpack'].update({item: tradeitem})
-                    with GobCog.fp.open('w') as f:
-                        json.dump(users, f)
-                    await ctx.send(
-                        "```css\n" + "{} traded to {} for {} {}```".format(
-                            item, buyer.display_name, asking, currency
-                        ))
+            if pred.result: #user reacted with Yes.
+                for item in lookup:
+                    price = random.randint(10,1000)*max(users[str(user.id)]['items']['backpack'][item]['att']+users[str(user.id)]['items']['backpack'][item]['cha'],1)
+                    await bank.deposit_credits(user, price)
+                    del users[str(user.id)]['items']['backpack'][item]
+                    await ctx.send("You sold your {} for {} copperpieces.".format(item,price))
+        elif switch == "trade":
+            if item == "None" or not any([x for x in users[str(user.id)]['items']['backpack'] if item in x.lower()]):
+                await ctx.send("You have to specify an item from your backpack to trade.")
+                return
+            lookup = list(x for x in users[str(user.id)]['items']['backpack'] if item in x.lower())
+            if len(lookup) > 1:
+                await ctx.send("I found multiple items ({}) matching that name in your backpack.\nPlease be more specific.".format(" and ".join([", ".join(lookup[:-1]),lookup[-1]] if len(lookup) > 2 else lookup)))
+                return
+            else:
+                item = lookup[0]
+                if len(users[str(user.id)]['items']['backpack'][item]["slot"]) == 2: # two handed weapons add their bonuses twice
+                    hand = "two handed"
+                    att = users[str(user.id)]['items']['backpack'][item]["att"]*2
+                    cha = users[str(user.id)]['items']['backpack'][item]["cha"]*2
                 else:
-                    await ctx.send("You do not have enough copperpieces.")
+                    if users[str(user.id)]['items']['backpack'][item]["slot"][0] == "right" or users[str(user.id)]['items']['backpack'][item]["slot"][0] == "left":
+                        hand = users[str(user.id)]['items']['backpack'][item]["slot"][0] + " handed"
+                    else:
+                        hand = users[str(user.id)]['items']['backpack'][item]["slot"][0] + " slot"
+                    att = users[str(user.id)]['items']['backpack'][item]["att"]
+                    cha = users[str(user.id)]['items']['backpack'][item]["cha"]
+                await ctx.send("{} wants to sell his {}. (Attack: {}, Charisma: {} [{}])".format(user.display_name,item,str(att),str(cha),hand))
+                msg = await ctx.send("Do you want to buy this item for {} cp?".format(str(asking)))
+                start_adding_reactions(msg, ReactionPredicate.YES_OR_NO_EMOJIS)
+                pred = ReactionPredicate.yes_or_no(msg, buyer)
+                await ctx.bot.wait_for("reaction_add", check=pred)
+                try:
+                    await msg.delete()
+                except discord.Forbidden:  # cannot remove message try remove emojis
+                    for key in ReactionPredicate.YES_OR_NO_EMOJIS:
+                        await msg.remove_reaction(key, ctx.bot.user)
+                if pred.result: #buyer reacted with Yes.
+                    spender = buyer
+                    to = user
+                    if await bank.can_spend(spender,asking):
+                        bal = await bank.transfer_credits(spender, to, asking)
+                        currency = await bank.get_currency_name(ctx.guild)
+                        tradeitem = users[str(user.id)]['items']['backpack'].pop(item)
+                        users[str(buyer.id)]['items']['backpack'].update({item: tradeitem})
+                        with GobCog.fp.open('w') as f:
+                            json.dump(users, f)
+                        await ctx.send(
+                            "```css\n" + "{} traded to {} for {} {}```".format(
+                                item, buyer.display_name, asking, currency
+                            ))
+                    else:
+                        await ctx.send("You do not have enough copperpieces.")
 
     @commands.command()
     @commands.guild_only()

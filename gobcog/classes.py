@@ -12,7 +12,7 @@ class Classes:
         print('blessing, adding cha calculated based bonus to everyone else fighting')
 
     async def sing():
-        print('blessing, adding double cha bonus to the talk, chance of some downside on fumbles')
+        print('singing, adding double cha bonus to the talk, chance of some downside on fumbles')
 
     async def pet():
         print('chance of finding a pet if you do not own one, can send the pet foraging for a random item once per day with command.')
