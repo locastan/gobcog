@@ -451,16 +451,19 @@ class GobCog(BaseCog):
         negachar = "**Nega-" + random.choice(ctx.message.guild.members).name + "**"
         await ctx.send("You enter the negaverse and meet " + negachar + ".")
         roll = random.randint(1,20)
+        versus = random.randint(1,20)
         if roll== 1:
             await ctx.send("**" + ctx.author.name + "**" + " fumbled and died to " + negachar + "'s savagery.")
         elif roll == 20:
             await ctx.send("**" + ctx.author.name + "**" + " decapitated " + negachar + ". You gain {} xp and {} cp.".format(amount*2, amount))
             await self.add_rewards(ctx, ctx.message.author, amount*2, amount, False)
-        elif roll >=10:
-            await ctx.send("**" + ctx.author.name + "**" + " bravely defeated " + negachar + ". You gain {} xp.".format(amount))
+        elif roll > versus:
+            await ctx.send("**" + ctx.author.name + "** 🎲({})" + " bravely defeated " + negachar + " 🎲({}). You gain {} xp.".format(roll, versus, amount))
             await self.add_rewards(ctx, ctx.message.author, amount, 0, False)
+        elif roll == versus:
+            await ctx.send("**" + ctx.author.name + "** 🎲({})" + " almost killed " + negachar + " 🎲({}).".format(roll, versus))
         else:
-            await ctx.send("**" + ctx.author.name + "**" + " was killed by " + negachar + ".")
+            await ctx.send("**" + ctx.author.name + "** 🎲({})" + " was killed by " + negachar + " 🎲({}).".format(roll, versus))
 
     async def __error(self, ctx: commands.Context, error):
         if isinstance(error, commands.CommandOnCooldown):
