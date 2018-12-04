@@ -307,9 +307,12 @@ class Adventure:
         async def handle_pray(attack, diplomacy):
             for user in Adventure.userslist["pray"]:
                 roll = random.randint(1,4)
+                if len(Adventure.userslist["fight"]+Adventure.userlist["talk"]) == 0:
+                    await ctx.send("**" + user + "**" + "prayed like a madman but nobody else helped him.")
+                    return (attack, diplomacy)
                 if roll == 4:
-                    attack += 20
-                    diplomacy += 20
+                    attack += 20 * len(Adventure.userslist["fight"])
+                    diplomacy += 20 * len(Adventure.userlist["talk"])
                     await ctx.send("**" + user + "**" + "'s prayer called upon the mighty Herbert to help you.")
                 else:
                     Adventure.userslist["pray"].remove(user)
