@@ -296,7 +296,7 @@ class GobCog(BaseCog):
                 if not " sell " in reply.content.lower() and not " trade " in reply.content.lower():
                     equip = {}
                     for item in users[str(user.id)]['items']['backpack']:
-                        if item in reply.content.lower():
+                        if reply.content.lower() in item:
                             equip = {"itemname": item,"item": users[str(user.id)]['items']['backpack'][item]}
                             break
                     if equip != {}: #not good to change dict size during iteration so I moved this outside the for loop.
