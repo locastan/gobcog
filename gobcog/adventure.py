@@ -313,7 +313,7 @@ class Adventure:
                 if roll == 4:
                     attack += 20 * len(Adventure.userslist["fight"])
                     diplomacy += 20 * len(Adventure.userlist["talk"])
-                    await ctx.send("**" + user + "**" + "'s prayer called upon the mighty Herbert to help you.")
+                    await ctx.send("**" + user + "**" + "'s prayer called upon the mighty Herbert to help you. (+{}🗡/+{}🗨)".format(20 * len(Adventure.userslist["fight"]),20 * len(Adventure.userlist["talk"])))
                 else:
                     Adventure.userslist["pray"].remove(user)
                     await ctx.send("**" + user + "**" + "'s prayers went unanswered.")
