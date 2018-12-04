@@ -310,7 +310,7 @@ class GobCog(BaseCog):
                 await ctx.send("I found multiple items ({}) matching that name in your backpack.\nPlease be more specific.".format(" and ".join([", ".join(lookup[:-1]),lookup[-1]] if len(lookup) > 2 else lookup)))
                 return
             else:
-                item == lookup[0]
+                item = lookup[0]
                 equip = {"itemname": item,"item": users[str(user.id)]['items']['backpack'][item]}
                 await self.equip_item(ctx, equip, True)
         elif switch == "sell": #new logic allows for bulk sales. It also always confirms the sale by yes/no query to avoid accidents.
