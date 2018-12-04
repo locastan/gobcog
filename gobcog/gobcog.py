@@ -333,6 +333,8 @@ class GobCog(BaseCog):
                     await bank.deposit_credits(user, price)
                     del users[str(user.id)]['items']['backpack'][item]
                     await ctx.send("You sold your {} for {} copperpieces.".format(item,price))
+                    with GobCog.fp.open('w') as f:
+                        json.dump(users, f)
         elif switch == "trade":
             if item == "None" or not any([x for x in users[str(user.id)]['items']['backpack'] if item in x.lower()]):
                 await ctx.send("You have to specify an item from your backpack to trade.")
