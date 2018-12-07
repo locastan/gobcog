@@ -62,6 +62,7 @@ class Adventure:
         Adventure.dipl = Adventure.monsters[Adventure.challenge]["dipl"]*Adventure.attribs[Adventure.attrib][1]
         Adventure.userslist = {"fight":[],"pray":[],"talk":[],"run":[]}
         Adventure.rewards = {}
+        Adventure.participants = []
         Adventure.started = time.time()
         if Adventure.challenge == "Red Dragon":
             Adventure.timeout = 120
@@ -78,7 +79,7 @@ class Adventure:
         raisins = [" is going to investigate,", " is curious to have a peek,", " would like to have a look,", " wants to go there,"]
         await ctx.send(text + random.choice(locations)+ "\n" + "**" + ctx.author.name + "**" + random.choice(raisins))
         await Adventure.choice(ctx)
-        return Adventure.rewards
+        return (Adventure.rewards, Adventure.participants)
 
     async def choice(ctx):
         if Adventure.challenge == "Red Dragon":
@@ -290,34 +291,72 @@ class Adventure:
                 att_value = users[str(member.id)]['att'] + users[str(member.id)]['skill']['att']
                 if roll == 1:
                     await ctx.send("**" + user + "**" + " fumbled the attack.")
-                    Adventure.userslist["fight"].remove(user)
                     fumblelist.append(user)
-                elif roll == 20:
-                    await ctx.send("**" + user + "**" + " landed a critical hit.")
-                    critlist.append(user)
+                    if users[str(member.id)]['class']['name']=="Berserker" and users[str(member.id)]['class']['ability']:
+                        bonus = random.randint(5,15)
+                        attack += roll - bonus + att_value
+                        report += "| **" + user + "**: " +  "🎲({})-".format(roll) + " 💥{} + ".format(bonus) + "🗡" + str(att_value) + " |"
+                elif roll == 20 or (users[str(member.id)]['class']['name']=="Berserker" and users[str(member.id)]['class']['ability']):
+                    ability = ""
+                    if not users[str(member.id)]['class']['ability']:
+                        await ctx.send("**" + user + "**" + " landed a critical hit.")
+                        critlist.append(user)
+                    else:
+                        ability = "🗯️"
                     bonus = random.randint(5,15)
                     attack += roll + bonus + att_value
-                    report += "| **" + user + "**: " +  "🎲({})+".format(roll) + "{} + ".format(bonus) + "🗡" + str(att_value) + " |"
+                    bonus = ability + str(bonus)
+                    report += "| **" + user + "**: " +  "🎲({})+".format(roll) + " {} + ".format(bonus) + "🗡" + str(att_value) + " |"
                 else:
                     attack += roll + att_value
                     report += "| **" + user + "**: " +  "🎲({})+".format(roll) + "🗡" + str(att_value) + " |"
             await ctx.send(report)
+            for user in fumblelist:
+                if user in Adventure.userslist["fight"]:
+                    Adventure.userslist["fight"].remove(user)
             return (fumblelist, critlist, attack)
 
-        async def handle_pray(attack, diplomacy):
+        async def handle_pray(fumblelist, attack, diplomacy):
             for user in Adventure.userslist["pray"]:
-                roll = random.randint(1,4)
-                if len(Adventure.userslist["fight"]+Adventure.userlist["talk"]) == 0:
-                    await ctx.send("**" + user + "**" + "prayed like a madman but nobody else helped him.")
-                    return (attack, diplomacy)
-                if roll == 4:
-                    attack += 20 * len(Adventure.userslist["fight"])
-                    diplomacy += 20 * len(Adventure.userlist["talk"])
-                    await ctx.send("**" + user + "**" + "'s prayer called upon the mighty Herbert to help you. (+{}🗡/+{}🗨)".format(20 * len(Adventure.userslist["fight"]),20 * len(Adventure.userlist["talk"])))
+                member = discord.utils.find(lambda m: m.display_name == user, ctx.guild.members)
+                if users[str(member.id)]['class']['name']=="Cleric" and users[str(member.id)]['class']['ability']:
+                    roll = random.randint(1,20)
+                    if len(Adventure.userslist["fight"]+Adventure.userslist["talk"]) == 0:
+                        await ctx.send("**" + user + "**" + "blessed like a madman but nobody was there to receive it.")
+                        return (attack, diplomacy)
+                    if roll == 1:
+                        attack -= 5 * len(Adventure.userslist["fight"])
+                        diplomacy -= 5 * len(Adventure.userlist["talk"])
+                        fumblelist.append(user)
+                        await ctx.send("**" + user + "**" + "'s sermon offended the mighty Herbert. (-{}🗡/-{}🗨)".format(5 * len(Adventure.userslist["fight"]),5 * len(Adventure.userlist["talk"])))
+                    elif roll > 1 and roll <= 10:
+                        attack += 1 * len(Adventure.userslist["fight"])
+                        diplomacy += 1 * len(Adventure.userlist["talk"])
+                        await ctx.send("**" + user + "**" + "'s blessed you all in Herberts name. (+{}🗡/+{}🗨)".format(1 * len(Adventure.userslist["fight"]),1 * len(Adventure.userlist["talk"])))
+                    elif roll > 10 and roll <= 19:
+                        attack += 5 * len(Adventure.userslist["fight"])
+                        diplomacy += 5 * len(Adventure.userlist["talk"])
+                        await ctx.send("**" + user + "**" + "'s blessed you all in Herberts name. (+{}🗡/+{}🗨)".format(5 * len(Adventure.userslist["fight"]),5 * len(Adventure.userlist["talk"])))
+                    else:
+                        attack += 10 * len(Adventure.userslist["fight"])
+                        diplomacy += 10 * len(Adventure.userlist["talk"])
+                        await ctx.send("**" + user + "**" + "turned into an avatar of mighty Herbert. (+{}🗡/+{}🗨)".format(10 * len(Adventure.userslist["fight"]),10 * len(Adventure.userlist["talk"])))
                 else:
+                    roll = random.randint(1,4)
+                    if len(Adventure.userslist["fight"]+Adventure.userlist["talk"]) == 0:
+                        await ctx.send("**" + user + "**" + "prayed like a madman but nobody else helped him.")
+                        return (attack, diplomacy)
+                    if roll == 4:
+                        attack += 20 * len(Adventure.userslist["fight"])
+                        diplomacy += 20 * len(Adventure.userlist["talk"])
+                        await ctx.send("**" + user + "**" + "'s prayer called upon the mighty Herbert to help you. (+{}🗡/+{}🗨)".format(20 * len(Adventure.userslist["fight"]),20 * len(Adventure.userlist["talk"])))
+                    else:
+                        fumblelist.append(user)
+                        await ctx.send("**" + user + "**" + "'s prayers went unanswered.")
+            for user in fumblelist:
+                if user in Adventure.userslist["pray"]:
                     Adventure.userslist["pray"].remove(user)
-                    await ctx.send("**" + user + "**" + "'s prayers went unanswered.")
-            return (attack, diplomacy)
+            return (fumblelist, attack, diplomacy)
 
         async def handle_talk(fumblelist, critlist, diplomacy):
             if len(Adventure.userslist["talk"]) > 0:
@@ -330,18 +369,29 @@ class Adventure:
                 dipl_value = users[str(member.id)]['cha'] + users[str(member.id)]['skill']['cha']
                 if roll== 1:
                     await ctx.send("**" + user + "**" + (" accidentally offended the {}.").format(Adventure.challenge))
-                    Adventure.userslist["talk"].remove(user)
                     fumblelist.append(user)
-                elif roll == 20:
-                    await ctx.send("**" + user + "**" + " made a compelling argument.")
-                    critlist.append(user)
+                    if users[str(member.id)]['class']['name']=="Bard" and users[str(member.id)]['class']['ability']:
+                        bonus = random.randint(5,15)
+                        attack += roll - bonus + att_value
+                        report += "| **" + user + "**: " +  "🎲({})-".format(roll) + " 💥{} + ".format(bonus) + "🗨" + str(dipl_value) + " |"
+                elif roll == 20 or (users[str(member.id)]['class']['name']=="Bard" and users[str(member.id)]['class']['ability']):
+                    ability = ""
+                    if not users[str(member.id)]['class']['ability']:
+                        await ctx.send("**" + user + "**" + " made a compelling argument.")
+                        critlist.append(user)
+                    else:
+                        ability = "🎵"
                     bonus = random.randint(5,15)
                     diplomacy += roll + bonus + dipl_value
-                    report += "| **" + user + "**: " +  "🎲({})+".format(roll) + "{} + ".format(bonus) + "🗨" +str(dipl_value) + " |"
+                    bonus = ability + str(bonus)
+                    report += "| **" + user + "**: " +  "🎲({})+".format(roll) + " {} + ".format(bonus) + "🗨" +str(dipl_value) + " |"
                 else:
                     diplomacy += roll + dipl_value
                     report += "| **" + user + "**: " +  "🎲({})+".format(roll) + "🗨" + str(dipl_value) + " |"
             await ctx.send(report)
+            for user in fumblelist:
+                if user in Adventure.userslist["talk"]:
+                    Adventure.userslist["talk"].remove(user)
             return (fumblelist, critlist, diplomacy)
 
         async def handle_basilisk(failed):
@@ -357,8 +407,6 @@ class Adventure:
             return failed
 
         users = Adventure.users
-        #with Adventure.fp.open('r') as f:
-        #    users = json.load(f)
         try:
             await message.clear_reactions()
         except discord.Forbidden:  # cannot remove all reactions
@@ -372,10 +420,11 @@ class Adventure:
             await message.edit(content=current_page)
         if people == 0:
             pages = ["everyone ran away. You failed."]
+            Adventure.participants= Adventure.userslist["fight"]+Adventure.userslist["talk"]+Adventure.userslist["pray"]+Adventure.userslist["run"]+fumblelist
             return await Adventure.menu(ctx, pages, controls, message=message, page=page)
 
         attack,diplomacy = await handle_run(attack, diplomacy)
-        attack, diplomacy = await handle_pray(attack, diplomacy)
+        fumblelist, attack, diplomacy = await handle_pray(fumblelist, attack, diplomacy)
         fumblelist, critlist, diplomacy= await handle_talk(fumblelist, critlist, diplomacy)
         failed = await handle_basilisk(failed)
         fumblelist, critlist, attack = await handle_fight(fumblelist, critlist, attack)
@@ -401,9 +450,11 @@ class Adventure:
             if treasure == [0,0,0]:
                 treasure = False
         if Adventure.challenge == "Basilisk" and failed:
+            Adventure.participants= Adventure.userslist["fight"]+Adventure.userslist["talk"]+Adventure.userslist["pray"]+Adventure.userslist["run"]+fumblelist
             await ctx.send("The Basilisk's gaze turned everyone to stone.")
             return
         if Adventure.challenge == "Basilisk" and not slain and not persuaded:
+            Adventure.participants= Adventure.userslist["fight"]+Adventure.userslist["talk"]+Adventure.userslist["pray"]+Adventure.userslist["run"]+fumblelist
             await ctx.send("The mirror shield reflected the Basilisks gaze, but he still managed to kill you.")
             return
         amount = ((Adventure.str+Adventure.dipl)*people)
@@ -438,14 +489,23 @@ class Adventure:
 
         Adventure.timeout = 0
         await ctx.send(text)
+        Adventure.participants= Adventure.userslist["fight"]+Adventure.userslist["talk"]+Adventure.userslist["pray"]+Adventure.userslist["run"]+fumblelist
 
     async def reward(ctx, list, amount, modif, special):
         xp = max(1,round(amount))
         cp = max(1,round(amount * modif))
+        phrase = ""
         for user in list:
             Adventure.rewards[user] = {}
-            Adventure.rewards[user]["xp"] = xp
-            Adventure.rewards[user]["cp"] = cp
+            member = discord.utils.find(lambda m: m.display_name == user, ctx.guild.members)
+            if Adventure.users[str(member.id)]['class']['name']=="Ranger" and 'pet' in Adventure.users[str(member.id)]['class']['ability'].keys():
+                Adventure.rewards[user]["xp"] = int(xp * Adventure.users[str(member.id)]['class']['ability']['pet']['bonus'])
+                Adventure.rewards[user]["cp"] = int(cp * Adventure.users[str(member.id)]['class']['ability']['pet']['bonus'])
+                percent = round((Adventure.users[str(member.id)]['class']['ability']['pet']['bonus'] - 1.0) * 100)
+                phrase = "\n**{}** received a **{}%** reward bonus from his {}.".format(member.display_name, percent, Adventure.users[str(member.id)]['class']['ability']['pet']['name'])
+            else:
+                Adventure.rewards[user]["xp"] = xp
+                Adventure.rewards[user]["cp"] = cp
             if special != False:
                 Adventure.rewards[user]["special"] = special
             else:
@@ -453,11 +513,12 @@ class Adventure:
         if special != False and sum(special) == 1:
             types = [" normal"," rare","n epic"]
             type = types[special.index(1)]
-            return "\nYou have been awarded {} xp and found {} copperpieces. You also secured **a{} treasure chest**!".format(xp,cp,type)
+            phrase += "\nYou have been awarded {} xp and found {} copperpieces. You also secured **a{} treasure chest**!".format(xp,cp,type)
         elif special != False and sum(special) > 1:
-            return "\nYou have been awarded {} xp and found {} copperpieces. You also secured **several treasure chests**!".format(xp,cp)
+            phrase += "\nYou have been awarded {} xp and found {} copperpieces. You also secured **several treasure chests**!".format(xp,cp)
         else:
-            return "\nYou have been awarded {} xp and found {} copperpieces.".format(xp,cp)
+            phrase += "\nYou have been awarded {} xp and found {} copperpieces.".format(xp,cp)
+        return phrase
 
     def countdown(ctx, seconds = None, title = "Remaining: ", loop: Optional[asyncio.AbstractEventLoop] = None,) -> asyncio.Task:
 

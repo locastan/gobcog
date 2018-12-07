@@ -66,8 +66,22 @@ class Treasure:
             }
 
     async def open_chest(ctx, user, type):
-        await ctx.send("{} is opening a treasure chest. What riches lay inside?".format(user.display_name))
+        if hasattr(user, "display_name"):
+            await ctx.send("{} is opening a treasure chest. What riches lay inside?".format(user.display_name))
+        else:
+            await ctx.send("{} is foraging for treasure. What will it find?".format(user[:1].upper() + user[1:]))
+            await asyncio.sleep(2)
         roll = random.randint(1,100)
+        if type == "pet":
+            if roll <= 5:
+                chance = Treasure.unique
+            elif roll > 5 and roll <= 25:
+                chance = Treasure.rare
+            elif roll > 25 and roll <= 75:
+                chance = Treasure.common
+            else:
+                await ctx.send("{} found nothing of value.".format(user[:1].upper() + user[1:]))
+                return None
         if type == "normal":
             if roll <= 5:
                 chance = Treasure.unique
@@ -100,10 +114,16 @@ class Treasure:
                 hand = item["slot"][0] + " slot"
             att = item["att"]
             cha = item["cha"]
-        await ctx.send("{} found a {}. (Attack: {}, Charisma: {} [{}])".format(user.display_name,itemname,str(att),str(cha),hand))
+        if hasattr(user, "display_name"):
+            await ctx.send("{} found a {}. (Attack: {}, Charisma: {} [{}])".format(user.display_name,itemname,str(att),str(cha),hand))
+        else:
+            await ctx.send("Your {} found a {}. (Attack: {}, Charisma: {} [{}])".format(user,itemname,str(att),str(cha),hand))
         msg = await ctx.send("Do you want to equip, put in backpack or sell this item?")
         start_adding_reactions(msg, Treasure.controls.keys())
-        pred = ReactionPredicate.with_emojis(tuple(Treasure.controls.keys()), msg, user)
+        if hasattr(user, "id"):
+            pred = ReactionPredicate.with_emojis(tuple(Treasure.controls.keys()), msg, user)
+        else:
+            pred = ReactionPredicate.with_emojis(tuple(Treasure.controls.keys()), msg, ctx.author)
         react, user = await ctx.bot.wait_for("reaction_add", check=pred)
         try:
             await msg.clear_reactions()

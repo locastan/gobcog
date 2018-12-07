@@ -55,22 +55,31 @@ class GobCog(BaseCog):
 
             !unequip "name of item"
         """
+        await GobCog.sub_unequip(ctx,item)
+
+    @staticmethod
+    async def sub_unequip(ctx, item: str="None"):
         global users
         user = ctx.author
-        if item == "None":
-            return await ctx.send("You need to name the item you want to put in your backpack.")
+        equipped = {}
+        for slot in users[str(user.id)]['items']:
+            if users[str(user.id)]['items'][slot] and slot != "backpack":
+                equipped.update(users[str(user.id)]['items'][slot])
+        if item == "None" or not any([x for x in equipped if item in x.lower()]):
+            if item == "{.:'":
+                return
+            else:
+                return await ctx.send("You do not have an item matching {} equipped.".format(item))
         else:
-            for slot in users[str(user.id)]['items']:
-                if users[str(user.id)]['items'][slot] and slot != "backpack":
-                    if item == list(users[str(user.id)]['items'][slot].keys())[0]:
-                        olditem = users[str(user.id)]['items'][slot]
-                        for slot in olditem[list(olditem.keys())[0]]['slot']:
-                            users[str(user.id)]['items'][slot] = {}
-                            users[str(user.id)]['att'] -= olditem[list(olditem.keys())[0]]['att']     # keep in mind that double handed items grant their bonus twice so they remove twice
-                            users[str(user.id)]['cha'] -= olditem[list(olditem.keys())[0]]['cha']
-                        users[str(user.id)]['items']['backpack'].update(olditem) # TODO: Change data structure of items dict so you can have duplicate items because of key duplicate overwrite in dicts.
-                        await ctx.send("You removed {} and put it into your backpack.".format(list(olditem.keys())[0]))
-                        await ctx.send("Your new stats: **Attack**: {}, **Diplomacy**: {}.".format(users[str(user.id)]['att'],users[str(user.id)]['cha']))
+            lookup = list(x for x in equipped if item in x.lower())
+            for olditem in lookup:
+                for slot in equipped[olditem].get('slot'):
+                    users[str(user.id)]['items'][slot] = {}
+                    users[str(user.id)]['att'] -= int(equipped[olditem].get('att'))     # keep in mind that double handed items grant their bonus twice so they remove twice
+                    users[str(user.id)]['cha'] -= int(equipped[olditem].get('cha'))
+                users[str(user.id)]['items']['backpack'].update({olditem: equipped[olditem]}) # TODO: Change data structure of items dict so you can have duplicate items because of key duplicate overwrite in dicts.
+                await ctx.send("You removed {} and put it into your backpack.".format(olditem))
+            await ctx.send("Your new stats: **Attack**: {} [+{}], **Diplomacy**: {} [+{}].".format(users[str(user.id)]['att'],users[str(user.id)]['skill']['att'],users[str(user.id)]['cha'],users[str(user.id)]['skill']['cha']))
 
 
     @commands.command()
@@ -118,8 +127,202 @@ class GobCog(BaseCog):
             users[str(user)]['cha'] = diplomacy
             print(users[str(user)]['name']+": "+str(int(users[str(user)]['lvl'] / 5)) + "-" + str(users[str(user)]['skill']['att']+users[str(user)]['skill']['cha']))
             users[str(user)]['skill']['pool'] = int(users[str(user)]['lvl'] / 5) - (users[str(user)]['skill']['att']+users[str(user)]['skill']['cha'])
+            users[str(user)]['class'] = {}
         with GobCog.fp.open('w') as f:
             json.dump(users, f)
+
+    @commands.command()
+    @commands.guild_only()
+    @commands.cooldown(rate=1, per=86400, type=commands.BucketType.user)
+    async def pet(self,ctx, switch:str=None):
+        """This allows a Ranger to tame or set free a pet or send it foraging (once per day).
+            !pet
+            !pet forage
+            !pet free
+        """
+        global users
+        user = ctx.author.id
+        if 'name' in users[str(user)]['class'] and users[str(user)]['class']['name'] != "Ranger":
+            ctx.command.reset_cooldown(ctx)
+            return await ctx.send("You need to be a Ranger to do this.")
+        else:
+            if switch == None or users[str(user)]['class']['ability'] == False:
+                pet = await Classes.pet(ctx, users, None)
+                if pet != None:
+                    ctx.command.reset_cooldown(ctx) #reset cooldown so ppl can forage right after taming a new pet.
+                    users[str(user)]['class']['ability'] = {'active': True, 'pet': pet}
+                    with GobCog.fp.open('w') as f:
+                        json.dump(users, f)
+            elif switch == 'forage':
+                item = await Classes.pet(ctx, users, switch)
+                if item != None:
+                    if item['equip'] == "sell":
+                        price = random.randint(10,1000)*max(item['item']['att']+item['item']['cha'],1)
+                        await bank.deposit_credits(ctx.author, price)
+                        await ctx.send("{} sold the {} for {} copperpieces.".format(ctx.author.display_name,item['itemname'],price))
+                    elif item['equip'] == "equip":
+                        equip = {"itemname": item['itemname'],"item": item['item']}
+                        await self.equip_item(ctx, equip, False)
+                    else:
+                        users[str(user)]['items']['backpack'].update({item['itemname']: item['item']})
+                        await ctx.send("{} put the {} into the backpack.".format(ctx.author.display_name,item['itemname']))
+                        with GobCog.fp.open('w') as f:
+                            json.dump(users, f)
+            elif switch == 'free':
+                await Classes.pet(ctx, users, switch)
+                with GobCog.fp.open('w') as f:
+                    json.dump(users, f)
+
+    @commands.command()
+    @commands.guild_only()
+    @commands.cooldown(rate=1, per=3600, type=commands.BucketType.user)
+    async def rage(self,ctx):
+        """This allows a Berserker to add substantial attack bonuses for one battle.
+        """
+        global users
+        user = ctx.author.id
+        if 'name' in users[str(user)]['class'] and users[str(user)]['class']['name'] != "Berserker":
+            ctx.command.reset_cooldown(ctx)
+            return await ctx.send("You need to be a Berserker to do this.")
+        else:
+            users = await Classes.rage(ctx, users)
+
+
+    @commands.command()
+    @commands.guild_only()
+    @commands.cooldown(rate=1, per=3600, type=commands.BucketType.user)
+    async def bless(self,ctx):
+        """This allows a praying Cleric to add substantial bonuses for heroes fighting the battle.
+        """
+        global users
+        user = ctx.author.id
+        if 'name' in users[str(user)]['class'] and users[str(user)]['class']['name'] != "Cleric":
+            ctx.command.reset_cooldown(ctx)
+            return await ctx.send("You need to be a Cleric to do this.")
+        else:
+            users = await Classes.bless(ctx, users)
+
+    @commands.command()
+    @commands.guild_only()
+    @commands.cooldown(rate=1, per=3600, type=commands.BucketType.user)
+    async def sing(self,ctx):
+        """This allows a Bard to add substantial diplomacy bonuses for one battle.
+        """
+        global users
+        user = ctx.author.id
+        if 'name' in users[str(user)]['class'] and users[str(user)]['class']['name'] != "Bard":
+            ctx.command.reset_cooldown(ctx)
+            return await ctx.send("You need to be a Bard to do this.")
+        else:
+            users = await Classes.sing(ctx, users)
+
+    @commands.command()
+    @commands.guild_only()
+    @commands.cooldown(rate=1, per=86400, type=commands.BucketType.user)
+    async def forge(self,ctx):
+        """This allows a Tinkerer to forge two items into a device.
+        """
+        global users
+        user = ctx.author.id
+        if 'name' in users[str(user)]['class'] and users[str(user)]['class']['name'] != "Tinkerer":
+            ctx.command.reset_cooldown(ctx)
+            return await ctx.send("You need to be a Tinkerer to do this.")
+        else:
+            bkpk = ""
+            consumed = []
+            forgeables = len(users[str(user)]['items']['backpack']) - sum("{.:'" in x for x in users[str(user)]['items']['backpack'])
+            if forgeables <= 1:
+                ctx.command.reset_cooldown(ctx)
+                return await ctx.send("You need at least two forgeable items in your backpack to forge.")
+            for item in users[str(user)]['items']['backpack']:
+                if "{.:'" not in item:
+                    if len(users[str(user)]['items']['backpack'][item]['slot']) == 1:
+                        bkpk += " - " + item + " - (ATT: "+ str(users[str(user)]['items']['backpack'][item]['att']) + " | DPL: "+ str(users[str(user)]['items']['backpack'][item]['cha']) +" ["+ users[str(user)]['items']['backpack'][item]['slot'][0] + " slot])\n"
+                    else:
+                        bkpk += " - " + item + " -(ATT: "+ str(users[str(user)]['items']['backpack'][item]['att']*2) + " | DPL: "+ str(users[str(user)]['items']['backpack'][item]['cha']*2) +" [two handed])\n"
+            await ctx.send(
+                "```css\n[{}'s forgeables] \n\n```".format(
+                    ctx.author.display_name
+                ) + "```css\n" + bkpk + "\n (Reply with the full or partial name of item 1 to select for forging. Try to be specific.)```"
+            )
+            try:
+                reply = await ctx.bot.wait_for("message", check=MessagePredicate.same_context(ctx), timeout=30)
+            except asyncio.TimeoutError:
+                ctx.command.reset_cooldown(ctx)
+                return await ctx.send("I don't have all day, you know.")
+            item1 = {}
+            for item in users[str(user)]['items']['backpack']:
+                if reply.content.lower() in item:
+                    if  "{.:'" not in item:
+                        item1 = users[str(user)]['items']['backpack'].get(item)
+                        consumed.append(item)
+                        break
+                    else:
+                        ctx.command.reset_cooldown(ctx)
+                        return await ctx.send("Tinkered devices cannot be reforged.")
+            if item1 == {}:
+                ctx.command.reset_cooldown(ctx)
+                return await ctx.send("I could not find that item, check your spelling.")
+            bkpk = ""
+            for item in users[str(user)]['items']['backpack']:
+                if item not in consumed and "{.:'" not in item:
+                    if len(users[str(user)]['items']['backpack'][item]['slot']) == 1:
+                        bkpk += " - " + item + " - (ATT: "+ str(users[str(user)]['items']['backpack'][item]['att']) + " | DPL: "+ str(users[str(user)]['items']['backpack'][item]['cha']) +" ["+ users[str(user)]['items']['backpack'][item]['slot'][0] + " slot])\n"
+                    else:
+                        bkpk += " - " + item + " -(ATT: "+ str(users[str(user)]['items']['backpack'][item]['att']*2) + " | DPL: "+ str(users[str(user)]['items']['backpack'][item]['cha']*2) +" [two handed])\n"
+            await ctx.send(
+                "```css\n[{}'s forgeables] \n\n```".format(
+                    ctx.author.display_name
+                ) + "```css\n" + bkpk + "\n (Reply with the full or partial name of item 2 to select for forging. Try to be specific.)```"
+            )
+            try:
+                reply = await ctx.bot.wait_for("message", check=MessagePredicate.same_context(ctx), timeout=30)
+            except asyncio.TimeoutError:
+                ctx.command.reset_cooldown(ctx)
+                return await ctx.send("I don't have all day, you know.")
+            item2 = {}
+            for item in users[str(user)]['items']['backpack']:
+                if reply.content.lower() in item and reply.content.lower() not in consumed:
+                    if  "{.:'" not in item:
+                        item2 = users[str(user)]['items']['backpack'].get(item)
+                        consumed.append(item)
+                        break
+                    else:
+                        ctx.command.reset_cooldown(ctx)
+                        return await ctx.send("Tinkered devices cannot be reforged.")
+            if item2 == {}:
+                    ctx.command.reset_cooldown(ctx)
+                    return await ctx.send("I could not find that item, check your spelling.")
+            newitem = await Classes.forge(ctx, item1, item2)
+            for item in consumed:
+                users[str(user)]['items']['backpack'].pop(item)
+            await GobCog.sub_unequip(ctx,"{.:'")
+            lookup = list(x for x in users[str(user)]['items']['backpack'] if "{.:'" in x.lower())
+            if len(lookup) > 0:
+                msg = await ctx.send("```css\n You already have a device. Do you want to replace {}? ```".format(', '.join(lookup)))
+                start_adding_reactions(msg, ReactionPredicate.YES_OR_NO_EMOJIS)
+                pred = ReactionPredicate.yes_or_no(msg, ctx.author)
+                await ctx.bot.wait_for("reaction_add", check=pred)
+                try:
+                    await msg.delete()
+                except discord.Forbidden:  # cannot remove message try remove emojis
+                    for key in ReactionPredicate.YES_OR_NO_EMOJIS:
+                        await msg.remove_reaction(key, ctx.bot.user)
+                if pred.result: #user reacted with Yes.
+                    for item in lookup:
+                        del users[str(user)]['items']['backpack'][item]
+                        users[str(user)]['items']['backpack'].update({newitem['itemname']: newitem['item']})
+                        await ctx.send('```css\n Your new {} consumed {} and is now lurking in your backpack. ```'.format(newitem['itemname'], ', '.join(lookup)))
+                else:
+                    with GobCog.fp.open('w') as f:
+                        json.dump(users, f)
+                    return await ctx.send('```css\n {} got mad at your rejection and blew itself up. ```'.format(newitem['itemname']))
+            else:
+                users[str(user)]['items']['backpack'].update({newitem['itemname']: newitem['item']})
+                await ctx.send('```css\n Your new {} is lurking in your backpack. ```'.format(newitem['itemname']))
+                with GobCog.fp.open('w') as f:
+                    json.dump(users, f)
+
 
     @commands.command()
     @commands.guild_only()
@@ -129,17 +332,43 @@ class GobCog(BaseCog):
             For information on class use: !heroclass "classname" info
         """
         global users
-        classes = {'Tinkerer': {'name': "Tinkerer", 'ability': "forge", 'desc': "Tinkerers can forge two different items into a device bound to their very soul."},
-                    'Berserker':{'name': "Berserker", 'ability': "rage", 'desc': "Berserker have the option to rage and add big bonuses to attacks, but fumbles hurt."},
-                    'Cleric': {'name': "Cleric", 'ability': "bless", 'desc': "Clerics can bless the entire group when praying."},
-                    'Ranger': {'name': "Ranger", 'ability': "pet", 'desc': "Rangers can gain a special pet in adventures."},
-                    'Bard': {'name': "Bard", 'ability': "sing", 'desc': "Bards can perform to aid their comrades in diplomacy."}}
+        classes = {'Tinkerer': {'name': "Tinkerer", 'ability': False, 'desc': "Tinkerers can forge two different items into a device bound to their very soul.\n Use !forge."},
+                    'Berserker':{'name': "Berserker", 'ability': False, 'desc': "Berserker have the option to rage and add big bonuses to attacks, but fumbles hurt.\n Use !rage when attacking in an adventure."},
+                    'Cleric': {'name': "Cleric", 'ability': False, 'desc': "Clerics can bless the entire group when praying.\n Use !bless when fighting in an adventure."},
+                    'Ranger': {'name': "Ranger", 'ability': False, 'desc': "Rangers can gain a special pet, which can find items and give reward bonuses.\n Use !pet."},
+                    'Bard': {'name': "Bard", 'ability': False, 'desc': "Bards can perform to aid their comrades in diplomacy.\n Use !sing when being diplomatic in an adventure."}}
         user = ctx.author
         if users[str(user.id)]['lvl'] >= 10:
             if clz == None:
                 await ctx.send("So you feel like taking on a class, **{}**?\nAvailable classes are: Tinkerer, Berserker, Cleric, Ranger and Bard.\n Use !heroclass \"name-of-class\" to choose one.".format(user.display_name))
             else:
+                clz = clz[:1].upper() + clz[1:]
                 if clz in classes and action == None:
+                    if 'name' in users[str(user.id)]['class']:
+                        if users[str(user.id)]['class']['name'] == 'Tinkerer' or users[str(user.id)]['class']['name'] == 'Ranger':
+                            curclass = users[str(user.id)]['class']['name']
+                            if curclass == 'Tinkerer':
+                                msg = await ctx.send("```css\n You will loose your forged device if you change your class.\nShall I proceed? ```")
+                            else:
+                                msg = await ctx.send("```css\n You will loose your pet if you change your class.\nShall I proceed? ```")
+                            start_adding_reactions(msg, ReactionPredicate.YES_OR_NO_EMOJIS)
+                            pred = ReactionPredicate.yes_or_no(msg, ctx.author)
+                            await ctx.bot.wait_for("reaction_add", check=pred)
+                            try:
+                                await msg.delete()
+                            except discord.Forbidden:  # cannot remove message try remove emojis
+                                for key in ReactionPredicate.YES_OR_NO_EMOJIS:
+                                    await msg.remove_reaction(key, ctx.bot.user)
+                            if pred.result: #user reacted with Yes.
+                                if curclass == 'Tinkerer':
+                                    await GobCog.sub_unequip(ctx,"{.:'")
+                                    if any([x for x in users[str(user.id)]['items']['backpack'] if "{.:'" in x.lower()]):
+                                        lookup = list(x for x in users[str(user.id)]['items']['backpack'] if "{.:'" in x.lower())
+                                        for item in lookup:
+                                            del users[str(user.id)]['items']['backpack'][item]
+                                            await ctx.send('```css\n {} has run off to find a new master. ```'.format(', '.join(lookup)))
+                            else:
+                                return
                     users[str(user.id)]['class'] = {}
                     users[str(user.id)]['class'] = classes[clz]
                     await ctx.send("Congratulations. You are now a {}.".format(classes[clz]['name']))
@@ -249,12 +478,12 @@ class GobCog(BaseCog):
                     equip += " - " + item + " -(ATT: "+ str(users[str(user.id)]['items'][slot][item]['att']*2) + " | CHA: "+ str(users[str(user.id)]['items'][slot][item]['cha']*2) +" [two handed])\n"
                     next(i, None)
         next_lvl = int((lvl+1) ** 4)
-        if users[str(user.id)]['class'] != {}:
-            clazz = users[str(user.id)]['class']['name']
+        if users[str(user.id)]['class'] != {} and 'name' in users[str(user.id)]['class']:
+            clazz = users[str(user.id)]['class']['name'] + "\n" + users[str(user.id)]['class']['desc']
         else:
-            clazz = "Hero"
+            clazz = "Hero."
         await ctx.send(
-            "```css\n[{}'s Character Sheet] \n\n```".format(user.display_name) + "```css\nA level {} {}. \n\n- ATTACK: {} [+{}] - DIPLOMACY: {} [+{}] -\n\n- Credits: {} {} \n- Experience: {}/{} \n- Unspent skillpoints: {} \n```".format(
+            "```css\n[{}'s Character Sheet] \n\n```".format(user.display_name) + "```css\nA level {} {} \n\n- ATTACK: {} [+{}] - DIPLOMACY: {} [+{}] -\n\n- Credits: {} {} \n- Experience: {}/{} \n- Unspent skillpoints: {} \n```".format(
                 lvl, clazz, att, satt, cha, scha, bal, currency, xp, next_lvl, pool
             ) + "```css\n" + equip + "```" +
             "```css\n" + "You own {} normal, {} rare and {} epic chests.```".format(
@@ -318,6 +547,10 @@ class GobCog(BaseCog):
                 await ctx.send("You have to specify an item (or partial name) from your backpack to sell.")
                 return
             lookup = list(x for x in users[str(user.id)]['items']['backpack'] if item in x.lower())
+            if any([x for x in lookup if "{.:'" in x.lower()]):
+                device = [x for x in lookup if "{.:'" in x.lower()]
+                await ctx.send("```css\n Your {} is refusing to be sold and bit your finger for trying. ```".format(device))
+                return
             msg = await ctx.send("Do you want to sell these items {}?".format(str(lookup)))
             start_adding_reactions(msg, ReactionPredicate.YES_OR_NO_EMOJIS)
             pred = ReactionPredicate.yes_or_no(msg, buyer)
@@ -342,6 +575,10 @@ class GobCog(BaseCog):
             lookup = list(x for x in users[str(user.id)]['items']['backpack'] if item in x.lower())
             if len(lookup) > 1:
                 await ctx.send("I found multiple items ({}) matching that name in your backpack.\nPlease be more specific.".format(" and ".join([", ".join(lookup[:-1]),lookup[-1]] if len(lookup) > 2 else lookup)))
+                return
+            if any([x for x in lookup if "{.:'" in x.lower()]):
+                device = [x for x in lookup if "{.:'" in x.lower()]
+                await ctx.send("```css\n Your {} does not want to leave you. ```".format(device))
                 return
             else:
                 item = lookup[0]
@@ -410,7 +647,10 @@ class GobCog(BaseCog):
             will create 10 cp and add to Elder Aramis.
         """
         if to is None:
-            await ctx.send("You need to specify who you want me to give the money to, " + ctx.author.name + ".")
+            return await ctx.send("You need to specify a receiving member, " + ctx.author.name + ".")
+        member = discord.utils.find(lambda m: m.name == to, ctx.guild.members)
+        if member == None:
+            return await ctx.send("I could not find that user, " + ctx.author.name + ".")
         bal = await bank.deposit_credits(to, amount)
         currency = await bank.get_currency_name(ctx.guild)
         await ctx.send(
@@ -420,6 +660,7 @@ class GobCog(BaseCog):
         )
 
     @commands.command(name="adventure", aliases=['a'])
+    @commands.guild_only()
     @commands.cooldown(rate=1, per=120, type=commands.BucketType.guild)
     async def _adventure(self, ctx):
         """This will send you on an adventure!
@@ -427,17 +668,23 @@ class GobCog(BaseCog):
         """
         global users
         await ctx.send("You feel adventurous, " + ctx.author.display_name + "?")
-        reward = await Adventure.simple(ctx, users) #Adventure class doesn't change any user info, so no need to return the users object in rewards.
+        reward, participants = await Adventure.simple(ctx, users) #Adventure class doesn't change any user info, so no need to return the users object in rewards.
         if reward is not None:
-            print(reward)
+            print(reward, participants)
             for user in reward.keys():
                 member = discord.utils.find(lambda m: m.display_name == user, ctx.guild.members)
                 await self.add_rewards(ctx, member, reward[user]["xp"], reward[user]["cp"], reward[user]["special"])
-        else:
-            await ctx.send("There is an ongoing Adventure. Please wait for it to finish. {}".format(Adventure.timeout))
+            for user in participants: #reset activated abilities
+                member = discord.utils.find(lambda m: m.display_name == user, ctx.guild.members)
+                if 'name' in users[str(member.id)]['class']:
+                    if users[str(member.id)]['class']['name'] != "Ranger" and users[str(member.id)]['class']['ability']:
+                        users[str(member.id)]['class']['ability'] = False
+            with GobCog.fp.open('w') as f:
+                json.dump(users, f)
 
 
     @commands.command(name="negaverse", aliases=['nv'])
+    @commands.guild_only()
     @commands.cooldown(rate=1, per=60, type=commands.BucketType.user)
     async def _negaverse(self, ctx, amount: int = None):
         """This will send you to fight a nega-member!
@@ -469,7 +716,21 @@ class GobCog(BaseCog):
 
     async def __error(self, ctx: commands.Context, error):
         if isinstance(error, commands.CommandOnCooldown):
-            await Adventure.countdown(ctx, error.retry_after, "I feel a little tired now. Ask me again in: ")
+            m, s = divmod(error.retry_after, 60)
+            h, m = divmod(m, 60)
+            s = int(s)
+            m = int(m)
+            h = int(h)
+            if h == 0 and m == 0:
+                out = "{:02d}s".format(s)
+            elif h == 0:
+                out = "{:02d}:{:02d}s".format(m, s)
+            else:
+                out = "{:01d}:{:02d}:{:02d}s".format(h, m, s)
+            if h == 0 and m < 3:
+                await Adventure.countdown(ctx, error.retry_after, "I feel a little tired now. !{} is available again in: ".format(ctx.command.qualified_name))
+            else:
+                await ctx.send("⏳ " + "Don't be hasty, {}. You can use !{} again in: ".format(ctx.author.display_name, ctx.command.qualified_name) + out)
         else:
             pass
 
