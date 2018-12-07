@@ -326,30 +326,30 @@ class Adventure:
                         return (attack, diplomacy)
                     if roll == 1:
                         attack -= 5 * len(Adventure.userslist["fight"])
-                        diplomacy -= 5 * len(Adventure.userlist["talk"])
+                        diplomacy -= 5 * len(Adventure.userslist["talk"])
                         fumblelist.append(user)
-                        await ctx.send("**" + user + "**" + "'s sermon offended the mighty Herbert. (-{}🗡/-{}🗨)".format(5 * len(Adventure.userslist["fight"]),5 * len(Adventure.userlist["talk"])))
+                        await ctx.send("**" + user + "**" + "'s sermon offended the mighty Herbert. (-{}🗡/-{}🗨)".format(5 * len(Adventure.userslist["fight"]),5 * len(Adventure.userslist["talk"])))
                     elif roll > 1 and roll <= 10:
                         attack += 1 * len(Adventure.userslist["fight"])
-                        diplomacy += 1 * len(Adventure.userlist["talk"])
-                        await ctx.send("**" + user + "**" + "'s blessed you all in Herberts name. (+{}🗡/+{}🗨)".format(1 * len(Adventure.userslist["fight"]),1 * len(Adventure.userlist["talk"])))
+                        diplomacy += 1 * len(Adventure.userslist["talk"])
+                        await ctx.send("**" + user + "**" + "'s blessed you all in Herberts name. (+{}🗡/+{}🗨)".format(1 * len(Adventure.userslist["fight"]),1 * len(Adventure.userslist["talk"])))
                     elif roll > 10 and roll <= 19:
                         attack += 5 * len(Adventure.userslist["fight"])
-                        diplomacy += 5 * len(Adventure.userlist["talk"])
-                        await ctx.send("**" + user + "**" + "'s blessed you all in Herberts name. (+{}🗡/+{}🗨)".format(5 * len(Adventure.userslist["fight"]),5 * len(Adventure.userlist["talk"])))
+                        diplomacy += 5 * len(Adventure.userslist["talk"])
+                        await ctx.send("**" + user + "**" + "'s blessed you all in Herberts name. (+{}🗡/+{}🗨)".format(5 * len(Adventure.userslist["fight"]),5 * len(Adventure.userslist["talk"])))
                     else:
                         attack += 10 * len(Adventure.userslist["fight"])
-                        diplomacy += 10 * len(Adventure.userlist["talk"])
-                        await ctx.send("**" + user + "**" + "turned into an avatar of mighty Herbert. (+{}🗡/+{}🗨)".format(10 * len(Adventure.userslist["fight"]),10 * len(Adventure.userlist["talk"])))
+                        diplomacy += 10 * len(Adventure.userslist["talk"])
+                        await ctx.send("**" + user + "**" + "turned into an avatar of mighty Herbert. (+{}🗡/+{}🗨)".format(10 * len(Adventure.userslist["fight"]),10 * len(Adventure.userslist["talk"])))
                 else:
                     roll = random.randint(1,4)
-                    if len(Adventure.userslist["fight"]+Adventure.userlist["talk"]) == 0:
+                    if len(Adventure.userslist["fight"]+Adventure.userslist["talk"]) == 0:
                         await ctx.send("**" + user + "**" + "prayed like a madman but nobody else helped him.")
                         return (attack, diplomacy)
                     if roll == 4:
                         attack += 20 * len(Adventure.userslist["fight"])
-                        diplomacy += 20 * len(Adventure.userlist["talk"])
-                        await ctx.send("**" + user + "**" + "'s prayer called upon the mighty Herbert to help you. (+{}🗡/+{}🗨)".format(20 * len(Adventure.userslist["fight"]),20 * len(Adventure.userlist["talk"])))
+                        diplomacy += 20 * len(Adventure.userslist["talk"])
+                        await ctx.send("**" + user + "**" + "'s prayer called upon the mighty Herbert to help you. (+{}🗡/+{}🗨)".format(20 * len(Adventure.userslist["fight"]),20 * len(Adventure.userslist["talk"])))
                     else:
                         fumblelist.append(user)
                         await ctx.send("**" + user + "**" + "'s prayers went unanswered.")
