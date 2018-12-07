@@ -340,6 +340,7 @@ class GobCog(BaseCog):
 
     @commands.command()
     @commands.guild_only()
+    @commands.cooldown(rate=1, per=300, type=commands.BucketType.user)
     async def heroclass(self, ctx, clz:str=None, action:str=None):
         """This allows you to select a class.
             You need to be level 10 to select one.
@@ -353,6 +354,7 @@ class GobCog(BaseCog):
                     'Bard': {'name': "Bard", 'ability': False, 'desc': "Bards can perform to aid their comrades in diplomacy.\n Use !sing when being diplomatic in an adventure."}}
         user = ctx.author
         if clz == None:
+            ctx.command.reset_cooldown(ctx)
             await ctx.send("So you feel like taking on a class, **{}**?\nAvailable classes are: Tinkerer, Berserker, Cleric, Ranger and Bard.\n Use !heroclass \"name-of-class\" to choose one.".format(user.display_name))
         else:
             clz = clz[:1].upper() + clz[1:]
@@ -382,6 +384,7 @@ class GobCog(BaseCog):
                                             del users[str(user.id)]['items']['backpack'][item]
                                             await ctx.send('```css\n {} has run off to find a new master. ```'.format(', '.join(lookup)))
                             else:
+                                ctx.command.reset_cooldown(ctx)
                                 return
                     users[str(user.id)]['class'] = {}
                     users[str(user.id)]['class'] = classes[clz]
@@ -389,10 +392,13 @@ class GobCog(BaseCog):
                     with GobCog.fp.open('w') as f:
                         json.dump(users, f)
                 else:
+                    ctx.command.reset_cooldown(ctx)
                     await ctx.send("You need to be at least level 10 to choose a class.")
             elif clz in classes and action == "info":
+                ctx.command.reset_cooldown(ctx)
                 await ctx.send("{}".format(classes[clz]['desc']))
             else:
+                ctx.command.reset_cooldown(ctx)
                 await ctx.send("{} may be a class somewhere, but not on my watch.".format(clz))
 
     @commands.command()
