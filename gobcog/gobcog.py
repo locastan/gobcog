@@ -134,12 +134,13 @@ class GobCog(BaseCog):
             users[str(user)]['name'] = member.display_name
             if 'class' not in users[str(user)]:
                 users[str(user)]['class'] = {}
+            if users[str(user)]['class'] == {}
+                users[str(user)]['class'] = {'name': "Hero", 'ability': False, 'desc': "Your basic adventuring hero."}
             if 'skill' not in users[str(user)]:
                 users[str(user)]['skill'] = {}
                 users[str(user)]['skill'] = {'pool': 0, 'att': 0, 'cha': 0}
             print(users[str(user)]['name']+": "+str(int(users[str(user)]['lvl'] / 5)) + "-" + str(users[str(user)]['skill']['att']+users[str(user)]['skill']['cha']))
             users[str(user)]['skill']['pool'] = int(users[str(user)]['lvl'] / 5) - (users[str(user)]['skill']['att']+users[str(user)]['skill']['cha'])
-            users[str(user)]['class'] = {}
         for userID in deadsies:
             users.pop(userID)
         with GobCog.fp.open('w') as f:
@@ -816,6 +817,7 @@ class GobCog(BaseCog):
             users[str(user)]['name'] = {}
             users[str(user)]['name'] = user.display_name
             users[str(user)]['class'] = {}
+            users[str(user)]['class'] = {'name': "Hero", 'ability': False, 'desc': "Your basic adventuring hero."}
             users[str(user)]['skill'] = {}
             users[str(user)]['skill'] = {'pool': 0, 'att': 0, 'cha': 0}
             with GobCog.fp.open('w') as f:
