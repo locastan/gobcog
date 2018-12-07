@@ -134,7 +134,7 @@ class GobCog(BaseCog):
             users[str(user)]['name'] = member.display_name
             if 'class' not in users[str(user)]:
                 users[str(user)]['class'] = {}
-            if users[str(user)]['class'] == {}
+            if users[str(user)]['class'] == {}:
                 users[str(user)]['class'] = {'name': "Hero", 'ability': False, 'desc': "Your basic adventuring hero."}
             if 'skill' not in users[str(user)]:
                 users[str(user)]['skill'] = {}
