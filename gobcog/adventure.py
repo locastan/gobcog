@@ -498,7 +498,8 @@ class Adventure:
         for user in list:
             Adventure.rewards[user] = {}
             member = discord.utils.find(lambda m: m.display_name == user, ctx.guild.members)
-            if Adventure.users[str(member.id)]['class']['name']=="Ranger" and 'pet' in Adventure.users[str(member.id)]['class']['ability'].keys():
+            roll = random.randint(1,5)
+            if roll == 5 and Adventure.users[str(member.id)]['class']['name']=="Ranger" and 'pet' in Adventure.users[str(member.id)]['class']['ability'].keys():
                 Adventure.rewards[user]["xp"] = int(xp * Adventure.users[str(member.id)]['class']['ability']['pet']['bonus'])
                 Adventure.rewards[user]["cp"] = int(cp * Adventure.users[str(member.id)]['class']['ability']['pet']['bonus'])
                 percent = round((Adventure.users[str(member.id)]['class']['ability']['pet']['bonus'] - 1.0) * 100)

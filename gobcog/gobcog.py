@@ -114,7 +114,12 @@ class GobCog(BaseCog):
             (Meant for stat cleanup after a messup error appeared.)
         """
         global users
+        deadsies = []
         for user in users:
+            member = discord.utils.find(lambda m: m.id == int(user), ctx.guild.members)
+            if member == None: #member left the discord.
+                deadsies.append(str(user))
+                continue
             i = iter(users[str(user)]['items'])
             attack = 0
             diplomacy = 0
@@ -125,9 +130,18 @@ class GobCog(BaseCog):
                     diplomacy += users[str(user)]['items'][slot][item]['cha']
             users[str(user)]['att'] = attack
             users[str(user)]['cha'] = diplomacy
+            users[str(user)]['name'] = {}
+            users[str(user)]['name'] = member.display_name
+            if 'class' not in users[str(user)]:
+                users[str(user)]['class'] = {}
+            if 'skill' not in users[str(user)]:
+                users[str(user)]['skill'] = {}
+                users[str(user)]['skill'] = {'pool': 0, 'att': 0, 'cha': 0}
             print(users[str(user)]['name']+": "+str(int(users[str(user)]['lvl'] / 5)) + "-" + str(users[str(user)]['skill']['att']+users[str(user)]['skill']['cha']))
             users[str(user)]['skill']['pool'] = int(users[str(user)]['lvl'] / 5) - (users[str(user)]['skill']['att']+users[str(user)]['skill']['cha'])
             users[str(user)]['class'] = {}
+        for userID in deadsies:
+            users.pop(userID)
         with GobCog.fp.open('w') as f:
             json.dump(users, f)
 
@@ -338,12 +352,12 @@ class GobCog(BaseCog):
                     'Ranger': {'name': "Ranger", 'ability': False, 'desc': "Rangers can gain a special pet, which can find items and give reward bonuses.\n Use !pet."},
                     'Bard': {'name': "Bard", 'ability': False, 'desc': "Bards can perform to aid their comrades in diplomacy.\n Use !sing when being diplomatic in an adventure."}}
         user = ctx.author
-        if users[str(user.id)]['lvl'] >= 10:
-            if clz == None:
-                await ctx.send("So you feel like taking on a class, **{}**?\nAvailable classes are: Tinkerer, Berserker, Cleric, Ranger and Bard.\n Use !heroclass \"name-of-class\" to choose one.".format(user.display_name))
-            else:
-                clz = clz[:1].upper() + clz[1:]
-                if clz in classes and action == None:
+        if clz == None:
+            await ctx.send("So you feel like taking on a class, **{}**?\nAvailable classes are: Tinkerer, Berserker, Cleric, Ranger and Bard.\n Use !heroclass \"name-of-class\" to choose one.".format(user.display_name))
+        else:
+            clz = clz[:1].upper() + clz[1:]
+            if clz in classes and action == None:
+                if users[str(user.id)]['lvl'] >= 10:
                     if 'name' in users[str(user.id)]['class']:
                         if users[str(user.id)]['class']['name'] == 'Tinkerer' or users[str(user.id)]['class']['name'] == 'Ranger':
                             curclass = users[str(user.id)]['class']['name']
@@ -374,12 +388,12 @@ class GobCog(BaseCog):
                     await ctx.send("Congratulations. You are now a {}.".format(classes[clz]['name']))
                     with GobCog.fp.open('w') as f:
                         json.dump(users, f)
-                elif clz in classes and action == "info":
-                    await ctx.send("{}".format(classes[clz]['desc']))
                 else:
-                    await ctx.send("{} may be a class somewhere, but not on my watch.".format(clz))
-        else:
-            await ctx.send("You need to be at least level 10 to choose a class.")
+                    await ctx.send("You need to be at least level 10 to choose a class.")
+            elif clz in classes and action == "info":
+                await ctx.send("{}".format(classes[clz]['desc']))
+            else:
+                await ctx.send("{} may be a class somewhere, but not on my watch.".format(clz))
 
     @commands.command()
     @commands.guild_only()
