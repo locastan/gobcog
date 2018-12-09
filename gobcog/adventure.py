@@ -499,7 +499,7 @@ class Adventure:
             Adventure.rewards[user] = {}
             member = discord.utils.find(lambda m: m.display_name == user, ctx.guild.members)
             roll = random.randint(1,5)
-            if roll == 5 and Adventure.users[str(member.id)]['class']['name']=="Ranger" and isinstance(Adventure.users[str(member.id)]['class']['ability'], bool):
+            if roll == 5 and Adventure.users[str(member.id)]['class']['name']=="Ranger" and not isinstance(Adventure.users[str(member.id)]['class']['ability'], bool):
                 Adventure.rewards[user]["xp"] = int(xp * Adventure.users[str(member.id)]['class']['ability']['pet']['bonus'])
                 Adventure.rewards[user]["cp"] = int(cp * Adventure.users[str(member.id)]['class']['ability']['pet']['bonus'])
                 percent = round((Adventure.users[str(member.id)]['class']['ability']['pet']['bonus'] - 1.0) * 100)
