@@ -114,7 +114,7 @@ class Classes:
                 roll = random.randint(1,20)
                 await ctx.send('You are tracking a wild **{}** with a roll of 🎲({}).'.format(Classes.pets[pet]['name'], roll))
                 await asyncio.sleep(1)
-                dipl_value = users[str(user)]['cha'] + users[str(user)]['skill']['cha']
+                dipl_value = roll + users[str(user)]['cha'] + users[str(user)]['skill']['cha']
                 if roll == 1:
                     await ctx.send('But you stepped on a twig and scared it away.')
                     return
