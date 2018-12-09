@@ -379,7 +379,7 @@ class Adventure:
                     if roll == 20:
                         await ctx.send("**" + user + "**" + " made a compelling argument.")
                         critlist.append(user)
-                    if users[str(member.id)]['class']['ability']::
+                    if users[str(member.id)]['class']['ability']:
                         ability = "🎵"
                     bonus = random.randint(5,15)
                     diplomacy += roll + bonus + dipl_value

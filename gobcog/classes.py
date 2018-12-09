@@ -92,7 +92,7 @@ class Classes:
 
     pets = {"flitterwisp": {'name': "flitterwisp", 'bonus': 1.05, 'cha': 10},
             "hufflepuff": {'name': "hufflepuff", 'bonus': 1.1, 'cha': 12},
-            "silvan wolf": {'name': "silvan wolf", 'bonus': 1.2, 'cha': 16},
+            "sylvan wolf": {'name': "silvan wolf", 'bonus': 1.2, 'cha': 16},
             "zephyr cat": {'name': "zephyr cat", 'bonus': 1.2, 'cha': 16},
             "giggling imp": {'name': "giggling imp", 'bonus': 1.4, 'cha': 20},
             "pocket dragon": {'name': "pocket dragon", 'bonus': 1.5, 'cha': 30},
