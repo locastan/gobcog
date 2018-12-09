@@ -148,7 +148,7 @@ class GobCog(BaseCog):
 
     @commands.command()
     @commands.guild_only()
-    @commands.cooldown(rate=1, per=86400, type=commands.BucketType.user)
+    @commands.cooldown(rate=1, per=43200, type=commands.BucketType.user)
     async def pet(self,ctx, switch:str=None):
         """This allows a Ranger to tame or set free a pet or send it foraging (once per day).
             !pet
@@ -233,7 +233,7 @@ class GobCog(BaseCog):
 
     @commands.command()
     @commands.guild_only()
-    @commands.cooldown(rate=1, per=86400, type=commands.BucketType.user)
+    @commands.cooldown(rate=1, per=43200, type=commands.BucketType.user)
     async def forge(self,ctx):
         """This allows a Tinkerer to forge two items into a device.
         """

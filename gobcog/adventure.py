@@ -298,10 +298,10 @@ class Adventure:
                         report += "| **" + user + "**: " +  "🎲({})-".format(roll) + " 💥{} + ".format(bonus) + "🗡" + str(att_value) + " |"
                 elif roll == 20 or (users[str(member.id)]['class']['name']=="Berserker" and users[str(member.id)]['class']['ability']):
                     ability = ""
-                    if not users[str(member.id)]['class']['ability']:
+                    if roll == 20:
                         await ctx.send("**" + user + "**" + " landed a critical hit.")
                         critlist.append(user)
-                    else:
+                    if users[str(member.id)]['class']['ability']:
                         ability = "🗯️"
                     bonus = random.randint(5,15)
                     attack += roll + bonus + att_value
@@ -376,10 +376,10 @@ class Adventure:
                         report += "| **" + user + "**: " +  "🎲({})-".format(roll) + " 💥{} + ".format(bonus) + "🗨" + str(dipl_value) + " |"
                 elif roll == 20 or (users[str(member.id)]['class']['name']=="Bard" and users[str(member.id)]['class']['ability']):
                     ability = ""
-                    if not users[str(member.id)]['class']['ability']:
+                    if roll == 20:
                         await ctx.send("**" + user + "**" + " made a compelling argument.")
                         critlist.append(user)
-                    else:
+                    if users[str(member.id)]['class']['ability']::
                         ability = "🎵"
                     bonus = random.randint(5,15)
                     diplomacy += roll + bonus + dipl_value
@@ -499,7 +499,7 @@ class Adventure:
             Adventure.rewards[user] = {}
             member = discord.utils.find(lambda m: m.display_name == user, ctx.guild.members)
             roll = random.randint(1,5)
-            if roll == 5 and Adventure.users[str(member.id)]['class']['name']=="Ranger" and 'pet' in Adventure.users[str(member.id)]['class']['ability'].keys():
+            if roll == 5 and Adventure.users[str(member.id)]['class']['name']=="Ranger" and type(Adventure.users[str(member.id)]['class']['ability']) != bool:
                 Adventure.rewards[user]["xp"] = int(xp * Adventure.users[str(member.id)]['class']['ability']['pet']['bonus'])
                 Adventure.rewards[user]["cp"] = int(cp * Adventure.users[str(member.id)]['class']['ability']['pet']['bonus'])
                 percent = round((Adventure.users[str(member.id)]['class']['ability']['pet']['bonus'] - 1.0) * 100)
