@@ -434,6 +434,7 @@ class Adventure:
 
         fighters = " and ".join([", ".join(Adventure.userslist["fight"][:-1]),Adventure.userslist["fight"][-1]] if len(Adventure.userslist["fight"]) > 2 else Adventure.userslist["fight"])
         talkers = " and ".join([", ".join(Adventure.userslist["talk"][:-1]),Adventure.userslist["talk"][-1]] if len(Adventure.userslist["talk"]) > 2 else Adventure.userslist["talk"])
+        preachermen = " and ".join([", ".join(Adventure.userslist["pray"][:-1]),Adventure.userslist["pray"][-1]] if len(Adventure.userslist["pray"]) > 2 else Adventure.userslist["pray"])
         text = ""
 
         if slain or persuaded and not failed:
@@ -472,15 +473,24 @@ class Adventure:
                 text= random.choice(options)
         else:
             if slain and persuaded:
-                text= ("**{}** slayed the {} in battle,").format(fighters,Adventure.challenge) + ("while **{}** distracted with insults.").format(talkers)
+                if len(Adventure.userslist["pray"]) > 0:
+                    text= ("**{}** slayed the {} in battle,").format(fighters,Adventure.challenge) + ("while **{}** distracted with flattery and **{}** aided in Herberts name.").format(talkers, preachermen)
+                else:
+                    text= ("**{}** slayed the {} in battle,").format(fighters,Adventure.challenge) + ("while **{}** distracted with insults.").format(talkers)
                 text += await Adventure.reward(ctx, Adventure.userslist["fight"]+Adventure.userslist["talk"]+Adventure.userslist["pray"],amount,(attack/Adventure.str+diplomacy/Adventure.dipl),treasure)
 
             if  not slain and persuaded:
-                text= ("**{}** talked the {} down.").format(talkers,Adventure.challenge)
+                if len(Adventure.userslist["pray"]) > 0:
+                    text= ("**{}** talked the {} down with **{}'s** blessing'.").format(talkers,Adventure.challenge, preachermen)
+                else:
+                    text= ("**{}** talked the {} down.").format(talkers,Adventure.challenge)
                 text += await Adventure.reward(ctx, Adventure.userslist["talk"]+Adventure.userslist["pray"],amount,(diplomacy/Adventure.dipl),treasure)
 
             if slain and not persuaded:
-                text= ("**{}** killed the {} in a most heroic battle.").format(fighters,Adventure.challenge)
+                if len(Adventure.userslist["pray"]) > 0:
+                    text= ("**{}** killed the {} in a most heroic battle with a little help from **{}**.").format(fighters,Adventure.challenge, preachermen)
+                else:
+                    text= ("**{}** killed the {} in an epic fight.").format(fighters,Adventure.challenge)
                 text += await Adventure.reward(ctx, Adventure.userslist["fight"]+Adventure.userslist["pray"],amount,(attack/Adventure.str),treasure)
 
             if not slain and not persuaded:

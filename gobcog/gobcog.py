@@ -814,12 +814,12 @@ class GobCog(BaseCog):
             users[str(user.id)]['cha'] = 0
             users[str(user.id)]['treasure'] = [0,0,0]
             users[str(user.id)]['items'] = {"left":{},"right":{},"ring":{},"charm":{},"backpack": {}}
-            users[str(user)]['name'] = {}
-            users[str(user)]['name'] = user.display_name
-            users[str(user)]['class'] = {}
-            users[str(user)]['class'] = {'name': "Hero", 'ability': False, 'desc': "Your basic adventuring hero."}
-            users[str(user)]['skill'] = {}
-            users[str(user)]['skill'] = {'pool': 0, 'att': 0, 'cha': 0}
+            users[str(user.id)]['name'] = {}
+            users[str(user.id)]['name'] = user.display_name
+            users[str(user.id)]['class'] = {}
+            users[str(user.id)]['class'] = {'name': "Hero", 'ability': False, 'desc': "Your basic adventuring hero."}
+            users[str(user.id)]['skill'] = {}
+            users[str(user.id)]['skill'] = {'pool': 0, 'att': 0, 'cha': 0}
             with GobCog.fp.open('w') as f:
                 json.dump(users, f)
 
