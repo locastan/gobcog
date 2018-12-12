@@ -172,8 +172,7 @@ class GobCog(BaseCog):
                 item = await Classes.pet(ctx, users, switch)
                 if item != None:
                     if item['equip'] == "sell":
-                        price = random.randint(10,1000)*max(item['item']['att']+item['item']['cha'],1)
-                        await bank.deposit_credits(ctx.author, price)
+                        price = await sell(ctx.author,item)
                         await ctx.send("{} sold the {} for {} copperpieces.".format(ctx.author.display_name,item['itemname'],price))
                     elif item['equip'] == "equip":
                         equip = {"itemname": item['itemname'],"item": item['item']}
@@ -455,8 +454,7 @@ class GobCog(BaseCog):
             item = await Treasure.open_chest(ctx, user, type)
             users[str(user.id)]['treasure'] = [x-y for x,y in zip(users[str(user.id)]['treasure'], redux)]
             if item['equip'] == "sell":
-                price = random.randint(10,1000)*max(item['item']['att']+item['item']['cha'],1)
-                await bank.deposit_credits(user, price)
+                price = await sell(user,item)
                 await ctx.send("{} sold the {} for {} copperpieces.".format(user.display_name,item['itemname'],price))
             elif item['equip'] == "equip":
                 equip = {"itemname": item['itemname'],"item": item['item']}
@@ -511,9 +509,9 @@ class GobCog(BaseCog):
                 str(users[str(user.id)]['treasure'][0]),str(users[str(user.id)]['treasure'][1]),str(users[str(user.id)]['treasure'][2]))
         )
 
-    @commands.command()
+    @commands.command(name="backpack", aliases=['b'])
     @commands.guild_only()
-    async def backpack(self, ctx, switch: str="None", item: str="None", asking: int=10, buyer: discord.Member=None):
+    async def _backpack(self, ctx, switch: str="None", item: str="None", asking: int=10, buyer: discord.Member=None):
         """This draws up the contents of your backpack.
             Selling: !backpack sell "(partial) name of item"
             Trading: !backpack trade "name of item" cp @buyer
@@ -583,8 +581,8 @@ class GobCog(BaseCog):
                     await msg.remove_reaction(key, ctx.bot.user)
             if pred.result: #user reacted with Yes.
                 for item in lookup:
-                    price = random.randint(10,1000)*max(users[str(user.id)]['items']['backpack'][item]['att']+users[str(user.id)]['items']['backpack'][item]['cha'],1)
-                    await bank.deposit_credits(user, price)
+                    queryitem = {'itemname': item,'item': {users[str(user.id)]['items']['backpack'].get(item)}}
+                    price = await sell(user,item)
                     del users[str(user.id)]['items']['backpack'][item]
                     await ctx.send("You sold your {} for {} copperpieces.".format(item,price))
                     with GobCog.fp.open('w') as f:
@@ -850,6 +848,18 @@ class GobCog(BaseCog):
             users[str(user.id)]['skill']['pool'] = int(lvl_end / 5) - (users[str(user.id)]['skill']['att']+users[str(user.id)]['skill']['cha'])
             if users[str(user.id)]['skill']['pool'] > 0:
                 await ctx.send('You have skillpoints available.')
+
+    @staticmethod
+    async def sell(user,item):
+        if "[" in item['itemname']:
+            base = (500,1000)
+        elif "." in item['itemname']:
+            base = (100,500)
+        else :
+            base = (10,200)
+        price = random.randint(base[0],base[1])*max(item['item']['att']+item['item']['cha'],1)
+        await bank.deposit_credits(user, price)
+        return(price)
 
     @staticmethod
     async def trader(ctx):
