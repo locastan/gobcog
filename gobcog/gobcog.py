@@ -581,7 +581,7 @@ class GobCog(BaseCog):
                     await msg.remove_reaction(key, ctx.bot.user)
             if pred.result: #user reacted with Yes.
                 for item in lookup:
-                    queryitem = {'itemname': item,'item': {users[str(user.id)]['items']['backpack'].get(item)}}
+                    queryitem = {'itemname': item,'item': users[str(user.id)]['items']['backpack'].get(item)}
                     price = await GobCog.sell(user,item)
                     del users[str(user.id)]['items']['backpack'][item]
                     await ctx.send("You sold your {} for {} copperpieces.".format(item,price))
