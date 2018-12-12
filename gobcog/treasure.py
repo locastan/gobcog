@@ -147,7 +147,7 @@ class Treasure:
                 elif roll == 100:
                     chest = [1,0,0]
                     if "normal chest" not in items:
-                        items.update({itemname: {"itemname": "normal chest","item":chest, "price": 10000}})
+                        items.update({itemname: {"itemname": "normal chest","item":chest, "price": 2000}})
                 else:
                     chance = Treasure.common
             elif type <= 95:
@@ -158,7 +158,7 @@ class Treasure:
                 elif roll == 100:
                     treasure = random.choice([[0,1,0],[1,0,0]])
                     types = ["normal chest",".rare_chest","[epic chest]"]
-                    prices = [10000,50000,100000]
+                    prices = [2000,5000,10000]
                     chesttext = types[treasure.index(1)]
                     price = prices[treasure.index(1)]
                     if chesttext not in items:
@@ -171,7 +171,7 @@ class Treasure:
                 elif roll == 100:
                     treasure = random.choice([[0,1,0],[0,0,1]])
                     types = ["normal chest",".rare_chest","[epic chest]"]
-                    prices = [10000,50000,100000]
+                    prices = [2000,5000,10000]
                     chesttext = types[treasure.index(1)]
                     price = prices[treasure.index(1)]
                     if chesttext not in items:
@@ -188,11 +188,11 @@ class Treasure:
                 att = item["att"]
                 cha = item["cha"]
             if "[" in itemname:
-                price = random.randint(1000,10000)*max(att+cha, 1)
+                price = random.randint(1000,2000)*max(att+cha, 1)
             elif "." in itemname:
-                price = random.randint(500,1000)*max(att+cha, 1)
+                price = random.randint(200,1000)*max(att+cha, 1)
             else:
-                price = random.randint(100,500)*max(att+cha, 1)
+                price = random.randint(10,200)*max(att+cha, 1)
             if itemname not in items:
                 items.update({itemname: {"itemname": itemname,"item":item, "price": price}})
         print(items)
