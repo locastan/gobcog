@@ -582,7 +582,7 @@ class GobCog(BaseCog):
             if pred.result: #user reacted with Yes.
                 for item in lookup:
                     queryitem = {'itemname': item,'item': users[str(user.id)]['items']['backpack'].get(item)}
-                    price = await GobCog.sell(user,item)
+                    price = await GobCog.sell(user,queryitem)
                     del users[str(user.id)]['items']['backpack'][item]
                     await ctx.send("You sold your {} for {} copperpieces.".format(item,price))
                     with GobCog.fp.open('w') as f:
