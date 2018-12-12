@@ -612,7 +612,7 @@ class GobCog(BaseCog):
                         hand = users[str(user.id)]['items']['backpack'][item]["slot"][0] + " slot"
                     att = users[str(user.id)]['items']['backpack'][item]["att"]
                     cha = users[str(user.id)]['items']['backpack'][item]["cha"]
-                await ctx.send("{} wants to sell his {}. (Attack: {}, Charisma: {} [{}])".format(user.display_name,item,str(att),str(cha),hand))
+                await ctx.send("{} wants to sell {}. (Attack: {}, Charisma: {} [{}])".format(user.display_name,item,str(att),str(cha),hand))
                 msg = await ctx.send("Do you want to buy this item for {} cp?".format(str(asking)))
                 start_adding_reactions(msg, ReactionPredicate.YES_OR_NO_EMOJIS)
                 pred = ReactionPredicate.yes_or_no(msg, buyer)
