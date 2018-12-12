@@ -172,7 +172,7 @@ class GobCog(BaseCog):
                 item = await Classes.pet(ctx, users, switch)
                 if item != None:
                     if item['equip'] == "sell":
-                        price = await sell(ctx.author,item)
+                        price = await GobCog.sell(ctx.author,item)
                         await ctx.send("{} sold the {} for {} copperpieces.".format(ctx.author.display_name,item['itemname'],price))
                     elif item['equip'] == "equip":
                         equip = {"itemname": item['itemname'],"item": item['item']}
@@ -454,7 +454,7 @@ class GobCog(BaseCog):
             item = await Treasure.open_chest(ctx, user, type)
             users[str(user.id)]['treasure'] = [x-y for x,y in zip(users[str(user.id)]['treasure'], redux)]
             if item['equip'] == "sell":
-                price = await sell(user,item)
+                price = await GobCog.sell(user,item)
                 await ctx.send("{} sold the {} for {} copperpieces.".format(user.display_name,item['itemname'],price))
             elif item['equip'] == "equip":
                 equip = {"itemname": item['itemname'],"item": item['item']}
@@ -582,7 +582,7 @@ class GobCog(BaseCog):
             if pred.result: #user reacted with Yes.
                 for item in lookup:
                     queryitem = {'itemname': item,'item': {users[str(user.id)]['items']['backpack'].get(item)}}
-                    price = await sell(user,item)
+                    price = await GobCog.sell(user,item)
                     del users[str(user.id)]['items']['backpack'][item]
                     await ctx.send("You sold your {} for {} copperpieces.".format(item,price))
                     with GobCog.fp.open('w') as f:
