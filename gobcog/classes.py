@@ -101,9 +101,12 @@ class Classes:
     async def pet(ctx,users,flag):
         user = ctx.author.id
         if flag == "free":
-            users[str(user)]['class']['ability'] = False
-            ctx.command.reset_cooldown(ctx)
-            await ctx.send('**{}** relased his pet into the wild again.'.format(ctx.author.display_name))
+            if users[str(user)]['class']['ability'] != False:
+                users[str(user)]['class']['ability'] = False
+                ctx.command.reset_cooldown(ctx)
+                await ctx.send('**{}** relased his pet into the wild again.'.format(ctx.author.display_name))
+            else:
+                return None
         elif flag == "forage":
             return await Treasure.open_chest(ctx,users[str(user)]['class']['ability']['pet']['name'],'pet')
         else:
@@ -116,8 +119,8 @@ class Classes:
                 await asyncio.sleep(1)
                 dipl_value = roll + users[str(user)]['cha'] + users[str(user)]['skill']['cha']
                 if roll == 1:
-                    await ctx.send('But you stepped on a twig and scared it away.')
-                    return
+                    return await ctx.send('But you stepped on a twig and scared it away.')
+
                 elif roll == 20:
                     await ctx.send('You happen to have its favorite food.')
                     dipl_value += 25
@@ -125,7 +128,8 @@ class Classes:
                     await ctx.send('You successfully tamed the {}.'.format(Classes.pets[pet]['name']))
                     return Classes.pets[pet]
                 else:
-                    await ctx.send('The {} escaped.'.format(Classes.pets[pet]['name']))
+                    return await ctx.send('The {} escaped.'.format(Classes.pets[pet]['name']))
+
             else:
                 ctx.command.reset_cooldown(ctx)
                 await ctx.send('You already have a pet. Try foraging.')
