@@ -106,7 +106,8 @@ class Classes:
                 ctx.command.reset_cooldown(ctx)
                 await ctx.send('**{}** relased his pet into the wild again.'.format(ctx.author.display_name))
             else:
-                return None
+                return await ctx.send('You have no pet to release.') 
+
         elif flag == "forage":
             return await Treasure.open_chest(ctx,users[str(user)]['class']['ability']['pet']['name'],'pet')
         else:
