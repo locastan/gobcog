@@ -139,23 +139,23 @@ class Treasure:
         type = random.randint(1,100)
         while len(items) < 4:
             roll = random.randint(1,100)
-            if type <= 80:
+            if type <= 60:
                 if roll <= 5:
                     chance = Treasure.unique
                 elif roll > 5 and roll <= 25:
                     chance = Treasure.rare
-                elif roll == 100:
+                elif roll >= 90:
                     chest = [1,0,0]
                     if "normal chest" not in items:
                         items.update({itemname: {"itemname": "normal chest","item":chest, "price": 2000}})
                 else:
                     chance = Treasure.common
-            elif type <= 95:
+            elif type <= 75:
                 if roll <= 15:
                     chance = Treasure.unique
                 elif roll > 15 and roll <= 45:
                     chance = Treasure.rare
-                elif roll == 100:
+                elif roll >= 90:
                     treasure = random.choice([[0,1,0],[1,0,0]])
                     types = ["normal chest",".rare_chest","[epic chest]"]
                     prices = [2000,5000,10000]
@@ -165,10 +165,10 @@ class Treasure:
                         items.update({chesttext: {"itemname": "{}".format(chesttext),"item":chest, "price": price}})
                 else:
                     chance = Treasure.common
-            elif type <= 100:
+            elif type <= 90:
                 if roll <= 25:
                     chance = Treasure.unique
-                elif roll == 100:
+                elif roll >= 90:
                     treasure = random.choice([[0,1,0],[0,0,1]])
                     types = ["normal chest",".rare_chest","[epic chest]"]
                     prices = [2000,5000,10000]
