@@ -103,11 +103,10 @@ class Classes:
         if flag == "free":
             if users[str(user)]['class']['ability'] != False:
                 users[str(user)]['class']['ability'] = False
-                ctx.command.reset_cooldown(ctx)
                 await ctx.send('**{}** relased his pet into the wild again.'.format(ctx.author.display_name))
             else:
-                return await ctx.send('You have no pet to release.') 
-
+                ctx.command.reset_cooldown(ctx)
+                await ctx.send('You have no pet to release.')
         elif flag == "forage":
             return await Treasure.open_chest(ctx,users[str(user)]['class']['ability']['pet']['name'],'pet')
         else:
@@ -130,7 +129,6 @@ class Classes:
                     return Classes.pets[pet]
                 else:
                     return await ctx.send('The {} escaped.'.format(Classes.pets[pet]['name']))
-
             else:
                 ctx.command.reset_cooldown(ctx)
                 await ctx.send('You already have a pet. Try foraging.')
