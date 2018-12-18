@@ -169,7 +169,8 @@ class Adventure:
                 for key in controls.keys():
                     await message.remove_reaction(key, ctx.bot.user)
             pages = ["but nobody did anything. You failed."]
-            return await Adventure.menu(ctx, pages, controls, message=message, page=page)
+            await message.edit(content=pages[0])
+            return
         await controls[react.emoji](ctx, pages, controls, message, page, Adventure.timeout, react.emoji, user)
 
     async def fight(
@@ -420,8 +421,9 @@ class Adventure:
             await message.edit(content=current_page)
         if people == 0:
             pages = ["everyone ran away. You failed."]
-            Adventure.participants= Adventure.userslist["fight"]+Adventure.userslist["talk"]+Adventure.userslist["pray"]+Adventure.userslist["run"]+fumblelist
-            return await Adventure.menu(ctx, pages, controls, message=message, page=page)
+            Adventure.participants = Adventure.userslist["fight"]+Adventure.userslist["talk"]+Adventure.userslist["pray"]+Adventure.userslist["run"]+fumblelist
+            await message.edit(content=pages[0])
+            return
 
         attack,diplomacy = await handle_run(attack, diplomacy)
         fumblelist, attack, diplomacy = await handle_pray(fumblelist, attack, diplomacy)
