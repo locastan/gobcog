@@ -653,6 +653,8 @@ class GobCog(BaseCog):
         spender = ctx.author
         if await bank.can_spend(spender,amount):
             bal = await bank.transfer_credits(spender, to, amount)
+        else:
+            return await ctx.send("You do not have enough copperpieces.")
         currency = await bank.get_currency_name(ctx.guild)
         await ctx.send(
             "```You transferred {3} {2}. {0} now has {1} {2}```".format(
@@ -761,15 +763,23 @@ class GobCog(BaseCog):
             await self.update_data(users, message.author)
             if GobCog.last_trade == 0: #this shuts hawls bro up for 3 hours after a cog reload
                 GobCog.last_trade = time.time()
-            roll = random.randint(1,20)
-            if roll == 20:
-                ctx = await self.bot.get_context(message)
-                await self.trader(ctx)
+            if "rpg-game" in message.channel.name: #restrict hawls bro to rpg-game channel.
+                roll = random.randint(1,20)
+                if roll == 20:
+                    ctx = await self.bot.get_context(message)
+                    await self.trader(ctx)
 
 
     async def on_member_join(self, member):
         global users
         await self.update_data(users, member)
+
+        with GobCog.fp.open('w') as f:
+            json.dump(users, f)
+
+    async def on_member_leave(self, member):
+        global users
+        users.pop(str(member.id))
 
         with GobCog.fp.open('w') as f:
             json.dump(users, f)

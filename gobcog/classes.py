@@ -120,7 +120,6 @@ class Classes:
                 dipl_value = roll + users[str(user)]['cha'] + users[str(user)]['skill']['cha']
                 if roll == 1:
                     return await ctx.send('But you stepped on a twig and scared it away.')
-
                 elif roll == 20:
                     await ctx.send('You happen to have its favorite food.')
                     dipl_value += 25
