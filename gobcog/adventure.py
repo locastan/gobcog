@@ -324,7 +324,7 @@ class Adventure:
                     roll = random.randint(1,20)
                     if len(Adventure.userslist["fight"]+Adventure.userslist["talk"]) == 0:
                         await ctx.send("**" + user + "**" + "blessed like a madman but nobody was there to receive it.")
-                        return (attack, diplomacy)
+                        return (fumblelist, attack, diplomacy)
                     if roll == 1:
                         attack -= 5 * len(Adventure.userslist["fight"])
                         diplomacy -= 5 * len(Adventure.userslist["talk"])
@@ -346,7 +346,7 @@ class Adventure:
                     roll = random.randint(1,4)
                     if len(Adventure.userslist["fight"]+Adventure.userslist["talk"]) == 0:
                         await ctx.send("**" + user + "**" + "prayed like a madman but nobody else helped him.")
-                        return (attack, diplomacy)
+                        return (fumblelist, attack, diplomacy)
                     if roll == 4:
                         attack += 20 * len(Adventure.userslist["fight"])
                         diplomacy += 20 * len(Adventure.userslist["talk"])
