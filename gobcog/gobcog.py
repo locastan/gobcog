@@ -682,7 +682,8 @@ class GobCog(BaseCog):
         """
         global users
         for user in users:
-            await self.add_rewards(ctx, user, xp, cp, chests)
+            member = discord.utils.find(lambda m: m.id == user, ctx.guild.members)
+            await self.add_rewards(ctx, member, xp, cp, chests)
         await ctx.send("All users were compensated with {} xp, {} cp and {} [normal, rare, epic] chests.".format(xp,cp,str(chests)))
 
     @commands.command(name="adventure", aliases=['a'])
