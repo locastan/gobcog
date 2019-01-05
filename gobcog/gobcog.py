@@ -675,16 +675,16 @@ class GobCog(BaseCog):
 
     @commands.command()
     @checks.admin_or_permissions(administrator=True)
-    async def compensate(self, ctx, xp: int=0, cp: int=0, chests: list=[0,0,0]):
+    async def compensate(self, ctx, xp: int=0, cp: int=0, normal: int=0, rare: int=0, epic: int=0,):
         """This will award xp, cp and chests to all players.
-            !compendate 10 12 [1,0,0]
+            !compendate 10 12 1 0 0
             will give all users 10xp, 12cp and a normal chest.
         """
         global users
         for user in users:
             member = discord.utils.find(lambda m: m.id == int(user), ctx.guild.members)
             if member != None:
-                await self.add_rewards(ctx, member, xp, cp, chests)
+                await self.add_rewards(ctx, member, xp, cp, [normal,rare,epic])
         await ctx.send("All users were compensated with {} xp, {} cp and {} [normal, rare, epic] chests.".format(xp,cp,chests))
 
     @commands.command(name="adventure", aliases=['a'])
