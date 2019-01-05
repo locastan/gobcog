@@ -682,7 +682,7 @@ class GobCog(BaseCog):
         """
         global users
         for user in users:
-            member = discord.utils.find(lambda m: m.id == user, ctx.guild.members)
+            member = discord.utils.find(lambda m: m.id == int(user), ctx.guild.members)
             if member != None:
                 await self.add_rewards(ctx, member, xp, cp, chests)
         await ctx.send("All users were compensated with {} xp, {} cp and {} [normal, rare, epic] chests.".format(xp,cp,str(chests)))
