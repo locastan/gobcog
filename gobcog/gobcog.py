@@ -685,7 +685,7 @@ class GobCog(BaseCog):
             member = discord.utils.find(lambda m: m.id == int(user), ctx.guild.members)
             if member != None:
                 await self.add_rewards(ctx, member, xp, cp, chests)
-        await ctx.send("All users were compensated with {} xp, {} cp and {} [normal, rare, epic] chests.".format(xp,cp,str(chests)))
+        await ctx.send("All users were compensated with {} xp, {} cp and {} [normal, rare, epic] chests.".format(xp,cp,chests))
 
     @commands.command(name="adventure", aliases=['a'])
     @commands.guild_only()
