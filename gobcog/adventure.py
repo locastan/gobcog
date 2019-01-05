@@ -51,7 +51,7 @@ class Adventure:
                 "Wyvern":{"str":70,"dipl":60},
                 "Hydra":{"str":75,"dipl":65},
                 "Red Dragon":{"str":95,"dipl":95},
-                "Black Dragon":{"str":110,"dipl":100},}
+                "Black Dragon":{"str":110,"dipl":100}}
     challenge = ""
     attrib = ""
     userslist = {}
