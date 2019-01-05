@@ -693,7 +693,7 @@ class GobCog(BaseCog):
         """
         global users
         for user in users:
-            await add_rewards(ctx, user, xp, cp, chests)
+            await self.add_rewards(ctx, user, xp, cp, chests)
         await ctx.send("All users were compensated with {} xp, {} cp and {} [normal, rare, epic] chests.".format(xp,cp,str(chests)))
 
     @commands.command(name="adventure", aliases=['a'])
