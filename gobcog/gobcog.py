@@ -865,7 +865,7 @@ class GobCog(BaseCog):
     @staticmethod
     async def save():
         with GobCog.fp.open('w') as f:
-            json.dump(users, f, indent=4, default: lambda o: '<not serializable>', sort_keys=True)
+            json.dump(users, f, indent=4, default=lambda o: '<not serializable>', sort_keys=True)
 
     @staticmethod
     async def level_up(ctx, users, user):
