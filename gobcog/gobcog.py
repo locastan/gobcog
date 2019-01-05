@@ -104,7 +104,7 @@ class GobCog(BaseCog):
         await ctx.send(
             "```{} now owns {} normal, {} rare and {} epic chests.```".format(
                 user.display_name, str(users[str(user.id)]['treasure'][0]),str(users[str(user.id)]['treasure'][1]),str(users[str(user.id)]['treasure'][2])))
-        await save()
+        await GobCog.save()
 
     @commands.command()
     @checks.admin_or_permissions(administrator=True)
@@ -142,7 +142,7 @@ class GobCog(BaseCog):
             users[str(user)]['skill']['pool'] = int(users[str(user)]['lvl'] / 5) - (users[str(user)]['skill']['att']+users[str(user)]['skill']['cha'])
         for userID in deadsies:
             users.pop(userID)
-        await save()
+        await GobCog.save()
 
     @commands.command()
     @commands.guild_only()
@@ -164,7 +164,7 @@ class GobCog(BaseCog):
                 if pet != None:
                     ctx.command.reset_cooldown(ctx) #reset cooldown so ppl can forage right after taming a new pet.
                     users[str(user)]['class']['ability'] = {'active': True, 'pet': pet}
-                    await save()
+                    await GobCog.save()
             elif switch == 'forage':
                 item = await Classes.pet(ctx, users, switch)
                 if item != None:
@@ -177,10 +177,10 @@ class GobCog(BaseCog):
                     else:
                         users[str(user)]['items']['backpack'].update({item['itemname']: item['item']})
                         await ctx.send("{} put the {} into the backpack.".format(ctx.author.display_name,item['itemname']))
-                        await save()
+                        await GobCog.save()
             elif switch == 'free':
                 await Classes.pet(ctx, users, switch)
-                await save()
+                await GobCog.save()
 
     @commands.command()
     @commands.guild_only()
@@ -323,12 +323,12 @@ class GobCog(BaseCog):
                         users[str(user)]['items']['backpack'].update({newitem['itemname']: newitem['item']})
                         await ctx.send('```css\n Your new {} consumed {} and is now lurking in your backpack. ```'.format(newitem['itemname'], ', '.join(lookup)))
                 else:
-                    await save()
+                    await GobCog.save()
                     return await ctx.send('```css\n {} got mad at your rejection and blew itself up. ```'.format(newitem['itemname']))
             else:
                 users[str(user)]['items']['backpack'].update({newitem['itemname']: newitem['item']})
                 await ctx.send('```css\n Your new {} is lurking in your backpack. ```'.format(newitem['itemname']))
-                await save()
+                await GobCog.save()
 
 
     @commands.command()
@@ -382,7 +382,7 @@ class GobCog(BaseCog):
                     users[str(user.id)]['class'] = {}
                     users[str(user.id)]['class'] = classes[clz]
                     await ctx.send("Congratulations. You are now a {}.".format(classes[clz]['name']))
-                    await save()
+                    await GobCog.save()
                 else:
                     ctx.command.reset_cooldown(ctx)
                     await ctx.send("You need to be at least level 10 to choose a class.")
@@ -415,7 +415,7 @@ class GobCog(BaseCog):
                 users[str(user.id)]['skill']['pool'] -= 1
                 users[str(user.id)]['skill']['cha'] += 1
             await ctx.send("You permanently raised your {} value by one.".format(spend))
-            await save()
+            await GobCog.save()
 
 
     @commands.command()
@@ -580,7 +580,7 @@ class GobCog(BaseCog):
                     price = await GobCog.sell(user,queryitem)
                     del users[str(user.id)]['items']['backpack'][item]
                     await ctx.send("You sold your {} for {} copperpieces.".format(item,price))
-                    await save()
+                    await GobCog.save()
         elif switch == "trade":
             if item == "None" or not any([x for x in users[str(user.id)]['items']['backpack'] if item in x.lower()]):
                 await ctx.send("You have to specify an item from your backpack to trade.")
@@ -624,7 +624,7 @@ class GobCog(BaseCog):
                         currency = await bank.get_currency_name(ctx.guild)
                         tradeitem = users[str(user.id)]['items']['backpack'].pop(item)
                         users[str(buyer.id)]['items']['backpack'].update({item: tradeitem})
-                        await save()
+                        await GobCog.save()
                         await ctx.send(
                             "```css\n" + "{} traded to {} for {} {}```".format(
                                 item, buyer.display_name, asking, currency
@@ -685,7 +685,7 @@ class GobCog(BaseCog):
             member = discord.utils.find(lambda m: m.id == int(user), ctx.guild.members)
             if member != None:
                 await self.add_rewards(ctx, member, xp, cp, [normal,rare,epic])
-        await ctx.send("All users were compensated with {} xp, {} cp and {} [normal, rare, epic] chests.".format(xp,cp,chests))
+        await ctx.send("All users were compensated with {} xp, {} cp and [{},{},{}] [normal, rare, epic] chests.".format(xp,cp,normal,rare,epic))
 
     @commands.command(name="adventure", aliases=['a'])
     @commands.guild_only()
@@ -707,7 +707,7 @@ class GobCog(BaseCog):
                 if 'name' in users[str(member.id)]['class']:
                     if users[str(member.id)]['class']['name'] != "Ranger" and users[str(member.id)]['class']['ability']:
                         users[str(member.id)]['class']['ability'] = False
-            await save()
+            await GobCog.save()
 
 
     @commands.command(name="negaverse", aliases=['nv'])
@@ -781,13 +781,13 @@ class GobCog(BaseCog):
         global users
         await self.update_data(users, member)
 
-        await save()
+        await GobCog.save()
 
     async def on_member_leave(self, member):
         global users
         users.pop(str(member.id))
 
-        await save()
+        await GobCog.save()
 
     @staticmethod
     async def equip_item(ctx, item, from_backpack):
@@ -815,7 +815,7 @@ class GobCog(BaseCog):
         if from_backpack:
             del users[str(user.id)]['items']['backpack'][item['itemname']]
         await ctx.send("Your new stats: **Attack**: {} [+{}], **Diplomacy**: {} [+{}].".format(users[str(user.id)]['att'],users[str(user.id)]['skill']['att'],users[str(user.id)]['cha'],users[str(user.id)]['skill']['cha']))
-        await save()
+        await GobCog.save()
 
     @staticmethod
     async def update_data(users, user):
@@ -834,7 +834,7 @@ class GobCog(BaseCog):
             users[str(user.id)]['class'] = {'name': "Hero", 'ability': False, 'desc': "Your basic adventuring hero."}
             users[str(user.id)]['skill'] = {}
             users[str(user.id)]['skill'] = {'pool': 0, 'att': 0, 'cha': 0}
-            await save()
+            await GobCog.save()
 
 
     @staticmethod
@@ -897,7 +897,7 @@ class GobCog(BaseCog):
                         users[str(user.id)]['treasure'][0] += 1
                 else:
                     users[str(user.id)]['items']['backpack'].update({item['itemname']: item['item']})
-                await save()
+                await GobCog.save()
                 await ctx.send("{} bought the {} for {} cp and put it into the backpack.".format(user.display_name,item['itemname'],str(item['price'])))
             else:
                 await ctx.send("You do not have enough copperpieces.")
