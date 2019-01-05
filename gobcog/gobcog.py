@@ -860,7 +860,7 @@ class GobCog(BaseCog):
         lvl_end = int(exp ** (1/4))
 
         if lvl_start < lvl_end: #recalculate free skillpoint pool based on new level and already spent points.
-            await ctx.send('{} is now level {}!'.format(user.mention,lvl_end))
+            await ctx.send('{} is now level {}!'.format(user.display_name,lvl_end))
             users[str(user.id)]['lvl'] = lvl_end
             users[str(user.id)]['skill']['pool'] = int(lvl_end / 5) - (users[str(user.id)]['skill']['att']+users[str(user.id)]['skill']['cha'])
             if users[str(user.id)]['skill']['pool'] > 0:
