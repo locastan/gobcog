@@ -462,6 +462,8 @@ class GobCog(BaseCog):
             else:
                 users[str(user.id)]['items']['backpack'].update({item['itemname']: item['item']})
                 await ctx.send("{} put the {} into the backpack.".format(user.display_name,item['itemname']))
+            await ctx.send("```css\n" + "You own {} normal, {} rare and {} epic chests.```".format(
+                str(users[str(user.id)]['treasure'][0]),str(users[str(user.id)]['treasure'][1]),str(users[str(user.id)]['treasure'][2])))
 
 
     @commands.command()
@@ -682,6 +684,18 @@ class GobCog(BaseCog):
             )
         )
 
+    @commands.command()
+    @checks.admin_or_permissions(administrator=True)
+    async def compensate(self, ctx, xp: int=0, cp: int=0, chests: list=[0,0,0]):
+        """This will award xp, cp and chests to all players.
+            !compendate 10 12 [1,0,0]
+            will give all users 10xp, 12cp and a normal chest.
+        """
+        global users
+        for user in users:
+            await add_rewards(ctx, user, xp, cp, chests)
+        await ctx.send("All users were compensated with {} xp, {} cp and {} [normal, rare, epic] chests.".format(xp,cp,str(chests)))
+
     @commands.command(name="adventure", aliases=['a'])
     @commands.guild_only()
     @commands.cooldown(rate=1, per=120, type=commands.BucketType.guild)
@@ -755,6 +769,9 @@ class GobCog(BaseCog):
             else:
                 await ctx.send("⏳ " + "Don't be hasty, {}. You can use !{} again in: ".format(ctx.author.display_name, ctx.command.qualified_name) + out)
         else:
+            ep = cog_data_path(None, "gobcog") / 'crashbackup.txt'  # failsave dumb-dumping entire live data to string for recovery.
+            with ep.open('w') as file:
+                file.write(str(users))
             pass
 
     async def on_message(self, message):
@@ -845,8 +862,10 @@ class GobCog(BaseCog):
                 users[str(user.id)]['treasure'] = [0,0,0]
             users[str(user.id)]['treasure'] = [sum(x) for x in zip(users[str(user.id)]['treasure'], special)]
 
+    @staticmethod
+    async def save():
         with GobCog.fp.open('w') as f:
-            json.dump(users, f)
+            json.dump(users, f, indent=4, default: lambda o: '<not serializable>', sort_keys=True)
 
     @staticmethod
     async def level_up(ctx, users, user):

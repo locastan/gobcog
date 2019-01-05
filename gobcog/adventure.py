@@ -28,6 +28,8 @@ class Adventure:
                 " dumb":[1,0.8],
                 "n old":[0.8,1.5],
                 "n ancient":[0.8,2],
+                " colossal":[2,1.1],
+                " miniature":[0.7,0.9],
                 " savage":[1.8,0.9]}
     monsters = {"Ogre":{"str":18,"dipl":10},
                 "Gnoll":{"str":12,"dipl":8},
@@ -35,14 +37,21 @@ class Adventure:
                 "Mountain Troll":{"str":25,"dipl":10},
                 "Kobold":{"str":15,"dipl":18},
                 "Orc":{"str":16,"dipl":10},
+                "Golem":{"str":40,"dipl":20},
                 "Wizard":{"str":8,"dipl":15},
                 "Demon":{"str":30,"dipl":17},
                 "Cave Rat":{"str":5,"dipl":30},
                 "Pack of Wolves":{"str":19,"dipl":35},
                 "Fire Elemental":{"str":20,"dipl":20},
                 "Bandit":{"str":10,"dipl":10},
+                "Giant":{"str":35,"dipl":20},
+                "Archmage":{"str":28,"dipl":30},
                 "Basilisk":{"str":50,"dipl":50},
-                "Red Dragon":{"str":95,"dipl":95}}
+                "Medusa":{"str":65,"dipl":65},
+                "Wyvern":{"str":70,"dipl":60},
+                "Hydra":{"str":75,"dipl":65},
+                "Red Dragon":{"str":95,"dipl":95},
+                "Black Dragon":{"str":110,"dipl":100},}
     challenge = ""
     attrib = ""
     userslist = {}
@@ -69,7 +78,7 @@ class Adventure:
             modRole = discord.utils.get(ctx.guild.roles, name='Goblin Adventurer!')
             if modRole is not None:
                 text = modRole.mention + "\n" + "```css\n [Dragon Alarm!]```"
-        elif Adventure.challenge == "Basilisk":
+        elif Adventure.challenge == "Basilisk" or Adventure.challenge == "Medusa":
             Adventure.timeout = 60
         else:
             Adventure.timeout = 30
@@ -77,14 +86,14 @@ class Adventure:
         await asyncio.sleep(0.2)
         locations = ["There is telling of a dangerous cave nearby, holding immense riches. ", "You found a small clearing. ", "A bridge crosses over a deep gorge. ", "This towns inn looks very inviting. "]
         raisins = [" is going to investigate,", " is curious to have a peek,", " would like to have a look,", " wants to go there,"]
-        await ctx.send(text + random.choice(locations)+ "\n" + "**" + ctx.author.name + "**" + random.choice(raisins))
+        await ctx.send(text + random.choice(locations)+ "\n" + "**" + ctx.author.display_name + "**" + random.choice(raisins))
         await Adventure.choice(ctx)
         return (Adventure.rewards, Adventure.participants)
 
     async def choice(ctx):
         if Adventure.challenge == "Red Dragon":
             await Adventure.menu(ctx, [("but **a{} {}** just landed in front of you glaring! \n\nWhat will you do and will other heroes be brave enough to help you?\nHeroes have 30s to participate via reaction:").format(Adventure.attrib,Adventure.challenge)], {"🗡": Adventure.fight, "🗨": Adventure.talk, "🛐": Adventure.pray, "❌": Adventure.run})
-        elif Adventure.challenge == "Basilisk":
+        elif Adventure.challenge == "Basilisk" or Adventure.challenge == "Medusa":
             await Adventure.menu(ctx, [("but **a{} {}** stepped out looking around. \n\nWhat will you do and will other heroes help your cause?\nHeroes have 30s to participate via reaction:").format(Adventure.attrib,Adventure.challenge)], {"🗡": Adventure.fight, "🗨": Adventure.talk, "🛐": Adventure.pray, "❌": Adventure.run})
         else:
             threatee = [" menace", " glee", " malice", " all means necessary", " a couple of friends", " a crosseyed squint", " steady pace"]
@@ -302,7 +311,7 @@ class Adventure:
                     if roll == 20:
                         await ctx.send("**" + user + "**" + " landed a critical hit.")
                         critlist.append(user)
-                    if users[str(member.id)]['class']['ability']:
+                    if users[str(member.id)]['class']['name']=="Berserker" and users[str(member.id)]['class']['ability']:
                         ability = "🗯️"
                     bonus = random.randint(5,15)
                     attack += roll + bonus + att_value
@@ -380,7 +389,7 @@ class Adventure:
                     if roll == 20:
                         await ctx.send("**" + user + "**" + " made a compelling argument.")
                         critlist.append(user)
-                    if users[str(member.id)]['class']['ability']:
+                    if users[str(member.id)]['class']['name']=="Bard" and users[str(member.id)]['class']['ability']:
                         ability = "🎵"
                     bonus = random.randint(5,15)
                     diplomacy += roll + bonus + dipl_value
@@ -396,7 +405,7 @@ class Adventure:
             return (fumblelist, critlist, diplomacy)
 
         async def handle_basilisk(failed):
-            if Adventure.challenge == "Basilisk":
+            if Adventure.challenge == "Basilisk" or Adventure.challenge == "Medusa":
                 failed = True
                 for user in Adventure.userslist["fight"]+Adventure.userslist["talk"]+Adventure.userslist["pray"]: #check if any fighter has an equipped mirror shield to give them a chance.
                     member = discord.utils.find(lambda m: m.display_name == user, ctx.guild.members)
@@ -442,7 +451,7 @@ class Adventure:
         if slain or persuaded and not failed:
             CR = Adventure.str + Adventure.dipl
             treasure = [0,0,0]
-            if CR >= 80 or Adventure.challenge == "Basilisk": #rewards 50:50 rare:normal chest for killing something like the basilisk
+            if CR >= 80 or Adventure.challenge == "Basilisk" or Adventure.challenge == "Medusa": #rewards 50:50 rare:normal chest for killing something like the basilisk
                 treasure = random.choice([[0,1,0],[1,0,0]])
             elif CR >= 180: #rewards 50:50 epic:rare chest for killing hard stuff.
                 treasure = random.choice([[0,0,1],[0,1,0]])
@@ -452,13 +461,13 @@ class Adventure:
                 treasure[0] += 1
             if treasure == [0,0,0]:
                 treasure = False
-        if Adventure.challenge == "Basilisk" and failed:
+        if (Adventure.challenge == "Basilisk" or Adventure.challenge == "Medusa") and failed:
             Adventure.participants= Adventure.userslist["fight"]+Adventure.userslist["talk"]+Adventure.userslist["pray"]+Adventure.userslist["run"]+fumblelist
-            await ctx.send("The Basilisk's gaze turned everyone to stone.")
+            await ctx.send("The {}'s gaze turned everyone to stone.".format(Adventure.challenge))
             return
-        if Adventure.challenge == "Basilisk" and not slain and not persuaded:
+        if (Adventure.challenge == "Basilisk" or Adventure.challenge == "Medusa") and not slain and not persuaded:
             Adventure.participants= Adventure.userslist["fight"]+Adventure.userslist["talk"]+Adventure.userslist["pray"]+Adventure.userslist["run"]+fumblelist
-            await ctx.send("The mirror shield reflected the Basilisks gaze, but he still managed to kill you.")
+            await ctx.send("The mirror shield reflected the {}s gaze, but he still managed to kill you.".format(Adventure.challenge))
             return
         amount = ((Adventure.str+Adventure.dipl)*people)
         if people == 1:
