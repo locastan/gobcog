@@ -37,9 +37,14 @@ class Adventure:
                 "Mountain Troll":{"str":25,"dipl":10},
                 "Kobold":{"str":15,"dipl":18},
                 "Orc":{"str":16,"dipl":10},
+                "Ghoul":{"str":10,"dipl":10},
+                "Zombie":{"str":15,"dipl":12},
+                "Gelatinous Cube":{"str":12,"dipl":30},
+                "Green Ooze":{"str":10,"dipl":30},
                 "Golem":{"str":40,"dipl":20},
                 "Wizard":{"str":8,"dipl":15},
                 "Demon":{"str":30,"dipl":17},
+                "Owlbear":{"str":30,"dipl":25},
                 "Cave Rat":{"str":5,"dipl":30},
                 "Pack of Wolves":{"str":19,"dipl":35},
                 "Fire Elemental":{"str":20,"dipl":20},
@@ -51,7 +56,8 @@ class Adventure:
                 "Wyvern":{"str":70,"dipl":60},
                 "Hydra":{"str":75,"dipl":65},
                 "Red Dragon":{"str":95,"dipl":95},
-                "Black Dragon":{"str":110,"dipl":100}}
+                "Black Dragon":{"str":130,"dipl":120}}
+
     challenge = ""
     attrib = ""
     userslist = {}
@@ -73,12 +79,12 @@ class Adventure:
         Adventure.rewards = {}
         Adventure.participants = []
         Adventure.started = time.time()
-        if Adventure.challenge == "Red Dragon":
+        if "Dragon" in Adventure.challenge:
             Adventure.timeout = 120
             modRole = discord.utils.get(ctx.guild.roles, name='Goblin Adventurer!')
             if modRole is not None:
-                text = modRole.mention + "\n" + "```css\n [Dragon Alarm!]```"
-        elif Adventure.challenge == "Basilisk" or Adventure.challenge == "Medusa":
+                text = modRole.mention + "\n" + "```css\n [{} {} Alarm!]```".format(Adventure.attrib,Adventure.challenge)
+        elif (Adventure.str + Adventure.dipl) > 100:
             Adventure.timeout = 60
         else:
             Adventure.timeout = 30
@@ -91,14 +97,13 @@ class Adventure:
         return (Adventure.rewards, Adventure.participants)
 
     async def choice(ctx):
-        if Adventure.challenge == "Red Dragon":
+        if "Dragon" in Adventure.challenge:
             await Adventure.menu(ctx, [("but **a{} {}** just landed in front of you glaring! \n\nWhat will you do and will other heroes be brave enough to help you?\nHeroes have 30s to participate via reaction:").format(Adventure.attrib,Adventure.challenge)], {"🗡": Adventure.fight, "🗨": Adventure.talk, "🛐": Adventure.pray, "❌": Adventure.run})
         elif Adventure.challenge == "Basilisk" or Adventure.challenge == "Medusa":
             await Adventure.menu(ctx, [("but **a{} {}** stepped out looking around. \n\nWhat will you do and will other heroes help your cause?\nHeroes have 30s to participate via reaction:").format(Adventure.attrib,Adventure.challenge)], {"🗡": Adventure.fight, "🗨": Adventure.talk, "🛐": Adventure.pray, "❌": Adventure.run})
         else:
             threatee = [" menace", " glee", " malice", " all means necessary", " a couple of friends", " a crosseyed squint", " steady pace"]
             await Adventure.menu(ctx, [("but **a{} {}** is guarding it with{}. \n\nWhat will you do and will other heroes help your cause?\nHeroes have 30s to participate via reaction:").format(Adventure.attrib,Adventure.challenge,random.choice(threatee))], {"🗡": Adventure.fight, "🗨": Adventure.talk, "🛐": Adventure.pray, "❌": Adventure.run})
-
 
     async def menu(
         ctx: commands.Context,
@@ -332,7 +337,7 @@ class Adventure:
                 if users[str(member.id)]['class']['name']=="Cleric" and users[str(member.id)]['class']['ability']:
                     roll = random.randint(1,20)
                     if len(Adventure.userslist["fight"]+Adventure.userslist["talk"]) == 0:
-                        await ctx.send("**" + user + "**" + "blessed like a madman but nobody was there to receive it.")
+                        await ctx.send("**" + user + "**" + " blessed like a madman but nobody was there to receive it.")
                         return (fumblelist, attack, diplomacy)
                     if roll == 1:
                         attack -= 5 * len(Adventure.userslist["fight"])
@@ -342,7 +347,7 @@ class Adventure:
                     elif roll > 1 and roll <= 10:
                         attack += 1 * len(Adventure.userslist["fight"])
                         diplomacy += 1 * len(Adventure.userslist["talk"])
-                        await ctx.send("**" + user + "**" + "'s blessed you all in Herberts name. (+{}🗡/+{}🗨)".format(1 * len(Adventure.userslist["fight"]),1 * len(Adventure.userslist["talk"])))
+                        await ctx.send("**" + user + "**" + "'s blessed you all in Herberts name. (+{}🗡/+{}🗨)".format(2 * len(Adventure.userslist["fight"]),2 * len(Adventure.userslist["talk"])))
                     elif roll > 10 and roll <= 19:
                         attack += 5 * len(Adventure.userslist["fight"])
                         diplomacy += 5 * len(Adventure.userslist["talk"])
@@ -350,11 +355,11 @@ class Adventure:
                     else:
                         attack += 10 * len(Adventure.userslist["fight"])
                         diplomacy += 10 * len(Adventure.userslist["talk"])
-                        await ctx.send("**" + user + "**" + "turned into an avatar of mighty Herbert. (+{}🗡/+{}🗨)".format(10 * len(Adventure.userslist["fight"]),10 * len(Adventure.userslist["talk"])))
+                        await ctx.send("**" + user + "**" + " turned into an avatar of mighty Herbert. (+{}🗡/+{}🗨)".format(10 * len(Adventure.userslist["fight"]),10 * len(Adventure.userslist["talk"])))
                 else:
                     roll = random.randint(1,4)
                     if len(Adventure.userslist["fight"]+Adventure.userslist["talk"]) == 0:
-                        await ctx.send("**" + user + "**" + "prayed like a madman but nobody else helped him.")
+                        await ctx.send("**" + user + "**" + " prayed like a madman but nobody else helped him.")
                         return (fumblelist, attack, diplomacy)
                     if roll == 4:
                         attack += 20 * len(Adventure.userslist["fight"])
@@ -455,7 +460,7 @@ class Adventure:
                 treasure = random.choice([[0,1,0],[1,0,0]])
             elif CR >= 180: #rewards 50:50 epic:rare chest for killing hard stuff.
                 treasure = random.choice([[0,0,1],[0,1,0]])
-            if Adventure.challenge == "Red Dragon": #always rewards an epic chest.
+            if "Dragon" in Adventure.challenge: #always rewards an epic chest.
                 treasure[2] += 1
             if len(critlist) != 0:
                 treasure[0] += 1
@@ -463,11 +468,11 @@ class Adventure:
                 treasure = False
         if (Adventure.challenge == "Basilisk" or Adventure.challenge == "Medusa") and failed:
             Adventure.participants= Adventure.userslist["fight"]+Adventure.userslist["talk"]+Adventure.userslist["pray"]+Adventure.userslist["run"]+fumblelist
-            await ctx.send("The {}'s gaze turned everyone to stone.".format(Adventure.challenge))
+            await ctx.send("The {}s gaze turned everyone to stone.".format(Adventure.challenge))
             return
         if (Adventure.challenge == "Basilisk" or Adventure.challenge == "Medusa") and not slain and not persuaded:
             Adventure.participants= Adventure.userslist["fight"]+Adventure.userslist["talk"]+Adventure.userslist["pray"]+Adventure.userslist["run"]+fumblelist
-            await ctx.send("The mirror shield reflected the {}s gaze, but he still managed to kill you.".format(Adventure.challenge))
+            await ctx.send("The mirror shield reflected the {}s gaze, but it still managed to kill you.".format(Adventure.challenge))
             return
         amount = ((Adventure.str+Adventure.dipl)*people)
         if people == 1:

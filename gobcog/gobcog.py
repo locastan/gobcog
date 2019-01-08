@@ -492,8 +492,9 @@ class GobCog(BaseCog):
         next_lvl = int((lvl+1) ** 4)
         if users[str(user.id)]['class'] != {} and 'name' in users[str(user.id)]['class']:
             clazz = users[str(user.id)]['class']['name'] + "\n\n" + users[str(user.id)]['class']['desc']
-            if users[str(user.id)]['class']['name'] == "Ranger" and 'pet' in users[str(user.id)]['class']['ability']:
-                clazz += "\n- Current pet: {}".format(users[str(user.id)]['class']['ability']['pet']['name'])
+            if users[str(user.id)]['class']['name'] == "Ranger" and type(users[str(user.id)]['class']['ability']) != bool:
+                if 'pet' in users[str(user.id)]['class']['ability']:
+                    clazz += "\n- Current pet: {}".format(users[str(user.id)]['class']['ability']['pet']['name'])
         else:
             clazz = "Hero."
         await ctx.send(
