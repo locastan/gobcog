@@ -7,22 +7,32 @@ import time
 from redbot.core.utils.predicates import MessagePredicate
 from redbot.core.utils.menus import start_adding_reactions
 from redbot.core.utils.predicates import ReactionPredicate
-from .custompredicate import CustomPredicate
 from redbot.core.commands.context import Context
 from redbot.core import commands, bank, checks
-from .adventure import Adventure
-from .treasure import Treasure
-from .classes import Classes
+from .modules.custompredicate import CustomPredicate
+from .modules.adventure import Adventure
+from .modules.quest import Quest
+from .modules.treasure import Treasure
+from .modules.classes import Classes
+from .modules.userdata import Userdata
 
 BaseCog = getattr(commands, "Cog", object)
-users = {}
+
+def charge(amount: int):
+    async def pred(ctx):
+        try:
+            await bank.withdraw_credits(ctx.author, amount)
+        except ValueError:
+            await ctx.send("You don't have enough copperpieces.")
+            return False
+        else:
+            return True
+    return commands.check(pred)
 
 class GobCog(BaseCog):
 
-    fp = cog_data_path(None, "gobcog") / 'users.json'  # this looks for users.json inside your RedBot/cogs/gobcog folder. Needs to be setup once: create the folder, make a users.json with just an empty {} inside.
     global users
-    with fp.open('r') as f:
-        users = json.load(f)
+    users = Userdata.users
     last_trade = 0
     bot = None
 
@@ -62,9 +72,9 @@ class GobCog(BaseCog):
         global users
         user = ctx.author
         equipped = {}
-        for slot in users[str(user.id)]['items']:
-            if users[str(user.id)]['items'][slot] and slot != "backpack":
-                equipped.update(users[str(user.id)]['items'][slot])
+        for slot in Userdata.users[str(user.id)]['items']:
+            if Userdata.users[str(user.id)]['items'][slot] and slot != "backpack":
+                equipped.update(Userdata.users[str(user.id)]['items'][slot])
         if item == "None" or not any([x for x in equipped if item in x.lower()]):
             if item == "{.:'":
                 return
@@ -74,12 +84,12 @@ class GobCog(BaseCog):
             lookup = list(x for x in equipped if item in x.lower())
             for olditem in lookup:
                 for slot in equipped[olditem].get('slot'):
-                    users[str(user.id)]['items'][slot] = {}
-                    users[str(user.id)]['att'] -= int(equipped[olditem].get('att'))     # keep in mind that double handed items grant their bonus twice so they remove twice
-                    users[str(user.id)]['cha'] -= int(equipped[olditem].get('cha'))
-                users[str(user.id)]['items']['backpack'].update({olditem: equipped[olditem]}) # TODO: Change data structure of items dict so you can have duplicate items because of key duplicate overwrite in dicts.
+                    Userdata.users[str(user.id)]['items'][slot] = {}
+                    Userdata.users[str(user.id)]['att'] -= int(equipped[olditem].get('att'))     # keep in mind that double handed items grant their bonus twice so they remove twice
+                    Userdata.users[str(user.id)]['cha'] -= int(equipped[olditem].get('cha'))
+                Userdata.users[str(user.id)]['items']['backpack'].update({olditem: equipped[olditem]}) # TODO: Change data structure of items dict so you can have duplicate items because of key duplicate overwrite in dicts.
                 await ctx.send("You removed {} and put it into your backpack.".format(olditem))
-            await ctx.send("Your new stats: **Attack**: {} [+{}], **Diplomacy**: {} [+{}].".format(users[str(user.id)]['att'],users[str(user.id)]['skill']['att'],users[str(user.id)]['cha'],users[str(user.id)]['skill']['cha']))
+            await ctx.send("Your new stats: **Attack**: {} [+{}], **Diplomacy**: {} [+{}].".format(Userdata.users[str(user.id)]['att'],Userdata.users[str(user.id)]['skill']['att'],Userdata.users[str(user.id)]['cha'],Userdata.users[str(user.id)]['skill']['cha']))
 
 
     @commands.command()
@@ -93,17 +103,17 @@ class GobCog(BaseCog):
         global users
         if user is None:
             user = ctx.author
-        if not 'treasure' in users[str(user.id)].keys():
-            users[str(user.id)]['treasure'] = [0,0,0]
+        if not 'treasure' in Userdata.users[str(user.id)].keys():
+            Userdata.users[str(user.id)]['treasure'] = [0,0,0]
         if type == "rare":
-            users[str(user.id)]['treasure'][1] += 1
+            Userdata.users[str(user.id)]['treasure'][1] += 1
         elif type == "epic":
-            users[str(user.id)]['treasure'][2] += 1
+            Userdata.users[str(user.id)]['treasure'][2] += 1
         else:
-            users[str(user.id)]['treasure'][0] += 1
+            Userdata.users[str(user.id)]['treasure'][0] += 1
         await ctx.send(
             "```{} now owns {} normal, {} rare and {} epic chests.```".format(
-                user.display_name, str(users[str(user.id)]['treasure'][0]),str(users[str(user.id)]['treasure'][1]),str(users[str(user.id)]['treasure'][2])))
+                user.display_name, str(Userdata.users[str(user.id)]['treasure'][0]),str(Userdata.users[str(user.id)]['treasure'][1]),str(Userdata.users[str(user.id)]['treasure'][2])))
         await GobCog.save()
 
     @commands.command()
@@ -119,27 +129,27 @@ class GobCog(BaseCog):
             if member == None: #member left the discord.
                 deadsies.append(str(user))
                 continue
-            i = iter(users[str(user)]['items'])
+            i = iter(Userdata.users[str(user)]['items'])
             attack = 0
             diplomacy = 0
             for slot in i:
-                if users[str(user)]['items'][slot] and slot != "backpack":
-                    item = list(users[str(user)]['items'][slot].keys())[0]
-                    attack += users[str(user)]['items'][slot][item]['att']
-                    diplomacy += users[str(user)]['items'][slot][item]['cha']
-            users[str(user)]['att'] = attack
-            users[str(user)]['cha'] = diplomacy
-            users[str(user)]['name'] = {}
-            users[str(user)]['name'] = member.display_name
-            if 'class' not in users[str(user)]:
-                users[str(user)]['class'] = {}
-            if users[str(user)]['class'] == {}:
-                users[str(user)]['class'] = {'name': "Hero", 'ability': False, 'desc': "Your basic adventuring hero."}
-            if 'skill' not in users[str(user)]:
-                users[str(user)]['skill'] = {}
-                users[str(user)]['skill'] = {'pool': 0, 'att': 0, 'cha': 0}
-            print(users[str(user)]['name']+": "+str(int(users[str(user)]['lvl'] / 5)) + "-" + str(users[str(user)]['skill']['att']+users[str(user)]['skill']['cha']))
-            users[str(user)]['skill']['pool'] = int(users[str(user)]['lvl'] / 5) - (users[str(user)]['skill']['att']+users[str(user)]['skill']['cha'])
+                if Userdata.users[str(user)]['items'][slot] and slot != "backpack":
+                    item = list(Userdata.users[str(user)]['items'][slot].keys())[0]
+                    attack += Userdata.users[str(user)]['items'][slot][item]['att']
+                    diplomacy += Userdata.users[str(user)]['items'][slot][item]['cha']
+            Userdata.users[str(user)]['att'] = attack
+            Userdata.users[str(user)]['cha'] = diplomacy
+            Userdata.users[str(user)]['name'] = {}
+            Userdata.users[str(user)]['name'] = member.display_name
+            if 'class' not in Userdata.users[str(user)]:
+                Userdata.users[str(user)]['class'] = {}
+            if Userdata.users[str(user)]['class'] == {}:
+                Userdata.users[str(user)]['class'] = {'name': "Hero", 'ability': False, 'desc': "Your basic adventuring hero."}
+            if 'skill' not in Userdata.users[str(user)]:
+                Userdata.users[str(user)]['skill'] = {}
+                Userdata.users[str(user)]['skill'] = {'pool': 0, 'att': 0, 'cha': 0}
+            print(Userdata.users[str(user)]['name']+": "+str(int(Userdata.users[str(user)]['lvl'] / 5)) + "-" + str(Userdata.users[str(user)]['skill']['att']+Userdata.users[str(user)]['skill']['cha']))
+            Userdata.users[str(user)]['skill']['pool'] = int(Userdata.users[str(user)]['lvl'] / 5) - (Userdata.users[str(user)]['skill']['att']+Userdata.users[str(user)]['skill']['cha'])
         for userID in deadsies:
             users.pop(userID)
         await GobCog.save()
@@ -155,18 +165,18 @@ class GobCog(BaseCog):
         """
         global users
         user = ctx.author.id
-        if 'name' in users[str(user)]['class'] and users[str(user)]['class']['name'] != "Ranger":
+        if 'name' in Userdata.users[str(user)]['class'] and Userdata.users[str(user)]['class']['name'] != "Ranger":
             ctx.command.reset_cooldown(ctx)
             return await ctx.send("You need to be a Ranger to do this.")
         else:
-            if switch == None or users[str(user)]['class']['ability'] == False:
-                pet = await Classes.pet(ctx, users, None)
+            if switch == None or Userdata.users[str(user)]['class']['ability'] == False:
+                pet = await Classes.pet(ctx, None)
                 if pet != None:
                     ctx.command.reset_cooldown(ctx) #reset cooldown so ppl can forage right after taming a new pet.
-                    users[str(user)]['class']['ability'] = {'active': True, 'pet': pet}
+                    Userdata.users[str(user)]['class']['ability'] = {'active': True, 'pet': pet}
                     await GobCog.save()
             elif switch == 'forage':
-                item = await Classes.pet(ctx, users, switch)
+                item = await Classes.pet(ctx, switch)
                 if item != None:
                     if item['equip'] == "sell":
                         price = await GobCog.sell(ctx.author,item)
@@ -175,11 +185,11 @@ class GobCog(BaseCog):
                         equip = {"itemname": item['itemname'],"item": item['item']}
                         await self.equip_item(ctx, equip, False)
                     else:
-                        users[str(user)]['items']['backpack'].update({item['itemname']: item['item']})
+                        Userdata.users[str(user)]['items']['backpack'].update({item['itemname']: item['item']})
                         await ctx.send("{} put the {} into the backpack.".format(ctx.author.display_name,item['itemname']))
                         await GobCog.save()
             elif switch == 'free':
-                await Classes.pet(ctx, users, switch)
+                await Classes.pet(ctx, switch)
                 await GobCog.save()
 
     @commands.command()
@@ -190,11 +200,11 @@ class GobCog(BaseCog):
         """
         global users
         user = ctx.author.id
-        if 'name' in users[str(user)]['class'] and users[str(user)]['class']['name'] != "Berserker":
+        if 'name' in Userdata.users[str(user)]['class'] and Userdata.users[str(user)]['class']['name'] != "Berserker":
             ctx.command.reset_cooldown(ctx)
             return await ctx.send("You need to be a Berserker to do this.")
         else:
-            users = await Classes.rage(ctx, users)
+            users = await Classes.rage(ctx)
 
 
     @commands.command()
@@ -205,11 +215,11 @@ class GobCog(BaseCog):
         """
         global users
         user = ctx.author.id
-        if 'name' in users[str(user)]['class'] and users[str(user)]['class']['name'] != "Cleric":
+        if 'name' in Userdata.users[str(user)]['class'] and Userdata.users[str(user)]['class']['name'] != "Cleric":
             ctx.command.reset_cooldown(ctx)
             return await ctx.send("You need to be a Cleric to do this.")
         else:
-            users = await Classes.bless(ctx, users)
+            users = await Classes.bless(ctx)
 
     @commands.command()
     @commands.guild_only()
@@ -219,11 +229,11 @@ class GobCog(BaseCog):
         """
         global users
         user = ctx.author.id
-        if 'name' in users[str(user)]['class'] and users[str(user)]['class']['name'] != "Bard":
+        if 'name' in Userdata.users[str(user)]['class'] and Userdata.users[str(user)]['class']['name'] != "Bard":
             ctx.command.reset_cooldown(ctx)
             return await ctx.send("You need to be a Bard to do this.")
         else:
-            users = await Classes.sing(ctx, users)
+            users = await Classes.sing(ctx)
 
     @commands.command()
     @commands.guild_only()
@@ -233,22 +243,22 @@ class GobCog(BaseCog):
         """
         global users
         user = ctx.author.id
-        if 'name' in users[str(user)]['class'] and users[str(user)]['class']['name'] != "Tinkerer":
+        if 'name' in Userdata.users[str(user)]['class'] and Userdata.users[str(user)]['class']['name'] != "Tinkerer":
             ctx.command.reset_cooldown(ctx)
             return await ctx.send("You need to be a Tinkerer to do this.")
         else:
             bkpk = ""
             consumed = []
-            forgeables = len(users[str(user)]['items']['backpack']) - sum("{.:'" in x for x in users[str(user)]['items']['backpack'])
+            forgeables = len(Userdata.users[str(user)]['items']['backpack']) - sum("{.:'" in x for x in Userdata.users[str(user)]['items']['backpack'])
             if forgeables <= 1:
                 ctx.command.reset_cooldown(ctx)
                 return await ctx.send("You need at least two forgeable items in your backpack to forge.")
-            for item in users[str(user)]['items']['backpack']:
+            for item in Userdata.users[str(user)]['items']['backpack']:
                 if "{.:'" not in item:
-                    if len(users[str(user)]['items']['backpack'][item]['slot']) == 1:
-                        bkpk += " - " + item + " - (ATT: "+ str(users[str(user)]['items']['backpack'][item]['att']) + " | DPL: "+ str(users[str(user)]['items']['backpack'][item]['cha']) +" ["+ users[str(user)]['items']['backpack'][item]['slot'][0] + " slot])\n"
+                    if len(Userdata.users[str(user)]['items']['backpack'][item]['slot']) == 1:
+                        bkpk += " - " + item + " - (ATT: "+ str(Userdata.users[str(user)]['items']['backpack'][item]['att']) + " | DPL: "+ str(Userdata.users[str(user)]['items']['backpack'][item]['cha']) +" ["+ Userdata.users[str(user)]['items']['backpack'][item]['slot'][0] + " slot])\n"
                     else:
-                        bkpk += " - " + item + " -(ATT: "+ str(users[str(user)]['items']['backpack'][item]['att']*2) + " | DPL: "+ str(users[str(user)]['items']['backpack'][item]['cha']*2) +" [two handed])\n"
+                        bkpk += " - " + item + " -(ATT: "+ str(Userdata.users[str(user)]['items']['backpack'][item]['att']*2) + " | DPL: "+ str(Userdata.users[str(user)]['items']['backpack'][item]['cha']*2) +" [two handed])\n"
             await ctx.send(
                 "```css\n[{}'s forgeables] \n\n```".format(
                     ctx.author.display_name
@@ -260,10 +270,10 @@ class GobCog(BaseCog):
                 ctx.command.reset_cooldown(ctx)
                 return await ctx.send("I don't have all day, you know.")
             item1 = {}
-            for item in users[str(user)]['items']['backpack']:
+            for item in Userdata.users[str(user)]['items']['backpack']:
                 if reply.content.lower() in item:
                     if  "{.:'" not in item:
-                        item1 = users[str(user)]['items']['backpack'].get(item)
+                        item1 = Userdata.users[str(user)]['items']['backpack'].get(item)
                         consumed.append(item)
                         break
                     else:
@@ -273,12 +283,12 @@ class GobCog(BaseCog):
                 ctx.command.reset_cooldown(ctx)
                 return await ctx.send("I could not find that item, check your spelling.")
             bkpk = ""
-            for item in users[str(user)]['items']['backpack']:
+            for item in Userdata.users[str(user)]['items']['backpack']:
                 if item not in consumed and "{.:'" not in item:
-                    if len(users[str(user)]['items']['backpack'][item]['slot']) == 1:
-                        bkpk += " - " + item + " - (ATT: "+ str(users[str(user)]['items']['backpack'][item]['att']) + " | DPL: "+ str(users[str(user)]['items']['backpack'][item]['cha']) +" ["+ users[str(user)]['items']['backpack'][item]['slot'][0] + " slot])\n"
+                    if len(Userdata.users[str(user)]['items']['backpack'][item]['slot']) == 1:
+                        bkpk += " - " + item + " - (ATT: "+ str(Userdata.users[str(user)]['items']['backpack'][item]['att']) + " | DPL: "+ str(Userdata.users[str(user)]['items']['backpack'][item]['cha']) +" ["+ Userdata.users[str(user)]['items']['backpack'][item]['slot'][0] + " slot])\n"
                     else:
-                        bkpk += " - " + item + " -(ATT: "+ str(users[str(user)]['items']['backpack'][item]['att']*2) + " | DPL: "+ str(users[str(user)]['items']['backpack'][item]['cha']*2) +" [two handed])\n"
+                        bkpk += " - " + item + " -(ATT: "+ str(Userdata.users[str(user)]['items']['backpack'][item]['att']*2) + " | DPL: "+ str(Userdata.users[str(user)]['items']['backpack'][item]['cha']*2) +" [two handed])\n"
             await ctx.send(
                 "```css\n[{}'s forgeables] \n\n```".format(
                     ctx.author.display_name
@@ -290,10 +300,10 @@ class GobCog(BaseCog):
                 ctx.command.reset_cooldown(ctx)
                 return await ctx.send("I don't have all day, you know.")
             item2 = {}
-            for item in users[str(user)]['items']['backpack']:
+            for item in Userdata.users[str(user)]['items']['backpack']:
                 if reply.content.lower() in item and reply.content.lower() not in consumed:
                     if  "{.:'" not in item:
-                        item2 = users[str(user)]['items']['backpack'].get(item)
+                        item2 = Userdata.users[str(user)]['items']['backpack'].get(item)
                         consumed.append(item)
                         break
                     else:
@@ -304,9 +314,9 @@ class GobCog(BaseCog):
                     return await ctx.send("I could not find that item, check your spelling.")
             newitem = await Classes.forge(ctx, item1, item2)
             for item in consumed:
-                users[str(user)]['items']['backpack'].pop(item)
+                Userdata.users[str(user)]['items']['backpack'].pop(item)
             await GobCog.sub_unequip(ctx,"{.:'")
-            lookup = list(x for x in users[str(user)]['items']['backpack'] if "{.:'" in x.lower())
+            lookup = list(x for x in Userdata.users[str(user)]['items']['backpack'] if "{.:'" in x.lower())
             if len(lookup) > 0:
                 msg = await ctx.send("```css\n You already have a device. Do you want to replace {}? ```".format(', '.join(lookup)))
                 start_adding_reactions(msg, ReactionPredicate.YES_OR_NO_EMOJIS)
@@ -319,14 +329,14 @@ class GobCog(BaseCog):
                         await msg.remove_reaction(key, ctx.bot.user)
                 if pred.result: #user reacted with Yes.
                     for item in lookup:
-                        del users[str(user)]['items']['backpack'][item]
-                        users[str(user)]['items']['backpack'].update({newitem['itemname']: newitem['item']})
+                        del Userdata.users[str(user)]['items']['backpack'][item]
+                        Userdata.users[str(user)]['items']['backpack'].update({newitem['itemname']: newitem['item']})
                         await ctx.send('```css\n Your new {} consumed {} and is now lurking in your backpack. ```'.format(newitem['itemname'], ', '.join(lookup)))
                 else:
                     await GobCog.save()
                     return await ctx.send('```css\n {} got mad at your rejection and blew itself up. ```'.format(newitem['itemname']))
             else:
-                users[str(user)]['items']['backpack'].update({newitem['itemname']: newitem['item']})
+                Userdata.users[str(user)]['items']['backpack'].update({newitem['itemname']: newitem['item']})
                 await ctx.send('```css\n Your new {} is lurking in your backpack. ```'.format(newitem['itemname']))
                 await GobCog.save()
 
@@ -352,10 +362,10 @@ class GobCog(BaseCog):
         else:
             clz = clz[:1].upper() + clz[1:]
             if clz in classes and action == None:
-                if users[str(user.id)]['lvl'] >= 10:
-                    if 'name' in users[str(user.id)]['class']:
-                        if users[str(user.id)]['class']['name'] == 'Tinkerer' or users[str(user.id)]['class']['name'] == 'Ranger':
-                            curclass = users[str(user.id)]['class']['name']
+                if Userdata.users[str(user.id)]['lvl'] >= 10:
+                    if 'name' in Userdata.users[str(user.id)]['class']:
+                        if Userdata.users[str(user.id)]['class']['name'] == 'Tinkerer' or Userdata.users[str(user.id)]['class']['name'] == 'Ranger':
+                            curclass = Userdata.users[str(user.id)]['class']['name']
                             if curclass == 'Tinkerer':
                                 msg = await ctx.send("```css\n You will loose your forged device if you change your class.\nShall I proceed? ```")
                             else:
@@ -371,16 +381,16 @@ class GobCog(BaseCog):
                             if pred.result: #user reacted with Yes.
                                 if curclass == 'Tinkerer':
                                     await GobCog.sub_unequip(ctx,"{.:'")
-                                    if any([x for x in users[str(user.id)]['items']['backpack'] if "{.:'" in x.lower()]):
-                                        lookup = list(x for x in users[str(user.id)]['items']['backpack'] if "{.:'" in x.lower())
+                                    if any([x for x in Userdata.users[str(user.id)]['items']['backpack'] if "{.:'" in x.lower()]):
+                                        lookup = list(x for x in Userdata.users[str(user.id)]['items']['backpack'] if "{.:'" in x.lower())
                                         for item in lookup:
-                                            del users[str(user.id)]['items']['backpack'][item]
+                                            del Userdata.users[str(user.id)]['items']['backpack'][item]
                                             await ctx.send('```css\n {} has run off to find a new master. ```'.format(', '.join(lookup)))
                             else:
                                 ctx.command.reset_cooldown(ctx)
                                 return
-                    users[str(user.id)]['class'] = {}
-                    users[str(user.id)]['class'] = classes[clz]
+                    Userdata.users[str(user.id)]['class'] = {}
+                    Userdata.users[str(user.id)]['class'] = classes[clz]
                     await ctx.send("Congratulations. You are now a {}.".format(classes[clz]['name']))
                     await GobCog.save()
                 else:
@@ -401,19 +411,19 @@ class GobCog(BaseCog):
         """
         global users
         user = ctx.author
-        if users[str(user.id)]['skill']['pool'] == 0:
+        if Userdata.users[str(user.id)]['skill']['pool'] == 0:
             return await ctx.send("You do not have unspent skillpoints.")
         if spend == None:
-            await ctx.send("You currently have **{}** unspent skillpoints.\nIf you want to put them towards a permanent attack or diplomacy bonus,\nuse !skill attack or !skill diplomacy".format(str(users[str(user.id)]['skill']['pool'])))
+            await ctx.send("You currently have **{}** unspent skillpoints.\nIf you want to put them towards a permanent attack or diplomacy bonus,\nuse !skill attack or !skill diplomacy".format(str(Userdata.users[str(user.id)]['skill']['pool'])))
         else:
             if spend not in ['attack','diplomacy']:
                 return await ctx.send("Don't try to fool me! There is no such thing as {}.".format(spend))
             elif spend == "attack":
-                users[str(user.id)]['skill']['pool'] -= 1
-                users[str(user.id)]['skill']['att'] += 1
+                Userdata.users[str(user.id)]['skill']['pool'] -= 1
+                Userdata.users[str(user.id)]['skill']['att'] += 1
             elif spend == "diplomacy":
-                users[str(user.id)]['skill']['pool'] -= 1
-                users[str(user.id)]['skill']['cha'] += 1
+                Userdata.users[str(user.id)]['skill']['pool'] -= 1
+                Userdata.users[str(user.id)]['skill']['cha'] += 1
             await ctx.send("You permanently raised your {} value by one.".format(spend))
             await GobCog.save()
 
@@ -436,14 +446,14 @@ class GobCog(BaseCog):
             return
         global users
         user = ctx.author
-        if not 'treasure' in users[str(user.id)].keys():
-            users[str(user.id)]['treasure'] = [0,0,0]
-        treasure = users[str(user.id)]['treasure'][redux.index(1)]
+        if not 'treasure' in Userdata.users[str(user.id)].keys():
+            Userdata.users[str(user.id)]['treasure'] = [0,0,0]
+        treasure = Userdata.users[str(user.id)]['treasure'][redux.index(1)]
         if treasure == 0:
             await ctx.send("You have no {} treasure chest to open.".format(type))
         else:
             item = await Treasure.open_chest(ctx, user, type)
-            users[str(user.id)]['treasure'] = [x-y for x,y in zip(users[str(user.id)]['treasure'], redux)]
+            Userdata.users[str(user.id)]['treasure'] = [x-y for x,y in zip(Userdata.users[str(user.id)]['treasure'], redux)]
             if item['equip'] == "sell":
                 price = await GobCog.sell(user,item)
                 await ctx.send("{} sold the {} for {} copperpieces.".format(user.display_name,item['itemname'],price))
@@ -451,10 +461,10 @@ class GobCog(BaseCog):
                 equip = {"itemname": item['itemname'],"item": item['item']}
                 await self.equip_item(ctx, equip, False)
             else:
-                users[str(user.id)]['items']['backpack'].update({item['itemname']: item['item']})
+                Userdata.users[str(user.id)]['items']['backpack'].update({item['itemname']: item['item']})
                 await ctx.send("{} put the {} into the backpack.".format(user.display_name,item['itemname']))
             await ctx.send("```css\n" + "You own {} normal, {} rare and {} epic chests.```".format(
-                str(users[str(user.id)]['treasure'][0]),str(users[str(user.id)]['treasure'][1]),str(users[str(user.id)]['treasure'][2])))
+                str(Userdata.users[str(user.id)]['treasure'][0]),str(Userdata.users[str(user.id)]['treasure'][1]),str(Userdata.users[str(user.id)]['treasure'][2])))
 
 
     @commands.command()
@@ -472,29 +482,29 @@ class GobCog(BaseCog):
         bal = await bank.get_balance(user)
         currency = await bank.get_currency_name(ctx.guild)
         global users
-        xp = round(users[str(user.id)]['exp'])
-        lvl = users[str(user.id)]['lvl']
-        att = users[str(user.id)]['att']
-        satt = users[str(user.id)]['skill']['att']
-        cha = users[str(user.id)]['cha']
-        scha = users[str(user.id)]['skill']['cha']
-        pool = users[str(user.id)]['skill']['pool']
+        xp = round(Userdata.users[str(user.id)]['exp'])
+        lvl = Userdata.users[str(user.id)]['lvl']
+        att = Userdata.users[str(user.id)]['att']
+        satt = Userdata.users[str(user.id)]['skill']['att']
+        cha = Userdata.users[str(user.id)]['cha']
+        scha = Userdata.users[str(user.id)]['skill']['cha']
+        pool = Userdata.users[str(user.id)]['skill']['pool']
         equip = "Equipped Items: \n"
-        i = iter(users[str(user.id)]['items'])
+        i = iter(Userdata.users[str(user.id)]['items'])
         for slot in i:
-            if users[str(user.id)]['items'][slot] and slot != "backpack":
-                item = list(users[str(user.id)]['items'][slot].keys())[0]
-                if len(users[str(user.id)]['items'][slot][item]['slot']) == 1:
-                    equip += " - " + item + " - (ATT: "+ str(users[str(user.id)]['items'][slot][item]['att']) + " | CHA: "+ str(users[str(user.id)]['items'][slot][item]['cha']) +" ["+ users[str(user.id)]['items'][slot][item]['slot'][0] + " slot])\n"
+            if Userdata.users[str(user.id)]['items'][slot] and slot != "backpack":
+                item = list(Userdata.users[str(user.id)]['items'][slot].keys())[0]
+                if len(Userdata.users[str(user.id)]['items'][slot][item]['slot']) == 1:
+                    equip += " - " + item + " - (ATT: "+ str(Userdata.users[str(user.id)]['items'][slot][item]['att']) + " | CHA: "+ str(Userdata.users[str(user.id)]['items'][slot][item]['cha']) +" ["+ Userdata.users[str(user.id)]['items'][slot][item]['slot'][0] + " slot])\n"
                 else:
-                    equip += " - " + item + " -(ATT: "+ str(users[str(user.id)]['items'][slot][item]['att']*2) + " | CHA: "+ str(users[str(user.id)]['items'][slot][item]['cha']*2) +" [two handed])\n"
+                    equip += " - " + item + " -(ATT: "+ str(Userdata.users[str(user.id)]['items'][slot][item]['att']*2) + " | CHA: "+ str(Userdata.users[str(user.id)]['items'][slot][item]['cha']*2) +" [two handed])\n"
                     next(i, None)
         next_lvl = int((lvl+1) ** 4)
-        if users[str(user.id)]['class'] != {} and 'name' in users[str(user.id)]['class']:
-            clazz = users[str(user.id)]['class']['name'] + "\n\n" + users[str(user.id)]['class']['desc']
-            if users[str(user.id)]['class']['name'] == "Ranger" and type(users[str(user.id)]['class']['ability']) != bool:
-                if 'pet' in users[str(user.id)]['class']['ability']:
-                    clazz += "\n- Current pet: {}".format(users[str(user.id)]['class']['ability']['pet']['name'])
+        if Userdata.users[str(user.id)]['class'] != {} and 'name' in Userdata.users[str(user.id)]['class']:
+            clazz = Userdata.users[str(user.id)]['class']['name'] + "\n\n" + Userdata.users[str(user.id)]['class']['desc']
+            if Userdata.users[str(user.id)]['class']['name'] == "Ranger" and type(Userdata.users[str(user.id)]['class']['ability']) != bool:
+                if 'pet' in Userdata.users[str(user.id)]['class']['ability']:
+                    clazz += "\n- Current pet: {}".format(Userdata.users[str(user.id)]['class']['ability']['pet']['name'])
         else:
             clazz = "Hero."
         await ctx.send(
@@ -502,7 +512,7 @@ class GobCog(BaseCog):
                 lvl, clazz, att, satt, cha, scha, bal, currency, xp, next_lvl, pool
             ) + "```css\n" + equip + "```" +
             "```css\n" + "You own {} normal, {} rare and {} epic chests.```".format(
-                str(users[str(user.id)]['treasure'][0]),str(users[str(user.id)]['treasure'][1]),str(users[str(user.id)]['treasure'][2]))
+                str(Userdata.users[str(user.id)]['treasure'][0]),str(Userdata.users[str(user.id)]['treasure'][1]),str(Userdata.users[str(user.id)]['treasure'][2]))
         )
 
     @commands.command(name="backpack", aliases=['b'])
@@ -520,11 +530,11 @@ class GobCog(BaseCog):
         global users
         bkpk = "Items in Backpack: \n"
         if switch == "None":
-            for item in users[str(user.id)]['items']['backpack']: # added second if level for two handed weapons so their slots show properly.
-                if len(users[str(user.id)]['items']['backpack'][item]['slot']) == 1:
-                    bkpk += " - " + item + " - (ATT: "+ str(users[str(user.id)]['items']['backpack'][item]['att']) + " | DPL: "+ str(users[str(user.id)]['items']['backpack'][item]['cha']) +" ["+ users[str(user.id)]['items']['backpack'][item]['slot'][0] + " slot])\n"
+            for item in Userdata.users[str(user.id)]['items']['backpack']: # added second if level for two handed weapons so their slots show properly.
+                if len(Userdata.users[str(user.id)]['items']['backpack'][item]['slot']) == 1:
+                    bkpk += " - " + item + " - (ATT: "+ str(Userdata.users[str(user.id)]['items']['backpack'][item]['att']) + " | DPL: "+ str(Userdata.users[str(user.id)]['items']['backpack'][item]['cha']) +" ["+ Userdata.users[str(user.id)]['items']['backpack'][item]['slot'][0] + " slot])\n"
                 else:
-                    bkpk += " - " + item + " -(ATT: "+ str(users[str(user.id)]['items']['backpack'][item]['att']*2) + " | DPL: "+ str(users[str(user.id)]['items']['backpack'][item]['cha']*2) +" [two handed])\n"
+                    bkpk += " - " + item + " -(ATT: "+ str(Userdata.users[str(user.id)]['items']['backpack'][item]['att']*2) + " | DPL: "+ str(Userdata.users[str(user.id)]['items']['backpack'][item]['cha']*2) +" [two handed])\n"
             await ctx.send(
                 "```css\n[{}'s baggage] \n\n```".format(
                     user.display_name
@@ -539,29 +549,29 @@ class GobCog(BaseCog):
             else:
                 if not " sell " in reply.content.lower() and not " trade " in reply.content.lower():
                     equip = {}
-                    for item in users[str(user.id)]['items']['backpack']:
+                    for item in Userdata.users[str(user.id)]['items']['backpack']:
                         if reply.content.lower() in item:
-                            equip = {"itemname": item,"item": users[str(user.id)]['items']['backpack'][item]}
+                            equip = {"itemname": item,"item": Userdata.users[str(user.id)]['items']['backpack'][item]}
                             break
                     if equip != {}: #not good to change dict size during iteration so I moved this outside the for loop.
                         await self.equip_item(ctx, equip, True)
         elif switch == "equip":
-            if item == "None" or not any([x for x in users[str(user.id)]['items']['backpack'] if item in x.lower()]):
+            if item == "None" or not any([x for x in Userdata.users[str(user.id)]['items']['backpack'] if item in x.lower()]):
                 await ctx.send("You have to specify an item from your backpack to equip.")
                 return
-            lookup = list(x for x in users[str(user.id)]['items']['backpack'] if item in x.lower())
+            lookup = list(x for x in Userdata.users[str(user.id)]['items']['backpack'] if item in x.lower())
             if len(lookup) > 1:
                 await ctx.send("I found multiple items ({}) matching that name in your backpack.\nPlease be more specific.".format(" and ".join([", ".join(lookup[:-1]),lookup[-1]] if len(lookup) > 2 else lookup)))
                 return
             else:
                 item = lookup[0]
-                equip = {"itemname": item,"item": users[str(user.id)]['items']['backpack'][item]}
+                equip = {"itemname": item,"item": Userdata.users[str(user.id)]['items']['backpack'][item]}
                 await self.equip_item(ctx, equip, True)
         elif switch == "sell": #new logic allows for bulk sales. It also always confirms the sale by yes/no query to avoid accidents.
-            if item == "None" or not any([x for x in users[str(user.id)]['items']['backpack'] if item in x.lower()]):
+            if item == "None" or not any([x for x in Userdata.users[str(user.id)]['items']['backpack'] if item in x.lower()]):
                 await ctx.send("You have to specify an item (or partial name) from your backpack to sell.")
                 return
-            lookup = list(x for x in users[str(user.id)]['items']['backpack'] if item in x.lower())
+            lookup = list(x for x in Userdata.users[str(user.id)]['items']['backpack'] if item in x.lower())
             if any([x for x in lookup if "{.:'" in x.lower()]):
                 device = [x for x in lookup if "{.:'" in x.lower()]
                 await ctx.send("```css\n Your {} is refusing to be sold and bit your finger for trying. ```".format(device))
@@ -577,16 +587,16 @@ class GobCog(BaseCog):
                     await msg.remove_reaction(key, ctx.bot.user)
             if pred.result: #user reacted with Yes.
                 for item in lookup:
-                    queryitem = {'itemname': item,'item': users[str(user.id)]['items']['backpack'].get(item)}
+                    queryitem = {'itemname': item,'item': Userdata.users[str(user.id)]['items']['backpack'].get(item)}
                     price = await GobCog.sell(user,queryitem)
-                    del users[str(user.id)]['items']['backpack'][item]
+                    del Userdata.users[str(user.id)]['items']['backpack'][item]
                     await ctx.send("You sold your {} for {} copperpieces.".format(item,price))
                     await GobCog.save()
         elif switch == "trade":
-            if item == "None" or not any([x for x in users[str(user.id)]['items']['backpack'] if item in x.lower()]):
+            if item == "None" or not any([x for x in Userdata.users[str(user.id)]['items']['backpack'] if item in x.lower()]):
                 await ctx.send("You have to specify an item from your backpack to trade.")
                 return
-            lookup = list(x for x in users[str(user.id)]['items']['backpack'] if item in x.lower())
+            lookup = list(x for x in Userdata.users[str(user.id)]['items']['backpack'] if item in x.lower())
             if len(lookup) > 1:
                 await ctx.send("I found multiple items ({}) matching that name in your backpack.\nPlease be more specific.".format(" and ".join([", ".join(lookup[:-1]),lookup[-1]] if len(lookup) > 2 else lookup)))
                 return
@@ -596,17 +606,17 @@ class GobCog(BaseCog):
                 return
             else:
                 item = lookup[0]
-                if len(users[str(user.id)]['items']['backpack'][item]["slot"]) == 2: # two handed weapons add their bonuses twice
+                if len(Userdata.users[str(user.id)]['items']['backpack'][item]["slot"]) == 2: # two handed weapons add their bonuses twice
                     hand = "two handed"
-                    att = users[str(user.id)]['items']['backpack'][item]["att"]*2
-                    cha = users[str(user.id)]['items']['backpack'][item]["cha"]*2
+                    att = Userdata.users[str(user.id)]['items']['backpack'][item]["att"]*2
+                    cha = Userdata.users[str(user.id)]['items']['backpack'][item]["cha"]*2
                 else:
-                    if users[str(user.id)]['items']['backpack'][item]["slot"][0] == "right" or users[str(user.id)]['items']['backpack'][item]["slot"][0] == "left":
-                        hand = users[str(user.id)]['items']['backpack'][item]["slot"][0] + " handed"
+                    if Userdata.users[str(user.id)]['items']['backpack'][item]["slot"][0] == "right" or Userdata.users[str(user.id)]['items']['backpack'][item]["slot"][0] == "left":
+                        hand = Userdata.users[str(user.id)]['items']['backpack'][item]["slot"][0] + " handed"
                     else:
-                        hand = users[str(user.id)]['items']['backpack'][item]["slot"][0] + " slot"
-                    att = users[str(user.id)]['items']['backpack'][item]["att"]
-                    cha = users[str(user.id)]['items']['backpack'][item]["cha"]
+                        hand = Userdata.users[str(user.id)]['items']['backpack'][item]["slot"][0] + " slot"
+                    att = Userdata.users[str(user.id)]['items']['backpack'][item]["att"]
+                    cha = Userdata.users[str(user.id)]['items']['backpack'][item]["cha"]
                 await ctx.send("{} wants to sell {}. (Attack: {}, Charisma: {} [{}])".format(user.display_name,item,str(att),str(cha),hand))
                 msg = await ctx.send("Do you want to buy this item for {} cp?".format(str(asking)))
                 start_adding_reactions(msg, ReactionPredicate.YES_OR_NO_EMOJIS)
@@ -623,8 +633,8 @@ class GobCog(BaseCog):
                     if await bank.can_spend(spender,asking):
                         bal = await bank.transfer_credits(spender, to, asking)
                         currency = await bank.get_currency_name(ctx.guild)
-                        tradeitem = users[str(user.id)]['items']['backpack'].pop(item)
-                        users[str(buyer.id)]['items']['backpack'].update({item: tradeitem})
+                        tradeitem = Userdata.users[str(user.id)]['items']['backpack'].pop(item)
+                        Userdata.users[str(buyer.id)]['items']['backpack'].update({item: tradeitem})
                         await GobCog.save()
                         await ctx.send(
                             "```css\n" + "{} traded to {} for {} {}```".format(
@@ -663,9 +673,6 @@ class GobCog(BaseCog):
         """
         if to is None:
             return await ctx.send("You need to specify a receiving member, " + ctx.author.name + ".")
-        member = discord.utils.find(lambda m: m.name == to, ctx.guild.members)
-        if member == None:
-            return await ctx.send("I could not find that user, " + ctx.author.name + ".")
         bal = await bank.deposit_credits(to, amount)
         currency = await bank.get_currency_name(ctx.guild)
         await ctx.send(
@@ -697,7 +704,7 @@ class GobCog(BaseCog):
         """
         global users
         await ctx.send("You feel adventurous, " + ctx.author.display_name + "?")
-        reward, participants = await Adventure.simple(ctx, users) #Adventure class doesn't change any user info, so no need to return the users object in rewards.
+        reward, participants = await Adventure.simple(ctx)
         if reward is not None:
             print(reward, participants)
             for user in reward.keys():
@@ -705,9 +712,54 @@ class GobCog(BaseCog):
                 await self.add_rewards(ctx, member, reward[user]["xp"], reward[user]["cp"], reward[user]["special"])
             for user in participants: #reset activated abilities
                 member = discord.utils.find(lambda m: m.display_name == user, ctx.guild.members)
-                if 'name' in users[str(member.id)]['class']:
-                    if users[str(member.id)]['class']['name'] != "Ranger" and users[str(member.id)]['class']['ability']:
-                        users[str(member.id)]['class']['ability'] = False
+                if 'name' in Userdata.users[str(member.id)]['class']:
+                    if Userdata.users[str(member.id)]['class']['name'] != "Ranger" and Userdata.users[str(member.id)]['class']['ability']:
+                        Userdata.users[str(member.id)]['class']['ability'] = False
+            await GobCog.save()
+
+    @commands.command(name="quest", aliases=['q'])
+    @charge(amount=500)
+    @commands.guild_only()
+    @commands.cooldown(rate=1, per=600, type=commands.BucketType.guild)
+    async def _quest(self, ctx):
+        """This will send you on a mighty quest!
+            You play by reacting with the offered emojis.
+            Available once per 10 minutes.
+        """
+        global users
+        party = []
+        msg = await ctx.send("**" + ctx.author.display_name + "** just spent 500 copperpieces in the inn, looking for a party to do a mighty quest. Do you accept (30s)?")
+        start_adding_reactions(msg, "✅")
+        #await asyncio.sleep(30)
+        for reaction in msg.reactions:
+            if reaction.emoji == "✅":
+                reactors = await self.bot.get_reaction_users(reaction)
+                for user in reactors:
+                    party.append(user.display_name)
+        party.append(ctx.author.display_name)
+        try:
+            await msg.delete()
+        except discord.Forbidden:  # cannot remove message try remove emoji
+            await msg.remove_reaction("✅", ctx.bot.user)
+        #if len(party) <= 1:
+            #return await ctx.send("Not enough heroes are willing to go on this quest. Try again later.")
+        await asyncio.sleep(1.5)
+        text_party = ','.join(map(str, party))
+        await ctx.send("A valiant party assembled! **" + text_party + "** are going on a quest!")
+        reward, participants, dead = await Quest.queste(ctx, party)
+        if reward is not None:
+            print(reward, participants, dead)
+            for user in reward.keys():
+                member = discord.utils.find(lambda m: m.display_name == user, ctx.guild.members)
+                await self.add_rewards(ctx, member, reward[user]["xp"], reward[user]["cp"], reward[user]["special"])
+            for user in participants: #reset activated abilities
+                member = discord.utils.find(lambda m: m.display_name == user, ctx.guild.members)
+                if 'name' in Userdata.users[str(member.id)]['class']:
+                    if Userdata.users[str(member.id)]['class']['name'] != "Ranger" and Userdata.users[str(member.id)]['class']['ability']:
+                        Userdata.users[str(member.id)]['class']['ability'] = False
+            if len(dead) > 0:
+                casualties = ','.join(map(str, dead))
+                await ctx.send("**" + casualties + "**" + " did not make it back alive.")
             await GobCog.save()
 
 
@@ -794,77 +846,76 @@ class GobCog(BaseCog):
     async def equip_item(ctx, item, from_backpack):
         global users
         user = ctx.author
-        if not 'items' in users[str(user.id)].keys(): # if the user has an older account or something went wrong, create empty items slot.
-            users[str(user.id)]['items'] = {"left":{},"right":{},"ring":{},"charm":{},"backpack": {}}
+        if not 'items' in Userdata.users[str(user.id)].keys(): # if the user has an older account or something went wrong, create empty items slot.
+            Userdata.users[str(user.id)]['items'] = {"left":{},"right":{},"ring":{},"charm":{},"backpack": {}}
         for slot in item['item']["slot"]:
-            if users[str(user.id)]['items'][slot] == {}:
-                users[str(user.id)]['items'][slot][item['itemname']] = item['item']
-                users[str(user.id)]['att'] += item['item']['att']
-                users[str(user.id)]['cha'] += item['item']['cha']
+            if Userdata.users[str(user.id)]['items'][slot] == {}:
+                Userdata.users[str(user.id)]['items'][slot][item['itemname']] = item['item']
+                Userdata.users[str(user.id)]['att'] += item['item']['att']
+                Userdata.users[str(user.id)]['cha'] += item['item']['cha']
                 await ctx.send("You equipped {}.".format(item['itemname']))
             else:
-                olditem = users[str(user.id)]['items'][slot]
+                olditem = Userdata.users[str(user.id)]['items'][slot]
                 for oslot in olditem[list(olditem.keys())[0]]['slot']:
-                    users[str(user.id)]['items'][oslot] = {}
-                    users[str(user.id)]['att'] -= olditem[list(olditem.keys())[0]]['att']     # keep in mind that double handed items grant their bonus twice so they remove twice
-                    users[str(user.id)]['cha'] -= olditem[list(olditem.keys())[0]]['cha']
-                users[str(user.id)]['items']['backpack'].update(olditem)
-                users[str(user.id)]['items'][slot][item['itemname']] = item['item']
-                users[str(user.id)]['att'] += item['item']['att']
-                users[str(user.id)]['cha'] += item['item']['cha']
+                    Userdata.users[str(user.id)]['items'][oslot] = {}
+                    Userdata.users[str(user.id)]['att'] -= olditem[list(olditem.keys())[0]]['att']     # keep in mind that double handed items grant their bonus twice so they remove twice
+                    Userdata.users[str(user.id)]['cha'] -= olditem[list(olditem.keys())[0]]['cha']
+                Userdata.users[str(user.id)]['items']['backpack'].update(olditem)
+                Userdata.users[str(user.id)]['items'][slot][item['itemname']] = item['item']
+                Userdata.users[str(user.id)]['att'] += item['item']['att']
+                Userdata.users[str(user.id)]['cha'] += item['item']['cha']
                 await ctx.send("You equipped {} and put {} into your backpack.".format(item['itemname'],list(olditem.keys())[0]))
         if from_backpack:
-            del users[str(user.id)]['items']['backpack'][item['itemname']]
-        await ctx.send("Your new stats: **Attack**: {} [+{}], **Diplomacy**: {} [+{}].".format(users[str(user.id)]['att'],users[str(user.id)]['skill']['att'],users[str(user.id)]['cha'],users[str(user.id)]['skill']['cha']))
+            del Userdata.users[str(user.id)]['items']['backpack'][item['itemname']]
+        await ctx.send("Your new stats: **Attack**: {} [+{}], **Diplomacy**: {} [+{}].".format(Userdata.users[str(user.id)]['att'],Userdata.users[str(user.id)]['skill']['att'],Userdata.users[str(user.id)]['cha'],Userdata.users[str(user.id)]['skill']['cha']))
         await GobCog.save()
 
     @staticmethod
     async def update_data(users, user):
         if str(user.id) not in users:
             print('Setting up account for', user.display_name + '.')
-            users[str(user.id)] = {}
-            users[str(user.id)]['exp'] = 0
-            users[str(user.id)]['lvl'] = 1
-            users[str(user.id)]['att'] = 0
-            users[str(user.id)]['cha'] = 0
-            users[str(user.id)]['treasure'] = [0,0,0]
-            users[str(user.id)]['items'] = {"left":{},"right":{},"ring":{},"charm":{},"backpack": {}}
-            users[str(user.id)]['name'] = {}
-            users[str(user.id)]['name'] = user.display_name
-            users[str(user.id)]['class'] = {}
-            users[str(user.id)]['class'] = {'name': "Hero", 'ability': False, 'desc': "Your basic adventuring hero."}
-            users[str(user.id)]['skill'] = {}
-            users[str(user.id)]['skill'] = {'pool': 0, 'att': 0, 'cha': 0}
+            Userdata.users[str(user.id)] = {}
+            Userdata.users[str(user.id)]['exp'] = 0
+            Userdata.users[str(user.id)]['lvl'] = 1
+            Userdata.users[str(user.id)]['att'] = 0
+            Userdata.users[str(user.id)]['cha'] = 0
+            Userdata.users[str(user.id)]['treasure'] = [0,0,0]
+            Userdata.users[str(user.id)]['items'] = {"left":{},"right":{},"ring":{},"charm":{},"backpack": {}}
+            Userdata.users[str(user.id)]['name'] = {}
+            Userdata.users[str(user.id)]['name'] = user.display_name
+            Userdata.users[str(user.id)]['class'] = {}
+            Userdata.users[str(user.id)]['class'] = {'name': "Hero", 'ability': False, 'desc': "Your basic adventuring hero."}
+            Userdata.users[str(user.id)]['skill'] = {}
+            Userdata.users[str(user.id)]['skill'] = {'pool': 0, 'att': 0, 'cha': 0}
             await GobCog.save()
 
 
     @staticmethod
     async def add_rewards(ctx, user, exp, cp, special):
         global users
-        users[str(user.id)]['exp'] += exp
+        Userdata.users[str(user.id)]['exp'] += exp
         await bank.deposit_credits(user, cp)
         await GobCog.level_up(ctx, users, user)
         if special != False:
-            if not 'treasure' in users[str(user.id)].keys():
-                users[str(user.id)]['treasure'] = [0,0,0]
-            users[str(user.id)]['treasure'] = [sum(x) for x in zip(users[str(user.id)]['treasure'], special)]
+            if not 'treasure' in Userdata.users[str(user.id)].keys():
+                Userdata.users[str(user.id)]['treasure'] = [0,0,0]
+            Userdata.users[str(user.id)]['treasure'] = [sum(x) for x in zip(Userdata.users[str(user.id)]['treasure'], special)]
 
     @staticmethod
     async def save():
-        with GobCog.fp.open('w') as f:
-            json.dump(users, f, indent=4, default=lambda o: '<not serializable>', sort_keys=True)
+        await Userdata.save()
 
     @staticmethod
     async def level_up(ctx, users, user):
-        exp = users[str(user.id)]['exp']
-        lvl_start = users[str(user.id)]['lvl']
+        exp = Userdata.users[str(user.id)]['exp']
+        lvl_start = Userdata.users[str(user.id)]['lvl']
         lvl_end = int(exp ** (1/4))
 
         if lvl_start < lvl_end: #recalculate free skillpoint pool based on new level and already spent points.
             await ctx.send('{} is now level {}!'.format(user.display_name,lvl_end))
-            users[str(user.id)]['lvl'] = lvl_end
-            users[str(user.id)]['skill']['pool'] = int(lvl_end / 5) - (users[str(user.id)]['skill']['att']+users[str(user.id)]['skill']['cha'])
-            if users[str(user.id)]['skill']['pool'] > 0:
+            Userdata.users[str(user.id)]['lvl'] = lvl_end
+            Userdata.users[str(user.id)]['skill']['pool'] = int(lvl_end / 5) - (Userdata.users[str(user.id)]['skill']['att']+Userdata.users[str(user.id)]['skill']['cha'])
+            if Userdata.users[str(user.id)]['skill']['pool'] > 0:
                 await ctx.send('You have skillpoints available.')
 
     @staticmethod
@@ -891,13 +942,13 @@ class GobCog(BaseCog):
                 await bank.withdraw_credits(spender, int(item['price']))
                 if 'chest' in item['itemname']:
                     if item['itemname'] == ".rare_chest":
-                        users[str(user.id)]['treasure'][1] += 1
+                        Userdata.users[str(user.id)]['treasure'][1] += 1
                     elif item['itemname'] == "[epic chest]":
-                        users[str(user.id)]['treasure'][2] += 1
+                        Userdata.users[str(user.id)]['treasure'][2] += 1
                     else:
-                        users[str(user.id)]['treasure'][0] += 1
+                        Userdata.users[str(user.id)]['treasure'][0] += 1
                 else:
-                    users[str(user.id)]['items']['backpack'].update({item['itemname']: item['item']})
+                    Userdata.users[str(user.id)]['items']['backpack'].update({item['itemname']: item['item']})
                 await GobCog.save()
                 await ctx.send("{} bought the {} for {} cp and put it into the backpack.".format(user.display_name,item['itemname'],str(item['price'])))
             else:
