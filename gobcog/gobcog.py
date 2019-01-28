@@ -739,6 +739,7 @@ class GobCog(BaseCog):
         start_adding_reactions(msg, "✅")
         while time.time() < endtime:
             await asyncio.sleep(1)
+        print(msg.reactions)
         for reaction in msg.reactions:
             if reaction.emoji == "✅":
                 reactors = await self.bot.get_reaction_users(reaction)
