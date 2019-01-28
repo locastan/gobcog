@@ -737,14 +737,17 @@ class GobCog(BaseCog):
         msg = await ctx.send("**" + ctx.author.display_name + "** just spent 500 copperpieces in the inn, looking for a party to do a mighty quest. Do you accept (30s)?")
         start_adding_reactions(msg, "✅")
         await asyncio.sleep(30)
-        cache_msg = discord.utils.get(self.bot.messages, id=msg.id)
-        print(cache_msg.reactions)
-        for reaction in cache_msg.reactions:
-            if reaction.emoji == "✅":
-                reactors = await self.bot.get_reaction_users(reaction)
-                for user in reactors:
-                    print(user.display_name)
-                    party.append(user.display_name)
+        message = await channel.get_message(msg.id)
+        try:
+    	    reaction = next(filter(lambda x: x.emoji == "✅", message.reactions), None)
+    	except AttributeError:
+    	    return await ctx.send("The message id provided is either invalid, "
+    	                          "or is not from that channel.")
+	    wannabees = await reaction.users().flatten()
+        print(wannabees)
+        for user in wannabees:
+            print(user.display_name)
+            party.append(user.display_name)
         party.append(ctx.author.display_name)
         try:
             await msg.delete()
