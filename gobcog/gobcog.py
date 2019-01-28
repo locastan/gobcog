@@ -745,7 +745,7 @@ class GobCog(BaseCog):
         wannabees = await reaction.users().flatten()
         for user in wannabees:
             if not user.bot:
-            party.append(user.display_name)
+                party.append(user.display_name)
         party.append(ctx.author.display_name)
         try:
             await msg.delete()
