@@ -113,7 +113,8 @@ class Classes:
                 await asyncio.sleep(1)
                 dipl_value = roll + Userdata.users[str(user)]['cha'] + Userdata.users[str(user)]['skill']['cha']
                 if roll == 1:
-                    return await ctx.send('But you stepped on a twig and scared it away.')
+                    await ctx.send('But you stepped on a twig and scared it away.')
+                    return None
                 elif roll == 20:
                     await ctx.send('You happen to have its favorite food.')
                     dipl_value += 25
@@ -121,7 +122,8 @@ class Classes:
                     await ctx.send('You successfully tamed the {}.'.format(Classes.pets[pet]['name']))
                     return Classes.pets[pet]
                 else:
-                    return await ctx.send('The {} escaped.'.format(Classes.pets[pet]['name']))
+                    await ctx.send('The {} escaped.'.format(Classes.pets[pet]['name']))
+                    return None
             else:
                 ctx.command.reset_cooldown(ctx)
                 await ctx.send('You already have a pet. Try foraging.')
