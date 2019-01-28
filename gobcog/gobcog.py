@@ -746,7 +746,8 @@ class GobCog(BaseCog):
         for user in wannabees:
             if not user.bot:
                 party.append(user.display_name)
-        party.append(ctx.author.display_name)
+        if ctx.author.display_name not in party:
+            party.append(ctx.author.display_name)
         try:
             await msg.delete()
         except discord.Forbidden:  # cannot remove message try remove emoji
