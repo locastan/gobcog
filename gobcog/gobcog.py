@@ -741,6 +741,7 @@ class GobCog(BaseCog):
             if reaction.emoji == "✅":
                 reactors = await self.bot.get_reaction_users(reaction)
                 for user in reactors:
+                    print(user.display_name)
                     party.append(user.display_name)
         party.append(ctx.author.display_name)
         try:
