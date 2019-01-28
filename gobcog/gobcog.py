@@ -743,9 +743,8 @@ class GobCog(BaseCog):
         except AttributeError:
             return await ctx.send("The message id provided is either invalid or is not from that channel.")
         wannabees = await reaction.users().flatten()
-        print(wannabees)
         for user in wannabees:
-            print(user.display_name)
+            if not user.bot:
             party.append(user.display_name)
         party.append(ctx.author.display_name)
         try:
