@@ -737,7 +737,7 @@ class GobCog(BaseCog):
         msg = await ctx.send("**" + ctx.author.display_name + "** just spent 500 copperpieces in the inn, looking for a party to do a mighty quest. Do you accept (30s)?")
         start_adding_reactions(msg, "✅")
         await asyncio.sleep(30)
-        message = await channel.get_message(msg.id)
+        message = await ctx.message.channel.get_message(msg.id)
         try:
     	    reaction = next(filter(lambda x: x.emoji == "✅", message.reactions), None)
     	except AttributeError:
