@@ -295,7 +295,7 @@ class Adventure:
         async def handle_fight(fumblelist, critlist, attack):
             if len(Adventure.userslist["fight"]) == 0:
                 return (fumblelist, critlist, attack)
-            report = "Attack Party: "
+            report = "Attack Party: |"
             for user in Adventure.userslist["fight"]:
                 roll = random.randint(1,20)
                 member = discord.utils.find(lambda m: m.display_name == user, ctx.guild.members)
@@ -306,7 +306,7 @@ class Adventure:
                     if Userdata.users[str(member.id)]['class']['name']=="Berserker" and Userdata.users[str(member.id)]['class']['ability']:
                         bonus = random.randint(5,15)
                         attack += roll - bonus + att_value
-                        report += "| **" + user + "**: " +  "🎲({})-".format(roll) + " 💥{} + ".format(bonus) + "🗡" + str(att_value) + " |"
+                        report += "**" + user + "**: " +  "🎲({})-".format(roll) + " 💥{} + ".format(bonus) + "🗡" + str(att_value) + " |"
                 elif roll == 20 or (Userdata.users[str(member.id)]['class']['name']=="Berserker" and Userdata.users[str(member.id)]['class']['ability']):
                     ability = ""
                     if roll == 20:
@@ -317,11 +317,11 @@ class Adventure:
                     bonus = random.randint(5,15)
                     attack += roll + bonus + att_value
                     bonus = ability + str(bonus)
-                    report += "| **" + user + "**: " +  "🎲({})+".format(roll) + " {} + ".format(bonus) + "🗡" + str(att_value) + " |"
+                    report += "**" + user + "**: " +  "🎲({})+".format(roll) + " {} + ".format(bonus) + "🗡" + str(att_value) + " |"
                 else:
                     attack += roll + att_value
-                    report += "| **" + user + "**: " +  "🎲({})+".format(roll) + "🗡" + str(att_value) + " |"
-            if len(Quest.userslist["fight"]) > 0:
+                    report += "**" + user + "**: " +  "🎲({})+".format(roll) + "🗡" + str(att_value) + " |"
+            if len(Adventure.userslist["fight"]) > 0:
                 await ctx.send(report)
             for user in fumblelist:
                 if user in Adventure.userslist["fight"]:
@@ -373,7 +373,7 @@ class Adventure:
         async def handle_talk(fumblelist, critlist, diplomacy):
             if len(Adventure.userslist["talk"]) == 0:
                 return (fumblelist, critlist, diplomacy)
-            report = "Talking Party: "
+            report = "Talking Party: |"
             for user in Adventure.userslist["talk"]:
                 roll = random.randint(1,20)
                 member = discord.utils.find(lambda m: m.display_name == user, ctx.guild.members)
@@ -384,7 +384,7 @@ class Adventure:
                     if Userdata.users[str(member.id)]['class']['name']=="Bard" and Userdata.users[str(member.id)]['class']['ability']:
                         bonus = random.randint(5,15)
                         attack += roll - bonus + att_value
-                        report += "| **" + user + "**: " +  "🎲({})-".format(roll) + " 💥{} + ".format(bonus) + "🗨" + str(dipl_value) + " |"
+                        report += "**" + user + "**: " +  "🎲({})-".format(roll) + " 💥{} + ".format(bonus) + "🗨" + str(dipl_value) + " |"
                 elif roll == 20 or (Userdata.users[str(member.id)]['class']['name']=="Bard" and Userdata.users[str(member.id)]['class']['ability']):
                     ability = ""
                     if roll == 20:
@@ -395,11 +395,11 @@ class Adventure:
                     bonus = random.randint(5,15)
                     diplomacy += roll + bonus + dipl_value
                     bonus = ability + str(bonus)
-                    report += "| **" + user + "**: " +  "🎲({})+".format(roll) + " {} + ".format(bonus) + "🗨" +str(dipl_value) + " |"
+                    report += "**" + user + "**: " +  "🎲({})+".format(roll) + " {} + ".format(bonus) + "🗨" +str(dipl_value) + " |"
                 else:
                     diplomacy += roll + dipl_value
-                    report += "| **" + user + "**: " +  "🎲({})+".format(roll) + "🗨" + str(dipl_value) + " |"
-            if len(Quest.userslist["talk"]) > 0:
+                    report += "**" + user + "**: " +  "🎲({})+".format(roll) + "🗨" + str(dipl_value) + " |"
+            if len(Adventure.userslist["talk"]) > 0:
                 await ctx.send(report)
             for user in fumblelist:
                 if user in Adventure.userslist["talk"]:
@@ -450,16 +450,16 @@ class Adventure:
 
         if slain or persuaded and not failed:
             CR = Adventure.str + Adventure.dipl
-            treasure = [0,0,0]
+            treasure = [0,0,0,0]
             if CR >= 80 or Adventure.challenge == "Basilisk" or Adventure.challenge == "Medusa": #rewards 50:50 rare:normal chest for killing something like the basilisk
-                treasure = random.choice([[0,1,0],[1,0,0]])
+                treasure = random.choice([[0,1,0,0],[1,0,0,0]])
             elif CR >= 180: #rewards 50:50 epic:rare chest for killing hard stuff.
-                treasure = random.choice([[0,0,1],[0,1,0]])
+                treasure = random.choice([[0,0,1,0],[0,1,0,0]])
             if "Dragon" in Adventure.challenge: #always rewards an epic chest.
                 treasure[2] += 1
             if len(critlist) != 0:
                 treasure[0] += 1
-            if treasure == [0,0,0]:
+            if treasure == [0,0,0,0]:
                 treasure = False
         if (Adventure.challenge == "Basilisk" or Adventure.challenge == "Medusa") and failed:
             Adventure.participants= Adventure.userslist["fight"]+Adventure.userslist["talk"]+Adventure.userslist["pray"]+Adventure.userslist["run"]+fumblelist
@@ -533,7 +533,7 @@ class Adventure:
             else:
                 Adventure.rewards[user]["special"] = False
         if special != False and sum(special) == 1:
-            types = [" normal"," rare","n epic"]
+            types = [" normal"," rare","n epic", "quest"]
             type = types[special.index(1)]
             phrase += "\nYou have been awarded {} xp and found {} copperpieces. You also secured **a{} treasure chest**!".format(xp,cp,type)
         elif special != False and sum(special) > 1:

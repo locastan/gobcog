@@ -29,7 +29,10 @@ class Quest:
                 "n ancient":[0.8,2],
                 " colossal":[2,1.1],
                 " miniature":[0.7,0.9],
-                " savage":[1.8,0.9]}
+                " savage":[1.8,0.9],
+                " suicidal":[0.5,0.8],
+                " breathtaking":[1,1.9],
+                " brutal":[2,0.8]}
     wood_monsters = {"Ogre":{"str":28,"dipl":18, "pronoun": "its"},
                 "Gnoll":{"str":20,"dipl":15, "pronoun": "its"},
                 "Cave Spider":{"str":60,"dipl":50, "pronoun": "its"},
@@ -50,16 +53,34 @@ class Quest:
     tomb_monsters = {"Beholder Zombie":{"str":30,"dipl":35, "pronoun": "it"},
                 "Bunch of Ghouls":{"str":60,"dipl":60, "pronoun": "it"},
                 "Wizard":{"str":20,"dipl":25, "pronoun": "he"},
-                "Bone Dragon":{"str":95,"dipl":75, "pronoun": "it"},
                 "Trap":{"str":65,"dipl":50, "pronoun": "it"},
                 "Diamond Troll":{"str":50,"dipl":50, "pronoun": "he"}}
-    tomb_bosses = {"Grz'al Brömpf":{"str":180,"dipl":180, "pronoun": "he"},
-                "Black Dragon":{"str":130,"dipl":120, "pronoun": "it"}}
+    tomb_bosses = {"Grz'al Brömpf":{"str":180,"dipl":180, "pronoun": "he"}}
+    arena_monsters = {"Brassmoon Guard":{"str":30,"dipl":35, "pronoun": "He is"},
+                "Warforged Golem":{"str":90,"dipl":100, "pronoun": "It is"},
+                "Hammerhead Dwarf":{"str":35,"dipl":40, "pronoun": "He is"},
+                "Drunk Bard":{"str":20,"dipl":25, "pronoun": "He is"},
+                "Darkelf Mage":{"str":50,"dipl":65, "pronoun": "He is"},
+                "Bone Dragon":{"str":95,"dipl":75, "pronoun": "It is"},
+                "Black Aliss":{"str":90,"dipl":110, "pronoun": "She is"},
+                "Gnome Warlord":{"str":30,"dipl":30, "pronoun": "He is"},
+                "Pictsie":{"str":25,"dipl":20, "pronoun": "He is"},
+                "Ice Giantess":{"str":45,"dipl":40, "pronoun": "She is"},
+                "Hellspectre":{"str":50,"dipl":50, "pronoun": "It is"},
+                "Switchbeast":{"str":80,"dipl":50, "pronoun": "It is"},
+                "Can of Purpleworms":{"str":50,"dipl":50, "pronoun": "It is"},
+                "Wraith":{"str":70,"dipl":80, "pronoun": "It is"},
+                "Xorza\'cuatl":{"str":85,"dipl":90, "pronoun": "Whatever this is, it\'s"},
+                "Westershire Pirate":{"str":40,"dipl":30, "pronoun": "He is"}}
+    arena_bosses = {"The Destroyer":{"str":180,"dipl":120, "pronoun": "He is"},
+                "Bonesmasher":{"str":150,"dipl":100, "pronoun": "He is"},
+                "Kyra Dragonqueen":{"str":100,"dipl":170, "pronoun": "She is"}}
     effects = {"Weakness":["str",0.5,0.8],
                 "Sleep":["dipl",0,0],
                 "Blind":["str",0.2,0.9],
-                "Entangle":["str",0.6,0.1],
-                "Fumble":["dipl",0,0]}
+                "Entangle":["str",0.3,1],
+                "Fumble":["dipl",0,0],
+                "Silence":["dipl",1,0.1]}
 
                     # structure of quest entries: text, challenge attrib, challenge, effect, effect text, chance to cause effect
     tomb = [["**The tomb of Grz'al Brömpf** is beckoning. {} mighty heroes are brave and mad enough to attempt loot the vast riches deep in the mountain.", None, None, None, None, 0],
@@ -77,7 +98,18 @@ class Quest:
             ["Swatting your partymember to keep that infernal buzzing noise down, you realize it is coming from all around you. A{0} {1} has surrounded you.", None, "Swarm of Jabberflies", "Blind", "The {} is like a black cloud obscuring your vision.", 100],
             ["Now this seems to be the cave tunnel shortcut the guide was talking about. No spidersilk anywhere and smooth walls! But this time it is guarded by a{0} {1}", None, "Toadward and 3 Ogres", None, None, 0],
             ["The end of that tunnel led you up into the middle of Drekmore Castle! {2} {1} watched you emerge from the small grate in the courtyard and is now launching an attack.", None, None, "Any", "{2}{0} curses you with {1}.", 80],]
-    ambush = [["What a nice resting place you found for the night. Our {} adventurers are having a well deserved rest under the stars. Then suddenly all hell broke loose.", None, None, None, None, 0]]
+    arena = [["Our {} adventurers are bravely entering the **Arena of endless horrible Deaths**. Then suddenly all hell breaks loose.", None, None, None, None, 0],
+            ["The announcer summons a{0} {1} into the arena.", None, None, None, None, 0],
+            ["Next up on the list of contestants is a{0} {1}. {2} rudely gesturing what he'll do to your slain corpses.", None, None, None, None, 0],
+            ["Time for some crowd pleasing! A{0} {1} is whipping up some dark magic.", None, "Darkelf Mage", "Any", "The {} casts {}.", 100],
+            ["Her heart is as black as her soul. Meet a{0} {1}. A melange of blackclad witchdom and halitosis.", None, "Black Aliss", "Any", "{} giggles maniacally and curses you with {}.", 90],
+            ["Here comes a{0} {1}. {3} as colorful as a bruise.", None, None, None, None, 0],
+            ["Some like a{0} {1} to the salt of the earth. {2} square, rough and bad for your health.", None, None, None, None, 0],
+            ["Order up! Here comes a{0} {1}. No refunds!", None, None, "Any", "To your surprise, the {} cast {}.", 50],
+            ["Now a{0} {1} is raging and screaming towards you.", None, None, None, None, 0],
+            ["A{0} {1} is making quite a pompous entrance. Let's see if you can cut him down to size.", None, None, None, None, 0],
+            ["Gather round to see a{0} {1} make his move in the arena.", None, None, None, None, 0],
+            ["A round of applause heralds the coming of a{0} {1}. {2} an all time audience favourite.", None, None, None, None, 0],]
 
     challenge = ""
     attrib = ""
@@ -105,11 +137,14 @@ class Quest:
         for user in party:
             member = discord.utils.find(lambda m: m.display_name == user, ctx.guild.members)
             Quest.partyIDs.append(member.id)
-        Quest.name = random.choice(["tomb", "wood"])
+        Quest.name = random.choice(["tomb", "wood", "arena"])
+        Quest.endless = (Quest.name == "arena")
         Quest.quest = getattr(Quest, Quest.name)
         Quest.monsters = getattr(Quest, Quest.name + "_monsters")
         Quest.bosses = getattr(Quest, Quest.name + "_bosses")
         await ctx.send(Quest.quest[Quest.idx][0].format(len(Quest.participants)))
+        if Quest.endless:
+            del Quest.quest[0]
         await Quest.narrate(ctx)
         dead = []
         if Quest.failed:
@@ -133,12 +168,20 @@ class Quest:
             else:
                 Quest.challenge = Quest.quest[Quest.idx][2]
             Quest.effect = Quest.quest[Quest.idx][3] # Intended for special ability or effect of a room or enemy or trap.
-            if Quest.idx < len(Quest.quest):
-                Quest.str = Quest.monsters[Quest.challenge]["str"]*Quest.attribs[Quest.attrib][0]
-                Quest.dipl = Quest.monsters[Quest.challenge]["dipl"]*Quest.attribs[Quest.attrib][1]
+            if Quest.endless:
+                if Quest.idx % 5 == 0:
+                    Quest.str = Quest.bosses[Quest.challenge]["str"]*Quest.attribs[Quest.attrib][0]
+                    Quest.dipl = Quest.bosses[Quest.challenge]["dipl"]*Quest.attribs[Quest.attrib][1]
+                else:
+                    Quest.str = Quest.monsters[Quest.challenge]["str"]*Quest.attribs[Quest.attrib][0]
+                    Quest.dipl = Quest.monsters[Quest.challenge]["dipl"]*Quest.attribs[Quest.attrib][1]
             else:
-                Quest.str = Quest.bosses[Quest.challenge]["str"]*Quest.attribs[Quest.attrib][0]
-                Quest.dipl = Quest.bosses[Quest.challenge]["dipl"]*Quest.attribs[Quest.attrib][1]
+                if Quest.idx < len(Quest.quest):
+                    Quest.str = Quest.monsters[Quest.challenge]["str"]*Quest.attribs[Quest.attrib][0]
+                    Quest.dipl = Quest.monsters[Quest.challenge]["dipl"]*Quest.attribs[Quest.attrib][1]
+                elif Quest.idx == len(Quest.quest):
+                    Quest.str = Quest.bosses[Quest.challenge]["str"]*Quest.attribs[Quest.attrib][0]
+                    Quest.dipl = Quest.bosses[Quest.challenge]["dipl"]*Quest.attribs[Quest.attrib][1]
             Quest.started = time.time()
             if "Dragon" in Quest.challenge:
                 Quest.timeout = 90
@@ -146,13 +189,23 @@ class Quest:
                 Quest.timeout = 60
             else:
                 Quest.timeout = 45
-            await ctx.send("📖 **Chapter {}**".format(Quest.idx))
+            if Quest.endless:
+                await ctx.send("🏟️ **Round {}**".format(Quest.idx))
+            else:
+                await ctx.send("📖 **Chapter {}**".format(Quest.idx))
             Quest.countdown(ctx, None, "Time remaining: ")
             await asyncio.sleep(0.2)
-            if Quest.idx < len(Quest.quest):
-                await Quest.menu(ctx, [(Quest.quest[Quest.idx][0]).format(Quest.attrib,Quest.challenge,Quest.monsters[Quest.challenge]["pronoun"])], {"🗡": Quest.fight, "🗨": Quest.talk, "🛐": Quest.pray, "❌": Quest.run})
+            if Quest.endless:
+                roll = random.randint(0,int(len(Quest.quest)-1))
+                if Quest.idx % 5 == 0:
+                    await Quest.menu(ctx, [(Quest.quest[roll][0]).format(Quest.attrib,Quest.challenge,Quest.bosses[Quest.challenge]["pronoun"])], {"🗡": Quest.fight, "🗨": Quest.talk, "🛐": Quest.pray, "❌": Quest.run})
+                else:
+                    await Quest.menu(ctx, [(Quest.quest[roll][0]).format(Quest.attrib,Quest.challenge,Quest.monsters[Quest.challenge]["pronoun"])], {"🗡": Quest.fight, "🗨": Quest.talk, "🛐": Quest.pray, "❌": Quest.run})
             else:
-                await Quest.menu(ctx, [(Quest.quest[Quest.idx][0]).format(Quest.attrib,Quest.challenge,Quest.bosses[Quest.challenge]["pronoun"])], {"🗡": Quest.fight, "🗨": Quest.talk, "🛐": Quest.pray, "❌": Quest.run})
+                if Quest.idx < len(Quest.quest):
+                    await Quest.menu(ctx, [(Quest.quest[Quest.idx][0]).format(Quest.attrib,Quest.challenge,Quest.monsters[Quest.challenge]["pronoun"])], {"🗡": Quest.fight, "🗨": Quest.talk, "🛐": Quest.pray, "❌": Quest.run})
+                else:
+                    await Quest.menu(ctx, [(Quest.quest[Quest.idx][0]).format(Quest.attrib,Quest.challenge,Quest.bosses[Quest.challenge]["pronoun"])], {"🗡": Quest.fight, "🗨": Quest.talk, "🛐": Quest.pray, "❌": Quest.run})
 
     async def handle_breakup(user):
         equipped = {}
@@ -413,7 +466,7 @@ class Quest:
         async def handle_fight(fumblelist, critlist, attack):
             if len(Quest.userslist["fight"]) == 0:
                 return (fumblelist, critlist, attack)
-            report = "Attack Party: "
+            report = "Attack Party: |"
             for user in Quest.userslist["fight"]:
                 roll = random.randint(1,20)
                 member = discord.utils.find(lambda m: m.display_name == user, ctx.guild.members)
@@ -429,14 +482,14 @@ class Quest:
                     if Userdata.users[str(member.id)]['class']['name']=="Berserker" and Userdata.users[str(member.id)]['class']['ability']:
                         bonus = random.randint(5,15)
                         attack += roll - bonus + att_value
-                        report += "| **" + user + "**: " +  "🎲({})-".format(roll) + " 💥{} + ".format(bonus) + "🗡" + str(att_value) + effect + " |"
+                        report += "**" + user + "**: " +  "🎲({})-".format(roll) + " 💥{} + ".format(bonus) + "🗡" + str(att_value) + effect + " |"
                 if user in Quest.affected and Quest.effect == "Fumble" and 1 < roll <= 5:
                     await ctx.send("**" + user + "**" + " has been fumbled.")
                     fumblelist.append(user)
                     if Userdata.users[str(member.id)]['class']['name']=="Berserker" and Userdata.users[str(member.id)]['class']['ability']:
                         bonus = random.randint(5,15)
                         attack += roll - bonus + att_value
-                        report += "| **" + user + "**: " +  "🎲({})-".format(roll) + " 💥{} + ".format(bonus) + "🗡" + str(att_value) + effect + " |"
+                        report += "**" + user + "**: " +  "🎲({})-".format(roll) + " 💥{} + ".format(bonus) + "🗡" + str(att_value) + effect + " |"
                 elif roll == 20 or (Userdata.users[str(member.id)]['class']['name']=="Berserker" and Userdata.users[str(member.id)]['class']['ability']):
                     ability = ""
                     if roll == 20:
@@ -447,10 +500,10 @@ class Quest:
                     bonus = random.randint(5,15)
                     attack += roll + bonus + att_value
                     bonus = ability + str(bonus)
-                    report += "| **" + user + "**: " +  "🎲({})+".format(roll) + " {} + ".format(bonus) + "🗡" + str(att_value) + effect + " |"
+                    report += "**" + user + "**: " +  "🎲({})+".format(roll) + " {} + ".format(bonus) + "🗡" + str(att_value) + effect + " |"
                 else:
                     attack += roll + att_value
-                    report += "| **" + user + "**: " +  "🎲({})+".format(roll) + "🗡" + str(att_value) + effect + " |"
+                    report += "**" + user + "**: " +  "🎲({})+".format(roll) + "🗡" + str(att_value) + effect + " |"
             if len(Quest.userslist["fight"]) > 0:
                 await ctx.send(report)
             for user in fumblelist:
@@ -506,7 +559,7 @@ class Quest:
         async def handle_talk(fumblelist, critlist, diplomacy):
             if len(Quest.userslist["talk"]) == 0:
                 return (fumblelist, critlist, diplomacy)
-            report = "Talking Party: "
+            report = "Talking Party: |"
             for user in Quest.userslist["talk"]:
                 roll = random.randint(1,20)
                 member = discord.utils.find(lambda m: m.display_name == user, ctx.guild.members)
@@ -522,14 +575,14 @@ class Quest:
                     if Userdata.users[str(member.id)]['class']['name']=="Bard" and Userdata.users[str(member.id)]['class']['ability']:
                         bonus = random.randint(5,15)
                         attack += roll - bonus + att_value
-                        report += "| **" + user + "**: " +  "🎲({})-".format(roll) + " 💥{} + ".format(bonus) + "🗨" + str(dipl_value) + effect + " |"
+                        report += "**" + user + "**: " +  "🎲({})-".format(roll) + " 💥{} + ".format(bonus) + "🗨" + str(dipl_value) + effect + " |"
                 if user in Quest.affected and Quest.effect == "Fumble" and 1 < roll <= 5:
                     await ctx.send("**" + user + "**" + (" got fumbled by the {}.").format(Quest.challenge))
                     fumblelist.append(user)
                     if Userdata.users[str(member.id)]['class']['name']=="Bard" and Userdata.users[str(member.id)]['class']['ability']:
                         bonus = random.randint(5,15)
                         attack += roll - bonus + att_value
-                        report += "| **" + user + "**: " +  "🎲({})-".format(roll) + " 💥{} + ".format(bonus) + "🗨" + str(dipl_value) + effect + " |"
+                        report += "**" + user + "**: " +  "🎲({})-".format(roll) + " 💥{} + ".format(bonus) + "🗨" + str(dipl_value) + effect + " |"
                 elif roll == 20 or (Userdata.users[str(member.id)]['class']['name']=="Bard" and Userdata.users[str(member.id)]['class']['ability']):
                     ability = ""
                     if roll == 20:
@@ -540,10 +593,10 @@ class Quest:
                     bonus = random.randint(5,15)
                     diplomacy += roll + bonus + dipl_value
                     bonus = ability + str(bonus)
-                    report += "| **" + user + "**: " +  "🎲({})+".format(roll) + " {} + ".format(bonus) + "🗨" +str(dipl_value) + effect + " |"
+                    report += "**" + user + "**: " +  "🎲({})+".format(roll) + " {} + ".format(bonus) + "🗨" +str(dipl_value) + effect + " |"
                 else:
                     diplomacy += roll + dipl_value
-                    report += "| **" + user + "**: " +  "🎲({})+".format(roll) + "🗨" + str(dipl_value) + effect + " |"
+                    report += "**" + user + "**: " +  "🎲({})+".format(roll) + "🗨" + str(dipl_value) + effect + " |"
             if len(Quest.userslist["talk"]) > 0:
                 await ctx.send(report)
             for user in fumblelist:
@@ -598,16 +651,16 @@ class Quest:
 
         if slain or persuaded and not Quest.failed:
             CR = Quest.str + Quest.dipl
-            treasure = [0,0,0]
+            treasure = [0,0,0,0]
             if CR >= 80 or Quest.challenge == "Basilisk" or Quest.challenge == "Medusa": #rewards 50:50 rare:normal chest for killing something like the basilisk
-                treasure = random.choice([[0,1,0],[1,0,0]])
+                treasure = random.choice([[0,1,0,0],[1,0,0,0]])
             elif CR >= 180: #rewards 50:50 epic:rare chest for killing hard stuff.
-                treasure = random.choice([[0,0,1],[0,1,0]])
+                treasure = random.choice([[0,0,1,0],[0,1,0,0]])
             if "Dragon" in Quest.challenge: #always rewards an epic chest.
                 treasure[2] += 1
             if len(critlist) != 0:
                 treasure[0] += 1
-            if treasure == [0,0,0]:
+            if treasure == [0,0,0,0]:
                 treasure = False
         if (Quest.challenge == "Basilisk" or Quest.challenge == "Medusa") and Quest.failed:
             Quest.participants= Quest.userslist["fight"]+Quest.userslist["talk"]+Quest.userslist["pray"]+Quest.userslist["run"]+fumblelist
@@ -671,7 +724,7 @@ class Quest:
                 if Userdata.users[str(member.id)]['class']['name'] != "Ranger" and Userdata.users[str(member.id)]['class']['ability']:
                     Userdata.users[str(member.id)]['class']['ability'] = False
         Quest.timeout = 0
-        if Quest.idx >= len(Quest.quest):
+        if Quest.idx >= len(Quest.quest) and not Quest.endless:
             Quest.running = False
 
     async def reward(ctx, list, amount, modif, special):
@@ -682,6 +735,12 @@ class Quest:
         cp = max(1,round(amount * modif))
         Quest.sumcp += cp
         phrase = ""
+        if Quest.endless and (Quest.idx % 5 == 0):
+            phrase += "You defeated the questboss and earned a quest chest for your troubles!"
+            special[3] += 1
+        elif Quest.idx >= len(Quest.quest):
+            phrase += "You defeated the questboss and earned a quest chest for your troubles!"
+            special[3] += 1
         for user in list:
             if user not in Quest.rewards:
                 Quest.rewards[user] = {"xp":0,"cp":0,"special":False}
@@ -691,7 +750,7 @@ class Quest:
                 Quest.rewards[user]["xp"] += int(xp * Userdata.users[str(member.id)]['class']['ability']['pet']['bonus'])
                 Quest.rewards[user]["cp"] += int(cp * Userdata.users[str(member.id)]['class']['ability']['pet']['bonus'])
                 percent = round((Userdata.users[str(member.id)]['class']['ability']['pet']['bonus'] - 1.0) * 100)
-                phrase = "\n**{}** received a **{}%** reward bonus from his {}.".format(member.display_name, percent, Userdata.users[str(member.id)]['class']['ability']['pet']['name'])
+                phrase += "\n**{}** received a **{}%** reward bonus from his {}.".format(member.display_name, percent, Userdata.users[str(member.id)]['class']['ability']['pet']['name'])
             else:
                 Quest.rewards[user]["xp"] += xp
                 Quest.rewards[user]["cp"] += cp
@@ -706,7 +765,7 @@ class Quest:
             elif not Quest.rewards[user]["special"]:
                 Quest.rewards[user]["special"] = special
         if Quest.sumtreasure != False and sum(Quest.sumtreasure) == 1:
-            types = [" normal"," rare","n epic"]
+            types = [" normal"," rare","n epic", "quest"]
             type = types[Quest.sumtreasure.index(1)]
             phrase += "\nYou have {} xp and found {} copperpieces so far. You also secured **a{} treasure chest**!".format(Quest.sumxp,Quest.sumcp,type)
         elif Quest.sumtreasure != False and sum(Quest.sumtreasure) > 1:

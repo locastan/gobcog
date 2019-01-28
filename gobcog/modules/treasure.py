@@ -92,25 +92,30 @@ class Treasure:
             else:
                 await ctx.send("{} found nothing of value.".format(user[:1].upper() + user[1:]))
                 return None
-        if type == "normal":
+        elif type == "normal":
             if roll <= 5:
                 chance = Treasure.unique
             elif roll > 5 and roll <= 25:
                 chance = Treasure.rare
             else:
                 chance = Treasure.common
-        if type == "rare":
+        elif type == "rare":
             if roll <= 15:
                 chance = Treasure.unique
             elif roll > 15 and roll <= 45:
                 chance = Treasure.rare
             else:
                 chance = Treasure.common
-        if type == "epic":
+        elif type == "epic":
             if roll <= 25:
                 chance = Treasure.unique
             else:
                 chance = Treasure.rare
+        elif type == "quest":
+            if roll <= 5:
+                chance = Treasure.quest
+            else:
+                chance = Treasure.unique
         itemname = random.choice(list(chance.keys()))
         item = chance[itemname]
         if len(item["slot"]) == 2: # two handed weapons add their bonuses twice
@@ -194,7 +199,7 @@ class Treasure:
                 elif roll > 15 and roll <= 45:
                     chance = Treasure.rare
                 elif roll >= 90:
-                    treasure = random.choice([[0,1,0],[1,0,0]])
+                    treasure = random.choice([[0,1,0,0],[1,0,0,0]])
                     types = ["normal chest",".rare_chest","[epic chest]"]
                     prices = [2000,5000,10000]
                     chesttext = types[treasure.index(1)]
@@ -207,7 +212,7 @@ class Treasure:
                 if roll <= 25:
                     chance = Treasure.unique
                 elif roll >= 90:
-                    treasure = random.choice([[0,1,0],[0,0,1]])
+                    treasure = random.choice([[0,1,0,0],[0,0,1,0]])
                     types = ["normal chest",".rare_chest","[epic chest]"]
                     prices = [2000,5000,10000]
                     chesttext = types[treasure.index(1)]

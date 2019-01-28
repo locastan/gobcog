@@ -104,16 +104,18 @@ class GobCog(BaseCog):
         if user is None:
             user = ctx.author
         if not 'treasure' in Userdata.users[str(user.id)].keys():
-            Userdata.users[str(user.id)]['treasure'] = [0,0,0]
+            Userdata.users[str(user.id)]['treasure'] = [0,0,0,0]
         if type == "rare":
             Userdata.users[str(user.id)]['treasure'][1] += 1
         elif type == "epic":
             Userdata.users[str(user.id)]['treasure'][2] += 1
+        elif type == "quest":
+            Userdata.users[str(user.id)]['treasure'][3] += 1
         else:
             Userdata.users[str(user.id)]['treasure'][0] += 1
         await ctx.send(
-            "```{} now owns {} normal, {} rare and {} epic chests.```".format(
-                user.display_name, str(Userdata.users[str(user.id)]['treasure'][0]),str(Userdata.users[str(user.id)]['treasure'][1]),str(Userdata.users[str(user.id)]['treasure'][2])))
+            "```{} now owns {} normal, {} rare, {} epic and {} quest chests.```".format(
+                user.display_name, str(Userdata.users[str(user.id)]['treasure'][0]),str(Userdata.users[str(user.id)]['treasure'][1]),str(Userdata.users[str(user.id)]['treasure'][2]),str(Userdata.users[str(user.id)]['treasure'][3])))
         await GobCog.save()
 
     @commands.command()
@@ -150,6 +152,8 @@ class GobCog(BaseCog):
                 Userdata.users[str(user)]['skill'] = {'pool': 0, 'att': 0, 'cha': 0}
             print(Userdata.users[str(user)]['name']+": "+str(int(Userdata.users[str(user)]['lvl'] / 5)) + "-" + str(Userdata.users[str(user)]['skill']['att']+Userdata.users[str(user)]['skill']['cha']))
             Userdata.users[str(user)]['skill']['pool'] = int(Userdata.users[str(user)]['lvl'] / 5) - (Userdata.users[str(user)]['skill']['att']+Userdata.users[str(user)]['skill']['cha'])
+            if len(Userdata.users[str(user)]['treasure']) <= 3:
+                Userdata.users[str(user)]['treasure'].append(0)
         for userID in deadsies:
             users.pop(userID)
         await GobCog.save()
@@ -436,18 +440,20 @@ class GobCog(BaseCog):
             "epic" after the command to open those.)
         """
         if type == "normal":
-            redux = [1,0,0]
+            redux = [1,0,0,0]
         elif type == "rare":
-            redux = [0,1,0]
+            redux = [0,1,0,0]
         elif type == "epic":
-            redux = [0,0,1]
+            redux = [0,0,1,0]
+        elif type == "quest":
+            redux = [0,0,0,1]
         else:
             await ctx.send("There is talk of a {} treasure chest but nobody ever saw one.".format(type))
             return
         global users
         user = ctx.author
         if not 'treasure' in Userdata.users[str(user.id)].keys():
-            Userdata.users[str(user.id)]['treasure'] = [0,0,0]
+            Userdata.users[str(user.id)]['treasure'] = [0,0,0,0]
         treasure = Userdata.users[str(user.id)]['treasure'][redux.index(1)]
         if treasure == 0:
             await ctx.send("You have no {} treasure chest to open.".format(type))
@@ -463,8 +469,8 @@ class GobCog(BaseCog):
             else:
                 Userdata.users[str(user.id)]['items']['backpack'].update({item['itemname']: item['item']})
                 await ctx.send("{} put the {} into the backpack.".format(user.display_name,item['itemname']))
-            await ctx.send("```css\n" + "You own {} normal, {} rare and {} epic chests.```".format(
-                str(Userdata.users[str(user.id)]['treasure'][0]),str(Userdata.users[str(user.id)]['treasure'][1]),str(Userdata.users[str(user.id)]['treasure'][2])))
+            await ctx.send("```css\n" + "You own {} normal, {} rare, {} epic and {} quest chests.```".format(
+                str(Userdata.users[str(user.id)]['treasure'][0]),str(Userdata.users[str(user.id)]['treasure'][1]),str(Userdata.users[str(user.id)]['treasure'][2]),str(Userdata.users[str(user.id)]['treasure'][3])))
 
 
     @commands.command()
@@ -511,8 +517,8 @@ class GobCog(BaseCog):
             "```css\n[{}'s Character Sheet] \n\n```".format(user.display_name) + "```css\nA level {} {} \n\n- ATTACK: {} [+{}] - DIPLOMACY: {} [+{}] -\n\n- Credits: {} {} \n- Experience: {}/{} \n- Unspent skillpoints: {} \n```".format(
                 lvl, clazz, att, satt, cha, scha, bal, currency, xp, next_lvl, pool
             ) + "```css\n" + equip + "```" +
-            "```css\n" + "You own {} normal, {} rare and {} epic chests.```".format(
-                str(Userdata.users[str(user.id)]['treasure'][0]),str(Userdata.users[str(user.id)]['treasure'][1]),str(Userdata.users[str(user.id)]['treasure'][2]))
+            "```css\n" + "You own {} normal, {} rare, {} epic and {} quest chests.```".format(
+                str(Userdata.users[str(user.id)]['treasure'][0]),str(Userdata.users[str(user.id)]['treasure'][1]),str(Userdata.users[str(user.id)]['treasure'][2]),str(Userdata.users[str(user.id)]['treasure'][3]))
         )
 
     @commands.command(name="backpack", aliases=['b'])
@@ -724,13 +730,13 @@ class GobCog(BaseCog):
     async def _quest(self, ctx):
         """This will send you on a mighty quest!
             You play by reacting with the offered emojis.
-            Available once per 10 minutes.
+            Available once per 10 minutes and costing 500 cp.
         """
         global users
         party = []
         msg = await ctx.send("**" + ctx.author.display_name + "** just spent 500 copperpieces in the inn, looking for a party to do a mighty quest. Do you accept (30s)?")
         start_adding_reactions(msg, "✅")
-        #await asyncio.sleep(30)
+        await asyncio.sleep(30)
         for reaction in msg.reactions:
             if reaction.emoji == "✅":
                 reactors = await self.bot.get_reaction_users(reaction)
@@ -741,8 +747,14 @@ class GobCog(BaseCog):
             await msg.delete()
         except discord.Forbidden:  # cannot remove message try remove emoji
             await msg.remove_reaction("✅", ctx.bot.user)
-        #if len(party) <= 1:
-            #return await ctx.send("Not enough heroes are willing to go on this quest. Try again later.")
+        for user in party:
+            member = discord.utils.find(lambda m: m.display_name == user, ctx.guild.members)
+            if Userdata.users[str(member.id)]['lvl'] < 15:
+                party.remove(user)
+                await ctx.send("Sorry **{}**. You need to be at least level 15 to go on a quest.".format(user))
+        if len(party) <= 1:
+            ctx.command.reset_cooldown(ctx)
+            return await ctx.send("Not enough heroes are willing or able to go on this quest. Try again later.")
         await asyncio.sleep(1.5)
         text_party = ','.join(map(str, party))
         await ctx.send("A valiant party assembled! **" + text_party + "** are going on a quest!")
@@ -879,7 +891,7 @@ class GobCog(BaseCog):
             Userdata.users[str(user.id)]['lvl'] = 1
             Userdata.users[str(user.id)]['att'] = 0
             Userdata.users[str(user.id)]['cha'] = 0
-            Userdata.users[str(user.id)]['treasure'] = [0,0,0]
+            Userdata.users[str(user.id)]['treasure'] = [0,0,0,0]
             Userdata.users[str(user.id)]['items'] = {"left":{},"right":{},"ring":{},"charm":{},"backpack": {}}
             Userdata.users[str(user.id)]['name'] = {}
             Userdata.users[str(user.id)]['name'] = user.display_name
@@ -898,7 +910,7 @@ class GobCog(BaseCog):
         await GobCog.level_up(ctx, users, user)
         if special != False:
             if not 'treasure' in Userdata.users[str(user.id)].keys():
-                Userdata.users[str(user.id)]['treasure'] = [0,0,0]
+                Userdata.users[str(user.id)]['treasure'] = [0,0,0,0]
             Userdata.users[str(user.id)]['treasure'] = [sum(x) for x in zip(Userdata.users[str(user.id)]['treasure'], special)]
 
     @staticmethod
