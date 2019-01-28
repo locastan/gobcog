@@ -741,8 +741,7 @@ class GobCog(BaseCog):
         try:
     	    reaction = next(filter(lambda x: x.emoji == "✅", message.reactions), None)
     	except AttributeError:
-    	    return await ctx.send("The message id provided is either invalid, "
-    	                          "or is not from that channel.")
+    	    return await ctx.send("The message id provided is either invalid or is not from that channel.")
 	    wannabees = await reaction.users().flatten()
         print(wannabees)
         for user in wannabees:
