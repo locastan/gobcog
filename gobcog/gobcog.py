@@ -735,8 +735,10 @@ class GobCog(BaseCog):
         global users
         party = []
         msg = await ctx.send("**" + ctx.author.display_name + "** just spent 500 copperpieces in the inn, looking for a party to do a mighty quest. Do you accept (30s)?")
+        endtime = time.time()+30
         start_adding_reactions(msg, "✅")
-        await asyncio.sleep(30)
+        while time.time() < endtime:
+            await asyncio.sleep(1)
         for reaction in msg.reactions:
             if reaction.emoji == "✅":
                 reactors = await self.bot.get_reaction_users(reaction)
