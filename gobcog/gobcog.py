@@ -752,6 +752,7 @@ class GobCog(BaseCog):
             if Userdata.users[str(member.id)]['lvl'] < 15:
                 party.remove(user)
                 await ctx.send("Sorry **{}**. You need to be at least level 15 to go on a quest.".format(user))
+        print(party)
         if len(party) <= 1:
             ctx.command.reset_cooldown(ctx)
             return await ctx.send("Not enough heroes are willing or able to go on this quest. Try again later.")
