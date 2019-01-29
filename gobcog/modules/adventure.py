@@ -322,11 +322,11 @@ class Adventure:
                 else:
                     attack += roll + att_value
                     report += "**" + user + "**: " +  "🎲({})+".format(roll) + "🗡" + str(att_value) + " |"
-            if len(Adventure.userslist["fight"]) > 0:
-                await ctx.send(report)
             for user in fumblelist:
                 if user in Adventure.userslist["fight"]:
                     Adventure.userslist["fight"].remove(user)
+            if len(Adventure.userslist["fight"]) > 0:
+                await ctx.send(report)
             return (fumblelist, critlist, attack)
 
         async def handle_pray(fumblelist, attack, diplomacy):
@@ -400,11 +400,11 @@ class Adventure:
                 else:
                     diplomacy += roll + dipl_value
                     report += "**" + user + "**: " +  "🎲({})+".format(roll) + "🗨" + str(dipl_value) + " |"
-            if len(Adventure.userslist["talk"]) > 0:
-                await ctx.send(report)
             for user in fumblelist:
                 if user in Adventure.userslist["talk"]:
                     Adventure.userslist["talk"].remove(user)
+            if len(Adventure.userslist["talk"]) > 0:
+                await ctx.send(report)
             return (fumblelist, critlist, diplomacy)
 
         async def handle_basilisk(failed):

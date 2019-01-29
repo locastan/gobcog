@@ -504,14 +504,14 @@ class Quest:
                 else:
                     attack += roll + att_value
                     report += "**" + user + "**: " +  "🎲({})+".format(roll) + "🗡" + str(att_value) + effect + " |"
-            if len(Quest.userslist["fight"]) > 0:
-                await ctx.send(report)
             for user in fumblelist:
                 if user in Quest.userslist["fight"]:
                     Quest.userslist["fight"].remove(user)
                     fumble = random.randint(1,100)
                     if fumble <= 5:
                         await handle_breakup(member)
+            if len(Quest.userslist["fight"]) > 0:
+                await ctx.send(report)
             return (fumblelist, critlist, attack)
 
         async def handle_pray(fumblelist, attack, diplomacy):
@@ -597,11 +597,11 @@ class Quest:
                 else:
                     diplomacy += roll + dipl_value
                     report += "**" + user + "**: " +  "🎲({})+".format(roll) + "🗨" + str(dipl_value) + effect + " |"
-            if len(Quest.userslist["talk"]) > 0:
-                await ctx.send(report)
             for user in fumblelist:
                 if user in Quest.userslist["talk"]:
                     Quest.userslist["talk"].remove(user)
+            if len(Quest.userslist["talk"]) > 0:
+                await ctx.send(report)
             return (fumblelist, critlist, diplomacy)
 
         async def handle_basilisk(failed):
