@@ -666,6 +666,7 @@ class Quest:
             Quest.participants= Quest.userslist["fight"]+Quest.userslist["talk"]+Quest.userslist["pray"]+Quest.userslist["run"]+fumblelist
             await ctx.send("The {}s gaze turned everyone to stone.".format(Quest.challenge))
             Quest.running = False
+            Quest.failed = True
             return
         if (Quest.challenge == "Basilisk" or Quest.challenge == "Medusa") and not slain and not persuaded:
             Quest.participants= Quest.userslist["fight"]+Quest.userslist["talk"]+Quest.userslist["pray"]+Quest.userslist["run"]+fumblelist
