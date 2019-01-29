@@ -176,10 +176,10 @@ class Quest:
                     Quest.str = Quest.monsters[Quest.challenge]["str"]*Quest.attribs[Quest.attrib][0] * Quest.idx
                     Quest.dipl = Quest.monsters[Quest.challenge]["dipl"]*Quest.attribs[Quest.attrib][1] * Quest.idx
             else:
-                if Quest.idx < len(Quest.quest):
+                if Quest.idx < (len(Quest.quest)-1):
                     Quest.str = Quest.monsters[Quest.challenge]["str"]*Quest.attribs[Quest.attrib][0]
                     Quest.dipl = Quest.monsters[Quest.challenge]["dipl"]*Quest.attribs[Quest.attrib][1]
-                elif Quest.idx == len(Quest.quest):
+                elif Quest.idx >= (len(Quest.quest)-1):
                     Quest.str = Quest.bosses[Quest.challenge]["str"]*Quest.attribs[Quest.attrib][0]
                     Quest.dipl = Quest.bosses[Quest.challenge]["dipl"]*Quest.attribs[Quest.attrib][1]
             Quest.started = time.time()
@@ -202,7 +202,7 @@ class Quest:
                 else:
                     await Quest.menu(ctx, [(Quest.quest[roll][0]).format(Quest.attrib,Quest.challenge,Quest.monsters[Quest.challenge]["pronoun"],Quest.monsters[Quest.challenge]["pronoun"].lower())], {"🗡": Quest.fight, "🗨": Quest.talk, "🛐": Quest.pray, "❌": Quest.run})
             else:
-                if Quest.idx < len(Quest.quest):
+                if Quest.idx < (len(Quest.quest)-1):
                     await Quest.menu(ctx, [(Quest.quest[Quest.idx][0]).format(Quest.attrib,Quest.challenge,Quest.monsters[Quest.challenge]["pronoun"],Quest.monsters[Quest.challenge]["pronoun"].lower())], {"🗡": Quest.fight, "🗨": Quest.talk, "🛐": Quest.pray, "❌": Quest.run})
                 else:
                     await Quest.menu(ctx, [(Quest.quest[Quest.idx][0]).format(Quest.attrib,Quest.challenge,Quest.bosses[Quest.challenge]["pronoun"],Quest.bosses[Quest.challenge]["pronoun"].lower())], {"🗡": Quest.fight, "🗨": Quest.talk, "🛐": Quest.pray, "❌": Quest.run})
@@ -425,7 +425,7 @@ class Quest:
                     await ctx.send("**" + sleepyhead + "**" + " fell asleep.")
                 else:
                     fails = []
-                    if Quest.idx < len(Quest.quest):
+                    if Quest.idx < (len(Quest.quest)-1):
                         if Quest.idx < 3:
                             saving_throw = round(Quest.monsters[Quest.challenge][Quest.effects[Quest.effect][0]]*0.8 + Quest.idx*2)
                         elif Quest.idx < 5:
@@ -725,7 +725,7 @@ class Quest:
                 if Userdata.users[str(member.id)]['class']['name'] != "Ranger" and Userdata.users[str(member.id)]['class']['ability']:
                     Userdata.users[str(member.id)]['class']['ability'] = False
         Quest.timeout = 0
-        if Quest.idx >= len(Quest.quest) and not Quest.endless:
+        if Quest.idx >= (len(Quest.quest)-1) and not Quest.endless:
             Quest.running = False
 
     async def reward(ctx, list, amount, modif, special):
@@ -739,7 +739,7 @@ class Quest:
         if Quest.endless and (Quest.idx % 5 == 0):
             phrase += "You defeated the questboss and earned a quest chest for your troubles!"
             special[3] += 1
-        elif Quest.idx >= len(Quest.quest):
+        elif Quest.idx >= (len(Quest.quest)-1):
             phrase += "You defeated the questboss and earned a quest chest for your troubles!"
             special[3] += 1
         for user in list:

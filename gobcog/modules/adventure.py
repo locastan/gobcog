@@ -92,6 +92,8 @@ class Adventure:
         advmsg = await ctx.send(text + random.choice(locations)+ "\n" + "**" + ctx.author.display_name + "**" + random.choice(raisins))
         await Adventure.choice(ctx)
         advmsg.mentions.clear()
+        text = advmsg.content.replace("@Goblin Adventurer!", "")
+        await advmsg.edit(content=text)
         return (Adventure.rewards, Adventure.participants)
 
     async def choice(ctx):
