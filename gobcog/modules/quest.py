@@ -56,25 +56,25 @@ class Quest:
                 "Trap":{"str":65,"dipl":50, "pronoun": "it"},
                 "Diamond Troll":{"str":50,"dipl":50, "pronoun": "he"}}
     tomb_bosses = {"Grz'al Brömpf":{"str":180,"dipl":180, "pronoun": "he"}}
-    arena_monsters = {"Brassmoon Guard":{"str":30,"dipl":35, "pronoun": "He is"},
-                "Warforged Golem":{"str":90,"dipl":100, "pronoun": "It is"},
-                "Hammerhead Dwarf":{"str":35,"dipl":40, "pronoun": "He is"},
-                "Drunk Bard":{"str":20,"dipl":25, "pronoun": "He is"},
-                "Darkelf Mage":{"str":50,"dipl":65, "pronoun": "He is"},
-                "Bone Dragon":{"str":95,"dipl":75, "pronoun": "It is"},
-                "Black Aliss":{"str":90,"dipl":110, "pronoun": "She is"},
-                "Gnome Warlord":{"str":30,"dipl":30, "pronoun": "He is"},
-                "Pictsie":{"str":25,"dipl":20, "pronoun": "He is"},
-                "Ice Giantess":{"str":45,"dipl":40, "pronoun": "She is"},
-                "Hellspectre":{"str":50,"dipl":50, "pronoun": "It is"},
-                "Switchbeast":{"str":80,"dipl":50, "pronoun": "It is"},
-                "Can of Purpleworms":{"str":50,"dipl":50, "pronoun": "It is"},
-                "Wraith":{"str":70,"dipl":80, "pronoun": "It is"},
-                "Xorza\'cuatl":{"str":85,"dipl":90, "pronoun": "Whatever this is, it\'s"},
-                "Westershire Pirate":{"str":40,"dipl":30, "pronoun": "He is"}}
-    arena_bosses = {"The Destroyer":{"str":180,"dipl":120, "pronoun": "He is"},
-                "Bonesmasher":{"str":150,"dipl":100, "pronoun": "He is"},
-                "Kyra Dragonqueen":{"str":100,"dipl":170, "pronoun": "She is"}}
+    arena_monsters = {"Brassmoon Guard":{"str":4,"dipl":6, "pronoun": "He is"},
+                "Warforged Golem":{"str":10,"dipl":8, "pronoun": "It is"},
+                "Hammerhead Dwarf":{"str":5,"dipl":9, "pronoun": "He is"},
+                "Drunk Bard":{"str":8,"dipl":10, "pronoun": "He is"},
+                "Darkelf Mage":{"str":9,"dipl":12, "pronoun": "He is"},
+                "Bone Dragon":{"str":18,"dipl":20, "pronoun": "It is"},
+                "Black Aliss":{"str":20,"dipl":19, "pronoun": "She is"},
+                "Gnome Warlord":{"str":10,"dipl":12, "pronoun": "He is"},
+                "Pictsie":{"str":9,"dipl":6, "pronoun": "He is"},
+                "Ice Giantess":{"str":12,"dipl":15, "pronoun": "She is"},
+                "Hellspectre":{"str":17,"dipl":18, "pronoun": "It is"},
+                "Switchbeast":{"str":22,"dipl":18, "pronoun": "It is"},
+                "Can of Purpleworms":{"str":20,"dipl":15, "pronoun": "It is"},
+                "Wraith":{"str":20,"dipl":20, "pronoun": "It is"},
+                "Xorza\'cuatl":{"str":14,"dipl":16, "pronoun": "Whatever this is, it\'s"},
+                "Westershire Pirate":{"str":9,"dipl":10, "pronoun": "He is"}}
+    arena_bosses = {"The Destroyer":{"str":25,"dipl":23, "pronoun": "He is"},
+                "Bonesmasher":{"str":26,"dipl":20, "pronoun": "He is"},
+                "Kyra Dragonqueen":{"str":27,"dipl":30, "pronoun": "She is"}}
     effects = {"Weakness":["str",0.5,0.8],
                 "Sleep":["dipl",0,0],
                 "Blind":["str",0.2,0.9],
@@ -100,11 +100,11 @@ class Quest:
             ["The end of that tunnel led you up into the middle of Drekmore Castle! {2} {1} watched you emerge from the small grate in the courtyard and is now launching an attack.", None, None, "Any", "{2}{0} curses you with {1}.", 80],]
     arena = [["Our {} adventurers are bravely entering the **Arena of endless horrible Deaths**. Then suddenly all hell breaks loose.", None, None, None, None, 0],
             ["The announcer summons a{0} {1} into the arena.", None, None, None, None, 0],
-            ["Next up on the list of contestants is a{0} {1}. {2} rudely gesturing what he'll do to your slain corpses.", None, None, None, None, 0],
+            ["Next up on the list of contestants is a{0} {1}. {2} rudely gesturing what {3} going to do to your slain corpses.", None, None, None, None, 0],
             ["Time for some crowd pleasing! A{0} {1} is whipping up some dark magic.", None, "Darkelf Mage", "Any", "The {} casts {}.", 100],
             ["Her heart is as black as her soul. Meet a{0} {1}. A melange of blackclad witchdom and halitosis.", None, "Black Aliss", "Any", "{} giggles maniacally and curses you with {}.", 90],
-            ["Here comes a{0} {1}. {3} as colorful as a bruise.", None, None, None, None, 0],
-            ["Some like a{0} {1} to the salt of the earth. {2} square, rough and bad for your health.", None, None, None, None, 0],
+            ["Here comes a{0} {1}. {2} as colorful as a bruise.", None, None, None, None, 0],
+            ["Some like a{0} {1} to the salt of the earth. Probably meaning {3} square, rough and bad for your health.", None, None, None, None, 0],
             ["Order up! Here comes a{0} {1}. No refunds!", None, None, "Any", "To your surprise, the {} cast {}.", 50],
             ["Now a{0} {1} is raging and screaming towards you.", None, None, None, None, 0],
             ["A{0} {1} is making quite a pompous entrance. Let's see if you can cut him down to size.", None, None, None, None, 0],
@@ -122,7 +122,6 @@ class Quest:
     async def queste(ctx, party): # party is a list of user.display_name of partymembers.
         if Quest.timeout != 0:
             return None
-        Quest.userslist = {"fight":[],"pray":[],"talk":[],"run":[]}
         Quest.rewards = {}
         Quest.effect = None
         Quest.affected = []
@@ -157,6 +156,7 @@ class Quest:
 
     async def narrate(ctx):
         while Quest.running:
+            Quest.userslist = {"fight":[],"pray":[],"talk":[],"run":[]}
             Quest.idx += 1
             Quest.affected = []
             if Quest.quest[Quest.idx][1] == None:
@@ -170,11 +170,11 @@ class Quest:
             Quest.effect = Quest.quest[Quest.idx][3] # Intended for special ability or effect of a room or enemy or trap.
             if Quest.endless:
                 if Quest.idx % 5 == 0:
-                    Quest.str = Quest.bosses[Quest.challenge]["str"]*Quest.attribs[Quest.attrib][0]
-                    Quest.dipl = Quest.bosses[Quest.challenge]["dipl"]*Quest.attribs[Quest.attrib][1]
+                    Quest.str = Quest.bosses[Quest.challenge]["str"]*Quest.attribs[Quest.attrib][0] * Quest.idx
+                    Quest.dipl = Quest.bosses[Quest.challenge]["dipl"]*Quest.attribs[Quest.attrib][1] * Quest.idx
                 else:
-                    Quest.str = Quest.monsters[Quest.challenge]["str"]*Quest.attribs[Quest.attrib][0]
-                    Quest.dipl = Quest.monsters[Quest.challenge]["dipl"]*Quest.attribs[Quest.attrib][1]
+                    Quest.str = Quest.monsters[Quest.challenge]["str"]*Quest.attribs[Quest.attrib][0] * Quest.idx
+                    Quest.dipl = Quest.monsters[Quest.challenge]["dipl"]*Quest.attribs[Quest.attrib][1] * Quest.idx
             else:
                 if Quest.idx < len(Quest.quest):
                     Quest.str = Quest.monsters[Quest.challenge]["str"]*Quest.attribs[Quest.attrib][0]
@@ -198,14 +198,14 @@ class Quest:
             if Quest.endless:
                 roll = random.randint(0,int(len(Quest.quest)-1))
                 if Quest.idx % 5 == 0:
-                    await Quest.menu(ctx, [(Quest.quest[roll][0]).format(Quest.attrib,Quest.challenge,Quest.bosses[Quest.challenge]["pronoun"])], {"🗡": Quest.fight, "🗨": Quest.talk, "🛐": Quest.pray, "❌": Quest.run})
+                    await Quest.menu(ctx, [(Quest.quest[roll][0]).format(Quest.attrib,Quest.challenge,Quest.bosses[Quest.challenge]["pronoun"],Quest.bosses[Quest.challenge]["pronoun"].lower())], {"🗡": Quest.fight, "🗨": Quest.talk, "🛐": Quest.pray, "❌": Quest.run})
                 else:
-                    await Quest.menu(ctx, [(Quest.quest[roll][0]).format(Quest.attrib,Quest.challenge,Quest.monsters[Quest.challenge]["pronoun"])], {"🗡": Quest.fight, "🗨": Quest.talk, "🛐": Quest.pray, "❌": Quest.run})
+                    await Quest.menu(ctx, [(Quest.quest[roll][0]).format(Quest.attrib,Quest.challenge,Quest.monsters[Quest.challenge]["pronoun"],Quest.bosses[Quest.challenge]["pronoun"].lower())], {"🗡": Quest.fight, "🗨": Quest.talk, "🛐": Quest.pray, "❌": Quest.run})
             else:
                 if Quest.idx < len(Quest.quest):
-                    await Quest.menu(ctx, [(Quest.quest[Quest.idx][0]).format(Quest.attrib,Quest.challenge,Quest.monsters[Quest.challenge]["pronoun"])], {"🗡": Quest.fight, "🗨": Quest.talk, "🛐": Quest.pray, "❌": Quest.run})
+                    await Quest.menu(ctx, [(Quest.quest[Quest.idx][0]).format(Quest.attrib,Quest.challenge,Quest.monsters[Quest.challenge]["pronoun"],Quest.bosses[Quest.challenge]["pronoun"].lower())], {"🗡": Quest.fight, "🗨": Quest.talk, "🛐": Quest.pray, "❌": Quest.run})
                 else:
-                    await Quest.menu(ctx, [(Quest.quest[Quest.idx][0]).format(Quest.attrib,Quest.challenge,Quest.bosses[Quest.challenge]["pronoun"])], {"🗡": Quest.fight, "🗨": Quest.talk, "🛐": Quest.pray, "❌": Quest.run})
+                    await Quest.menu(ctx, [(Quest.quest[Quest.idx][0]).format(Quest.attrib,Quest.challenge,Quest.bosses[Quest.challenge]["pronoun"],Quest.bosses[Quest.challenge]["pronoun"].lower())], {"🗡": Quest.fight, "🗨": Quest.talk, "🛐": Quest.pray, "❌": Quest.run})
 
     async def handle_breakup(user):
         equipped = {}
@@ -362,12 +362,12 @@ class Quest:
                 symbol = Quest.emoji_lookup[x]
                 Quest.userslist[x].remove(user.display_name)
                 await message.remove_reaction(symbol, user)
-        if user.display_name not in Quest.userslist[call_from]:
+        if user.display_name not in Quest.userslist[call_from] and user.id in Quest.partyIDs:
             Quest.userslist[call_from].append(user.display_name)
         try:
             react, user = await ctx.bot.wait_for(
                 "reaction_add",
-                check=CustomPredicate.with_emojis(tuple(controls.keys()), message),
+                check=CustomPredicate.with_emojis(tuple(controls.keys()), message, Quest.partyIDs),
                 timeout=Quest.timeout,
             )
         except asyncio.TimeoutError:
