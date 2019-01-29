@@ -838,7 +838,7 @@ class GobCog(BaseCog):
     async def on_message(self, message):
         global users
         if not message.author.bot:
-            await self.update_data(users, message.author)
+            await self.update_data(Userdata.users, message.author)
             if GobCog.last_trade == 0: #this shuts hawls bro up for 3 hours after a cog reload
                 GobCog.last_trade = time.time()
             if "rpg-game" in message.channel.name: #restrict hawls bro to rpg-game channel.
@@ -850,13 +850,13 @@ class GobCog(BaseCog):
 
     async def on_member_join(self, member):
         global users
-        await self.update_data(users, member)
+        await self.update_data(Userdata.users, member)
 
         await GobCog.save()
 
     async def on_member_leave(self, member):
         global users
-        users.pop(str(member.id))
+        Userdata.users.pop(str(member.id))
 
         await GobCog.save()
 
