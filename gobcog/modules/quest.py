@@ -448,7 +448,7 @@ class Quest:
                             if dipl_value < saving_throw:
                                 Quest.affected.append(member.display_name)
                     if len(Quest.affected) > 0:
-                        affected = ','.join(map(str, Quest.affected))
+                        affected = " and ".join([", ".join(Quest.affected[:-1]),Quest.affected[-1]] if len(Quest.affected) > 2 else Quest.affected)
                         await ctx.send("**" + affected + "**" + " missed the {} saving throw of {}.".format(stat_txt,saving_throw))
                     else:
                         await ctx.send("Everyone resisted the effect.")
@@ -459,7 +459,7 @@ class Quest:
                 for user in Quest.userslist["run"]:
                     member = discord.utils.find(lambda m: m.display_name == user, ctx.guild.members)
                     Quest.partyIDs.remove(member.id) #user left party and can no longer participate with reactions
-                runners = ','.join(map(str, Quest.userslist["run"]))
+                runners = " and ".join([", ".join(Quest.userslist["run"][:-1]),Quest.userslist["run"][-1]] if len(Quest.userslist["run"]) > 2 else Quest.userslist["run"])
                 await ctx.send("**" + runners + "**" + " left the party, keeping rewards earned so far.")
             return (attack,diplomacy)
 

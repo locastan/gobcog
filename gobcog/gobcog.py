@@ -762,7 +762,7 @@ class GobCog(BaseCog):
             ctx.command.reset_cooldown(ctx)
             return await ctx.send("Not enough heroes are willing or able to go on this quest. Try again later.")
         await asyncio.sleep(1.5)
-        text_party = ','.join(map(str, party))
+        text_party = " and ".join([", ".join(party[:-1]),party[-1]] if len(party) > 2 else party)
         await ctx.send("A valiant party assembled! **" + text_party + "** are going on a quest!")
         reward, participants, dead = await Quest.queste(ctx, party)
         if reward is not None:
@@ -776,7 +776,7 @@ class GobCog(BaseCog):
                     if Userdata.users[str(member.id)]['class']['name'] != "Ranger" and Userdata.users[str(member.id)]['class']['ability']:
                         Userdata.users[str(member.id)]['class']['ability'] = False
             if len(dead) > 0:
-                casualties = ','.join(map(str, dead))
+                casualties = " and ".join([", ".join(dead[:-1]),dead[-1]] if len(dead) > 2 else dead)
                 await ctx.send("**" + casualties + "**" + " did not make it back alive.")
             await GobCog.save()
 
