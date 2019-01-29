@@ -767,8 +767,8 @@ class Quest:
                 Quest.rewards[user]["special"] = special
         if Quest.sumtreasure != False and sum(Quest.sumtreasure) == 1:
             types = [" normal"," rare","n epic", "quest"]
-            type = types[Quest.sumtreasure.index(1)]
-            phrase += "\nYou have {} xp and found {} copperpieces so far. You also secured **a{} treasure chest**!".format(Quest.sumxp,Quest.sumcp,type)
+            ctype = types[Quest.sumtreasure.index(1)]
+            phrase += "\nYou have {} xp and found {} copperpieces so far. You also secured **a{} treasure chest**!".format(Quest.sumxp,Quest.sumcp,ctype)
         elif Quest.sumtreasure != False and sum(Quest.sumtreasure) > 1:
             phrase += "\nYou have {} xp and found {} copperpieces so far. You also secured **several treasure chests**!".format(Quest.sumxp,Quest.sumcp)
         else:
