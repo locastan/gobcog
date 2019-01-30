@@ -171,7 +171,10 @@ class Quest:
                     else:
                         Quest.challenge = random.choice(list(Quest.monsters.keys()))
                 else:
-                    Quest.challenge = random.choice(list(Quest.monsters.keys()))
+                    if Quest.idx < (len(Quest.quest)-1):
+                        Quest.challenge = random.choice(list(Quest.monsters.keys()))
+                    elif Quest.idx >= (len(Quest.quest)-1):
+                        Quest.challenge = random.choice(list(Quest.bosses.keys()))
             else:
                 Quest.challenge = Quest.quest[Quest.idx][2]
             Quest.effect = Quest.quest[Quest.idx][3] # Intended for special ability or effect of a room or enemy or trap.
