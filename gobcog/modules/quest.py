@@ -55,7 +55,7 @@ class Quest:
                 "Wizard":{"str":20,"dipl":25, "pronoun": "he"},
                 "Trap":{"str":65,"dipl":50, "pronoun": "it"},
                 "Diamond Troll":{"str":50,"dipl":50, "pronoun": "he"}}
-    tomb_bosses = {"Grz'al Brömpf":{"str":180,"dipl":180, "pronoun": "he"}}
+    tomb_bosses = {"Grz'al Brömpf":{"str":120,"dipl":120, "pronoun": "he"}}
     arena_monsters = {"Brassmoon Guard":{"str":4,"dipl":6, "pronoun": "He is"},
                 "Warforged Golem":{"str":10,"dipl":8, "pronoun": "It is"},
                 "Hammerhead Dwarf":{"str":5,"dipl":9, "pronoun": "He is"},
@@ -90,7 +90,7 @@ class Quest:
             ["That decaying Beholder was no match for this party! Onwards and downwards you venture into perilous darkness. You descend into a large cave, where luminous fungi and sharp crystals decorating every surface create a breathtaking display of wonder. Then the crystals start to move and the floor shakes as **a{} {}** unfolds.", " lumbering", "Diamond Troll", "Blind", "```css\n A bright flash of light comes off the {}, blinding you.```", 100],
             ["You made a bit of profit on that one if you manage to get out of this tomb alive. As you venture on, it gets quite a bit warmer and the air smells of brimstone. It's probably just some geothermal vent or volcanic activity you reassure yourselfes moving on. From behind a boulder in a darker corner, two gleaming eyes gleefully watch you trigger **a{} {}**.","n ancient","Trap","Entangle","```css\n Creepy black tendrils whip around blindly searching for anything to grab.```", 100],
             ["That wasn't easy. On top of things, **a{} {}** got attracted by the trap to prey on its victims.",None,"Bunch of Ghouls",None,None,0],
-            ["Finally this seems to be the end of this tomb. You found an ornate coffin amidst several tall bookcases filled with magic folios. Some stacks of books are piled on a sturdy desk, where an oil lamp is burning. Doesn't it seem strange how this resembles more an active workplace than a grave? This question is answered with a sombre \"YES\" as the archlich **{}** manifests himself out of the very dust this room is covered in."," hideous","Grz'al Brömpf","Sleep","```css\n \"GOOD NIGHT, MIGHTY HERO\" {} booms maniacally.```",50]]
+            ["Finally this seems to be the end of this tomb. You found an ornate coffin amidst several tall bookcases filled with magic folios. Some stacks of books are piled on a sturdy desk, where an oil lamp is burning. Doesn't it seem strange how this resembles more an active workplace than a grave? This question is answered with a sombre \"YES\" as the archlich **{1}** manifests himself out of the very dust this room is covered in."," hideous","Grz'al Brömpf","Sleep","```css\n \"GOOD NIGHT, MIGHTY HERO\" {} booms maniacally.```",50]]
     wood = [["**The dark and brooding shadow forests of Dunwyn** lie in front of you. {} heroes be crossing. How far will they make it?", None, None, None, None, 0],
             ["A clearing opens up and allows for some scarce sunlight in this gloomy woods. Apparently **a{0} {1}** is enjoying the sun as well, startled by your sudden appearance.", None, None, None, None, 0],
             ["Further back in some overgrown thicket, you spot a small cottage...made of gingerbread? **A{0} {1}** is beckoning you closer. The fact that {2} skin is green and {2} faces\' warts are nearly covered by the big hooked nose does not bode well.", "n old", "Witch", "Any", "```css\n The wicked old {} casts {}.```", 80],
@@ -510,7 +510,7 @@ class Quest:
                         bonus = random.randint(5,15)
                         attack += roll - bonus + att_value
                         report += "**" + user + "**: " +  "🎲({})-".format(roll) + " 💥{} + ".format(bonus) + "🗡" + str(att_value) + effect + " |"
-                if user in Quest.affected and Quest.effect == "Fumble" and 1 < roll <= 5:
+                elif user in Quest.affected and Quest.effect == "Fumble" and 1 < roll <= 5:
                     await ctx.send("**" + user + "**" + " has been fumbled.")
                     fumblelist.append(user)
                     if Userdata.users[str(member.id)]['class']['name']=="Berserker" and Userdata.users[str(member.id)]['class']['ability']:
