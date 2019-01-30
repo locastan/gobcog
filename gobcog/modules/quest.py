@@ -787,9 +787,9 @@ class Quest:
                     Quest.rewards[user]["special"] = special
                     Quest.sumtreasure = special
                 else:
-                    for idx, amount in enumerate(special):
-                        Quest.rewards[user]["special"][idx] += amount
-                        Quest.sumtreasure[idx] += amount
+                    for idx, number in enumerate(special):
+                        Quest.rewards[user]["special"][idx] += number
+                        Quest.sumtreasure[idx] += number
             elif not Quest.rewards[user]["special"]:
                 Quest.rewards[user]["special"] = special
         if Quest.sumtreasure != False and sum(Quest.sumtreasure) == 1:
