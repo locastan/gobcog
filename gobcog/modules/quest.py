@@ -74,7 +74,8 @@ class Quest:
                 "Westershire Pirate":{"str":9,"dipl":10, "pronoun": "He is"}}
     arena_bosses = {"The Destroyer":{"str":25,"dipl":23, "pronoun": "He is"},
                 "Bonesmasher":{"str":26,"dipl":20, "pronoun": "He is"},
-                "Kyra Dragonqueen":{"str":27,"dipl":30, "pronoun": "She is"}}
+                "Kyra Dragonqueen":{"str":27,"dipl":30, "pronoun": "She is"},
+                "Black Aliss":{"str":20,"dipl":19, "pronoun": "She is"},}
     effects = {"Weakness":["str",0.5,0.8],
                 "Sleep":["dipl",0,0],
                 "Blind":["str",0.2,0.9],
@@ -84,32 +85,32 @@ class Quest:
 
                     # structure of quest entries: text, challenge attrib, challenge, effect, effect text, chance to cause effect
     tomb = [["**The tomb of Grz'al Brömpf** is beckoning. {} mighty heroes are brave and mad enough to attempt loot the vast riches deep in the mountain.", None, None, None, None, 0],
-            ["The entrance is guarded by a{0} {1}. The {1} warns you not to enter this dungeon, claiming all the treasure inside to be rightfully his.", None, "Wizard", "Any", "The affronted {} casts {}.", 40],
-            ["With the selfproclaimed guardian out of the way, you venture inside. Narrow passages were hewn into the bare rock making it uncomfortable to move along. A small chamber finally allows for some space, but a{0} {1} heard you enter and is now waking up.", None, "Beholder Zombie", "Weakness", "The {} is making a flatulent sound and a foul odour is making an assault on your senses.", 100],
-            ["That decaying Beholder was no match for this party! Onwards and downwards you venture into perilous darkness. You descend into a large cave, where luminous fungi and sharp crystals decorating every surface create a breathtaking display of wonder. Then the crystals start to move and the floor shakes as a{} {} unfolds.", " lumbering", "Diamond Troll", "Blind", "A bright flash of light comes off the {}, blinding you.", 100],
-            ["You made a bit of profit on that one if you manage to get out of this tomb alive. As you venture on, it gets quite a bit warmer and the air smells of brimstone. It's probably just some geothermal vent or volcanic activity you reassure yourselfes moving on. From behind a boulder in a darker corner, two gleaming eyes gleefully watch you trigger a{} {}.","n ancient","Trap","Entangle","Creepy black tendrils whip around blindly searching for anything to grab.", 100],
-            ["That wasn't easy. On top of things, a{} {} got attracted by the trap to prey on its victims.",None,"Bunch of Ghouls",None,None,0],
-            ["Finally this seems to be the end of this tomb. You found an ornate coffin amidst several tall bookcases filled with magic folios. Some stacks of books are piled on a sturdy desk, where an oil lamp is burning. Doesn't it seem strange how this resembles more an active workplace than a grave? This question is answered with a sombre \"YES\" as the archlich {} manifests himself out of the very dust this room is covered in."," hideous","Grz'al Brömpf","Sleep","\"GOOD NIGHT, MIGHTY HERO\" {} booms maniacally.",50]]
+            ["The entrance is guarded by **a{0} {1}**. The {1} warns you not to enter this dungeon, claiming all the treasure inside to be rightfully his.", None, "Wizard", "Any", "```css\n The affronted {} casts {}.```", 40],
+            ["With the selfproclaimed guardian out of the way, you venture inside. Narrow passages were hewn into the bare rock making it uncomfortable to move along. A small chamber finally allows for some space, but **a{0} {1}** heard you enter and is now waking up.", None, "Beholder Zombie", "Weakness", "```css\n The {} is making a flatulent sound and a foul odour is making an assault on your senses.```", 100],
+            ["That decaying Beholder was no match for this party! Onwards and downwards you venture into perilous darkness. You descend into a large cave, where luminous fungi and sharp crystals decorating every surface create a breathtaking display of wonder. Then the crystals start to move and the floor shakes as **a{} {}** unfolds.", " lumbering", "Diamond Troll", "Blind", "```css\n A bright flash of light comes off the {}, blinding you.```", 100],
+            ["You made a bit of profit on that one if you manage to get out of this tomb alive. As you venture on, it gets quite a bit warmer and the air smells of brimstone. It's probably just some geothermal vent or volcanic activity you reassure yourselfes moving on. From behind a boulder in a darker corner, two gleaming eyes gleefully watch you trigger **a{} {}**.","n ancient","Trap","Entangle","```css\n Creepy black tendrils whip around blindly searching for anything to grab.```", 100],
+            ["That wasn't easy. On top of things, **a{} {}** got attracted by the trap to prey on its victims.",None,"Bunch of Ghouls",None,None,0],
+            ["Finally this seems to be the end of this tomb. You found an ornate coffin amidst several tall bookcases filled with magic folios. Some stacks of books are piled on a sturdy desk, where an oil lamp is burning. Doesn't it seem strange how this resembles more an active workplace than a grave? This question is answered with a sombre \"YES\" as the archlich **{}** manifests himself out of the very dust this room is covered in."," hideous","Grz'al Brömpf","Sleep","```css\n \"GOOD NIGHT, MIGHTY HERO\" {} booms maniacally.```",50]]
     wood = [["**The dark and brooding shadow forests of Dunwyn** lie in front of you. {} heroes be crossing. How far will they make it?", None, None, None, None, 0],
-            ["A clearing opens up and allows for some scarce sunlight in this gloomy woods. Apparently a{0} {1} is enjoying the sun as well, startled by your sudden appearance.", None, None, None, None, 0],
-            ["Further back in some overgrown thicket, you spot a small cottage...made of gingerbread? A{0} {1} is beckoning you closer. The fact that {2} skin is green and {2} faces\' warts are nearly covered by the big hooked nose does not bode well.", "n old", "Witch", "Any", "The wicked old {} casts {}.", 80],
-            ["A cave tunnel was mentioned in a travellers guide as a shortcut. As you joyfully enter, you start wondering after a few meters if this spidersilk clad tunnel with bones on the floor is the right way. The{0} {1} however is grateful for such a big snack walking in willingly.", None, "Cave Spider", None, None, 0],
-            ["As you return from the cave, you tear up that wretched travellers guide into shreds. This{0} {1} is not happy about your littering the forest he calls {2} home.", " colossal", "Owlbear", None, None, 0],
-            ["Swatting your partymember to keep that infernal buzzing noise down, you realize it is coming from all around you. A{0} {1} has surrounded you.", None, "Swarm of Jabberflies", "Blind", "The {} is like a black cloud obscuring your vision.", 100],
-            ["Now this seems to be the cave tunnel shortcut the guide was talking about. No spidersilk anywhere and smooth walls! But this time it is guarded by a{0} {1}", None, "Toadward and 3 Ogres", None, None, 0],
-            ["The end of that tunnel led you up into the middle of Drekmore Castle! {2} {1} watched you emerge from the small grate in the courtyard and is now launching an attack.", None, None, "Any", "{2}{0} curses you with {1}.", 80],]
+            ["A clearing opens up and allows for some scarce sunlight in this gloomy woods. Apparently **a{0} {1}** is enjoying the sun as well, startled by your sudden appearance.", None, None, None, None, 0],
+            ["Further back in some overgrown thicket, you spot a small cottage...made of gingerbread? **A{0} {1}** is beckoning you closer. The fact that {2} skin is green and {2} faces\' warts are nearly covered by the big hooked nose does not bode well.", "n old", "Witch", "Any", "```css\n The wicked old {} casts {}.```", 80],
+            ["A cave tunnel was mentioned in a travellers guide as a shortcut. As you joyfully enter, you start wondering after a few meters if this spidersilk clad tunnel with bones on the floor is the right way. **A{0} {1}** however is grateful for such a big snack walking in willingly.", None, "Cave Spider", None, None, 0],
+            ["As you return from the cave, you tear up that wretched travellers guide into shreds. **A{0} {1}** is not happy about your littering the forest he calls {2} home.", " colossal", "Owlbear", None, None, 0],
+            ["Swatting your partymember to keep that infernal buzzing noise down, you realize it is coming from all around you. **A{0} {1}** has surrounded you.", None, "Swarm of Jabberflies", "Blind", "```css\n The {} is like a black cloud obscuring your vision.```", 100],
+            ["Now this seems to be the cave tunnel shortcut the guide was talking about. No spidersilk anywhere and smooth walls! But this time it is guarded by **a{0} {1}**", None, "Toadward and 3 Ogres", None, None, 0],
+            ["The end of that tunnel led you up into the middle of Drekmore Castle! **{2} {1}** watched you emerge from the small grate in the courtyard and is now launching an attack.", None, None, "Any", "```css\n {2}{0} curses you with {1}.```", 80]]
     arena = [["Our {} adventurers are bravely entering the **Arena of endless horrible Deaths**. Then suddenly all hell breaks loose.", None, None, None, None, 0],
-            ["The announcer summons a{0} {1} into the arena.", None, None, None, None, 0],
-            ["Next up on the list of contestants is a{0} {1}. {2} rudely gesturing what {3} going to do to your slain corpses.", None, None, None, None, 0],
-            ["Time for some crowd pleasing! A{0} {1} is whipping up some dark magic.", None, "Darkelf Mage", "Any", "The {} casts {}.", 100],
-            ["Her heart is as black as her soul. Meet a{0} {1}. A melange of blackclad witchdom and halitosis.", None, "Black Aliss", "Any", "{} giggles maniacally and curses you with {}.", 90],
-            ["Here comes a{0} {1}. {2} as colorful as a bruise.", None, None, None, None, 0],
-            ["Some like a{0} {1} to the salt of the earth. Probably meaning {3} square, rough and bad for your health.", None, None, None, None, 0],
-            ["Order up! Here comes a{0} {1}. No refunds!", None, None, "Any", "To your surprise, the {} cast {}.", 50],
-            ["Now a{0} {1} is raging and screaming towards you.", None, None, None, None, 0],
-            ["A{0} {1} is making quite a pompous entrance. Let's see if you can cut him down to size.", None, None, None, None, 0],
-            ["Gather round to see a{0} {1} make his move in the arena.", None, None, None, None, 0],
-            ["A round of applause heralds the coming of a{0} {1}. {2} an all time audience favourite.", None, None, None, None, 0],]
+            ["The announcer summons **a{0} {1}** into the arena.", None, None, None, None, 0],
+            ["Next up on the list of contestants is **a{0} {1}**. {2} rudely gesturing what {3} going to do to your slain corpses.", None, None, None, None, 0],
+            ["Time for some crowd pleasing! **A{0} {1}** is whipping up some dark magic.", None, None, "Any", "```css\n The {} casts {}.```", 100],
+            ["Her heart is as black as her soul. Meet **a{0} {1}**. A melange of blackclad witchdom and halitosis.", None, "Black Aliss", "Any", "```css\n {} giggles maniacally and curses you with {}.```", 90],
+            ["Here comes **a{0} {1}**. {2} as colorful as a bruise.", None, None, None, None, 0],
+            ["Some like **a{0} {1}** to the salt of the earth. Probably meaning {3} square, rough and bad for your health.", None, None, None, None, 0],
+            ["Order up! Here comes **a{0} {1}**. No refunds!", None, None, "Any", "```css\n To your surprise, the {} cast {}.```", 50],
+            ["Now **a{0} {1}** is raging and screaming towards you.", None, None, None, None, 0],
+            ["**A{0} {1}** is making quite a pompous entrance. Let's see if you can cut this challenge down to size.", None, None, None, None, 0],
+            ["Gather round to see **a{0} {1}** make a move in the arena.", None, None, None, None, 0],
+            ["A round of applause heralds the coming of **a{0} {1}**. {2} an all time audience favourite.", None, None, None, None, 0]]
 
     challenge = ""
     attrib = ""
@@ -418,7 +419,15 @@ class Quest:
                     return
                 if Quest.effect == "Any":
                     Quest.effect = random.choice(list(Quest.effects.keys()))
-                await ctx.send((Quest.quest[Quest.idx][4]).format(Quest.challenge,Quest.effect,Quest.monsters[Quest.challenge]["pronoun"]))
+                if Quest.endless:
+                    if Quest.idx % 5 == 0:
+                        await ctx.send((Quest.quest[Quest.idx][4]).format(Quest.challenge,Quest.effect,Quest.bosses[Quest.challenge]["pronoun"]))
+                    else:
+                        await ctx.send((Quest.quest[Quest.idx][4]).format(Quest.challenge,Quest.effect,Quest.monsters[Quest.challenge]["pronoun"]))
+                elif Quest.idx < (len(Quest.quest)-1):
+                    await ctx.send((Quest.quest[Quest.idx][4]).format(Quest.challenge,Quest.effect,Quest.bosses[Quest.challenge]["pronoun"]))
+                else:
+                    await ctx.send((Quest.quest[Quest.idx][4]).format(Quest.challenge,Quest.effect,Quest.monsters[Quest.challenge]["pronoun"]))
                 await asyncio.sleep(1.5)
                 if Quest.effect == "Sleep":
                     all = Quest.userslist["fight"]+Quest.userslist["talk"]+Quest.userslist["pray"]
@@ -432,7 +441,15 @@ class Quest:
                     await ctx.send("**" + sleepyhead + "**" + " fell asleep.")
                 else:
                     fails = []
-                    if Quest.idx < (len(Quest.quest)-1):
+                    if Quest.endless:
+                        if Quest.idx % 5 == 0:
+                            saving_throw = round(Quest.bosses[Quest.challenge][Quest.effects[Quest.effect][0]]*0.2 + Quest.idx*2)
+                        else:
+                            if Quest.idx < 3:
+                                saving_throw = round(Quest.monsters[Quest.challenge][Quest.effects[Quest.effect][0]]*0.8 + Quest.idx*2)
+                            elif Quest.idx < 5:
+                                saving_throw = round(Quest.monsters[Quest.challenge][Quest.effects[Quest.effect][0]]*0.4 + Quest.idx*2)
+                    elif Quest.idx < (len(Quest.quest)-1):
                         if Quest.idx < 3:
                             saving_throw = round(Quest.monsters[Quest.challenge][Quest.effects[Quest.effect][0]]*0.8 + Quest.idx*2)
                         elif Quest.idx < 5:
