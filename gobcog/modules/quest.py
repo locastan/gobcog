@@ -164,7 +164,13 @@ class Quest:
             else:
                 Quest.attrib = Quest.quest[Quest.idx][1]
             if Quest.quest[Quest.idx][2] == None:
-                Quest.challenge = random.choice(list(Quest.monsters.keys()))
+                if Quest.endless:
+                    if Quest.idx % 5 == 0:
+                        Quest.challenge = random.choice(list(Quest.bosses.keys()))
+                    else:
+                        Quest.challenge = random.choice(list(Quest.monsters.keys()))
+                else:
+                    Quest.challenge = random.choice(list(Quest.monsters.keys()))
             else:
                 Quest.challenge = Quest.quest[Quest.idx][2]
             Quest.effect = Quest.quest[Quest.idx][3] # Intended for special ability or effect of a room or enemy or trap.
@@ -407,6 +413,7 @@ class Quest:
         async def handle_effect():
             if Quest.effect != None:
                 roll = random.randint(1,100) #if effect chance is not met return silently.
+                saving_throw = 10 #initializte here with a default value if something goes wrong later with the if else.
                 if roll > Quest.quest[Quest.idx][5]:
                     return
                 if Quest.effect == "Any":
