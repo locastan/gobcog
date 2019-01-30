@@ -425,9 +425,9 @@ class Quest:
                     else:
                         await ctx.send((Quest.quest[Quest.idx][4]).format(Quest.challenge,Quest.effect,Quest.monsters[Quest.challenge]["pronoun"]))
                 elif Quest.idx < (len(Quest.quest)-1):
-                    await ctx.send((Quest.quest[Quest.idx][4]).format(Quest.challenge,Quest.effect,Quest.bosses[Quest.challenge]["pronoun"]))
-                else:
                     await ctx.send((Quest.quest[Quest.idx][4]).format(Quest.challenge,Quest.effect,Quest.monsters[Quest.challenge]["pronoun"]))
+                else:
+                    await ctx.send((Quest.quest[Quest.idx][4]).format(Quest.challenge,Quest.effect,Quest.bosses[Quest.challenge]["pronoun"]))
                 await asyncio.sleep(1.5)
                 if Quest.effect == "Sleep":
                     all = Quest.userslist["fight"]+Quest.userslist["talk"]+Quest.userslist["pray"]
