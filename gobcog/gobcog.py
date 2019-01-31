@@ -475,7 +475,7 @@ class GobCog(BaseCog):
                 if item['equip'] == "cancel":
                     await ctx.send("**{}** cancelled his looting session.".format(user.display_name))
                     break
-        Gobcog.save()
+        Userdata.save()
 
 
     @commands.command()
