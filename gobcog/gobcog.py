@@ -458,6 +458,7 @@ class GobCog(BaseCog):
             treasure = Userdata.users[str(user.id)]['treasure'][redux.index(1)]
             if treasure == 0:
                 await ctx.send("You have no {} treasure chest to open.".format(type))
+                break
             else:
                 item = await Treasure.open_chest(ctx, user, type)
                 Userdata.users[str(user.id)]['treasure'] = [x-y for x,y in zip(Userdata.users[str(user.id)]['treasure'], redux)]
