@@ -14,3 +14,4 @@ class Userdata:
     async def save():
         with Userdata.fp.open('w') as f:
             json.dump(Userdata.users, f, indent=4, default=lambda o: '<not serializable>', sort_keys=True)
+            print('Userdata saved.')
