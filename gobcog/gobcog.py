@@ -454,8 +454,8 @@ class GobCog(BaseCog):
         user = ctx.author
         if not 'treasure' in Userdata.users[str(user.id)].keys():
             Userdata.users[str(user.id)]['treasure'] = [0,0,0,0]
-        treasure = Userdata.users[str(user.id)]['treasure'][redux.index(1)]
         for x in range(0, many):
+            treasure = Userdata.users[str(user.id)]['treasure'][redux.index(1)]
             if treasure == 0:
                 await ctx.send("You have no {} treasure chest to open.".format(type))
             else:
