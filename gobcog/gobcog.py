@@ -734,9 +734,9 @@ class GobCog(BaseCog):
         """
         global users
         party = []
-        msg = await ctx.send("**" + ctx.author.display_name + "** just spent 500 copperpieces in the inn, looking for a party to do a mighty quest. Do you accept (30s)?")
+        msg = await ctx.send("**" + ctx.author.display_name + "** just spent 500 copperpieces in the inn, looking for a party to do a mighty quest. Do you accept (60s)?")
         start_adding_reactions(msg, "✅")
-        await asyncio.sleep(30)
+        await asyncio.sleep(60)
         message = await ctx.message.channel.get_message(msg.id)
         try:
             reaction = next(filter(lambda x: x.emoji == "✅", message.reactions), None)

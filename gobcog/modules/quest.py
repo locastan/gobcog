@@ -754,6 +754,7 @@ class Quest:
         Quest.timeout = 0
         if Quest.idx >= (len(Quest.quest)-1) and not Quest.endless:
             Quest.running = False
+        await asyncio.sleep(1)
 
     async def reward(ctx, list, amount, modif, special):
         depthbonus = float("2." + str(Quest.idx))
