@@ -11,7 +11,7 @@ class Treasure:
 
     finish = 0
 
-    controls = {"✅": "equip", "❎": "backpack", "💰": "sell"}
+    controls = {"✅": "equip", "❎": "backpack", "💰": "sell", "❌": "cancel"}
     common = {"rusty sword":{"slot":["right"],"att":1,"cha":-1},
             "shiny sword":{"slot":["right"],"att":1,"cha":1},
             "wooden club":{"slot":["right"],"att":1,"cha":0},

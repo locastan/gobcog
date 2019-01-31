@@ -455,7 +455,7 @@ class GobCog(BaseCog):
         if not 'treasure' in Userdata.users[str(user.id)].keys():
             Userdata.users[str(user.id)]['treasure'] = [0,0,0,0]
         treasure = Userdata.users[str(user.id)]['treasure'][redux.index(1)]
-        for x in range(1, many):
+        for x in range(0, many):
             if treasure == 0:
                 await ctx.send("You have no {} treasure chest to open.".format(type))
             else:
@@ -472,6 +472,8 @@ class GobCog(BaseCog):
                     await ctx.send("{} put the {} into the backpack.".format(user.display_name,item['itemname']))
                 await ctx.send("```css\n" + "You own {} normal, {} rare, {} epic and {} quest chests.```".format(
                     str(Userdata.users[str(user.id)]['treasure'][0]),str(Userdata.users[str(user.id)]['treasure'][1]),str(Userdata.users[str(user.id)]['treasure'][2]),str(Userdata.users[str(user.id)]['treasure'][3])))
+                if item['equip'] == "cancel":
+                    break
 
 
     @commands.command()
