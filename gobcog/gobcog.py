@@ -434,10 +434,10 @@ class GobCog(BaseCog):
 
     @commands.command()
     @commands.guild_only()
-    async def loot(self, ctx, type: str="normal"):
+    async def loot(self, ctx, type: str="normal", many: int=1):
         """This opens one of your precious treasure chests.
-            (If you have rare or epic chests, type "rare" or
-            "epic" after the command to open those.)
+            (specify "rare", "epic" or "quest" and
+            if you want to open multiple how many.)
         """
         if type == "normal":
             redux = [1,0,0,0]
@@ -455,22 +455,23 @@ class GobCog(BaseCog):
         if not 'treasure' in Userdata.users[str(user.id)].keys():
             Userdata.users[str(user.id)]['treasure'] = [0,0,0,0]
         treasure = Userdata.users[str(user.id)]['treasure'][redux.index(1)]
-        if treasure == 0:
-            await ctx.send("You have no {} treasure chest to open.".format(type))
-        else:
-            item = await Treasure.open_chest(ctx, user, type)
-            Userdata.users[str(user.id)]['treasure'] = [x-y for x,y in zip(Userdata.users[str(user.id)]['treasure'], redux)]
-            if item['equip'] == "sell":
-                price = await GobCog.sell(user,item)
-                await ctx.send("{} sold the {} for {} copperpieces.".format(user.display_name,item['itemname'],price))
-            elif item['equip'] == "equip":
-                equip = {"itemname": item['itemname'],"item": item['item']}
-                await self.equip_item(ctx, equip, False)
+        for x in range(1, many):
+            if treasure == 0:
+                await ctx.send("You have no {} treasure chest to open.".format(type))
             else:
-                Userdata.users[str(user.id)]['items']['backpack'].update({item['itemname']: item['item']})
-                await ctx.send("{} put the {} into the backpack.".format(user.display_name,item['itemname']))
-            await ctx.send("```css\n" + "You own {} normal, {} rare, {} epic and {} quest chests.```".format(
-                str(Userdata.users[str(user.id)]['treasure'][0]),str(Userdata.users[str(user.id)]['treasure'][1]),str(Userdata.users[str(user.id)]['treasure'][2]),str(Userdata.users[str(user.id)]['treasure'][3])))
+                item = await Treasure.open_chest(ctx, user, type)
+                Userdata.users[str(user.id)]['treasure'] = [x-y for x,y in zip(Userdata.users[str(user.id)]['treasure'], redux)]
+                if item['equip'] == "sell":
+                    price = await GobCog.sell(user,item)
+                    await ctx.send("{} sold the {} for {} copperpieces.".format(user.display_name,item['itemname'],price))
+                elif item['equip'] == "equip":
+                    equip = {"itemname": item['itemname'],"item": item['item']}
+                    await self.equip_item(ctx, equip, False)
+                else:
+                    Userdata.users[str(user.id)]['items']['backpack'].update({item['itemname']: item['item']})
+                    await ctx.send("{} put the {} into the backpack.".format(user.display_name,item['itemname']))
+                await ctx.send("```css\n" + "You own {} normal, {} rare, {} epic and {} quest chests.```".format(
+                    str(Userdata.users[str(user.id)]['treasure'][0]),str(Userdata.users[str(user.id)]['treasure'][1]),str(Userdata.users[str(user.id)]['treasure'][2]),str(Userdata.users[str(user.id)]['treasure'][3])))
 
 
     @commands.command()
