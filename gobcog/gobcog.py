@@ -463,16 +463,17 @@ class GobCog(BaseCog):
                 Userdata.users[str(user.id)]['treasure'] = [x-y for x,y in zip(Userdata.users[str(user.id)]['treasure'], redux)]
                 if item['equip'] == "sell":
                     price = await GobCog.sell(user,item)
-                    await ctx.send("{} sold the {} for {} copperpieces.".format(user.display_name,item['itemname'],price))
+                    await ctx.send("**{}** sold the {} for {} copperpieces.".format(user.display_name,item['itemname'],price))
                 elif item['equip'] == "equip":
                     equip = {"itemname": item['itemname'],"item": item['item']}
                     await self.equip_item(ctx, equip, False)
                 else:
                     Userdata.users[str(user.id)]['items']['backpack'].update({item['itemname']: item['item']})
-                    await ctx.send("{} put the {} into the backpack.".format(user.display_name,item['itemname']))
+                    await ctx.send("**{}** put the {} into the backpack.".format(user.display_name,item['itemname']))
                 await ctx.send("```css\n" + "You own {} normal, {} rare, {} epic and {} quest chests.```".format(
                     str(Userdata.users[str(user.id)]['treasure'][0]),str(Userdata.users[str(user.id)]['treasure'][1]),str(Userdata.users[str(user.id)]['treasure'][2]),str(Userdata.users[str(user.id)]['treasure'][3])))
                 if item['equip'] == "cancel":
+                    await ctx.send("**{}** cancelled his looting session.".format(user.display_name))
                     break
 
 
