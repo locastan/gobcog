@@ -442,10 +442,12 @@ class GobCog(BaseCog):
             if you want to open multiple how many.)
         """
         global looting
+        await ctx.send(str(looting))
         if ctx.author.display_name in looting:
             await ctx.send("**{}**, you are currently looting, please finish that session first.".format(ctx.author.display_name))
         else:
             looting.append(ctx.author.display_name)
+        await ctx.send(str(looting))
         if type == "normal":
             redux = [1,0,0,0]
         elif type == "rare":
@@ -458,7 +460,6 @@ class GobCog(BaseCog):
             await ctx.send("There is talk of a {} treasure chest but nobody ever saw one.".format(type))
             looting.remove(ctx.author.display_name)
             return
-        global users
         user = ctx.author
         if not 'treasure' in Userdata.users[str(user.id)].keys():
             Userdata.users[str(user.id)]['treasure'] = [0,0,0,0]
