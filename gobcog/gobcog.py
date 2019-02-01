@@ -442,12 +442,11 @@ class GobCog(BaseCog):
             if you want to open multiple how many.)
         """
         global looting
-        await ctx.send(str(looting))
         if ctx.author.display_name in looting:
             await ctx.send("**{}**, you are currently looting, please finish that session first.".format(ctx.author.display_name))
+            return
         else:
             looting.append(ctx.author.display_name)
-        await ctx.send(str(looting))
         if type == "normal":
             redux = [1,0,0,0]
         elif type == "rare":
