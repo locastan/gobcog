@@ -34,6 +34,7 @@ class GobCog(BaseCog):
     global users
     users = Userdata.users
     last_trade = 0
+    looting = []
     bot = None
 
     """Goblins Adventure bot"""
@@ -439,6 +440,11 @@ class GobCog(BaseCog):
             (specify "rare", "epic" or "quest" and
             if you want to open multiple how many.)
         """
+        looting = []
+        if ctx.author.display_name in looting:
+            await ctx.send("**{}**, you are currently looting, please finish that session first.".format(ctx.author.display_name))
+        else:
+            looting.append(ctx.author.display_name)
         if type == "normal":
             redux = [1,0,0,0]
         elif type == "rare":
@@ -449,6 +455,7 @@ class GobCog(BaseCog):
             redux = [0,0,0,1]
         else:
             await ctx.send("There is talk of a {} treasure chest but nobody ever saw one.".format(type))
+            looting.remove(ctx.author.display_name)
             return
         global users
         user = ctx.author
@@ -458,6 +465,7 @@ class GobCog(BaseCog):
             treasure = Userdata.users[str(user.id)]['treasure'][redux.index(1)]
             if treasure <= 0:
                 await ctx.send("You have no {} treasure chest to open.".format(type))
+                looting.remove(ctx.author.display_name)
                 break
             else:
                 item = await Treasure.open_chest(ctx, user, type)
@@ -475,6 +483,7 @@ class GobCog(BaseCog):
                     str(Userdata.users[str(user.id)]['treasure'][0]),str(Userdata.users[str(user.id)]['treasure'][1]),str(Userdata.users[str(user.id)]['treasure'][2]),str(Userdata.users[str(user.id)]['treasure'][3])))
                 if item['equip'] == "cancel":
                     await ctx.send("**{}** cancelled his looting session.".format(user.display_name))
+                    looting.remove(ctx.author.display_name)
                     break
         await Userdata.save()
 
