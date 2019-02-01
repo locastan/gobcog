@@ -757,12 +757,12 @@ class Quest:
             Quest.running = False
         await asyncio.sleep(1)
 
-    async def reward(ctx, list, amount, modif, special):
+    async def reward(ctx, list, xamount, modif, special):
         depthbonus = float("1.3" + str(Quest.idx))
-        amount = amount * depthbonus
-        xp = max(1,round(amount))
+        xamount = xamount * depthbonus
+        xp = max(1,round(xamount))
         Quest.sumxp += xp
-        cp = max(1,round(amount * modif))
+        cp = max(1,round(xamount * modif))
         Quest.sumcp += cp
         phrase = ""
         if Quest.endless and (Quest.idx % 5 == 0):
@@ -789,17 +789,14 @@ class Quest:
                     Quest.rewards[user]["special"] = special
                     Quest.sumtreasure = special
                 else:
-                    for indx, number in enumerate(special):
-                        Quest.rewards[user]["special"][indx] += number
-                        Quest.sumtreasure[indx] += number
-            elif not Quest.rewards[user]["special"]:
-                Quest.rewards[user]["special"] = special
+                    Quest.rewards[user]["special"] = [sum(x) for x in zip(Quest.rewards[user]["special"], special)]
+                    Quest.sumtreasure = [sum(x) for x in zip(Quest.sumtreasure, special)]
         if Quest.sumtreasure != False and sum(Quest.sumtreasure) == 1:
             types = [" normal"," rare","n epic", "quest"]
             ctype = types[Quest.sumtreasure.index(1)]
             phrase += "\nYou have {} xp and found {} copperpieces so far. You also secured **a{} treasure chest**!".format(Quest.sumxp,Quest.sumcp,ctype)
         elif Quest.sumtreasure != False and sum(Quest.sumtreasure) > 1:
-            phrase += "\nYou have {} xp and found {} copperpieces so far. You also secured {} normal, {} rare, {} epic and {} quest chests!".format(Quest.sumxp,Quest.sumcp, special[0],special[1],special[2],special[3])
+            phrase += "\nYou have {} xp and found {} copperpieces so far. You also secured {} normal, {} rare, {} epic and {} quest chests!".format(Quest.sumxp,Quest.sumcp, Quest.sumtreasure[0],Quest.sumtreasure[1],Quest.sumtreasure[2],Quest.sumtreasure[3])
         else:
             phrase += "\nYou have {} xp and found {} copperpieces so far.".format(Quest.sumxp,Quest.sumcp)
         return phrase
