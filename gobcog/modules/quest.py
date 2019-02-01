@@ -509,8 +509,8 @@ class Quest:
                     fumblelist.append(user)
                     if Userdata.users[str(member.id)]['class']['name']=="Berserker" and Userdata.users[str(member.id)]['class']['ability']:
                         bonus = random.randint(5,15)
-                        attack += roll - bonus + att_value
-                        report += "**" + user + "**: " +  "🎲({})-".format(roll) + " 💥{} + ".format(bonus) + "🗡" + str(att_value) + effect + " |"
+                        attack += -roll - bonus - att_value
+                        report += "**" + user + "**: " +  "- 🎲({}) -".format(roll) + "💥{} + ".format(bonus) + "- 🗡" + str(att_value) + " |"
                 elif user in Quest.affected and Quest.effect == "Fumble" and 1 < roll <= 5:
                     await ctx.send("**" + user + "**" + " has been fumbled.")
                     fumblelist.append(user)

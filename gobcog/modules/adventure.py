@@ -308,8 +308,8 @@ class Adventure:
                     fumblelist.append(user)
                     if Userdata.users[str(member.id)]['class']['name']=="Berserker" and Userdata.users[str(member.id)]['class']['ability']:
                         bonus = random.randint(5,15)
-                        attack += roll - bonus + att_value
-                        report += "**" + user + "**: " +  "🎲({})-".format(roll) + " 💥{} + ".format(bonus) + "🗡" + str(att_value) + " |"
+                        attack += -roll -bonus -att_value
+                        report += "**" + user + "**: " +  "- 🎲({}) -".format(roll) + "💥{} + ".format(bonus) + "- 🗡" + str(att_value) + " |"
                 elif roll == 20 or (Userdata.users[str(member.id)]['class']['name']=="Berserker" and Userdata.users[str(member.id)]['class']['ability']):
                     ability = ""
                     if roll == 20:
