@@ -32,6 +32,7 @@ def charge(amount: int):
 class GobCog(BaseCog):
 
     global users
+    global looting
     users = Userdata.users
     last_trade = 0
     looting = []
