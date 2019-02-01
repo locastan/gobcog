@@ -758,7 +758,7 @@ class Quest:
         await asyncio.sleep(1)
 
     async def reward(ctx, list, amount, modif, special):
-        depthbonus = float("2." + str(Quest.idx))
+        depthbonus = float("1.3" + str(Quest.idx))
         amount = amount * depthbonus
         xp = max(1,round(amount))
         Quest.sumxp += xp
@@ -789,9 +789,9 @@ class Quest:
                     Quest.rewards[user]["special"] = special
                     Quest.sumtreasure = special
                 else:
-                    for idx, number in enumerate(special):
-                        Quest.rewards[user]["special"][idx] += number
-                        Quest.sumtreasure[idx] += number
+                    for indx, number in enumerate(special):
+                        Quest.rewards[user]["special"][indx] += number
+                        Quest.sumtreasure[indx] += number
             elif not Quest.rewards[user]["special"]:
                 Quest.rewards[user]["special"] = special
         if Quest.sumtreasure != False and sum(Quest.sumtreasure) == 1:
@@ -799,7 +799,7 @@ class Quest:
             ctype = types[Quest.sumtreasure.index(1)]
             phrase += "\nYou have {} xp and found {} copperpieces so far. You also secured **a{} treasure chest**!".format(Quest.sumxp,Quest.sumcp,ctype)
         elif Quest.sumtreasure != False and sum(Quest.sumtreasure) > 1:
-            phrase += "\nYou have {} xp and found {} copperpieces so far. You also secured **several treasure chests**!".format(Quest.sumxp,Quest.sumcp)
+            phrase += "\nYou have {} xp and found {} copperpieces so far. You also secured {} normal, {} rare, {} epic and {} quest chests!".format(Quest.sumxp,Quest.sumcp, special[0],special[1],special[2],special[3])
         else:
             phrase += "\nYou have {} xp and found {} copperpieces so far.".format(Quest.sumxp,Quest.sumcp)
         return phrase
