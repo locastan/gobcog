@@ -434,7 +434,6 @@ class GobCog(BaseCog):
 
     @commands.command()
     @commands.guild_only()
-    @commands.cooldown(rate=1, per=30, type=commands.BucketType.user)
     async def loot(self, ctx, type: str="normal", many: int=1):
         """This opens one of your precious treasure chests.
             (specify "rare", "epic" or "quest" and
