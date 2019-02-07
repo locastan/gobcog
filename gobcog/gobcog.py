@@ -200,7 +200,7 @@ class GobCog(BaseCog):
 
     @commands.command()
     @commands.guild_only()
-    @commands.cooldown(rate=1, per=3600, type=commands.BucketType.user)
+    @commands.cooldown(rate=1, per=900, type=commands.BucketType.user)
     async def rage(self,ctx):
         """This allows a Berserker to add substantial attack bonuses for one battle.
         """
@@ -215,7 +215,7 @@ class GobCog(BaseCog):
 
     @commands.command()
     @commands.guild_only()
-    @commands.cooldown(rate=1, per=3600, type=commands.BucketType.user)
+    @commands.cooldown(rate=1, per=900, type=commands.BucketType.user)
     async def bless(self,ctx):
         """This allows a praying Cleric to add substantial bonuses for heroes fighting the battle.
         """
@@ -229,7 +229,7 @@ class GobCog(BaseCog):
 
     @commands.command()
     @commands.guild_only()
-    @commands.cooldown(rate=1, per=3600, type=commands.BucketType.user)
+    @commands.cooldown(rate=1, per=900, type=commands.BucketType.user)
     async def sing(self,ctx):
         """This allows a Bard to add substantial diplomacy bonuses for one battle.
         """
@@ -929,7 +929,7 @@ class GobCog(BaseCog):
         Userdata.users[str(user.id)]['exp'] += exp
         await bank.deposit_credits(user, cp)
         await GobCog.level_up(ctx, users, user)
-        if special != False:
+        if special != False and special != [0,0,0,0]:
             if not 'treasure' in Userdata.users[str(user.id)].keys():
                 Userdata.users[str(user.id)]['treasure'] = [0,0,0,0]
             Userdata.users[str(user.id)]['treasure'] = [sum(x) for x in zip(Userdata.users[str(user.id)]['treasure'], special)]

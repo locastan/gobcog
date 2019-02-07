@@ -10,10 +10,13 @@ import calendar
 import time
 from .custompredicate import CustomPredicate
 from .userdata import Userdata
+import logging
 
 _ReactableEmoji = Union[str, discord.Emoji]
 
 class Quest:
+
+    log = logging.getLogger("red")
 
     attribs = {" terrifying":[1,1.2],
                 " hideous":[1,1],
@@ -48,7 +51,7 @@ class Quest:
                 "Giant":{"str":45,"dipl":30, "pronoun": "its"},
                 "Archmage":{"str":28,"dipl":30, "pronoun": "him"}}
     wood_bosses = {"Lady Bane":{"str":90,"dipl":115, "pronoun": ""},
-                "Green Dragon":{"str":95,"dipl":105, "pronoun": "The"},
+                "Green Dragon":{"str":95,"dipl":105, "pronoun": "The "},
                 "Duke Igthorn":{"str":130,"dipl":120, "pronoun": ""}}
     tomb_monsters = {"Beholder Zombie":{"str":30,"dipl":35, "pronoun": "it"},
                 "Bunch of Ghouls":{"str":60,"dipl":60, "pronoun": "it"},
@@ -95,7 +98,7 @@ class Quest:
             ["A clearing opens up and allows for some scarce sunlight in this gloomy woods. Apparently **a{0} {1}** is enjoying the sun as well, startled by your sudden appearance.", None, None, None, None, 0],
             ["Further back in some overgrown thicket, you spot a small cottage...made of gingerbread? **A{0} {1}** is beckoning you closer. The fact that {2} skin is green and {2} faces\' warts are nearly covered by the big hooked nose does not bode well.", "n old", "Witch", "Any", "```css\n The wicked old {} casts {}.```", 80],
             ["A cave tunnel was mentioned in a travellers guide as a shortcut. As you joyfully enter, you start wondering after a few meters if this spidersilk clad tunnel with bones on the floor is the right way. **A{0} {1}** however is grateful for such a big snack walking in willingly.", None, "Cave Spider", None, None, 0],
-            ["As you return from the cave, you tear up that wretched travellers guide into shreds. **A{0} {1}** is not happy about your littering the forest he calls {2} home.", " colossal", "Owlbear", None, None, 0],
+            ["As you return from the cave, you tear up that wretched travellers guide into shreds. **A{0} {1}** is not happy about your littering the forest it calls {2} home.", " colossal", "Owlbear", None, None, 0],
             ["Swatting your partymember to keep that infernal buzzing noise down, you realize it is coming from all around you. **A{0} {1}** has surrounded you.", None, "Swarm of Jabberflies", "Blind", "```css\n The {} is like a black cloud obscuring your vision.```", 100],
             ["Now this seems to be the cave tunnel shortcut the guide was talking about. No spidersilk anywhere and smooth walls! But this time it is guarded by **a{0} {1}**", None, "Toadward and 3 Ogres", None, None, 0],
             ["The end of that tunnel led you up into the middle of Drekmore Castle! **{2} {1}** watched you emerge from the small grate in the courtyard and is now launching an attack.", None, None, "Any", "```css\n {2}{0} curses you with {1}.```", 80]]
@@ -122,6 +125,7 @@ class Quest:
 
     async def queste(ctx, party): # party is a list of user.display_name of partymembers.
         if Quest.timeout != 0:
+            Quest.log.exception("Quest.timeout != 0: There is already a Quest in session.")
             return None
         Quest.rewards = {}
         Quest.effect = None
@@ -129,11 +133,12 @@ class Quest:
         Quest.participants = party
         Quest.partyIDs = []
         Quest.idx = 0
+        Quest.depth = 0 #only used for endless dungeons
         Quest.running = True
         Quest.failed = False
         Quest.sumxp = 0
         Quest.sumcp = 0
-        Quest.sumtreasure = False
+        Quest.sumtreasure = [0,0,0,0]
         for user in party:
             member = discord.utils.find(lambda m: m.display_name == user, ctx.guild.members)
             Quest.partyIDs.append(member.id)
@@ -142,7 +147,7 @@ class Quest:
         Quest.quest = getattr(Quest, Quest.name)
         Quest.monsters = getattr(Quest, Quest.name + "_monsters")
         Quest.bosses = getattr(Quest, Quest.name + "_bosses")
-        print("Quest:" + str(Quest.quest) + "| Idx: "+ str(Quest.idx) + "| Participants: " + str(Quest.participants))
+        Quest.log.exception("Quest:" + str(Quest.quest) + "| Idx: "+ str(Quest.idx) + "| Participants: " + str(Quest.participants))
         await ctx.send(Quest.quest[Quest.idx][0].format(len(Quest.participants)))
         if Quest.endless:
             del Quest.quest[0]
@@ -159,7 +164,11 @@ class Quest:
     async def narrate(ctx):
         while Quest.running:
             Quest.userslist = {"fight":[],"pray":[],"talk":[],"run":[]}
-            Quest.idx += 1
+            if Quest.endless:
+                Quest.idx = random.randint(0,int(len(Quest.quest)-1)) #randomized pick from list of stages
+                Quest.depth += 1 #this keeps track of how far/deep we are now.
+            else:
+                Quest.idx += 1
             Quest.affected = []
             if Quest.quest[Quest.idx][1] == None:
                 Quest.attrib = random.choice(list(Quest.attribs.keys()))
@@ -167,7 +176,7 @@ class Quest:
                 Quest.attrib = Quest.quest[Quest.idx][1]
             if Quest.quest[Quest.idx][2] == None:
                 if Quest.endless:
-                    if Quest.idx % 5 == 0:
+                    if Quest.depth % 5 == 0:
                         Quest.challenge = random.choice(list(Quest.bosses.keys()))
                     else:
                         Quest.challenge = random.choice(list(Quest.monsters.keys()))
@@ -180,12 +189,12 @@ class Quest:
                 Quest.challenge = Quest.quest[Quest.idx][2]
             Quest.effect = Quest.quest[Quest.idx][3] # Intended for special ability or effect of a room or enemy or trap.
             if Quest.endless:
-                if Quest.idx % 5 == 0:
-                    Quest.str = Quest.bosses[Quest.challenge]["str"]*Quest.attribs[Quest.attrib][0] * Quest.idx
-                    Quest.dipl = Quest.bosses[Quest.challenge]["dipl"]*Quest.attribs[Quest.attrib][1] * Quest.idx
+                if Quest.depth % 5 == 0:
+                    Quest.str = Quest.bosses[Quest.challenge]["str"]*Quest.attribs[Quest.attrib][0] * Quest.depth
+                    Quest.dipl = Quest.bosses[Quest.challenge]["dipl"]*Quest.attribs[Quest.attrib][1] * Quest.depth
                 else:
-                    Quest.str = Quest.monsters[Quest.challenge]["str"]*Quest.attribs[Quest.attrib][0] * Quest.idx
-                    Quest.dipl = Quest.monsters[Quest.challenge]["dipl"]*Quest.attribs[Quest.attrib][1] * Quest.idx
+                    Quest.str = Quest.monsters[Quest.challenge]["str"]*Quest.attribs[Quest.attrib][0] * Quest.depth
+                    Quest.dipl = Quest.monsters[Quest.challenge]["dipl"]*Quest.attribs[Quest.attrib][1] * Quest.depth
             else:
                 if Quest.idx < (len(Quest.quest)-1):
                     Quest.str = Quest.monsters[Quest.challenge]["str"]*Quest.attribs[Quest.attrib][0]
@@ -201,17 +210,16 @@ class Quest:
             else:
                 Quest.timeout = 45
             if Quest.endless:
-                await ctx.send("🏟️ **Round {}**".format(Quest.idx))
+                await ctx.send("🏟️ **Round {}**".format(Quest.depth))
             else:
                 await ctx.send("📖 **Chapter {}**".format(Quest.idx))
             Quest.countdown(ctx, None, "Time remaining: ")
             await asyncio.sleep(0.2)
             if Quest.endless:
-                roll = random.randint(0,int(len(Quest.quest)-1))
-                if Quest.idx % 5 == 0:
-                    await Quest.menu(ctx, [(Quest.quest[roll][0]).format(Quest.attrib,Quest.challenge,Quest.bosses[Quest.challenge]["pronoun"],Quest.bosses[Quest.challenge]["pronoun"].lower())], {"🗡": Quest.fight, "🗨": Quest.talk, "🛐": Quest.pray, "❌": Quest.run})
+                if Quest.depth % 5 == 0: #Quest.idx is randomized.
+                    await Quest.menu(ctx, [(Quest.quest[Quest.idx][0]).format(Quest.attrib,Quest.challenge,Quest.bosses[Quest.challenge]["pronoun"],Quest.bosses[Quest.challenge]["pronoun"].lower())], {"🗡": Quest.fight, "🗨": Quest.talk, "🛐": Quest.pray, "❌": Quest.run})
                 else:
-                    await Quest.menu(ctx, [(Quest.quest[roll][0]).format(Quest.attrib,Quest.challenge,Quest.monsters[Quest.challenge]["pronoun"],Quest.monsters[Quest.challenge]["pronoun"].lower())], {"🗡": Quest.fight, "🗨": Quest.talk, "🛐": Quest.pray, "❌": Quest.run})
+                    await Quest.menu(ctx, [(Quest.quest[Quest.idx][0]).format(Quest.attrib,Quest.challenge,Quest.monsters[Quest.challenge]["pronoun"],Quest.monsters[Quest.challenge]["pronoun"].lower())], {"🗡": Quest.fight, "🗨": Quest.talk, "🛐": Quest.pray, "❌": Quest.run})
             else:
                 if Quest.idx < (len(Quest.quest)-1):
                     await Quest.menu(ctx, [(Quest.quest[Quest.idx][0]).format(Quest.attrib,Quest.challenge,Quest.monsters[Quest.challenge]["pronoun"],Quest.monsters[Quest.challenge]["pronoun"].lower())], {"🗡": Quest.fight, "🗨": Quest.talk, "🛐": Quest.pray, "❌": Quest.run})
@@ -424,7 +432,7 @@ class Quest:
                 if Quest.effect == "Any":
                     Quest.effect = random.choice(list(Quest.effects.keys()))
                 if Quest.endless:
-                    if Quest.idx % 5 == 0:
+                    if Quest.depth % 5 == 0:
                         await ctx.send((Quest.quest[Quest.idx][4]).format(Quest.challenge,Quest.effect,Quest.bosses[Quest.challenge]["pronoun"]))
                     else:
                         await ctx.send((Quest.quest[Quest.idx][4]).format(Quest.challenge,Quest.effect,Quest.monsters[Quest.challenge]["pronoun"]))
@@ -446,13 +454,13 @@ class Quest:
                 else:
                     fails = []
                     if Quest.endless:
-                        if Quest.idx % 5 == 0:
-                            saving_throw = round(Quest.bosses[Quest.challenge][Quest.effects[Quest.effect][0]]*0.2 + Quest.idx*2)
+                        if Quest.depth % 5 == 0:
+                            saving_throw = round(Quest.bosses[Quest.challenge][Quest.effects[Quest.effect][0]]*0.2 + Quest.depth*2)
                         else:
-                            if Quest.idx < 3:
-                                saving_throw = round(Quest.monsters[Quest.challenge][Quest.effects[Quest.effect][0]]*0.8 + Quest.idx*2)
-                            elif Quest.idx < 5:
-                                saving_throw = round(Quest.monsters[Quest.challenge][Quest.effects[Quest.effect][0]]*0.4 + Quest.idx*2)
+                            if Quest.depth < 3:
+                                saving_throw = round(Quest.monsters[Quest.challenge][Quest.effects[Quest.effect][0]]*0.8 + Quest.depth*2)
+                            elif Quest.depth < 5:
+                                saving_throw = round(Quest.monsters[Quest.challenge][Quest.effects[Quest.effect][0]]*0.4 + Quest.depth*2)
                     elif Quest.idx < (len(Quest.quest)-1):
                         if Quest.idx < 3:
                             saving_throw = round(Quest.monsters[Quest.challenge][Quest.effects[Quest.effect][0]]*0.8 + Quest.idx*2)
@@ -758,14 +766,17 @@ class Quest:
         await asyncio.sleep(1)
 
     async def reward(ctx, list, xamount, modif, special):
-        depthbonus = float("1.3" + str(Quest.idx))
+        if Quest.endless:
+            depthbonus = float("1.3" + str(Quest.depth))
+        else:
+            depthbonus = float("1.3" + str(Quest.idx))
         xamount = xamount * depthbonus
         xp = max(1,round(xamount))
         Quest.sumxp += xp
         cp = max(1,round(xamount * modif))
         Quest.sumcp += cp
         phrase = ""
-        if Quest.endless and (Quest.idx % 5 == 0):
+        if Quest.endless and (Quest.depth % 5 == 0):
             phrase += "You defeated the questboss and earned a quest chest for your troubles!"
             special[3] += 1
         elif Quest.idx >= (len(Quest.quest)-1):
@@ -773,7 +784,7 @@ class Quest:
             special[3] += 1
         for user in list:
             if user not in Quest.rewards:
-                Quest.rewards[user] = {"xp":0,"cp":0,"special":False}
+                Quest.rewards[user] = {"xp":0,"cp":0,"special":[0,0,0,0]}
             member = discord.utils.find(lambda m: m.display_name == user, ctx.guild.members)
             roll = random.randint(1,5)
             if roll == 5 and Userdata.users[str(member.id)]['class']['name']=="Ranger" and not isinstance(Userdata.users[str(member.id)]['class']['ability'], bool):
@@ -785,17 +796,14 @@ class Quest:
                 Quest.rewards[user]["xp"] += xp
                 Quest.rewards[user]["cp"] += cp
             if special != False:
-                if not Quest.rewards[user]["special"] or type(Quest.rewards[user]["special"]) is bool:
-                    Quest.rewards[user]["special"] = special
-                    Quest.sumtreasure = special
-                else:
                     Quest.rewards[user]["special"] = [sum(x) for x in zip(Quest.rewards[user]["special"], special)]
-                    Quest.sumtreasure = [sum(x) for x in zip(Quest.sumtreasure, special)]
-        if Quest.sumtreasure != False and sum(Quest.sumtreasure) == 1:
+        if special != False:
+            Quest.sumtreasure = [sum(x) for x in zip(Quest.sumtreasure, special)]
+        if Quest.sumtreasure != [0,0,0,0] and sum(Quest.sumtreasure) == 1:
             types = [" normal"," rare","n epic", "quest"]
             ctype = types[Quest.sumtreasure.index(1)]
             phrase += "\nYou have {} xp and found {} copperpieces so far. You also secured **a{} treasure chest**!".format(Quest.sumxp,Quest.sumcp,ctype)
-        elif Quest.sumtreasure != False and sum(Quest.sumtreasure) > 1:
+        elif Quest.sumtreasure != [0,0,0,0] and sum(Quest.sumtreasure) > 1:
             phrase += "\nYou have {} xp and found {} copperpieces so far. You also secured {} normal, {} rare, {} epic and {} quest chests!".format(Quest.sumxp,Quest.sumcp, Quest.sumtreasure[0],Quest.sumtreasure[1],Quest.sumtreasure[2],Quest.sumtreasure[3])
         else:
             phrase += "\nYou have {} xp and found {} copperpieces so far.".format(Quest.sumxp,Quest.sumcp)
