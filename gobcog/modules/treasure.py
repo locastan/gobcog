@@ -100,6 +100,7 @@ class Treasure:
             luckbonus = Userdata.users[str(user.id)]['buffs'].get('luck', {'bonus':0})['bonus']
             roll = random.randint(1,100)-luckbonus
         else:
+            luckbonus = 0
             roll = random.randint(1,100)
         if type == "pet":
             if roll <= 5:
