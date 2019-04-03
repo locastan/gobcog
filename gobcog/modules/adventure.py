@@ -396,7 +396,7 @@ class Adventure:
                     fumblelist.append(user)
                     if Userdata.users[str(member.id)]['class']['name']=="Bard" and Userdata.users[str(member.id)]['class']['ability']:
                         bonus = random.randint(5,15)
-                        attack += -roll - bonus - dipl_value + monster_value
+                        diplomacy += -roll - bonus - dipl_value + monster_value
                         report += "**" + user + "**: " +  "- 🎲({})-".format(roll) + " 💥{} - ".format(bonus) + "🗨" + str(dipl_value) + monster_string + " |"
                 elif roll == 20 or (Userdata.users[str(member.id)]['class']['name']=="Bard" and Userdata.users[str(member.id)]['class']['ability']):
                     ability = ""

@@ -620,14 +620,14 @@ class Quest:
                     fumblelist.append(user)
                     if Userdata.users[str(member.id)]['class']['name']=="Bard" and Userdata.users[str(member.id)]['class']['ability']:
                         bonus = random.randint(5,15)
-                        attack += -roll - bonus - dipl_value + monster_value
+                        diplomacy += -roll - bonus - dipl_value + monster_value
                         report += "**" + user + "**: " +  "- 🎲({})-".format(roll) + " 💥{} - ".format(bonus) + "🗨" + str(dipl_value) + effect + monster_string + " |"
                 if user in Quest.affected and Quest.effect == "Fumble" and 1 < roll <= 5:
                     await ctx.send("**" + user + "**" + (" got fumbled by the {}.").format(Quest.challenge))
                     fumblelist.append(user)
                     if Userdata.users[str(member.id)]['class']['name']=="Bard" and Userdata.users[str(member.id)]['class']['ability']:
                         bonus = random.randint(5,15)
-                        attack += -roll - bonus - dipl_value + monster_value
+                        diplomacy += -roll - bonus - dipl_value + monster_value
                         report += "**" + user + "**: " +  "- 🎲({})-".format(roll) + " 💥{} - ".format(bonus) + "🗨" + str(dipl_value) + effect + monster_string + " |"
                 elif roll == 20 or (Userdata.users[str(member.id)]['class']['name']=="Bard" and Userdata.users[str(member.id)]['class']['ability']):
                     ability = ""
