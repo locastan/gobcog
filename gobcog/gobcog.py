@@ -528,6 +528,10 @@ class GobCog(BaseCog):
                     await ctx.send("**{}** sold the {} for {} copperpieces.".format(user.display_name,item['itemname'],price))
                 elif item['equip'] == "equip":
                     if item['item']['slot'] == ['consumable']:
+                        if item['itemname'] in Userdata.users[str(user.id)]['consumables'].keys():
+                            Userdata.users[str(user.id)]['consumables'][item['itemname']]['uses'] = Userdata.users[str(user.id)]['consumables'][item['itemname']].get("uses", 0) + item['item']['uses']
+                        else:
+                            Userdata.users[str(user.id)]['consumables'].update({item['itemname']:item['item']})
                         await Consumables.use_con(ctx, user, item['itemname'])
                     else:
                         equip = {"itemname": item['itemname'],"item": item['item']}

@@ -156,7 +156,8 @@ class Treasure:
             try:
                 react, user = await ctx.bot.wait_for("reaction_add", check=pred, timeout=60)
             except asyncio.TimeoutError:
-                return await ctx.send("Item claim timed out after one minute.")
+                await ctx.send("Item claim timed out after one minute. Selling...")
+                react.emoji = "💰"
             try:
                 await msg.clear_reactions()
             except discord.Forbidden:  # cannot remove all reactions
@@ -188,7 +189,8 @@ class Treasure:
             try:
                 react, user = await ctx.bot.wait_for("reaction_add", check=pred, timeout=60)
             except asyncio.TimeoutError:
-                return await ctx.send("Item claim timed out after one minute.")
+                await ctx.send("Item claim timed out after one minute. Selling...")
+                react.emoji = "💰"
             try:
                 await msg.clear_reactions()
             except discord.Forbidden:  # cannot remove all reactions
@@ -218,7 +220,8 @@ class Treasure:
             try:
                 react, user = await ctx.bot.wait_for("reaction_add", check=pred, timeout=60)
             except asyncio.TimeoutError:
-                return await ctx.send("Item claim timed out after one minute.")
+                await ctx.send("Item claim timed out after one minute. Selling...")
+                react.emoji = "💰"
             try:
                 await msg.clear_reactions()
             except discord.Forbidden:  # cannot remove all reactions
@@ -244,7 +247,8 @@ class Treasure:
             try:
                 react, user = await ctx.bot.wait_for("reaction_add", check=pred, timeout=60)
             except asyncio.TimeoutError:
-                return await ctx.send("Item claim timed out after one minute.")
+                await ctx.send("Item claim timed out after one minute. Selling...")
+                react.emoji = "💰"
             try:
                 await msg.clear_reactions()
             except discord.Forbidden:  # cannot remove all reactions
