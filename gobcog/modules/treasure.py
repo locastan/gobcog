@@ -96,8 +96,11 @@ class Treasure:
         else: #this is when a pet is foraging.
             await ctx.send("{} is foraging for treasure. What will it find?".format(user[:1].upper() + user[1:]))
             await asyncio.sleep(2)
-        luckbonus = Userdata.users[str(user.id)]['buffs'].get('luck', {'bonus':0})['bonus']
-        roll = random.randint(1,100)-luckbonus
+        if hasattr(user, "display_name"):
+            luckbonus = Userdata.users[str(user.id)]['buffs'].get('luck', {'bonus':0})['bonus']
+            roll = random.randint(1,100)-luckbonus
+        else:
+            roll = random.randint(1,100)
         if type == "pet":
             if roll <= 5:
                 chance = Treasure.unique
