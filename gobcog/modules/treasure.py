@@ -6,6 +6,7 @@ import time
 from typing import Union, Iterable, Optional
 from redbot.core.utils.predicates import ReactionPredicate
 from redbot.core.utils.menus import start_adding_reactions
+from .userdata import Userdata
 
 class Treasure:
 
@@ -30,7 +31,9 @@ class Treasure:
             "peg leg":{"slot":["left"],"att":2,"cha":-1},
             "tambourine":{"slot":["left"],"att":0,"cha":2},
             "twig bow":{"slot":["right"],"att":1,"cha":-1},
-            "short bow":{"slot":["right","left"],"att":1,"cha":0}
+            "short bow":{"slot":["right","left"],"att":1,"cha":0},
+            "ringlet of balance":{"slot":["ring"],"att":1,"cha":1},
+            "four leaf clover":{"slot":["consumable"],"uses":1},
             }
     rare = {".ceremonial_dagger":{"slot":["right"],"att":2,"cha":2},
             ".tower_shield":{"slot":["left"],"att":3,"cha":1},
@@ -49,7 +52,14 @@ class Treasure:
             ".spiked_mace":{"slot":["right"],"att":3,"cha":-1},
             ".buckler":{"slot":["left"],"att":3,"cha":0},
             ".tuba":{"slot":["right","left"],"att":2,"cha":1},
-            ".pistol_crossbow":{"slot":["right"],"att":2,"cha":1}
+            ".pistol_crossbow":{"slot":["right"],"att":2,"cha":1},
+            ".ring_of_balance":{"slot":["ring"],"att":2,"cha":2},
+            ".potion_of_strength":{"slot":["consumable"],"uses":3},
+            ".vial_of_strength":{"slot":["consumable"],"uses":1},
+            ".potion_of_eloquence":{"slot":["consumable"],"uses":3},
+            ".vial_of_eloquence":{"slot":["consumable"],"uses":1},
+            ".dust_of_midas":{"slot":["consumable"],"uses":3},
+            ".scroll_of_learning":{"slot":["consumable"],"uses":3}
             }
     unique = {"[troll banhammer]":{"slot":["right","left"],"att":2,"cha":2},
             "[scythe of death]":{"slot":["right","left"],"att":3,"cha":-2},
@@ -61,18 +71,23 @@ class Treasure:
             "[great bulwark]":{"slot":["left"],"att":5,"cha":0},
             "[dragon ring]":{"slot":["ring"],"att":4,"cha":3},
             "[mandachord]":{"slot":["right", "left"],"att":1,"cha":4},
-            "[repeater crossbow]":{"slot":["right","left"],"att":3,"cha":1}
+            "[repeater crossbow]":{"slot":["right","left"],"att":3,"cha":1},
+            "[gauntlet of balance]":{"slot":["ring"],"att":3,"cha":3},
+            "[paci-fist]":{"slot":["ring"],"att":1,"cha":5},
+            "[luckworth essence]":{"slot":["consumable"],"uses":2},
+            "[foliant of wisdom]":{"slot":["consumable"],"uses":1},
+            "[chaos egg]":{"slot":["consumable"],"uses":3}
             }
-    quest = {"[lichtooth]":{"slot":["charm"],"att":1,"cha":6},
-            "[occam\'s razor]":{"slot":["right","left"],"att":4,"cha":-1},
+    quest = {"[lichtooth]":{"slot":["charm"],"att":2,"cha":6},
+            "[occam\'s razor]":{"slot":["right","left"],"att":5,"cha":1},
             "[cape of shadows]":{"slot":["charm"],"att":4,"cha":4},
             "[very pointy stick]":{"slot":["right"],"att":7,"cha":-1},
-            "[chattering shield]":{"slot":["left"],"att":6,"cha":1},
-            "[isildur\'s bane]":{"slot":["ring"],"att":6,"cha":2},
+            "[chattering shield]":{"slot":["left"],"att":6,"cha":2},
+            "[isildur\'s bane]":{"slot":["ring"],"att":6,"cha":3},
             "[dragon scales]":{"slot":["charm"],"att":4,"cha":5},
             "[mace of many]":{"slot":["right"],"att":6,"cha":1},
             "[mesmer ring]":{"slot":["ring"],"att":1,"cha":6},
-            "[crumhorn]":{"slot":["right", "left"],"att":1,"cha":4}
+            "[crumhorn]":{"slot":["right", "left"],"att":3,"cha":5}
             }
 
     async def open_chest(ctx, user, type):
@@ -81,7 +96,8 @@ class Treasure:
         else: #this is when a pet is foraging.
             await ctx.send("{} is foraging for treasure. What will it find?".format(user[:1].upper() + user[1:]))
             await asyncio.sleep(2)
-        roll = random.randint(1,100)
+        luckbonus = Userdata.users[str(user.id)]['buffs'].get('luck', {'bonus':0})['bonus']
+        roll = random.randint(1,100)-luckbonus
         if type == "pet":
             if roll <= 5:
                 chance = Treasure.unique
@@ -107,72 +123,130 @@ class Treasure:
             else:
                 chance = Treasure.common
         elif type == "epic":
-            if roll <= 25:
+            if roll <= 1:
+                await ctx.send("This was no ordinary epic chest!")
+                chance = Treasure.quest
+            elif roll <= 25:
                 chance = Treasure.unique
             else:
                 chance = Treasure.rare
         elif type == "quest":
-            if roll <= 5:
+            if roll <= 10:
                 chance = Treasure.quest
             else:
                 chance = Treasure.unique
         itemname = random.choice(list(chance.keys()))
         item = chance[itemname]
-        if len(item["slot"]) == 2: # two handed weapons add their bonuses twice
-            hand = "two handed"
-            att = item["att"]*2
-            cha = item["cha"]*2
-        else:
-            if item["slot"][0] == "right" or item["slot"][0] == "left":
-                hand = item["slot"][0] + " handed"
+        if item['slot'] == ['consumable']:
+            item['uses'] = random.randint(1,item['uses'])
+            if hasattr(user, "display_name"):
+                await ctx.send("```css\n{} found {} ({}x).```".format(user.display_name,itemname,item['uses']))
             else:
-                hand = item["slot"][0] + " slot"
-            att = item["att"]
-            cha = item["cha"]
-        if hasattr(user, "display_name"):
-            await ctx.send("{} found a {}. (Attack: {}, Charisma: {} [{}])".format(user.display_name,itemname,str(att),str(cha),hand))
+                await ctx.send("```css\nYour {} found {} ({}x)```.".format(user,itemname,item['uses']))
+            msg = await ctx.send("Do you want to use, put in backpack or sell this item?")
+            start_adding_reactions(msg, Treasure.controls.keys())
+            if hasattr(user, "id"):
+                pred = ReactionPredicate.with_emojis(tuple(Treasure.controls.keys()), msg, user)
+            else:
+                pred = ReactionPredicate.with_emojis(tuple(Treasure.controls.keys()), msg, ctx.author)
+            try:
+                react, user = await ctx.bot.wait_for("reaction_add", check=pred, timeout=60)
+            except asyncio.TimeoutError:
+                return await ctx.send("Item claim timed out after one minute.")
+            try:
+                await msg.clear_reactions()
+            except discord.Forbidden:  # cannot remove all reactions
+                for key in Treasure.controls.keys():
+                    await msg.remove_reaction(key, ctx.bot.user)
+            return {"itemname": itemname,"item":item,"equip":Treasure.controls[react.emoji]}
         else:
-            await ctx.send("Your {} found a {}. (Attack: {}, Charisma: {} [{}])".format(user,itemname,str(att),str(cha),hand))
-        msg = await ctx.send("Do you want to equip, put in backpack or sell this item?")
-        start_adding_reactions(msg, Treasure.controls.keys())
-        if hasattr(user, "id"):
-            pred = ReactionPredicate.with_emojis(tuple(Treasure.controls.keys()), msg, user)
-        else:
-            pred = ReactionPredicate.with_emojis(tuple(Treasure.controls.keys()), msg, ctx.author)
-        react, user = await ctx.bot.wait_for("reaction_add", check=pred)
-        try:
-            await msg.clear_reactions()
-        except discord.Forbidden:  # cannot remove all reactions
-            for key in Treasure.controls.keys():
-                await msg.remove_reaction(key, ctx.bot.user)
-        return {"itemname": itemname,"item":item,"equip":Treasure.controls[react.emoji]}
+            if len(item["slot"]) == 2: # two handed weapons add their bonuses twice
+                hand = "two handed"
+                att = item["att"]*2
+                cha = item["cha"]*2
+            else:
+                if item["slot"][0] == "right" or item["slot"][0] == "left":
+                    hand = item["slot"][0] + " handed"
+                else:
+                    hand = item["slot"][0] + " slot"
+                att = item["att"]
+                cha = item["cha"]
+            if hasattr(user, "display_name"):
+                await ctx.send("```css\n{} found a {}. (Attack: {}, Charisma: {} [{}])```".format(user.display_name,itemname,str(att),str(cha),hand))
+            else:
+                await ctx.send("```css\nYour {} found a {}. (Attack: {}, Charisma: {} [{}])```".format(user,itemname,str(att),str(cha),hand))
+            msg = await ctx.send("Do you want to equip, put in backpack or sell this item?")
+            start_adding_reactions(msg, Treasure.controls.keys())
+            if hasattr(user, "id"):
+                pred = ReactionPredicate.with_emojis(tuple(Treasure.controls.keys()), msg, user)
+            else:
+                pred = ReactionPredicate.with_emojis(tuple(Treasure.controls.keys()), msg, ctx.author)
+            try:
+                react, user = await ctx.bot.wait_for("reaction_add", check=pred, timeout=60)
+            except asyncio.TimeoutError:
+                return await ctx.send("Item claim timed out after one minute.")
+            try:
+                await msg.clear_reactions()
+            except discord.Forbidden:  # cannot remove all reactions
+                for key in Treasure.controls.keys():
+                    await msg.remove_reaction(key, ctx.bot.user)
+            if luckbonus != 0:
+                if Userdata.users[str(user.id)]['buffs']['luck']['duration'] <= 1:
+                    Userdata.users[str(user.id)]['buffs'].pop('luck')
+                else:
+                    Userdata.users[str(user.id)]['buffs']['luck']['duration'] = Userdata.users[str(user.id)]['buffs']['luck']['duration'] - 1
+            await Userdata.save()
+            return {"itemname": itemname,"item":item,"equip":Treasure.controls[react.emoji]}
 
     async def one_from(ctx,user,list): #user needs to be a discord.member object. list is a namestring of a droplist of items here.
         chance = getattr(Treasure, list)
         itemname = random.choice(list(chance.keys()))
         item = chance[itemname]
-        if len(item["slot"]) == 2: # two handed weapons add their bonuses twice
-            hand = "two handed"
-            att = item["att"]*2
-            cha = item["cha"]*2
-        else:
-            if item["slot"][0] == "right" or item["slot"][0] == "left":
-                hand = item["slot"][0] + " handed"
+        if item['slot'] == ['consumable']:
+            item['uses'] = random.randint(1,item['uses'])
+            await ctx.send("```css\n{} found {} ({}x).```".format(user.display_name,itemname,item['uses']))
+            msg = await ctx.send("Do you want to use, put in backpack or sell this item?")
+            start_adding_reactions(msg, Treasure.controls.keys())
+            if hasattr(user, "id"):
+                pred = ReactionPredicate.with_emojis(tuple(Treasure.controls.keys()), msg, user)
             else:
-                hand = item["slot"][0] + " slot"
-            att = item["att"]
-            cha = item["cha"]
-        await ctx.send("{} found a {}. (Attack: {}, Charisma: {} [{}])".format(user.display_name,itemname,str(att),str(cha),hand))
-        msg = await ctx.send("Do you want to equip, put in backpack or sell this item?")
-        start_adding_reactions(msg, Treasure.controls.keys())
-        pred = ReactionPredicate.with_emojis(tuple(Treasure.controls.keys()), msg, user)
-        react, user = await ctx.bot.wait_for("reaction_add", check=pred)
-        try:
-            await msg.clear_reactions()
-        except discord.Forbidden:  # cannot remove all reactions
-            for key in Treasure.controls.keys():
-                await msg.remove_reaction(key, ctx.bot.user)
-        return {"itemname": itemname,"item":item,"equip":Treasure.controls[react.emoji]}
+                pred = ReactionPredicate.with_emojis(tuple(Treasure.controls.keys()), msg, ctx.author)
+            try:
+                react, user = await ctx.bot.wait_for("reaction_add", check=pred, timeout=60)
+            except asyncio.TimeoutError:
+                return await ctx.send("Item claim timed out after one minute.")
+            try:
+                await msg.clear_reactions()
+            except discord.Forbidden:  # cannot remove all reactions
+                for key in Treasure.controls.keys():
+                    await msg.remove_reaction(key, ctx.bot.user)
+            return {"itemname": itemname,"item":item,"equip":Treasure.controls[react.emoji]}
+        else:
+            if len(item["slot"]) == 2: # two handed weapons add their bonuses twice
+                hand = "two handed"
+                att = item["att"]*2
+                cha = item["cha"]*2
+            else:
+                if item["slot"][0] == "right" or item["slot"][0] == "left":
+                    hand = item["slot"][0] + " handed"
+                else:
+                    hand = item["slot"][0] + " slot"
+                att = item["att"]
+                cha = item["cha"]
+            await ctx.send("```css\n{} found a {}. (Attack: {}, Charisma: {} [{}])```".format(user.display_name,itemname,str(att),str(cha),hand))
+            msg = await ctx.send("Do you want to equip, put in backpack or sell this item?")
+            start_adding_reactions(msg, Treasure.controls.keys())
+            pred = ReactionPredicate.with_emojis(tuple(Treasure.controls.keys()), msg, user)
+            try:
+                react, user = await ctx.bot.wait_for("reaction_add", check=pred, timeout=60)
+            except asyncio.TimeoutError:
+                return await ctx.send("Item claim timed out after one minute.")
+            try:
+                await msg.clear_reactions()
+            except discord.Forbidden:  # cannot remove all reactions
+                for key in Treasure.controls.keys():
+                    await msg.remove_reaction(key, ctx.bot.user)
+            return {"itemname": itemname,"item":item,"equip":Treasure.controls[react.emoji]}
 
 
     async def trader_get_items():
@@ -231,12 +305,16 @@ class Treasure:
                 else:
                     att = item["att"]
                     cha = item["cha"]
-                if "[" in itemname:
-                    price = random.randint(1000,2000)*max(att+cha, 1)
-                elif "." in itemname:
-                    price = random.randint(200,1000)*max(att+cha, 1)
+                if "[" in item['itemname']:
+                    base = (1000,2000)
+                elif "." in item['itemname']:
+                    base = (200,1000)
+                else :
+                    base = (10,200)
+                if item['item']['slot'] == ['consumable']:
+                    price = random.randint(base[0],base[1])*max(item['item']['uses'],1)
                 else:
-                    price = random.randint(10,200)*max(att+cha, 1)
+                    price = random.randint(base[0],base[1])*max(item['item']['att']+item['item']['cha'],1)
                 if itemname not in items:
                     items.update({itemname: {"itemname": itemname,"item":item, "price": price}})
         for index, item in enumerate(items):

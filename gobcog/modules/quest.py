@@ -75,7 +75,7 @@ class Quest:
                 "Wraith":{"str":20,"dipl":20, "pronoun": "It is"},
                 "Xorza\'cuatl":{"str":14,"dipl":16, "pronoun": "Whatever this is, it\'s"},
                 "Westershire Pirate":{"str":9,"dipl":10, "pronoun": "He is"}}
-    arena_bosses = {"The Destroyer":{"str":25,"dipl":23, "pronoun": "He is"},
+    arena_bosses = {"Destroyer":{"str":25,"dipl":23, "pronoun": "He is"},
                 "Bonesmasher":{"str":26,"dipl":20, "pronoun": "He is"},
                 "Kyra Dragonqueen":{"str":27,"dipl":30, "pronoun": "She is"},
                 "Black Aliss":{"str":20,"dipl":19, "pronoun": "She is"},}
@@ -511,21 +511,26 @@ class Quest:
                 if user in Quest.affected and Quest.effect != "Fumble":
                     att_effect = Quest.effects[Quest.effect][1]
                     effect = " *" + Quest.effect + "*"
-                att_value = round((Userdata.users[str(member.id)]['att'] + Userdata.users[str(member.id)]['skill']['att'])*att_effect)
+                att_value = round((Userdata.users[str(member.id)]['att'] + Userdata.users[str(member.id)]['skill']['att'] + Userdata.users[str(member.id)]['buffs'].get('att', {'bonus':0})['bonus'])*att_effect)
+                monster_string = ""
+                monster_value = 0
+                if "monster" in Userdata.users[str(member.id)]['buffs']:
+                    monster_value = Userdata.users[str(member.id)]['buffs'].get('monster', {'bonus':{'att':0}})['bonus']['att']
+                    monster_string = " + 🦖{}".format(monster_value)
                 if roll == 1:
                     await ctx.send("**" + user + "**" + " fumbled the attack.")
                     fumblelist.append(user)
                     if Userdata.users[str(member.id)]['class']['name']=="Berserker" and Userdata.users[str(member.id)]['class']['ability']:
                         bonus = random.randint(5,15)
-                        attack += -roll - bonus - att_value
-                        report += "**" + user + "**: " +  "- 🎲({}) -".format(roll) + "💥{} + ".format(bonus) + "- 🗡" + str(att_value) + " |"
+                        attack += -roll - bonus - att_value + monster_value
+                        report += "**" + user + "**: " +  "- 🎲({}) -".format(roll) + "💥{} + ".format(bonus) + "- 🗡" + str(att_value) + monster_string + " |"
                 elif user in Quest.affected and Quest.effect == "Fumble" and 1 < roll <= 5:
                     await ctx.send("**" + user + "**" + " has been fumbled.")
                     fumblelist.append(user)
                     if Userdata.users[str(member.id)]['class']['name']=="Berserker" and Userdata.users[str(member.id)]['class']['ability']:
                         bonus = random.randint(5,15)
-                        attack += roll - bonus + att_value
-                        report += "**" + user + "**: " +  "🎲({})-".format(roll) + " 💥{} + ".format(bonus) + "🗡" + str(att_value) + effect + " |"
+                        attack += -roll - bonus - att_value + monster_value
+                        report += "**" + user + "**: " +  "- 🎲({})-".format(roll) + " 💥{} - ".format(bonus) + "🗡" + str(att_value) + effect + monster_string + " |"
                 elif roll == 20 or (Userdata.users[str(member.id)]['class']['name']=="Berserker" and Userdata.users[str(member.id)]['class']['ability']):
                     ability = ""
                     if roll == 20:
@@ -534,12 +539,12 @@ class Quest:
                     if Userdata.users[str(member.id)]['class']['name']=="Berserker" and Userdata.users[str(member.id)]['class']['ability']:
                         ability = "🗯️"
                     bonus = random.randint(5,15)
-                    attack += roll + bonus + att_value
+                    attack += roll + bonus + att_value + monster_value
                     bonus = ability + str(bonus)
-                    report += "**" + user + "**: " +  "🎲({})+".format(roll) + " {} + ".format(bonus) + "🗡" + str(att_value) + effect + " |"
+                    report += "**" + user + "**: " +  "🎲({})+".format(roll) + " {} + ".format(bonus) + "🗡" + str(att_value) + effect + monster_string + " |"
                 else:
-                    attack += roll + att_value
-                    report += "**" + user + "**: " +  "🎲({})+".format(roll) + "🗡" + str(att_value) + effect + " |"
+                    attack += roll + att_value + monster_value
+                    report += "**" + user + "**: " +  "🎲({})+".format(roll) + "🗡" + str(att_value) + effect + monster_string + " |"
             for user in fumblelist:
                 if user in Quest.userslist["fight"]:
                     Quest.userslist["fight"].remove(user)
@@ -604,21 +609,26 @@ class Quest:
                 if user in Quest.affected and Quest.effect != "Fumble":
                     dipl_effect = Quest.effects[Quest.effect][2]
                     effect = " *" + Quest.effect + "*"
-                dipl_value = round((Userdata.users[str(member.id)]['cha'] + Userdata.users[str(member.id)]['skill']['cha'])*dipl_effect)
+                dipl_value = round((Userdata.users[str(member.id)]['cha'] + Userdata.users[str(member.id)]['skill']['cha'] + Userdata.users[str(member.id)]['buffs'].get('cha', {'bonus':0})['bonus'])*dipl_effect)
+                monster_string = ""
+                monster_value = 0
+                if "monster" in Userdata.users[str(member.id)]['buffs']:
+                    monster_value = Userdata.users[str(member.id)]['buffs'].get('monster', {'bonus':{'cha':0}})['bonus']['cha']
+                    monster_string = " + 🦖{}".format(monster_value)
                 if roll== 1:
                     await ctx.send("**" + user + "**" + (" accidentally offended the {}.").format(Quest.challenge))
                     fumblelist.append(user)
                     if Userdata.users[str(member.id)]['class']['name']=="Bard" and Userdata.users[str(member.id)]['class']['ability']:
                         bonus = random.randint(5,15)
-                        attack += roll - bonus + att_value
-                        report += "**" + user + "**: " +  "🎲({})-".format(roll) + " 💥{} + ".format(bonus) + "🗨" + str(dipl_value) + effect + " |"
+                        attack += -roll - bonus - dipl_value + monster_value
+                        report += "**" + user + "**: " +  "- 🎲({})-".format(roll) + " 💥{} - ".format(bonus) + "🗨" + str(dipl_value) + effect + monster_string + " |"
                 if user in Quest.affected and Quest.effect == "Fumble" and 1 < roll <= 5:
                     await ctx.send("**" + user + "**" + (" got fumbled by the {}.").format(Quest.challenge))
                     fumblelist.append(user)
                     if Userdata.users[str(member.id)]['class']['name']=="Bard" and Userdata.users[str(member.id)]['class']['ability']:
                         bonus = random.randint(5,15)
-                        attack += roll - bonus + att_value
-                        report += "**" + user + "**: " +  "🎲({})-".format(roll) + " 💥{} + ".format(bonus) + "🗨" + str(dipl_value) + effect + " |"
+                        attack += -roll - bonus - dipl_value + monster_value
+                        report += "**" + user + "**: " +  "- 🎲({})-".format(roll) + " 💥{} - ".format(bonus) + "🗨" + str(dipl_value) + effect + monster_string + " |"
                 elif roll == 20 or (Userdata.users[str(member.id)]['class']['name']=="Bard" and Userdata.users[str(member.id)]['class']['ability']):
                     ability = ""
                     if roll == 20:
@@ -627,12 +637,12 @@ class Quest:
                     if Userdata.users[str(member.id)]['class']['name']=="Bard" and Userdata.users[str(member.id)]['class']['ability']:
                         ability = "🎵"
                     bonus = random.randint(5,15)
-                    diplomacy += roll + bonus + dipl_value
+                    diplomacy += roll + bonus + dipl_value + monster_value
                     bonus = ability + str(bonus)
-                    report += "**" + user + "**: " +  "🎲({})+".format(roll) + " {} + ".format(bonus) + "🗨" +str(dipl_value) + effect + " |"
+                    report += "**" + user + "**: " +  "🎲({})+".format(roll) + " {} + ".format(bonus) + "🗨" +str(dipl_value) + effect + monster_string + " |"
                 else:
-                    diplomacy += roll + dipl_value
-                    report += "**" + user + "**: " +  "🎲({})+".format(roll) + "🗨" + str(dipl_value) + effect + " |"
+                    diplomacy += roll + dipl_value + monster_value
+                    report += "**" + user + "**: " +  "🎲({})+".format(roll) + "🗨" + str(dipl_value) + effect + monster_string + " |"
             for user in fumblelist:
                 if user in Quest.userslist["talk"]:
                     Quest.userslist["talk"].remove(user)
@@ -696,6 +706,22 @@ class Quest:
                 treasure[2] += 1
             if len(critlist) != 0:
                 treasure[0] += 1
+            checklist = Quest.userslist["fight"]+Quest.userslist["talk"]+Quest.userslist["pray"]
+            for user in checklist:
+                member = discord.utils.find(lambda m: m.display_name == user, ctx.guild.members)
+                lucky = Userdata.users[str(member.id)]['buffs'].get('luck')
+                if lucky != None:
+                    roll = random.randint(1,50+Userdata.users[str(member.id)]['buffs']['luck']['bonus'])
+                    if roll <= 50:
+                        continue
+                    elif roll <= 75: #25% normal
+                        treasure[0] += 1
+                    elif roll <= 90: #15% rare
+                        treasure[1] += 1
+                    elif roll <= 95: #5% epic
+                        treasure[2] += 1
+                    elif roll == 100: #1% quest
+                        treasure[3] += 1
             if treasure == [0,0,0,0]:
                 treasure = False
         if (Quest.challenge == "Basilisk" or Quest.challenge == "Medusa") and Quest.failed:
@@ -760,6 +786,14 @@ class Quest:
             if 'name' in Userdata.users[str(member.id)]['class']:
                 if Userdata.users[str(member.id)]['class']['name'] != "Ranger" and Userdata.users[str(member.id)]['class']['ability']:
                     Userdata.users[str(member.id)]['class']['ability'] = False
+            expired = []
+            for buff in Userdata.users[str(member.id)]['buffs'].keys(): #reduce duration of active buffs
+                if Userdata.users[str(member.id)]['buffs'][buff]['duration'] <= 1:
+                    expired.append(buff)
+                else:
+                    Userdata.users[str(member.id)]['buffs'][buff]['duration'] = Userdata.users[str(member.id)]['buffs'][buff]['duration'] - 1
+            for buff in expired: #remove buffs outside loop not to change size during iteration
+                Userdata.users[str(member.id)]['buffs'].pop(buff)
         Quest.timeout = 0
         if Quest.idx >= (len(Quest.quest)-1) and not Quest.endless:
             Quest.running = False
@@ -785,16 +819,24 @@ class Quest:
         for user in list:
             if user not in Quest.rewards:
                 Quest.rewards[user] = {"xp":0,"cp":0,"special":[0,0,0,0]}
+            bxp = 0
+            bcp = 0
             member = discord.utils.find(lambda m: m.display_name == user, ctx.guild.members)
+            if "xp" in Userdata.users[str(member.id)]['buffs'].keys():
+                bxp = int(xp * (Userdata.users[str(member.id)]['buffs']['xp']['bonus']/100))
+                phrase += "\n**{}** received **+{}** bonus xp.".format(member.display_name, bxp)
+            if "money" in Userdata.users[str(member.id)]['buffs'].keys():
+                bcp = int(cp * (Userdata.users[str(member.id)]['buffs']['money']['bonus']/100))
+                phrase += "\n**{}** received **+{}** bonus cp.".format(member.display_name, bcp)
             roll = random.randint(1,5)
             if roll == 5 and Userdata.users[str(member.id)]['class']['name']=="Ranger" and not isinstance(Userdata.users[str(member.id)]['class']['ability'], bool):
-                Quest.rewards[user]["xp"] += int(xp * Userdata.users[str(member.id)]['class']['ability']['pet']['bonus'])
-                Quest.rewards[user]["cp"] += int(cp * Userdata.users[str(member.id)]['class']['ability']['pet']['bonus'])
+                Quest.rewards[user]["xp"] += int((xp+bxp) * Userdata.users[str(member.id)]['class']['ability']['pet']['bonus'])
+                Quest.rewards[user]["cp"] += int((cp+bxp) * Userdata.users[str(member.id)]['class']['ability']['pet']['bonus'])
                 percent = round((Userdata.users[str(member.id)]['class']['ability']['pet']['bonus'] - 1.0) * 100)
                 phrase += "\n**{}** received a **{}%** reward bonus from his {}.".format(member.display_name, percent, Userdata.users[str(member.id)]['class']['ability']['pet']['name'])
             else:
-                Quest.rewards[user]["xp"] += xp
-                Quest.rewards[user]["cp"] += cp
+                Quest.rewards[user]["xp"] += xp + bxp
+                Quest.rewards[user]["cp"] += cp + bcp
             if special != False:
                     Quest.rewards[user]["special"] = [sum(x) for x in zip(Quest.rewards[user]["special"], special)]
         if special != False:

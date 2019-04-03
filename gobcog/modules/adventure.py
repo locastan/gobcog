@@ -302,14 +302,19 @@ class Adventure:
             for user in Adventure.userslist["fight"]:
                 roll = random.randint(1,20)
                 member = discord.utils.find(lambda m: m.display_name == user, ctx.guild.members)
-                att_value = Userdata.users[str(member.id)]['att'] + Userdata.users[str(member.id)]['skill']['att']
+                att_value = Userdata.users[str(member.id)]['att'] + Userdata.users[str(member.id)]['skill']['att'] + Userdata.users[str(member.id)]['buffs'].get('att', {'bonus':0})['bonus']
+                monster_string = ""
+                monster_value = 0
+                if "monster" in Userdata.users[str(member.id)]['buffs']:
+                    monster_value = Userdata.users[str(member.id)]['buffs'].get('monster', {'bonus':{'att':0}})['bonus']['att']
+                    monster_string = " + 🦖{}".format(monster_value)
                 if roll == 1:
                     await ctx.send("**" + user + "**" + " fumbled the attack.")
                     fumblelist.append(user)
                     if Userdata.users[str(member.id)]['class']['name']=="Berserker" and Userdata.users[str(member.id)]['class']['ability']:
                         bonus = random.randint(5,15)
-                        attack += -roll -bonus -att_value
-                        report += "**" + user + "**: " +  "- 🎲({}) -".format(roll) + "💥{} + ".format(bonus) + "- 🗡" + str(att_value) + " |"
+                        attack += -roll -bonus -att_value + monster_value
+                        report += "**" + user + "**: " +  "- 🎲({}) -".format(roll) + "💥{} + ".format(bonus) + "- 🗡" + str(att_value) + monster_string + " |"
                 elif roll == 20 or (Userdata.users[str(member.id)]['class']['name']=="Berserker" and Userdata.users[str(member.id)]['class']['ability']):
                     ability = ""
                     if roll == 20:
@@ -318,12 +323,12 @@ class Adventure:
                     if Userdata.users[str(member.id)]['class']['name']=="Berserker" and Userdata.users[str(member.id)]['class']['ability']:
                         ability = "🗯️"
                     bonus = random.randint(5,15)
-                    attack += roll + bonus + att_value
+                    attack += roll + bonus + att_value + monster_value
                     bonus = ability + str(bonus)
-                    report += "**" + user + "**: " +  "🎲({})+".format(roll) + " {} + ".format(bonus) + "🗡" + str(att_value) + " |"
+                    report += "**" + user + "**: " +  "🎲({})+".format(roll) + " {} + ".format(bonus) + "🗡" + str(att_value) + monster_string + " |"
                 else:
-                    attack += roll + att_value
-                    report += "**" + user + "**: " +  "🎲({})+".format(roll) + "🗡" + str(att_value) + " |"
+                    attack += roll + att_value + monster_value
+                    report += "**" + user + "**: " +  "🎲({})+".format(roll) + "🗡" + str(att_value) + monster_string + " |"
             for user in fumblelist:
                 if user in Adventure.userslist["fight"]:
                     Adventure.userslist["fight"].remove(user)
@@ -380,14 +385,19 @@ class Adventure:
             for user in Adventure.userslist["talk"]:
                 roll = random.randint(1,20)
                 member = discord.utils.find(lambda m: m.display_name == user, ctx.guild.members)
-                dipl_value = Userdata.users[str(member.id)]['cha'] + Userdata.users[str(member.id)]['skill']['cha']
+                dipl_value = Userdata.users[str(member.id)]['cha'] + Userdata.users[str(member.id)]['skill']['cha'] + Userdata.users[str(member.id)]['buffs'].get('cha', {'bonus':0})['bonus']
+                monster_string = ""
+                monster_value = 0
+                if "monster" in Userdata.users[str(member.id)]['buffs']:
+                    monster_value = Userdata.users[str(member.id)]['buffs'].get('monster', {'bonus':{'cha':0}})['bonus']['cha']
+                    monster_string = " + 🦖{}".format(monster_value)
                 if roll== 1:
                     await ctx.send("**" + user + "**" + (" accidentally offended the {}.").format(Adventure.challenge))
                     fumblelist.append(user)
                     if Userdata.users[str(member.id)]['class']['name']=="Bard" and Userdata.users[str(member.id)]['class']['ability']:
                         bonus = random.randint(5,15)
-                        attack += roll - bonus + att_value
-                        report += "**" + user + "**: " +  "🎲({})-".format(roll) + " 💥{} + ".format(bonus) + "🗨" + str(dipl_value) + " |"
+                        attack += -roll - bonus - dipl_value + monster_value
+                        report += "**" + user + "**: " +  "- 🎲({})-".format(roll) + " 💥{} - ".format(bonus) + "🗨" + str(dipl_value) + monster_string + " |"
                 elif roll == 20 or (Userdata.users[str(member.id)]['class']['name']=="Bard" and Userdata.users[str(member.id)]['class']['ability']):
                     ability = ""
                     if roll == 20:
@@ -396,12 +406,12 @@ class Adventure:
                     if Userdata.users[str(member.id)]['class']['name']=="Bard" and Userdata.users[str(member.id)]['class']['ability']:
                         ability = "🎵"
                     bonus = random.randint(5,15)
-                    diplomacy += roll + bonus + dipl_value
+                    diplomacy += roll + bonus + dipl_value + monster_value
                     bonus = ability + str(bonus)
-                    report += "**" + user + "**: " +  "🎲({})+".format(roll) + " {} + ".format(bonus) + "🗨" +str(dipl_value) + " |"
+                    report += "**" + user + "**: " +  "🎲({})+".format(roll) + " {} + ".format(bonus) + "🗨" +str(dipl_value) + monster_string + " |"
                 else:
-                    diplomacy += roll + dipl_value
-                    report += "**" + user + "**: " +  "🎲({})+".format(roll) + "🗨" + str(dipl_value) + " |"
+                    diplomacy += roll + dipl_value + monster_value
+                    report += "**" + user + "**: " +  "🎲({})+".format(roll) + "🗨" + str(dipl_value) + monster_string + " |"
             for user in fumblelist:
                 if user in Adventure.userslist["talk"]:
                     Adventure.userslist["talk"].remove(user)
@@ -462,6 +472,22 @@ class Adventure:
                 treasure[2] += 1
             if len(critlist) != 0:
                 treasure[0] += 1
+            checklist = Adventure.userslist["fight"]+Adventure.userslist["talk"]+Adventure.userslist["pray"]
+            for user in checklist:
+                member = discord.utils.find(lambda m: m.display_name == user, ctx.guild.members)
+                lucky = Userdata.users[str(member.id)]['buffs'].get('luck')
+                if lucky != None:
+                    roll = random.randint(1,50+Userdata.users[str(member.id)]['buffs']['luck']['bonus'])
+                    if roll <= 50:
+                        continue
+                    elif roll <= 75: #25% normal
+                        treasure[0] += 1
+                    elif roll <= 90: #15% rare
+                        treasure[1] += 1
+                    elif roll <= 95: #5% epic
+                        treasure[2] += 1
+                    elif roll == 100: #1% quest
+                        treasure[3] += 1
             if treasure == [0,0,0,0]:
                 treasure = False
         if (Adventure.challenge == "Basilisk" or Adventure.challenge == "Medusa") and failed:
@@ -522,15 +548,23 @@ class Adventure:
         for user in list:
             Adventure.rewards[user] = {}
             member = discord.utils.find(lambda m: m.display_name == user, ctx.guild.members)
+            bxp = 0
+            bcp = 0
+            if "xp" in Userdata.users[str(member.id)]['buffs'].keys():
+                bxp = int(xp * (Userdata.users[str(member.id)]['buffs']['xp']['bonus']/100))
+                phrase += "\n**{}** received **+{}** bonus xp.".format(member.display_name, bxp)
+            if "money" in Userdata.users[str(member.id)]['buffs'].keys():
+                bcp = int(cp * (Userdata.users[str(member.id)]['buffs']['money']['bonus']/100))
+                phrase += "\n**{}** received **+{}** bonus cp.".format(member.display_name, bcp)
             roll = random.randint(1,5)
             if roll == 5 and Userdata.users[str(member.id)]['class']['name']=="Ranger" and not isinstance(Userdata.users[str(member.id)]['class']['ability'], bool):
-                Adventure.rewards[user]["xp"] = int(xp * Userdata.users[str(member.id)]['class']['ability']['pet']['bonus'])
-                Adventure.rewards[user]["cp"] = int(cp * Userdata.users[str(member.id)]['class']['ability']['pet']['bonus'])
+                Adventure.rewards[user]["xp"] = int((xp+bxp) * Userdata.users[str(member.id)]['class']['ability']['pet']['bonus'])
+                Adventure.rewards[user]["cp"] = int((cp+bcp) * Userdata.users[str(member.id)]['class']['ability']['pet']['bonus'])
                 percent = round((Userdata.users[str(member.id)]['class']['ability']['pet']['bonus'] - 1.0) * 100)
-                phrase = "\n**{}** received a **{}%** reward bonus from his {}.".format(member.display_name, percent, Userdata.users[str(member.id)]['class']['ability']['pet']['name'])
+                phrase += "\n**{}** received a **{}%** reward bonus from his {}.".format(member.display_name, percent, Userdata.users[str(member.id)]['class']['ability']['pet']['name'])
             else:
-                Adventure.rewards[user]["xp"] = xp
-                Adventure.rewards[user]["cp"] = cp
+                Adventure.rewards[user]["xp"] = xp + bxp
+                Adventure.rewards[user]["cp"] = cp + bcp
             if special != False:
                 Adventure.rewards[user]["special"] = special
             else:
@@ -538,11 +572,11 @@ class Adventure:
         if special != False and sum(special) == 1:
             types = [" normal"," rare","n epic", "quest"]
             type = types[special.index(1)]
-            phrase += "\nYou have been awarded {} xp and found {} copperpieces. You also secured **a{} treasure chest**!".format(xp,cp,type)
+            phrase += "\nBase rewards: {} xp and {} copperpieces. You also secured **a{} treasure chest**!".format(xp,cp,type)
         elif special != False and sum(special) > 1:
-            phrase += "\nYou have been awarded {} xp and found {} copperpieces. You also secured **several treasure chests**!".format(xp,cp)
+            phrase += "\nBase rewards: {} xp and {} copperpieces. You also secured **several treasure chests**!".format(xp,cp)
         else:
-            phrase += "\nYou have been awarded {} xp and found {} copperpieces.".format(xp,cp)
+            phrase += "\nBase rewards: {} xp and {} copperpieces.".format(xp,cp)
         return phrase
 
     def countdown(ctx, seconds = None, title = "Remaining: ", loop: Optional[asyncio.AbstractEventLoop] = None,) -> asyncio.Task:

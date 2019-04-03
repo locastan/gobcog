@@ -15,6 +15,7 @@ from .modules.quest import Quest
 from .modules.treasure import Treasure
 from .modules.classes import Classes
 from .modules.userdata import Userdata
+from .modules.consumables import Consumables
 
 BaseCog = getattr(commands, "Cog", object)
 
@@ -89,14 +90,18 @@ class GobCog(BaseCog):
                     Userdata.users[str(user.id)]['items'][slot] = {}
                     Userdata.users[str(user.id)]['att'] -= int(equipped[olditem].get('att'))     # keep in mind that double handed items grant their bonus twice so they remove twice
                     Userdata.users[str(user.id)]['cha'] -= int(equipped[olditem].get('cha'))
-                Userdata.users[str(user.id)]['items']['backpack'].update({olditem: equipped[olditem]}) # TODO: Change data structure of items dict so you can have duplicate items because of key duplicate overwrite in dicts.
-                await ctx.send("You removed {} and put it into your backpack.".format(olditem))
-            await ctx.send("Your new stats: **Attack**: {} [+{}], **Diplomacy**: {} [+{}].".format(Userdata.users[str(user.id)]['att'],Userdata.users[str(user.id)]['skill']['att'],Userdata.users[str(user.id)]['cha'],Userdata.users[str(user.id)]['skill']['cha']))
+                if olditem in Userdata.users[str(user.id)]['items']['backpack'].keys():
+                    price = await GobCog.sell(user,{'itemname': olditem,'item':equipped[olditem]})
+                    await ctx.send("**{}** already in backpack: Sold for {} copperpieces.".format(olditem,price))
+                else:
+                    Userdata.users[str(user.id)]['items']['backpack'].update({olditem: equipped[olditem]}) # TODO: Change data structure of items dict so you can have duplicate items because of key duplicate overwrite in dicts.
+                    await ctx.send("You removed {} and put it into your backpack.".format(olditem))
+            await ctx.send("Your new stats: **Attack**: {} [+{}], **Diplomacy**: {} [+{}].".format(Userdata.users[str(user.id)]['att'],(Userdata.users[str(user.id)]['skill']['att']+ Userdata.users[str(user.id)]['buffs'].get('att', {'bonus':0})['bonus']),Userdata.users[str(user.id)]['cha'],(Userdata.users[str(user.id)]['skill']['cha']+ Userdata.users[str(user.id)]['buffs'].get('cha',{'bonus':0})['bonus'])))
 
 
     @commands.command()
     @checks.admin_or_permissions(administrator=True)
-    async def give_loot(self, ctx, type: str="normal", user: discord.Member=None):
+    async def give_loot(self, ctx, type: str="normal", user: discord.Member=None, amount: int=1):
         """[Admin] This rewards a treasure chest to a specified member.
             !give_loot normal @locastan
             will give locastan a normal chest.
@@ -108,13 +113,13 @@ class GobCog(BaseCog):
         if not 'treasure' in Userdata.users[str(user.id)].keys():
             Userdata.users[str(user.id)]['treasure'] = [0,0,0,0]
         if type == "rare":
-            Userdata.users[str(user.id)]['treasure'][1] += 1
+            Userdata.users[str(user.id)]['treasure'][1] += amount
         elif type == "epic":
-            Userdata.users[str(user.id)]['treasure'][2] += 1
+            Userdata.users[str(user.id)]['treasure'][2] += amount
         elif type == "quest":
-            Userdata.users[str(user.id)]['treasure'][3] += 1
+            Userdata.users[str(user.id)]['treasure'][3] += amount
         else:
-            Userdata.users[str(user.id)]['treasure'][0] += 1
+            Userdata.users[str(user.id)]['treasure'][0] += amount
         await ctx.send(
             "```{} now owns {} normal, {} rare, {} epic and {} quest chests.```".format(
                 user.display_name, str(Userdata.users[str(user.id)]['treasure'][0]),str(Userdata.users[str(user.id)]['treasure'][1]),str(Userdata.users[str(user.id)]['treasure'][2]),str(Userdata.users[str(user.id)]['treasure'][3])))
@@ -145,8 +150,9 @@ class GobCog(BaseCog):
             Userdata.users[str(user)]['cha'] = diplomacy
             Userdata.users[str(user)]['name'] = {}
             Userdata.users[str(user)]['name'] = member.display_name
-            if 'class' not in Userdata.users[str(user)]:
-                Userdata.users[str(user)]['class'] = {}
+            if 'consumables' not in Userdata.users[str(user)]:
+                Userdata.users[str(user)]['consumables'] = {}
+                Userdata.users[str(user)]['buffs'] = {}
             if Userdata.users[str(user)]['class'] == {}:
                 Userdata.users[str(user)]['class'] = {'name': "Hero", 'ability': False, 'desc': "Your basic adventuring hero."}
             if 'skill' not in Userdata.users[str(user)]:
@@ -154,8 +160,6 @@ class GobCog(BaseCog):
                 Userdata.users[str(user)]['skill'] = {'pool': 0, 'att': 0, 'cha': 0}
             print(Userdata.users[str(user)]['name']+": "+str(int(Userdata.users[str(user)]['lvl'] / 5)) + "-" + str(Userdata.users[str(user)]['skill']['att']+Userdata.users[str(user)]['skill']['cha']))
             Userdata.users[str(user)]['skill']['pool'] = int(Userdata.users[str(user)]['lvl'] / 5) - (Userdata.users[str(user)]['skill']['att']+Userdata.users[str(user)]['skill']['cha'])
-            if len(Userdata.users[str(user)]['treasure']) <= 3:
-                Userdata.users[str(user)]['treasure'].append(0)
         for userID in deadsies:
             users.pop(userID)
         await GobCog.save()
@@ -314,7 +318,7 @@ class GobCog(BaseCog):
                         break
                     else:
                         ctx.command.reset_cooldown(ctx)
-                        return await ctx.send("Tinkered devices cannot be reforged.")
+                        return await ctx.send("Tinkered devices cannot be forged.")
             if item2 == {}:
                     ctx.command.reset_cooldown(ctx)
                     return await ctx.send("I could not find that item, check your spelling.")
@@ -339,8 +343,16 @@ class GobCog(BaseCog):
                         Userdata.users[str(user)]['items']['backpack'].update({newitem['itemname']: newitem['item']})
                         await ctx.send('```css\n Your new {} consumed {} and is now lurking in your backpack. ```'.format(newitem['itemname'], ', '.join(lookup)))
                 else:
+                    roll = random.randint(1,5)
+                    if roll == 5:
+                        await ctx.send('```css\n You carefully dismantle the {} and salvaged its [soul essence]. ```'.format(newitem['itemname']))
+                        if "[soul essence]" in Userdata.users[str(user)]['consumables'].keys():
+                            Userdata.users[str(user)]['consumables']['[soul essence]']['uses'] = Userdata.users[str(user)]['consumables']['[soul essence]'].get("uses", 0) + 1
+                        else:
+                            Userdata.users[str(user)]['consumables'].update({'[soul essence]':{"slot":["consumable"],"uses":1}})
+                    else:
+                        await ctx.send('```css\n {} got mad at your rejection and blew itself up. ```'.format(newitem['itemname']))
                     await GobCog.save()
-                    return await ctx.send('```css\n {} got mad at your rejection and blew itself up. ```'.format(newitem['itemname']))
             else:
                 Userdata.users[str(user)]['items']['backpack'].update({newitem['itemname']: newitem['item']})
                 await ctx.send('```css\n Your new {} is lurking in your backpack. ```'.format(newitem['itemname']))
@@ -356,7 +368,7 @@ class GobCog(BaseCog):
             For information on class use: !heroclass "classname" info
         """
         global users
-        classes = {'Tinkerer': {'name': "Tinkerer", 'ability': False, 'desc': "Tinkerers can forge two different items into a device bound to their very soul.\n Use !forge."},
+        classes = {'Tinkerer': {'name': "Tinkerer", 'ability': False, 'desc': "Tinkerers can forge two different items into a device bound to their very soul.\nThey can also use soul essence to augment items.\n Use !forge."},
                     'Berserker':{'name': "Berserker", 'ability': False, 'desc': "Berserker have the option to rage and add big bonuses to attacks, but fumbles hurt.\n Use !rage when attacking in an adventure."},
                     'Cleric': {'name': "Cleric", 'ability': False, 'desc': "Clerics can bless the entire group when praying.\n Use !bless when fighting in an adventure."},
                     'Ranger': {'name': "Ranger", 'ability': False, 'desc': "Rangers can gain a special pet, which can find items and give reward bonuses.\n Use !pet."},
@@ -373,7 +385,7 @@ class GobCog(BaseCog):
                         if Userdata.users[str(user.id)]['class']['name'] == 'Tinkerer' or Userdata.users[str(user.id)]['class']['name'] == 'Ranger':
                             curclass = Userdata.users[str(user.id)]['class']['name']
                             if curclass == 'Tinkerer':
-                                msg = await ctx.send("```css\n You will loose your forged device if you change your class.\nShall I proceed? ```")
+                                msg = await ctx.send("```css\n You will loose your forged device and soul essence if you change your class.\nShall I proceed? ```")
                             else:
                                 msg = await ctx.send("```css\n You will loose your pet if you change your class.\nShall I proceed? ```")
                             start_adding_reactions(msg, ReactionPredicate.YES_OR_NO_EMOJIS)
@@ -392,6 +404,8 @@ class GobCog(BaseCog):
                                         for item in lookup:
                                             del Userdata.users[str(user.id)]['items']['backpack'][item]
                                             await ctx.send('```css\n {} has run off to find a new master. ```'.format(', '.join(lookup)))
+                                    if '[soul essence]' in Userdata.users[str(user.id)]['consumables']:
+                                        Userdata.users[str(user.id)]['consumables'].pop('[soul essence]')
                             else:
                                 ctx.command.reset_cooldown(ctx)
                                 return
@@ -433,6 +447,42 @@ class GobCog(BaseCog):
             await ctx.send("You permanently raised your {} value by one.".format(spend))
             await GobCog.save()
 
+    @commands.command()
+    @commands.guild_only()
+    async def use(self, ctx, consumable:str=None, switch:str=None):
+        """This allows you to use consumables.
+            !use "partial name of consumable"
+            Get a description of the consumable with:
+            !use "partial name of consumable" info
+        """
+        global users
+        user = ctx.author
+        gotcons = False
+        if Userdata.users[str(user.id)]['consumables'] != {}:
+            gotcons = True
+        if gotcons == False:
+            return await ctx.send("You do not have any consumables.")
+        if consumable == "None" or not any([x for x in Userdata.users[str(user.id)]['consumables'] if consumable in x.lower()]):
+            await ctx.send("You have to specify a consumable you own.")
+            return
+        lookup = list(x for x in Userdata.users[str(user.id)]['consumables'] if consumable in x.lower())
+        if len(lookup) > 1:
+            await ctx.send("I found multiple consumables ({}) matching that name.\nPlease be more specific.".format(" and ".join([", ".join(lookup[:-1]),lookup[-1]] if len(lookup) > 2 else lookup)))
+            return
+        else:
+            cons = lookup[0]
+            if switch != None:
+                return await ctx.send("{}".format(Consumables.consbles[cons]['desc']))
+            if Consumables.consbles[cons]['attrib'] in Userdata.users[str(user.id)]['buffs'].keys():
+                await ctx.send("You already have this buff in effect.")
+                return
+            amount = int(Userdata.users[str(user.id)]['consumables'][cons].get('uses'))
+            if amount <= 1:
+                del Userdata.users[str(user.id)]['consumables'][cons]
+            else:
+                Userdata.users[str(user.id)]['consumables'][cons]['uses'] = Userdata.users[str(user.id)]['consumables'][cons]['uses'] - 1
+            await Consumables.use_con(ctx, user, cons)
+        await GobCog.save()
 
     @commands.command()
     @commands.guild_only()
@@ -447,6 +497,9 @@ class GobCog(BaseCog):
             return
         else:
             looting.append(ctx.author.display_name)
+        if type.isdigit():
+            many = type
+            type = "normal"
         if type == "normal":
             redux = [1,0,0,0]
         elif type == "rare":
@@ -474,11 +527,24 @@ class GobCog(BaseCog):
                     price = await GobCog.sell(user,item)
                     await ctx.send("**{}** sold the {} for {} copperpieces.".format(user.display_name,item['itemname'],price))
                 elif item['equip'] == "equip":
-                    equip = {"itemname": item['itemname'],"item": item['item']}
-                    await self.equip_item(ctx, equip, False)
+                    if item['item']['slot'] == ['consumable']:
+                        await Consumables.use_con(ctx, user, item['itemname'])
+                    else:
+                        equip = {"itemname": item['itemname'],"item": item['item']}
+                        await self.equip_item(ctx, equip, False)
                 else:
-                    Userdata.users[str(user.id)]['items']['backpack'].update({item['itemname']: item['item']})
-                    await ctx.send("**{}** put the {} into the backpack.".format(user.display_name,item['itemname']))
+                    if item['item']['slot'] == ['consumable']:
+                        if item['itemname'] in Userdata.users[str(user.id)]['consumables'].keys():
+                            Userdata.users[str(user.id)]['consumables'][item['itemname']]['uses'] = Userdata.users[str(user.id)]['consumables'][item['itemname']].get("uses", 0) + item['item']['uses']
+                        else:
+                            Userdata.users[str(user.id)]['consumables'].update({item['itemname']:item['item']})
+                    else:
+                        if item['itemname'] in Userdata.users[str(user.id)]['items']['backpack'].keys():
+                            price = await GobCog.sell(user,item)
+                            await ctx.send("**{}** already had this item: Sold {} for {} copperpieces.".format(user.display_name,item['itemname'],price))
+                        else:
+                            Userdata.users[str(user.id)]['items']['backpack'].update({item['itemname']: item['item']})
+                            await ctx.send("**{}** put the {} into the backpack.".format(user.display_name,item['itemname']))
                 await ctx.send("```css\n" + "You own {} normal, {} rare, {} epic and {} quest chests.```".format(
                     str(Userdata.users[str(user.id)]['treasure'][0]),str(Userdata.users[str(user.id)]['treasure'][1]),str(Userdata.users[str(user.id)]['treasure'][2]),str(Userdata.users[str(user.id)]['treasure'][3])))
                 if item['equip'] == "cancel":
@@ -488,9 +554,9 @@ class GobCog(BaseCog):
         await Userdata.save()
 
 
-    @commands.command()
+    @commands.command(name="stats", aliases=['s'])
     @commands.guild_only()
-    async def stats(self, ctx, user: discord.Member=None):
+    async def _stats(self, ctx, user: discord.Member=None):
         """This draws up a charsheet of you or an optionally specified member.
             !stats @locastan
             will bring up locastans stats.
@@ -506,10 +572,27 @@ class GobCog(BaseCog):
         xp = round(Userdata.users[str(user.id)]['exp'])
         lvl = Userdata.users[str(user.id)]['lvl']
         att = Userdata.users[str(user.id)]['att']
-        satt = Userdata.users[str(user.id)]['skill']['att']
+        satt = Userdata.users[str(user.id)]['skill']['att'] + Userdata.users[str(user.id)]['buffs'].get('att', {'bonus':0})['bonus']
         cha = Userdata.users[str(user.id)]['cha']
-        scha = Userdata.users[str(user.id)]['skill']['cha']
+        scha = Userdata.users[str(user.id)]['skill']['cha'] + Userdata.users[str(user.id)]['buffs'].get('cha', {'bonus':0})['bonus']
         pool = Userdata.users[str(user.id)]['skill']['pool']
+        buffs = ""
+        if Userdata.users[str(user.id)]['buffs'] != {}:
+            buffs = "\n- Active Buffs:"
+            for key in Userdata.users[str(user.id)]['buffs'].keys():
+                if key == "luck":
+                    buffs += " 🍀 (+{}%/{}⏳) ".format(Userdata.users[str(user.id)]['buffs'][key]['bonus'],Userdata.users[str(user.id)]['buffs'][key]['duration'])
+                elif key == "att":
+                    buffs += " 🗡 (+{}/{}⏳) ".format(Userdata.users[str(user.id)]['buffs'][key]['bonus'],Userdata.users[str(user.id)]['buffs'][key]['duration'])
+                elif key == "cha":
+                    buffs += " 🗨 (+{}/{}⏳) ".format(Userdata.users[str(user.id)]['buffs'][key]['bonus'],Userdata.users[str(user.id)]['buffs'][key]['duration'])
+                elif key == "money":
+                    buffs += " 💰 (+{}%/{}⏳) ".format(Userdata.users[str(user.id)]['buffs'][key]['bonus'],Userdata.users[str(user.id)]['buffs'][key]['duration'])
+                elif key == "xp":
+                    buffs += " 📚 (+{}%/{}⏳) ".format(Userdata.users[str(user.id)]['buffs'][key]['bonus'],Userdata.users[str(user.id)]['buffs'][key]['duration'])
+                elif key == "monster":
+                    buffs += " 🦖 (🗡{}|🗨{}/{}⏳) ".format(Userdata.users[str(user.id)]['buffs'][key]['bonus']['att'],Userdata.users[str(user.id)]['buffs'][key]['bonus']['cha'],Userdata.users[str(user.id)]['buffs'][key]['duration'])
+            buffs += " -"
         equip = "Equipped Items: \n"
         i = iter(Userdata.users[str(user.id)]['items'])
         for slot in i:
@@ -529,8 +612,8 @@ class GobCog(BaseCog):
         else:
             clazz = "Hero."
         await ctx.send(
-            "```css\n[{}'s Character Sheet] \n\n```".format(user.display_name) + "```css\nA level {} {} \n\n- ATTACK: {} [+{}] - DIPLOMACY: {} [+{}] -\n\n- Credits: {} {} \n- Experience: {}/{} \n- Unspent skillpoints: {} \n```".format(
-                lvl, clazz, att, satt, cha, scha, bal, currency, xp, next_lvl, pool
+            "```css\n[{}'s Character Sheet] \n\n```".format(user.display_name) + "```css\nA level {} {} \n\n- ATTACK: {} [+{}] - DIPLOMACY: {} [+{}] -{}\n\n- Credits: {} {} \n- Experience: {}/{} \n- Unspent skillpoints: {} \n```".format(
+                lvl, clazz, att, satt, cha, scha, buffs, bal, currency, xp, next_lvl, pool
             ) + "```css\n" + equip + "```" +
             "```css\n" + "You own {} normal, {} rare, {} epic and {} quest chests.```".format(
                 str(Userdata.users[str(user.id)]['treasure'][0]),str(Userdata.users[str(user.id)]['treasure'][1]),str(Userdata.users[str(user.id)]['treasure'][2]),str(Userdata.users[str(user.id)]['treasure'][3]))
@@ -538,7 +621,7 @@ class GobCog(BaseCog):
 
     @commands.command(name="backpack", aliases=['b'])
     @commands.guild_only()
-    async def _backpack(self, ctx, switch: str="None", item: str="None", asking: int=10, buyer: discord.Member=None):
+    async def _backpack(self, ctx, switch: str="None", item: str="None", asking: int=0, buyer: discord.Member=None, quant: int=1):
         """This draws up the contents of your backpack.
             Selling: !backpack sell "(partial) name of item"
             Trading: !backpack trade "name of item" cp @buyer
@@ -550,17 +633,22 @@ class GobCog(BaseCog):
             return
         global users
         bkpk = "Items in Backpack: \n"
+        cspouch = "Consumables: \n"
+        if Userdata.users[str(user.id)]['consumables'] == {}:
+            cspouch = "No Consumables owned."
         if switch == "None":
             for item in Userdata.users[str(user.id)]['items']['backpack']: # added second if level for two handed weapons so their slots show properly.
                 if len(Userdata.users[str(user.id)]['items']['backpack'][item]['slot']) == 1:
                     bkpk += " - " + item + " - (ATT: "+ str(Userdata.users[str(user.id)]['items']['backpack'][item]['att']) + " | DPL: "+ str(Userdata.users[str(user.id)]['items']['backpack'][item]['cha']) +" ["+ Userdata.users[str(user.id)]['items']['backpack'][item]['slot'][0] + " slot])\n"
                 else:
                     bkpk += " - " + item + " -(ATT: "+ str(Userdata.users[str(user.id)]['items']['backpack'][item]['att']*2) + " | DPL: "+ str(Userdata.users[str(user.id)]['items']['backpack'][item]['cha']*2) +" [two handed])\n"
+            for item in Userdata.users[str(user.id)]['consumables']: # added second if level for two handed weapons so their slots show properly.
+                    cspouch += " - " + item + " ({}x)\n".format(Userdata.users[str(user.id)]['consumables'][item]['uses'])
             await ctx.send(
                 "```css\n[{}'s baggage] \n\n```".format(
                     user.display_name
-                ) + "```css\n" + bkpk + "\n (Reply with the name of an item or use !backpack equip \"name of item\" to equip it.)```"
-            )
+                ) + "```css\n" + bkpk + "\n (Reply with the name of an item or use !backpack equip \"name of item\" to equip it.)\n\n```")
+            await ctx.send("```css\n" + cspouch + "\n```")
             try:
                 reply = await ctx.bot.wait_for("message", check=MessagePredicate.same_context(ctx), timeout=30)
             except asyncio.TimeoutError:
@@ -589,15 +677,16 @@ class GobCog(BaseCog):
                 equip = {"itemname": item,"item": Userdata.users[str(user.id)]['items']['backpack'][item]}
                 await self.equip_item(ctx, equip, True)
         elif switch == "sell": #new logic allows for bulk sales. It also always confirms the sale by yes/no query to avoid accidents.
-            if item == "None" or not any([x for x in Userdata.users[str(user.id)]['items']['backpack'] if item in x.lower()]):
+            if item == "None" or not any([x for x in Userdata.users[str(user.id)]['items']['backpack'] if item in x.lower()]+[x for x in Userdata.users[str(user.id)]['consumables'] if item in x.lower()]):
                 await ctx.send("You have to specify an item (or partial name) from your backpack to sell.")
                 return
             lookup = list(x for x in Userdata.users[str(user.id)]['items']['backpack'] if item in x.lower())
+            lookup += list(x for x in Userdata.users[str(user.id)]['consumables'] if item in x.lower())
             if any([x for x in lookup if "{.:'" in x.lower()]):
                 device = [x for x in lookup if "{.:'" in x.lower()]
                 await ctx.send("```css\n Your {} is refusing to be sold and bit your finger for trying. ```".format(device))
                 return
-            msg = await ctx.send("Do you want to sell these items {}?".format(str(lookup)))
+            msg = await ctx.send("Do you want to sell these items {}?\n[If you are selling consumables and did not specify how many (eg. !b sell 'consumable' 3), all will be sold!]".format(str(lookup)))
             start_adding_reactions(msg, ReactionPredicate.YES_OR_NO_EMOJIS)
             pred = ReactionPredicate.yes_or_no(msg, buyer)
             await ctx.bot.wait_for("reaction_add", check=pred)
@@ -608,41 +697,67 @@ class GobCog(BaseCog):
                     await msg.remove_reaction(key, ctx.bot.user)
             if pred.result: #user reacted with Yes.
                 for item in lookup:
-                    queryitem = {'itemname': item,'item': Userdata.users[str(user.id)]['items']['backpack'].get(item)}
+                    if item in Consumables.consbles.keys() and asking != 0:
+                        if int(Userdata.users[str(user.id)]['consumables'][item]['uses']) > asking:
+                            queryitem = {'itemname': item,'item':Userdata.users[str(user.id)]['consumables'][item].copy()}
+                            queryitem['item']['uses'] = asking
+                        else:
+                            queryitem = {'itemname': item,'item': Userdata.users[str(user.id)]['items']['backpack'].get(item, Userdata.users[str(user.id)]['consumables'].get(item))}
+                    else:
+                        queryitem = {'itemname': item,'item': Userdata.users[str(user.id)]['items']['backpack'].get(item, Userdata.users[str(user.id)]['consumables'].get(item))}
                     price = await GobCog.sell(user,queryitem)
-                    del Userdata.users[str(user.id)]['items']['backpack'][item]
-                    await ctx.send("You sold your {} for {} copperpieces.".format(item,price))
+                    if item in Consumables.consbles.keys():
+                        if int(Userdata.users[str(user.id)]['consumables'][item]['uses']) > asking:
+                            Userdata.users[str(user.id)]['consumables'][item]['uses'] = int(Userdata.users[str(user.id)]['consumables'][item]['uses']) - asking
+                            await ctx.send("You sold {}x {} for {} copperpieces.".format(asking,item,price))
+                        else:
+                            Userdata.users[str(user.id)]['consumables'].pop(item)
+                            await ctx.send("You sold your {} for {} copperpieces.".format(item,price))
+                    else:
+                        Userdata.users[str(user.id)]['items']['backpack'].pop(item)
+                        await ctx.send("You sold your {} for {} copperpieces.".format(item,price))
                     await GobCog.save()
         elif switch == "trade":
-            if item == "None" or not any([x for x in Userdata.users[str(user.id)]['items']['backpack'] if item in x.lower()]):
+            if item == "None" or not any([x for x in Userdata.users[str(user.id)]['items']['backpack'] if item in x.lower()]+[x for x in Userdata.users[str(user.id)]['consumables'] if item in x.lower()]):
                 await ctx.send("You have to specify an item from your backpack to trade.")
                 return
             lookup = list(x for x in Userdata.users[str(user.id)]['items']['backpack'] if item in x.lower())
+            lookup += list(x for x in Userdata.users[str(user.id)]['consumables'] if item in x.lower())
             if len(lookup) > 1:
                 await ctx.send("I found multiple items ({}) matching that name in your backpack.\nPlease be more specific.".format(" and ".join([", ".join(lookup[:-1]),lookup[-1]] if len(lookup) > 2 else lookup)))
                 return
-            if any([x for x in lookup if "{.:'" in x.lower()]):
+            if any([x for x in lookup if "{.:'" in x.lower()]+[x for x in lookup if "[soul essence]" in x.lower()]):
                 device = [x for x in lookup if "{.:'" in x.lower()]
                 await ctx.send("```css\n Your {} does not want to leave you. ```".format(device))
                 return
             else:
                 item = lookup[0]
-                if len(Userdata.users[str(user.id)]['items']['backpack'][item]["slot"]) == 2: # two handed weapons add their bonuses twice
-                    hand = "two handed"
-                    att = Userdata.users[str(user.id)]['items']['backpack'][item]["att"]*2
-                    cha = Userdata.users[str(user.id)]['items']['backpack'][item]["cha"]*2
-                else:
-                    if Userdata.users[str(user.id)]['items']['backpack'][item]["slot"][0] == "right" or Userdata.users[str(user.id)]['items']['backpack'][item]["slot"][0] == "left":
-                        hand = Userdata.users[str(user.id)]['items']['backpack'][item]["slot"][0] + " handed"
+                if item in Consumables.consbles.keys():
+                    if Userdata.users[str(user.id)]['consumables'].get(item)['uses'] >= quant:
+                        await ctx.send("{} wants to sell {}x {}.".format(user.display_name,quant,item))
                     else:
-                        hand = Userdata.users[str(user.id)]['items']['backpack'][item]["slot"][0] + " slot"
-                    att = Userdata.users[str(user.id)]['items']['backpack'][item]["att"]
-                    cha = Userdata.users[str(user.id)]['items']['backpack'][item]["cha"]
-                await ctx.send("{} wants to sell {}. (Attack: {}, Charisma: {} [{}])".format(user.display_name,item,str(att),str(cha),hand))
+                        await ctx.send("You only have {} doses of {} to sell.".format(Userdata.users[str(user.id)]['consumables'].get(item)['uses'],item))
+                        return
+                else:
+                    if len(Userdata.users[str(user.id)]['items']['backpack'][item]["slot"]) == 2: # two handed weapons add their bonuses twice
+                        hand = "two handed"
+                        att = Userdata.users[str(user.id)]['items']['backpack'][item]["att"]*2
+                        cha = Userdata.users[str(user.id)]['items']['backpack'][item]["cha"]*2
+                    else:
+                        if Userdata.users[str(user.id)]['items']['backpack'][item]["slot"][0] == "right" or Userdata.users[str(user.id)]['items']['backpack'][item]["slot"][0] == "left":
+                            hand = Userdata.users[str(user.id)]['items']['backpack'][item]["slot"][0] + " handed"
+                        else:
+                            hand = Userdata.users[str(user.id)]['items']['backpack'][item]["slot"][0] + " slot"
+                        att = Userdata.users[str(user.id)]['items']['backpack'][item]["att"]
+                        cha = Userdata.users[str(user.id)]['items']['backpack'][item]["cha"]
+                    await ctx.send("{} wants to sell {}. (Attack: {}, Charisma: {} [{}])".format(user.display_name,item,str(att),str(cha),hand))
                 msg = await ctx.send("Do you want to buy this item for {} cp?".format(str(asking)))
                 start_adding_reactions(msg, ReactionPredicate.YES_OR_NO_EMOJIS)
                 pred = ReactionPredicate.yes_or_no(msg, buyer)
-                await ctx.bot.wait_for("reaction_add", check=pred)
+                try:
+                    await ctx.bot.wait_for("reaction_add", check=pred, timeout=60)
+                except asyncio.TimeoutError:
+                    return await ctx.send("Trade timed out after one minute.")
                 try:
                     await msg.delete()
                 except discord.Forbidden:  # cannot remove message try remove emojis
@@ -654,8 +769,24 @@ class GobCog(BaseCog):
                     if await bank.can_spend(spender,asking):
                         bal = await bank.transfer_credits(spender, to, asking)
                         currency = await bank.get_currency_name(ctx.guild)
-                        tradeitem = Userdata.users[str(user.id)]['items']['backpack'].pop(item)
-                        Userdata.users[str(buyer.id)]['items']['backpack'].update({item: tradeitem})
+                        if item in Consumables.consbles.keys():
+                            if Userdata.users[str(user.id)]['consumables'][item]['uses'] > quant:
+                                Userdata.users[str(user.id)]['consumables'][item]['uses'] = Userdata.users[str(user.id)]['consumables'][item]['uses'] - quant
+                                tradeitem = Userdata.users[str(user.id)]['consumables'][item].copy()
+                                tradeitem['uses'] = quant
+                                if item in Userdata.users[str(buyer.id)]['consumables'].keys():
+                                    Userdata.users[str(buyer.id)]['consumables'][item['itemname']]['uses'] = Userdata.users[str(buyer.id)]['consumables'][item['itemname']].get("uses", 0) + item['item']['uses']
+                                else:
+                                    Userdata.users[str(buyer.id)]['consumables'].update({item: tradeitem})
+                            else:
+                                tradeitem = Userdata.users[str(user.id)]['consumables'].pop(item)
+                                if item in Userdata.users[str(buyer.id)]['consumables'].keys():
+                                    Userdata.users[str(buyer.id)]['consumables'][item['itemname']]['uses'] = Userdata.users[str(buyer.id)]['consumables'][item['itemname']].get("uses", 0) + item['item']['uses']
+                                else:
+                                    Userdata.users[str(buyer.id)]['consumables'].update({item: tradeitem})
+                        else:
+                            tradeitem = Userdata.users[str(user.id)]['items']['backpack'].pop(item)
+                            Userdata.users[str(buyer.id)]['items']['backpack'].update({item: tradeitem})
                         await GobCog.save()
                         await ctx.send(
                             "```css\n" + "{} traded to {} for {} {}```".format(
@@ -736,6 +867,14 @@ class GobCog(BaseCog):
                 if 'name' in Userdata.users[str(member.id)]['class']:
                     if Userdata.users[str(member.id)]['class']['name'] != "Ranger" and Userdata.users[str(member.id)]['class']['ability']:
                         Userdata.users[str(member.id)]['class']['ability'] = False
+                expired = []
+                for buff in Userdata.users[str(member.id)]['buffs'].keys(): #reduce duration of active buffs
+                    if Userdata.users[str(member.id)]['buffs'][buff]['duration'] <= 1:
+                        expired.append(buff)
+                    else:
+                        Userdata.users[str(member.id)]['buffs'][buff]['duration'] = Userdata.users[str(member.id)]['buffs'][buff]['duration'] - 1
+                for buff in expired: #remove buffs outside loop not to change size during iteration
+                    Userdata.users[str(member.id)]['buffs'].pop(buff)
             await GobCog.save()
 
     @commands.command(name="quest", aliases=['q'])
@@ -790,6 +929,14 @@ class GobCog(BaseCog):
                 if 'name' in Userdata.users[str(member.id)]['class']:
                     if Userdata.users[str(member.id)]['class']['name'] != "Ranger" and Userdata.users[str(member.id)]['class']['ability']:
                         Userdata.users[str(member.id)]['class']['ability'] = False
+                expired = []
+                for buff in Userdata.users[str(member.id)]['buffs'].keys(): #reduce duration of active buffs
+                    if Userdata.users[str(member.id)]['buffs'][buff]['duration'] <= 1:
+                        expired.append(buff)
+                    else:
+                        Userdata.users[str(member.id)]['buffs'][buff]['duration'] = Userdata.users[str(member.id)]['buffs'][buff]['duration'] - 1
+                for buff in expired: #remove buffs outside loop not to change size during iteration
+                    Userdata.users[str(member.id)]['buffs'].pop(buff)
             if len(dead) > 0:
                 casualties = " and ".join([", ".join(dead[:-1]),dead[-1]] if len(dead) > 2 else dead)
                 await ctx.send("**" + casualties + "**" + " did not make it back alive.")
@@ -889,18 +1036,23 @@ class GobCog(BaseCog):
                 await ctx.send("You equipped {}.".format(item['itemname']))
             else:
                 olditem = Userdata.users[str(user.id)]['items'][slot]
+                olditemname = list(olditem.keys())[0]
                 for oslot in olditem[list(olditem.keys())[0]]['slot']:
                     Userdata.users[str(user.id)]['items'][oslot] = {}
                     Userdata.users[str(user.id)]['att'] -= olditem[list(olditem.keys())[0]]['att']     # keep in mind that double handed items grant their bonus twice so they remove twice
                     Userdata.users[str(user.id)]['cha'] -= olditem[list(olditem.keys())[0]]['cha']
-                Userdata.users[str(user.id)]['items']['backpack'].update(olditem)
                 Userdata.users[str(user.id)]['items'][slot][item['itemname']] = item['item']
                 Userdata.users[str(user.id)]['att'] += item['item']['att']
                 Userdata.users[str(user.id)]['cha'] += item['item']['cha']
-                await ctx.send("You equipped {} and put {} into your backpack.".format(item['itemname'],list(olditem.keys())[0]))
+                if olditemname in Userdata.users[str(user.id)]['items']['backpack'].keys():
+                    price = await GobCog.sell(user,{'itemname': olditemname,'item':olditem.get(olditemname)})
+                    await ctx.send("**{}** already in backpack: Sold for {} copperpieces.".format(olditemname,price))
+                else:
+                    Userdata.users[str(user.id)]['items']['backpack'].update(olditem)
+                    await ctx.send("You equipped {} and put {} into your backpack.".format(item['itemname'],list(olditem.keys())[0]))
         if from_backpack:
             del Userdata.users[str(user.id)]['items']['backpack'][item['itemname']]
-        await ctx.send("Your new stats: **Attack**: {} [+{}], **Diplomacy**: {} [+{}].".format(Userdata.users[str(user.id)]['att'],Userdata.users[str(user.id)]['skill']['att'],Userdata.users[str(user.id)]['cha'],Userdata.users[str(user.id)]['skill']['cha']))
+        await ctx.send("Your new stats: **Attack**: {} [+{}], **Diplomacy**: {} [+{}].".format(Userdata.users[str(user.id)]['att'],(Userdata.users[str(user.id)]['skill']['att']+ Userdata.users[str(user.id)]['buffs'].get('att', {'bonus':0})['bonus']),Userdata.users[str(user.id)]['cha'],(Userdata.users[str(user.id)]['skill']['cha']+ Userdata.users[str(user.id)]['buffs'].get('cha', {'bonus':0})['bonus'])))
         await GobCog.save()
 
     @staticmethod
@@ -914,6 +1066,8 @@ class GobCog(BaseCog):
             Userdata.users[str(user.id)]['cha'] = 0
             Userdata.users[str(user.id)]['treasure'] = [0,0,0,0]
             Userdata.users[str(user.id)]['items'] = {"left":{},"right":{},"ring":{},"charm":{},"backpack": {}}
+            Userdata.users[str(user.id)]['consumables'] = {}
+            Userdata.users[str(user.id)]['buffs'] = {}
             Userdata.users[str(user.id)]['name'] = {}
             Userdata.users[str(user.id)]['name'] = user.display_name
             Userdata.users[str(user.id)]['class'] = {}
@@ -959,7 +1113,10 @@ class GobCog(BaseCog):
             base = (100,500)
         else :
             base = (10,200)
-        price = random.randint(base[0],base[1])*max(item['item']['att']+item['item']['cha'],1)
+        if item['item']['slot'] == ['consumable']:
+            price = random.randint(base[0],base[1])*max(item['item']['uses'],1)
+        else:
+            price = random.randint(base[0],base[1])*max(item['item']['att']+item['item']['cha'],1)
         await bank.deposit_credits(user, price)
         return(price)
 
@@ -980,8 +1137,17 @@ class GobCog(BaseCog):
                         Userdata.users[str(user.id)]['treasure'][2] += 1
                     else:
                         Userdata.users[str(user.id)]['treasure'][0] += 1
+                elif item['itemname'] in Consumables.consbles.keys():
+                        if item['itemname'] in Userdata.users[str(user.id)]['consumables'].keys():
+                            Userdata.users[str(user.id)]['consumables'][item['itemname']]['uses'] = Userdata.users[str(user.id)]['consumables'][item['itemname']].get("uses", 0) + item['item']['uses']
+                        else:
+                            Userdata.users[str(user.id)]['consumables'].update({item['itemname']:item['item']})
                 else:
-                    Userdata.users[str(user.id)]['items']['backpack'].update({item['itemname']: item['item']})
+                    if item['itemname'] in Userdata.users[str(user.id)]['items']['backpack'].keys():
+                        price = await GobCog.sell(user,item)
+                        await ctx.send("**{}** was already in your backpack: Sold for {} copperpieces.".format(item['itemname'],price))
+                    else:
+                        Userdata.users[str(user.id)]['items']['backpack'].update({item['itemname']: item['item']})
                 await GobCog.save()
                 await ctx.send("{} bought the {} for {} cp and put it into the backpack.".format(user.display_name,item['itemname'],str(item['price'])))
             else:
@@ -1034,6 +1200,8 @@ class GobCog(BaseCog):
                     att = item['item']["att"]
                     cha = item['item']["cha"]
                 text += "```css\n" + "[{}] {} (Attack: {}, Charisma: {} [{}]) for {} cp.".format(str(index+1),item['itemname'],str(att),str(cha),hand,item['price'])+ " ```"
+            elif item['item']["slot"] == 'consumable':
+                text += "```css\n" + "[{}] {}x {} for {} cp.".format(str(index+1),item['item']['uses'],item['itemname'],item['price'])+ " ```"
             else:
                 text += "```css\n" + "[{}] {} for {} cp.".format(str(index+1),item['itemname'],item['price'])+ " ```"
         text += "Do you want to buy any of these fine items? Tell me which one below:"
