@@ -498,7 +498,7 @@ class GobCog(BaseCog):
         else:
             looting.append(ctx.author.display_name)
         if type.isdigit():
-            many = type
+            many = int(type)
             type = "normal"
         if type == "normal":
             redux = [1,0,0,0]
