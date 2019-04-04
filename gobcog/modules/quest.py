@@ -450,6 +450,7 @@ class Quest:
                         Quest.userslist["talk"].remove(sleepyhead)
                     else:
                         Quest.userslist["pray"].remove(sleepyhead)
+                    fumblelist.append(sleepyhead)
                     await ctx.send("**" + sleepyhead + "**" + " fell asleep.")
                 else:
                     fails = []
@@ -737,14 +738,15 @@ class Quest:
             Quest.failed = True
             return
         amount = ((Quest.str+Quest.dipl)*people)
+        Quest.participants = Quest.userslist["fight"]+Quest.userslist["talk"]+Quest.userslist["pray"]+Quest.userslist["run"]+fumblelist
         if people == 1:
             if slain:
                 text= ("**{}** has slain the {} in epic battle!").format(fighters,Quest.challenge)
-                text += await Quest.reward(ctx, Quest.userslist["fight"]+Quest.userslist["pray"],amount,(attack/Quest.str),treasure)
+                text += await Quest.reward(ctx, Quest.participants,amount,(attack/Quest.str),treasure)
 
             if  persuaded:
                 text= ("**{}** almost died in battle,").format(talkers) + (" but confounded the {} in the last second.").format(Quest.challenge)
-                text += await Quest.reward(ctx, Quest.userslist["talk"]+Quest.userslist["pray"],amount,(diplomacy/Quest.dipl),treasure)
+                text += await Quest.reward(ctx, Quest.participants,amount,(diplomacy/Quest.dipl),treasure)
 
             if not slain and not persuaded:
                 options = ["No amount of diplomacy or valiant fighting could save you. You died.", "This challenge was too much for one hero.", "You tried your best, but couldn't succeed alone."]
@@ -757,21 +759,21 @@ class Quest:
                     text= ("**{}** slayed the {} in battle,").format(fighters,Quest.challenge) + ("while **{}** distracted with flattery and **{}** aided in Herberts name.").format(talkers, preachermen)
                 else:
                     text= ("**{}** slayed the {} in battle,").format(fighters,Quest.challenge) + ("while **{}** distracted with insults.").format(talkers)
-                text += await Quest.reward(ctx, Quest.userslist["fight"]+Quest.userslist["talk"]+Quest.userslist["pray"],amount,(attack/Quest.str+diplomacy/Quest.dipl),treasure)
+                text += await Quest.reward(ctx, Quest.participants,amount,(attack/Quest.str+diplomacy/Quest.dipl),treasure)
 
             if  not slain and persuaded:
                 if len(Quest.userslist["pray"]) > 0:
                     text= ("**{}** talked the {} down with **{}'s** blessing'.").format(talkers,Quest.challenge, preachermen)
                 else:
                     text= ("**{}** talked the {} down.").format(talkers,Quest.challenge)
-                text += await Quest.reward(ctx, Quest.userslist["talk"]+Quest.userslist["pray"],amount,(diplomacy/Quest.dipl),treasure)
+                text += await Quest.reward(ctx, Quest.participants,amount,(diplomacy/Quest.dipl),treasure)
 
             if slain and not persuaded:
                 if len(Quest.userslist["pray"]) > 0:
                     text= ("**{}** killed the {} in a most heroic battle with a little help from **{}**.").format(fighters,Quest.challenge, preachermen)
                 else:
                     text= ("**{}** killed the {} in an epic fight.").format(fighters,Quest.challenge)
-                text += await Quest.reward(ctx, Quest.userslist["fight"]+Quest.userslist["pray"],amount,(attack/Quest.str),treasure)
+                text += await Quest.reward(ctx, Quest.participants,amount,(attack/Quest.str),treasure)
 
             if not slain and not persuaded:
                 options = ["No amount of diplomacy or valiant fighting could save you. Everyone died.", "This challenge was too much for this group.", "You tried your best, but succumbed to overwhelming forces in the end."]
@@ -780,7 +782,6 @@ class Quest:
                 Quest.failed = True
 
         await ctx.send(text)
-        Quest.participants= Quest.userslist["fight"]+Quest.userslist["talk"]+Quest.userslist["pray"]+Quest.userslist["run"]+fumblelist
         for user in Quest.participants: #reset activated abilities
             member = discord.utils.find(lambda m: m.display_name == user, ctx.guild.members)
             if 'name' in Userdata.users[str(member.id)]['class']:
@@ -811,9 +812,9 @@ class Quest:
         Quest.sumcp += cp
         phrase = ""
         if Quest.endless and (Quest.depth % 5 == 0):
-            phrase += "You defeated the questboss and earned a quest chest for your troubles!"
+            phrase += "You defeated the champion and were rewarded a quest chest for your victory!"
             special[3] += 1
-        elif Quest.idx >= (len(Quest.quest)-1):
+        elif not Quest.endless and Quest.idx >= (len(Quest.quest)-1):
             phrase += "You defeated the questboss and earned a quest chest for your troubles!"
             special[3] += 1
         for user in list:
