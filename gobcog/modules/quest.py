@@ -147,7 +147,6 @@ class Quest:
         Quest.quest = getattr(Quest, Quest.name)
         Quest.monsters = getattr(Quest, Quest.name + "_monsters")
         Quest.bosses = getattr(Quest, Quest.name + "_bosses")
-        Quest.log.exception("Quest:" + str(Quest.quest) + "| Idx: "+ str(Quest.idx) + "| Participants: " + str(Quest.participants))
         await ctx.send(Quest.quest[Quest.idx][0].format(len(Quest.participants)))
         if Quest.endless:
             del Quest.quest[0]
