@@ -424,7 +424,7 @@ class Adventure:
                 failed = True
                 for user in Adventure.userslist["fight"]+Adventure.userslist["talk"]+Adventure.userslist["pray"]: #check if any fighter has an equipped mirror shield to give them a chance.
                     member = discord.utils.find(lambda m: m.display_name == user, ctx.guild.members)
-                    if '.mirror_shield' in Userdata.users[str(member.id)]['items']['left']:
+                    if next(iter(Userdata.users[str(member.id)]['items']['left']))[0:14] == '.mirror_shield':
                         failed = False
                         break
             else:
