@@ -33,7 +33,7 @@ class Quest:
                 " colossal":[2,1.1],
                 " miniature":[0.7,0.9],
                 " savage":[1.8,0.9],
-                " suicidal":[0.5,0.8],
+                " careless":[0.5,0.8],
                 " breathtaking":[1,1.9],
                 " brutal":[2,0.8]}
     wood_monsters = {"Ogre":{"str":28,"dipl":18, "pronoun": "its"},
