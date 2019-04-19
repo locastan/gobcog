@@ -30,7 +30,7 @@ class Consumables:
                 attb = int(Userdata.users[str(user.id)]['skill']['att'])+ int(Userdata.users[str(user.id)]['buffs'].get('att', {'bonus':0})['bonus'])
                 chab = int(Userdata.users[str(user.id)]['skill']['cha'])+ int(Userdata.users[str(user.id)]['buffs'].get('cha', {'bonus':0})['bonus'])
                 await ctx.send("Your new stats: **Attack**: {} [+{}], **Diplomacy**: {} [+{}].".format(Userdata.users[str(user.id)]['att'],attb,Userdata.users[str(user.id)]['cha'],chab))
-                return
+                return True
             elif cons['attrib'] == 'luck':
                 bonus = random.randint(cons['min'],cons['max'])
                 Userdata.users[str(user.id)]['buffs'].update({cons['attrib']:{'bonus':bonus, 'duration':cons['duration']}})
@@ -38,7 +38,7 @@ class Consumables:
                     await ctx.send("Your {} yielded {}% increased luck during the next fight or chest opening.".format(con,bonus,cons['duration']))
                 else:
                     await ctx.send("Your {} yielded {}% increased luck during {} fights or chest openings.".format(con,bonus,cons['duration']))
-                return
+                return True
             elif cons['attrib'] == 'xp' or cons['attrib'] == 'money':
                 bonus = random.randint(cons['min'],cons['max'])
                 Userdata.users[str(user.id)]['buffs'].update({cons['attrib']:{'bonus':bonus, 'duration':cons['duration']}})
@@ -46,16 +46,18 @@ class Consumables:
                     await ctx.send("Your {} gives you {}% more {} for the next fight.".format(con,bonus,cons['attrib']))
                 else:
                     await ctx.send("Your {} gives you {}% more {} for the next {} fights.".format(con,bonus,cons['attrib'],cons['duration']))
-                return
+                return True
         elif cons['type']== "augment":
             if 'name' in Userdata.users[str(user.id)]['class'] and Userdata.users[str(user.id)]['class']['name'] != "Tinkerer":
-                return await ctx.send("You need to be a Tinkerer to do this.")
+                await ctx.send("You need to be a Tinkerer to do this.")
+                return False
             else:
                 bkpk = ""
                 consumed = ""
                 forgeables = len(Userdata.users[str(user.id)]['items']['backpack']) - sum("{.:'" in x for x in Userdata.users[str(user.id)]['items']['backpack'])
                 if forgeables < 1:
-                    return await ctx.send("You need at least one augmentable item in your backpack.")
+                    await ctx.send("You need at least one augmentable item in your backpack.")
+                    return False
                 for item in Userdata.users[str(user.id)]['items']['backpack']:
                     if "{.:'" not in item:
                         if len(Userdata.users[str(user.id)]['items']['backpack'][item]['slot']) == 1:
@@ -70,7 +72,8 @@ class Consumables:
                 try:
                     reply = await ctx.bot.wait_for("message", check=MessagePredicate.same_context(ctx), timeout=30)
                 except asyncio.TimeoutError:
-                    return await ctx.send("I don't have all day, you know.")
+                    await ctx.send("I don't have all day, you know.")
+                    return False
                 item1 = {}
                 for item in Userdata.users[str(user.id)]['items']['backpack']:
                     if reply.content.lower() in item:
@@ -79,9 +82,11 @@ class Consumables:
                             consumed = item
                             break
                         else:
-                            return await ctx.send("Devices and already augmented items cannot be augmented.")
+                            await ctx.send("Devices and already augmented items cannot be augmented.")
+                            return False
                 if item1 == {}:
-                    return await ctx.send("I could not find that item, check your spelling.")
+                    await ctx.send("I could not find that item, check your spelling.")
+                    return False
                 roll = random.randint(1,20)
                 if roll == 1:
                     modifier = -1
@@ -109,6 +114,7 @@ class Consumables:
                 Userdata.users[str(user.id)]['items']['backpack'].pop(consumed)
                 Userdata.users[str(user.id)]['items']['backpack'].update({newitem['itemname']: newitem['item']})
                 await Userdata.save()
+                return True
         elif cons['type'] == "summon":
             attrib = random.choice(list(Adventure.attribs.keys()))
             monster = random.choice(list(Adventure.monsters.keys()))
@@ -116,4 +122,4 @@ class Consumables:
             cha = int(Adventure.monsters[monster]["dipl"]*Adventure.attribs[attrib][1])
             Userdata.users[str(user.id)]['buffs'].update({cons['attrib']:{'bonus':{'att':att,'cha':cha}, 'duration':cons['duration']}})
             await ctx.send("**{}** summoned a{} {} (🗡 {} | 🗨 {}).".format(user.display_name,attrib,monster,att,cha))
-            return
+            return True

@@ -312,7 +312,7 @@ class Treasure:
                     base = (200,1000)
                 else :
                     base = (10,200)
-                if item['item']['slot'] == ['consumable']:
+                if item['slot'] == ['consumable']:
                     price = random.randint(base[0],base[1])*max(item['item']['uses'],1)
                 else:
                     if len(item["slot"]) == 2: # two handed weapons add their bonuses twice

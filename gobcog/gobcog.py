@@ -476,12 +476,13 @@ class GobCog(BaseCog):
             if Consumables.consbles[cons]['attrib'] in Userdata.users[str(user.id)]['buffs'].keys():
                 await ctx.send("You already have this buff in effect.")
                 return
-            amount = int(Userdata.users[str(user.id)]['consumables'][cons].get('uses'))
-            if amount <= 1:
-                del Userdata.users[str(user.id)]['consumables'][cons]
-            else:
-                Userdata.users[str(user.id)]['consumables'][cons]['uses'] = Userdata.users[str(user.id)]['consumables'][cons]['uses'] - 1
-            await Consumables.use_con(ctx, user, cons)
+            Done = await Consumables.use_con(ctx, user, cons)
+            if Done:
+                amount = int(Userdata.users[str(user.id)]['consumables'][cons].get('uses'))
+                if amount <= 1:
+                    del Userdata.users[str(user.id)]['consumables'][cons]
+                else:
+                    Userdata.users[str(user.id)]['consumables'][cons]['uses'] = Userdata.users[str(user.id)]['consumables'][cons]['uses'] - 1
         await GobCog.save()
 
     @commands.command()
