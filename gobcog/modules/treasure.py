@@ -32,8 +32,8 @@ class Treasure:
             "tambourine":{"slot":["left"],"att":0,"cha":2},
             "twig bow":{"slot":["right"],"att":1,"cha":-1},
             "short bow":{"slot":["right","left"],"att":1,"cha":0},
-            "ringlet of balance":{"slot":["ring"],"att":1,"cha":1},
-            "four leaf clover":{"slot":["consumable"],"uses":1},
+            "amulet of ambivalence":{"slot":["charm"],"att":1,"cha":1},
+            "four leaf clover":{"slot":["consumable"],"uses":3},
             }
     rare = {".ceremonial_dagger":{"slot":["right"],"att":2,"cha":2},
             ".tower_shield":{"slot":["left"],"att":3,"cha":1},
@@ -55,10 +55,10 @@ class Treasure:
             ".pistol_crossbow":{"slot":["right"],"att":2,"cha":1},
             ".ring_of_balance":{"slot":["ring"],"att":2,"cha":2},
             ".potion_of_strength":{"slot":["consumable"],"uses":3},
-            ".vial_of_strength":{"slot":["consumable"],"uses":1},
+            ".vial_of_strength":{"slot":["consumable"],"uses":5},
             ".potion_of_eloquence":{"slot":["consumable"],"uses":3},
-            ".vial_of_eloquence":{"slot":["consumable"],"uses":1},
-            ".dust_of_midas":{"slot":["consumable"],"uses":3},
+            ".vial_of_eloquence":{"slot":["consumable"],"uses":5},
+            ".dust_of_midas":{"slot":["consumable"],"uses":5},
             ".scroll_of_learning":{"slot":["consumable"],"uses":3}
             }
     unique = {"[troll banhammer]":{"slot":["right","left"],"att":2,"cha":2},
@@ -75,7 +75,7 @@ class Treasure:
             "[gauntlet of balance]":{"slot":["ring"],"att":3,"cha":3},
             "[paci-fist]":{"slot":["ring"],"att":1,"cha":5},
             "[luckworth essence]":{"slot":["consumable"],"uses":2},
-            "[foliant of wisdom]":{"slot":["consumable"],"uses":1},
+            "[foliant of wisdom]":{"slot":["consumable"],"uses":2},
             "[chaos egg]":{"slot":["consumable"],"uses":3}
             }
     quest = {"[lichtooth]":{"slot":["charm"],"att":2,"cha":6},
@@ -303,7 +303,7 @@ class Treasure:
                         items.update({chesttext: {"itemname": "{}".format(chesttext),"item":treasure, "price": price}})
                 else:
                     chance = Treasure.rare
-            if chance != None:
+            if chance != None: #item is selected from a droplist, not a manually created chest
                 itemname = random.choice(list(chance.keys()))
                 item = chance[itemname]
                 if "[" in itemname:
@@ -313,7 +313,7 @@ class Treasure:
                 else :
                     base = (10,200)
                 if item['slot'] == ['consumable']:
-                    price = random.randint(base[0],base[1])*max(item['item']['uses'],1)
+                    price = random.randint(base[0],base[1])*max(item['uses'],1)
                 else:
                     if len(item["slot"]) == 2: # two handed weapons add their bonuses twice
                         hand = "two handed"
@@ -322,7 +322,7 @@ class Treasure:
                     else:
                         att = item["att"]
                         cha = item["cha"]
-                    price = random.randint(base[0],base[1])*max(item['item']['att']+item['item']['cha'],1)
+                    price = random.randint(base[0],base[1])*max(item['att']+item['cha'],1)
                 if itemname not in items:
                     items.update({itemname: {"itemname": itemname,"item":item, "price": price}})
         for index, item in enumerate(items):

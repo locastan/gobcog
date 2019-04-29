@@ -615,14 +615,14 @@ class Quest:
                 if "monster" in Userdata.users[str(member.id)]['buffs']:
                     monster_value = Userdata.users[str(member.id)]['buffs'].get('monster', {'bonus':{'cha':0}})['bonus']['cha']
                     monster_string = " + 🦖{}".format(monster_value)
-                if roll== 1:
+                if roll == 1:
                     await ctx.send("**" + user + "**" + (" accidentally offended the {}.").format(Quest.challenge))
                     fumblelist.append(user)
                     if Userdata.users[str(member.id)]['class']['name']=="Bard" and Userdata.users[str(member.id)]['class']['ability']:
                         bonus = random.randint(5,15)
                         diplomacy += -roll - bonus - dipl_value + monster_value
                         report += "**" + user + "**: " +  "- 🎲({})-".format(roll) + " 💥{} - ".format(bonus) + "🗨" + str(dipl_value) + effect + monster_string + " |"
-                if user in Quest.affected and Quest.effect == "Fumble" and 1 < roll <= 5:
+                elif user in Quest.affected and Quest.effect == "Fumble" and 1 < roll <= 5:
                     await ctx.send("**" + user + "**" + (" got fumbled by the {}.").format(Quest.challenge))
                     fumblelist.append(user)
                     if Userdata.users[str(member.id)]['class']['name']=="Bard" and Userdata.users[str(member.id)]['class']['ability']:
