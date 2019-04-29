@@ -76,7 +76,8 @@ class Treasure:
             "[paci-fist]":{"slot":["ring"],"att":1,"cha":5},
             "[luckworth essence]":{"slot":["consumable"],"uses":2},
             "[foliant of wisdom]":{"slot":["consumable"],"uses":2},
-            "[chaos egg]":{"slot":["consumable"],"uses":3}
+            "[chaos egg]":{"slot":["consumable"],"uses":3},
+            "[soul essence]":{"slot":["consumable"],"uses":1}
             }
     quest = {"[lichtooth]":{"slot":["charm"],"att":2,"cha":6},
             "[occam\'s razor]":{"slot":["right","left"],"att":5,"cha":1},
