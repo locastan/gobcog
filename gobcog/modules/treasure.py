@@ -303,8 +303,15 @@ class Treasure:
         conspile.sort()
         itempile.sort()
         consreport = " - " + "\n - ".join(conspile) + "```"
-        pilereport = " - " + "\n - ".join(itempile) + "```"
-        await ctx.send("```css\n The following items were added to your backpack:\n" + pilereport)
+        pilereport = " - " + "\n - ".join(itempile)
+        if len(pilereport) > 1900: #split dangerously long texts into chunks.
+            chunks = [pilereport[i:i+1900] for i in range(0, len(pilereport), 1900)]
+            await ctx.send("```css\n The following items were added to your backpack:\n```")
+            for chunk in chunks:
+                await ctx.send("```css\n" + chunk + "```")
+                await asyncio.sleep(0.3)
+        else:
+            await ctx.send("```css\n The following items were added to your backpack:\n" + pilereport + "```")
         await ctx.send("```css\n Added consumables:\n" + consreport)
         await ctx.send("```css\n You also received {} copperpieces from selling duplicate items.```".format(moneypile))
         return lootpile

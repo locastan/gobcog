@@ -701,10 +701,14 @@ class GobCog(BaseCog):
                     conslist.append(" - " + item + " ({}x)\n".format(Userdata.users[str(user.id)]['consumables'][item]['uses']))
             conslist.sort()
             bkpklist.sort()
-            await ctx.send(
-                "```css\n[{}'s baggage] \n\n```".format(
-                    user.display_name
-                ) + "```css\n" + bkpk + "".join(bkpklist) + "\n (Reply with the name of an item or use !backpack equip \"name of item\" to equip it.)\n\n```")
+            textline = "[{}'s baggage] \n\n```".format(user.display_name) + "```css\n" + bkpk + "".join(bkpklist) + "\n (Reply with the name of an item or use !backpack equip \"name of item\" to equip it.)\n\n"
+            if len(textline) > 1900: #split dangerously long texts into chunks.
+                chunks = [textline[i:i+1900] for i in range(0, len(textline), 1900)]
+                for chunk in chunks:
+                    await ctx.send("```css\n" + chunk + "```")
+                    await asyncio.sleep(0.3)
+            else:
+                await ctx.send("```css\n"+ textline +"```")
             await ctx.send("```css\n" + cspouch + "".join(conslist) + "\n```")
             try:
                 reply = await ctx.bot.wait_for("message", check=MessagePredicate.same_context(ctx), timeout=30)
