@@ -3,6 +3,7 @@ import asyncio
 import discord
 import random
 import time
+from redbot.core import bank
 from typing import Union, Iterable, Optional
 from redbot.core.utils.predicates import ReactionPredicate
 from redbot.core.utils.menus import start_adding_reactions
@@ -72,6 +73,7 @@ class Treasure:
             "[dragon ring]":{"slot":["ring"],"att":4,"cha":3},
             "[mandachord]":{"slot":["right", "left"],"att":1,"cha":4},
             "[repeater crossbow]":{"slot":["right","left"],"att":3,"cha":1},
+            "[elvish longbow]":{"slot":["right","left"],"att":4,"cha":2},
             "[gauntlet of balance]":{"slot":["ring"],"att":3,"cha":3},
             "[paci-fist]":{"slot":["ring"],"att":1,"cha":5},
             "[luckworth essence]":{"slot":["consumable"],"uses":2},
@@ -81,6 +83,7 @@ class Treasure:
             }
     quest = {"[lichtooth]":{"slot":["charm"],"att":2,"cha":6},
             "[occam\'s razor]":{"slot":["right","left"],"att":5,"cha":1},
+            "[compound longbow]":{"slot":["right","left"],"att":5,"cha":3},
             "[cape of shadows]":{"slot":["charm"],"att":4,"cha":4},
             "[very pointy stick]":{"slot":["right"],"att":7,"cha":-1},
             "[chattering shield]":{"slot":["left"],"att":6,"cha":2},
@@ -104,11 +107,14 @@ class Treasure:
             luckbonus = 0
             roll = random.randint(1,100)
         if type == "pet":
-            if roll <= 5:
+            if roll <= 1:
+                await ctx.send("{} found something precious!".format(user[:1].upper() + user[1:]))
+                chance = Treasure.quest
+            elif roll <= 11:
                 chance = Treasure.unique
-            elif roll > 5 and roll <= 25:
+            elif roll > 11 and roll <= 50:
                 chance = Treasure.rare
-            elif roll > 25 and roll <= 75:
+            elif roll > 50 and roll <= 75:
                 chance = Treasure.common
             else:
                 await ctx.send("{} found nothing of value.".format(user[:1].upper() + user[1:]))
@@ -204,6 +210,104 @@ class Treasure:
                     Userdata.users[str(user.id)]['buffs']['luck']['duration'] = Userdata.users[str(user.id)]['buffs']['luck']['duration'] - 1
             await Userdata.save()
             return {"itemname": itemname,"item":item,"equip":Treasure.controls[react.emoji]}
+
+    async def autoopen_chest(ctx, user, type, many):
+        lootpile = {}
+        moneypile = 0
+        if hasattr(user, "display_name"):
+            await ctx.send("{} is opening {} treasure chests. What riches hide inside those?".format(user.display_name, many))
+        #enter for range many loop.
+        for x in range(0, many):
+            if hasattr(user, "display_name"):
+                luckbonus = Userdata.users[str(user.id)]['buffs'].get('luck', {'bonus':0})['bonus']
+                roll = random.randint(1,100)-luckbonus
+            else:
+                luckbonus = 0
+                roll = random.randint(1,100)
+            if type == "normal":
+                if roll <= 5:
+                    chance = Treasure.unique
+                elif roll > 5 and roll <= 25:
+                    chance = Treasure.rare
+                else:
+                    chance = Treasure.common
+            elif type == "rare":
+                if roll <= 15:
+                    chance = Treasure.unique
+                elif roll > 15 and roll <= 45:
+                    chance = Treasure.rare
+                else:
+                    chance = Treasure.common
+            elif type == "epic":
+                if roll <= 1:
+                    await ctx.send("This one was no ordinary epic chest!")
+                    chance = Treasure.quest
+                elif roll <= 25:
+                    chance = Treasure.unique
+                else:
+                    chance = Treasure.rare
+            elif type == "quest":
+                if roll <= 10:
+                    chance = Treasure.quest
+                else:
+                    chance = Treasure.unique
+            itemname = random.choice(list(chance.keys()))
+            item = chance[itemname]
+            if item['slot'] == ['consumable']:
+                item['uses'] = random.randint(1,item['uses'])
+                if luckbonus != 0:
+                    if Userdata.users[str(user.id)]['buffs']['luck']['duration'] <= 1:
+                        Userdata.users[str(user.id)]['buffs'].pop('luck')
+                    else:
+                        Userdata.users[str(user.id)]['buffs']['luck']['duration'] = Userdata.users[str(user.id)]['buffs']['luck']['duration'] - 1
+                await Userdata.save()
+                if itemname in lootpile.keys():
+                    lootpile[itemname]['uses'] = lootpile[itemname].get("uses", 0) + item['uses']
+                else:
+                    lootpile.update({itemname: {"itemname": itemname,"item":item,"equip":"backpack"}})
+            else:
+                if luckbonus != 0:
+                    if Userdata.users[str(user.id)]['buffs']['luck']['duration'] <= 1:
+                        Userdata.users[str(user.id)]['buffs'].pop('luck')
+                    else:
+                        Userdata.users[str(user.id)]['buffs']['luck']['duration'] = Userdata.users[str(user.id)]['buffs']['luck']['duration'] - 1
+                await Userdata.save()
+                if itemname in lootpile.keys() or itemname in Userdata.users[str(user.id)]['items']['backpack'].keys():
+                    moneypile += await Treasure.t_sell(user, {"itemname": itemname,"item":item})
+                else:
+                    lootpile.update({itemname: {"itemname": itemname,"item":item,"equip":"backpack"}})
+        itempile = []
+        conspile = []
+        pilereport = "```css\n"
+        consreport = "```css\n"
+        for thing in lootpile:
+            itemname = lootpile[thing]['itemname']
+            item = lootpile[thing]['item']
+            if item['slot'] == ['consumable']:
+                item['uses'] = random.randint(1,item['uses'])
+                if hasattr(user, "display_name"):
+                    conspile.append("{} ({}x)".format(itemname,item['uses']))
+            else:
+                if len(item["slot"]) == 2: # two handed weapons add their bonuses twice
+                    hand = "two handed"
+                    att = item["att"]*2
+                    cha = item["cha"]*2
+                else:
+                    if item["slot"][0] == "right" or item["slot"][0] == "left":
+                        hand = item["slot"][0] + " handed"
+                    else:
+                        hand = item["slot"][0] + " slot"
+                    att = item["att"]
+                    cha = item["cha"]
+                    itempile.append("{} (Attack: {}, Charisma: {} [{}])".format(itemname,str(att),str(cha),hand))
+        conspile.sort()
+        itempile.sort()
+        consreport = " - " + "\n - ".join(conspile) + "```"
+        pilereport = " - " + "\n - ".join(itempile) + "```"
+        await ctx.send("```css\n The following items were added to your backpack:\n" + pilereport)
+        await ctx.send("```css\n Added consumables:\n" + consreport)
+        await ctx.send("```css\n You also received {} copperpieces from selling duplicate items.```".format(moneypile))
+        return lootpile
 
     async def one_from(ctx,user,list): #user needs to be a discord.member object. list is a namestring of a droplist of items here.
         chance = getattr(Treasure, list)
@@ -377,3 +481,17 @@ class Treasure:
             loop = asyncio.get_event_loop()
 
         return loop.create_task(countdown())
+
+    async def t_sell(user,item):
+        if "[" in item['itemname']:
+            base = (500,1000)
+        elif "." in item['itemname']:
+            base = (100,500)
+        else :
+            base = (10,200)
+        if item['item']['slot'] == ['consumable']:
+            price = random.randint(base[0],base[1])*max(item['item']['uses'],1)
+        else:
+            price = random.randint(base[0],base[1])*max(item['item']['att']+item['item']['cha'],1)
+        await bank.deposit_credits(user, price)
+        return(price)

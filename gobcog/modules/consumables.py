@@ -29,13 +29,14 @@ class Consumables:
                 Userdata.users[str(user.id)]['buffs'].update({cons['attrib']:{'bonus':bonus, 'duration':cons['duration']}})
                 attb = int(Userdata.users[str(user.id)]['skill']['att'])+ int(Userdata.users[str(user.id)]['buffs'].get('att', {'bonus':0})['bonus'])
                 chab = int(Userdata.users[str(user.id)]['skill']['cha'])+ int(Userdata.users[str(user.id)]['buffs'].get('cha', {'bonus':0})['bonus'])
+                await ctx.send("Your {} gives you +{} {} for the next fight.".format(con,bonus,cons['attrib'].upper()))
                 await ctx.send("Your new stats: **Attack**: {} [+{}], **Diplomacy**: {} [+{}].".format(Userdata.users[str(user.id)]['att'],attb,Userdata.users[str(user.id)]['cha'],chab))
                 return True
             elif cons['attrib'] == 'luck':
                 bonus = random.randint(cons['min'],cons['max'])
                 Userdata.users[str(user.id)]['buffs'].update({cons['attrib']:{'bonus':bonus, 'duration':cons['duration']}})
                 if cons['duration'] == 1:
-                    await ctx.send("Your {} yielded {}% increased luck during the next fight or chest opening.".format(con,bonus,cons['duration']))
+                    await ctx.send("Your {} yielded {}% increased luck during the next fight or chest opening.".format(con,bonus))
                 else:
                     await ctx.send("Your {} yielded {}% increased luck during {} fights or chest openings.".format(con,bonus,cons['duration']))
                 return True
@@ -88,11 +89,11 @@ class Consumables:
                 modifier = -1
             if roll > 1 and roll <= 10:
                 modifier = 1
-            if roll > 10 and roll <= 16:
+            if roll > 10 and roll <= 17:
                 modifier = 2
-            if roll == 17:
+            if roll == 18:
                 modifier = 3
-            if roll >= 18 and roll <= 19:
+            if roll == 19:
                 modifier = 4
             if roll == 20:
                 modifier = 5

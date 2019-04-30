@@ -513,6 +513,7 @@ class Quest:
                     effect = " *" + Quest.effect + "*"
                 att_value = round((Userdata.users[str(member.id)]['att'] + Userdata.users[str(member.id)]['skill']['att'] + Userdata.users[str(member.id)]['buffs'].get('att', {'bonus':0})['bonus'])*att_effect)
                 monster_string = ""
+                bow_bonus = ""
                 monster_value = 0
                 if "monster" in Userdata.users[str(member.id)]['buffs']:
                     monster_value = Userdata.users[str(member.id)]['buffs'].get('monster', {'bonus':{'att':0}})['bonus']['att']
@@ -530,7 +531,7 @@ class Quest:
                     if Userdata.users[str(member.id)]['class']['name']=="Berserker" and Userdata.users[str(member.id)]['class']['ability']:
                         bonus = random.randint(5,15)
                         attack += -roll - bonus - att_value + monster_value
-                        report += "**" + user + "**: " +  "- 🎲({})-".format(roll) + " 💥{} - ".format(bonus) + "🗡" + str(att_value) + effect + monster_string + " |"
+                        report += "**" + user + "**: " +  "- 🎲({}) -".format(roll) + " 💥{} - ".format(bonus) + "🗡" + str(att_value) + effect + monster_string + " |"
                 elif roll == 20 or (Userdata.users[str(member.id)]['class']['name']=="Berserker" and Userdata.users[str(member.id)]['class']['ability']):
                     ability = ""
                     if roll == 20:
@@ -538,13 +539,19 @@ class Quest:
                         critlist.append(user)
                     if Userdata.users[str(member.id)]['class']['name']=="Berserker" and Userdata.users[str(member.id)]['class']['ability']:
                         ability = "🗯️"
-                    bonus = random.randint(5,15)
+                    elif Userdata.users[str(member.id)]['class']['name']=="Ranger" and "bow" in list(Userdata.users[str(member.id)]['items']['right'].keys())[0]:
+                        ability = "🏹"
+                    bonus = random.randint(5,max(15,int(Userdata.users[str(member.id)]['lvl'])))
                     attack += roll + bonus + att_value + monster_value
                     bonus = ability + str(bonus)
-                    report += "**" + user + "**: " +  "🎲({})+".format(roll) + " {} + ".format(bonus) + "🗡" + str(att_value) + effect + monster_string + " |"
+                    report += "**" + user + "**: " +  "🎲({}) +".format(roll) + " {} + ".format(bonus) + "🗡" + str(att_value) + effect + monster_string + " |"
                 else:
-                    attack += roll + att_value + monster_value
-                    report += "**" + user + "**: " +  "🎲({})+".format(roll) + "🗡" + str(att_value) + effect + monster_string + " |"
+                    bonus = 0
+                    if Userdata.users[str(member.id)]['class']['name']=="Ranger" and "bow" in list(Userdata.users[str(member.id)]['items']['right'].keys())[0]:
+                        bonus = int(Userdata.users[str(member.id)]['lvl']/10)*2
+                        bow_bonus = " {}🏹 + ".format(bonus)
+                    attack += roll + bonus + att_value + monster_value
+                    report += "**" + user + "**: " +  "🎲({}) +".format(roll) + bow_bonus + "🗡" + str(att_value) + monster_string + " |"
             for user in fumblelist:
                 if user in Quest.userslist["fight"]:
                     Quest.userslist["fight"].remove(user)
