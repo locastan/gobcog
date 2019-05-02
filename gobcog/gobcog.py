@@ -585,11 +585,11 @@ class GobCog(BaseCog):
         else:
             itempile = await Treasure.autoopen_chest(ctx, user, type, many)
             Userdata.users[str(user.id)]['treasure'] = [x-y for x,y in zip(Userdata.users[str(user.id)]['treasure'], redux)]
-            for thing in itempile:
+            for thing in itempile.keys():
                 item = itempile[thing]
                 if item['item']['slot'] == ['consumable']:
                     if item['itemname'] in Userdata.users[str(user.id)]['consumables'].keys():
-                        Userdata.users[str(user.id)]['consumables'][item['itemname']]['uses'] = Userdata.users[str(user.id)]['consumables'][item['itemname']].get("uses", 0) + item['item']['uses']
+                        Userdata.users[str(user.id)]['consumables'][thing]['uses'] = Userdata.users[str(user.id)]['consumables'][thing].get("uses", 0) + item['item']['uses']
                     else:
                         Userdata.users[str(user.id)]['consumables'].update({item['itemname']:item['item']})
                 else:
@@ -757,6 +757,7 @@ class GobCog(BaseCog):
                 for key in ReactionPredicate.YES_OR_NO_EMOJIS:
                     await msg.remove_reaction(key, ctx.bot.user)
             if pred.result: #user reacted with Yes.
+                moneypile = 0
                 for item in lookup:
                     if item in Consumables.consbles.keys() and asking != 0:
                         if int(Userdata.users[str(user.id)]['consumables'][item]['uses']) > asking:
@@ -766,18 +767,16 @@ class GobCog(BaseCog):
                             queryitem = {'itemname': item,'item': Userdata.users[str(user.id)]['items']['backpack'].get(item, Userdata.users[str(user.id)]['consumables'].get(item))}
                     else:
                         queryitem = {'itemname': item,'item': Userdata.users[str(user.id)]['items']['backpack'].get(item, Userdata.users[str(user.id)]['consumables'].get(item))}
-                    price = await GobCog.sell(user,queryitem)
+                    moneypile += await GobCog.sell(user,queryitem)
                     if item in Consumables.consbles.keys():
                         if int(Userdata.users[str(user.id)]['consumables'][item]['uses']) > asking and asking != 0:
                             Userdata.users[str(user.id)]['consumables'][item]['uses'] = int(Userdata.users[str(user.id)]['consumables'][item]['uses']) - asking
-                            await ctx.send("You sold {}x {} for {} copperpieces.".format(asking,item,price))
                         else:
                             Userdata.users[str(user.id)]['consumables'].pop(item)
-                            await ctx.send("You sold your {} for {} copperpieces.".format(item,price))
                     else:
                         Userdata.users[str(user.id)]['items']['backpack'].pop(item)
-                        await ctx.send("You sold your {} for {} copperpieces.".format(item,price))
-                    await GobCog.save()
+                await ctx.send("Sold {} for {} copperpieces.".format(str(lookup),moneypile))
+                await GobCog.save()
         elif switch == "trade":
             if item == "None" or not any([x for x in Userdata.users[str(user.id)]['items']['backpack'] if item in x.lower()]+[x for x in Userdata.users[str(user.id)]['consumables'] if item in x.lower()]):
                 await ctx.send("You have to specify an item from your backpack to trade.")

@@ -262,9 +262,9 @@ class Treasure:
                         Userdata.users[str(user.id)]['buffs']['luck']['duration'] = Userdata.users[str(user.id)]['buffs']['luck']['duration'] - 1
                 await Userdata.save()
                 if itemname in lootpile.keys():
-                    lootpile[itemname]['uses'] = lootpile[itemname].get("uses", 0) + item['uses']
+                    lootpile[itemname]['item']['uses'] = lootpile[itemname]['item'].get("uses", 0) + item['uses']
                 else:
-                    lootpile.update({itemname: {"itemname": itemname,"item":item,"equip":"backpack"}})
+                    lootpile.update({itemname: {"itemname": itemname,"item":item}})
             else:
                 if luckbonus != 0:
                     if Userdata.users[str(user.id)]['buffs']['luck']['duration'] <= 1:
@@ -275,7 +275,7 @@ class Treasure:
                 if itemname in lootpile.keys() or itemname in Userdata.users[str(user.id)]['items']['backpack'].keys():
                     moneypile += await Treasure.t_sell(user, {"itemname": itemname,"item":item})
                 else:
-                    lootpile.update({itemname: {"itemname": itemname,"item":item,"equip":"backpack"}})
+                    lootpile.update({itemname: {"itemname": itemname,"item":item}})
         itempile = []
         conspile = []
         pilereport = "```css\n"
@@ -314,6 +314,7 @@ class Treasure:
             await ctx.send("```css\n The following items were added to your backpack:\n" + pilereport + "```")
         await ctx.send("```css\n Added consumables:\n" + consreport)
         await ctx.send("```css\n You also received {} copperpieces from selling duplicate items.```".format(moneypile))
+        print(lootpile)
         return lootpile
 
     async def one_from(ctx,user,list): #user needs to be a discord.member object. list is a namestring of a droplist of items here.
