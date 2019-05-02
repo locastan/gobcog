@@ -49,7 +49,7 @@ class Consumables:
                     await ctx.send("Your {} gives you {}% more {} for the next {} fights.".format(con,bonus,cons['attrib'],cons['duration']))
                 return True
         elif cons['type']== "augment":
-            bkpk = ""
+            bkpk = []
             consumed = ""
             forgeables = len(Userdata.users[str(user.id)]['items']['backpack']) - sum("{.:'" in x for x in Userdata.users[str(user.id)]['items']['backpack'])
             if forgeables < 1:
@@ -58,14 +58,17 @@ class Consumables:
             for item in Userdata.users[str(user.id)]['items']['backpack']:
                 if "{.:'" not in item:
                     if len(Userdata.users[str(user.id)]['items']['backpack'][item]['slot']) == 1:
-                        bkpk += " - " + item + " - (ATT: "+ str(Userdata.users[str(user.id)]['items']['backpack'][item]['att']) + " | DPL: "+ str(Userdata.users[str(user.id)]['items']['backpack'][item]['cha']) +" ["+ Userdata.users[str(user.id)]['items']['backpack'][item]['slot'][0] + " slot])\n"
+                        bkpk.append(item + " - (ATT: "+ str(Userdata.users[str(user.id)]['items']['backpack'][item]['att']) + " | DPL: "+ str(Userdata.users[str(user.id)]['items']['backpack'][item]['cha']) +" ["+ Userdata.users[str(user.id)]['items']['backpack'][item]['slot'][0] + " slot])")
                     else:
-                        bkpk += " - " + item + " -(ATT: "+ str(Userdata.users[str(user.id)]['items']['backpack'][item]['att']*2) + " | DPL: "+ str(Userdata.users[str(user.id)]['items']['backpack'][item]['cha']*2) +" [two handed])\n"
-            await ctx.send(
-                "```css\n[{}'s augmentables] \n\n```".format(
-                    ctx.author.display_name
-                ) + "```css\n" + bkpk + "\n (Reply with the full or partial name of the item for augmentation. Try to be specific.)```"
-            )
+                        bkpk.append(item + " -(ATT: "+ str(Userdata.users[str(user.id)]['items']['backpack'][item]['att']*2) + " | DPL: "+ str(Userdata.users[str(user.id)]['items']['backpack'][item]['cha']*2) +" [two handed])")
+            pile = " - " + "\n - ".join(bkpk)
+            if len(pile) > 1900: #split dangerously long texts into chunks.
+                chunks = [pile[i:i+1900] for i in range(0, len(pile), 1900)]
+                await ctx.send("```css\n[{}'s augmentables] \n\n```".format(ctx.author.display_name))
+                for chunk in chunks:
+                    await ctx.send("```css\n" + chunk + "```")
+                    await asyncio.sleep(0.3)
+            await ctx.send("```css\n\n (Reply with the full or partial name of item 1 to select for augmenting. Try to be specific.)```")
             try:
                 reply = await ctx.bot.wait_for("message", check=MessagePredicate.same_context(ctx), timeout=30)
             except asyncio.TimeoutError:
@@ -103,9 +106,9 @@ class Consumables:
             if modifier < 0:
                 prefix = ""
             if len(item1['slot']) == 2:
-                await ctx.send('Your forging roll was 🎲({}).\nYour weapon is now a {}{} item and will have {}🗡 and {}🗨.'.format(roll,prefix,modifier,newatt*2,newdip*2))
+                await ctx.send('Your augment roll was 🎲({}).\nYour weapon is now a {}{} item and will have {}🗡 and {}🗨.'.format(roll,prefix,modifier,newatt*2,newdip*2))
             else:
-                await ctx.send('Your forging roll was 🎲({}).\nYour weapon is now a {}{} item and will have {}🗡 and {}🗨.'.format(roll,prefix,modifier,newatt,newdip))
+                await ctx.send('Your augment roll was 🎲({}).\nYour weapon is now a {}{} item and will have {}🗡 and {}🗨.'.format(roll,prefix,modifier,newatt,newdip))
             name = consumed + ":({}{})*".format(prefix,modifier)
             newitem = {"itemname": name,"item": {"slot":item1['slot'],"att":newatt,"cha":newdip}}
             Userdata.users[str(user.id)]['items']['backpack'].pop(consumed)

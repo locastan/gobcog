@@ -257,7 +257,7 @@ class GobCog(BaseCog):
             ctx.command.reset_cooldown(ctx)
             return await ctx.send("You need to be a Tinkerer to do this.")
         else:
-            bkpk = ""
+            bkpk = []
             consumed = []
             forgeables = len(Userdata.users[str(user)]['items']['backpack']) - sum("{.:'" in x for x in Userdata.users[str(user)]['items']['backpack'])
             if forgeables <= 1:
@@ -266,14 +266,17 @@ class GobCog(BaseCog):
             for item in Userdata.users[str(user)]['items']['backpack']:
                 if "{.:'" not in item:
                     if len(Userdata.users[str(user)]['items']['backpack'][item]['slot']) == 1:
-                        bkpk += " - " + item + " - (ATT: "+ str(Userdata.users[str(user)]['items']['backpack'][item]['att']) + " | DPL: "+ str(Userdata.users[str(user)]['items']['backpack'][item]['cha']) +" ["+ Userdata.users[str(user)]['items']['backpack'][item]['slot'][0] + " slot])\n"
+                        bkpk.append(item + " - (ATT: "+ str(Userdata.users[str(user)]['items']['backpack'][item]['att']) + " | DPL: "+ str(Userdata.users[str(user)]['items']['backpack'][item]['cha']) +" ["+ Userdata.users[str(user)]['items']['backpack'][item]['slot'][0] + " slot])")
                     else:
-                        bkpk += " - " + item + " -(ATT: "+ str(Userdata.users[str(user)]['items']['backpack'][item]['att']*2) + " | DPL: "+ str(Userdata.users[str(user)]['items']['backpack'][item]['cha']*2) +" [two handed])\n"
-            await ctx.send(
-                "```css\n[{}'s forgeables] \n\n```".format(
-                    ctx.author.display_name
-                ) + "```css\n" + bkpk + "\n (Reply with the full or partial name of item 1 to select for forging. Try to be specific.)```"
-            )
+                        bkpk.append(item + " -(ATT: "+ str(Userdata.users[str(user)]['items']['backpack'][item]['att']*2) + " | DPL: "+ str(Userdata.users[str(user)]['items']['backpack'][item]['cha']*2) +" [two handed])")
+            pile = " - " + "\n - ".join(bkpk)
+            if len(pile) > 1900: #split dangerously long texts into chunks.
+                chunks = [pile[i:i+1900] for i in range(0, len(pile), 1900)]
+                await ctx.send("```css\n[{}'s forgeables] \n\n```".format(ctx.author.display_name))
+                for chunk in chunks:
+                    await ctx.send("```css\n" + chunk + "```")
+                    await asyncio.sleep(0.3)
+            await ctx.send("```css\n\n (Reply with the full or partial name of item 1 to select for forging. Try to be specific.)```")
             try:
                 reply = await ctx.bot.wait_for("message", check=MessagePredicate.same_context(ctx), timeout=30)
             except asyncio.TimeoutError:
@@ -292,18 +295,21 @@ class GobCog(BaseCog):
             if item1 == {}:
                 ctx.command.reset_cooldown(ctx)
                 return await ctx.send("I could not find that item, check your spelling.")
-            bkpk = ""
+            bkpk = []
             for item in Userdata.users[str(user)]['items']['backpack']:
-                if item not in consumed and "{.:'" not in item:
+                if "{.:'" not in item:
                     if len(Userdata.users[str(user)]['items']['backpack'][item]['slot']) == 1:
-                        bkpk += " - " + item + " - (ATT: "+ str(Userdata.users[str(user)]['items']['backpack'][item]['att']) + " | DPL: "+ str(Userdata.users[str(user)]['items']['backpack'][item]['cha']) +" ["+ Userdata.users[str(user)]['items']['backpack'][item]['slot'][0] + " slot])\n"
+                        bkpk.append(item + " - (ATT: "+ str(Userdata.users[str(user)]['items']['backpack'][item]['att']) + " | DPL: "+ str(Userdata.users[str(user)]['items']['backpack'][item]['cha']) +" ["+ Userdata.users[str(user)]['items']['backpack'][item]['slot'][0] + " slot])")
                     else:
-                        bkpk += " - " + item + " -(ATT: "+ str(Userdata.users[str(user)]['items']['backpack'][item]['att']*2) + " | DPL: "+ str(Userdata.users[str(user)]['items']['backpack'][item]['cha']*2) +" [two handed])\n"
-            await ctx.send(
-                "```css\n[{}'s forgeables] \n\n```".format(
-                    ctx.author.display_name
-                ) + "```css\n" + bkpk + "\n (Reply with the full or partial name of item 2 to select for forging. Try to be specific.)```"
-            )
+                        bkpk.append(item + " -(ATT: "+ str(Userdata.users[str(user)]['items']['backpack'][item]['att']*2) + " | DPL: "+ str(Userdata.users[str(user)]['items']['backpack'][item]['cha']*2) +" [two handed])")
+            pile = " - " + "\n - ".join(bkpk)
+            if len(pile) > 1900: #split dangerously long texts into chunks.
+                chunks = [pile[i:i+1900] for i in range(0, len(pile), 1900)]
+                await ctx.send("```css\n[{}'s forgeables] \n\n```".format(ctx.author.display_name))
+                for chunk in chunks:
+                    await ctx.send("```css\n" + chunk + "```")
+                    await asyncio.sleep(0.3)
+            await ctx.send("```css\n\n (Reply with the full or partial name of item 1 to select for forging. Try to be specific.)```")
             try:
                 reply = await ctx.bot.wait_for("message", check=MessagePredicate.same_context(ctx), timeout=30)
             except asyncio.TimeoutError:
