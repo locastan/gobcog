@@ -314,7 +314,6 @@ class Treasure:
             await ctx.send("```css\n The following items were added to your backpack:\n" + pilereport + "```")
         await ctx.send("```css\n Added consumables:\n" + consreport)
         await ctx.send("```css\n You also received {} copperpieces from selling duplicate items.```".format(moneypile))
-        print(lootpile)
         return lootpile
 
     async def one_from(ctx,user,list): #user needs to be a discord.member object. list is a namestring of a droplist of items here.
