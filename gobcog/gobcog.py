@@ -901,6 +901,13 @@ class GobCog(BaseCog):
 
     @commands.command()
     @checks.admin_or_permissions(administrator=True)
+    async def getyerassoverhere(self, ctx):
+        """This will summon hawls brother asap.
+        """
+        await self.trader(ctx, True)
+
+    @commands.command()
+    @checks.admin_or_permissions(administrator=True)
     async def compensate(self, ctx, xp: int=0, cp: int=0, normal: int=0, rare: int=0, epic: int=0,):
         """This will award xp, cp and chests to all players.
             !compendate 10 12 1 0 0
@@ -1073,7 +1080,7 @@ class GobCog(BaseCog):
                 roll = random.randint(1,20)
                 if roll == 20:
                     ctx = await self.bot.get_context(message)
-                    await self.trader(ctx)
+                    await self.trader(ctx, False)
 
 
     async def on_member_join(self, member):
@@ -1187,7 +1194,7 @@ class GobCog(BaseCog):
         return(price)
 
     @staticmethod
-    async def trader(ctx):
+    async def trader(ctx,summoned):
 
         async def handle_buy(itemindex, user, stock, msg):
             global users
@@ -1244,30 +1251,32 @@ class GobCog(BaseCog):
             text = modRole.mention + "\n" + "```css\n [Hawls brother is bringing the cart around!]```"
         else:
             text = "```css\n [Hawls brother is bringing the cart around!]```"
-        if GobCog.last_trade == 0:
+        if GobCog.last_trade == 0 or summoned:
             GobCog.last_trade = time.time()
         elif GobCog.last_trade >= time.time()-10800: #trader can return after 3 hours have passed since last visit.
             print("Last Trade Visit: {}, current time: {}".format(str(GobCog.last_trade), str(time.time())))
             return #silent return.
         GobCog.last_trade = time.time()
         stock = await Treasure.trader_get_items()
-        for index, item in enumerate(stock):
+        for index, name in enumerate(stock):
             item = stock[index]
             if "chest" not in item['itemname']:
-                if len(item['item']["slot"]) == 2: # two handed weapons add their bonuses twice
-                    hand = "two handed"
-                    att = item['item']["att"]*2
-                    cha = item['item']["cha"]*2
+                if item['item']['slot'] == ['consumable']:
+                    text += "```css\n" + "[{}] {}x {} for {} cp.".format(str(index+1),item['item']['uses'],item['itemname'],item['price'])+ " ```"
+                    continue
                 else:
-                    if item['item']["slot"][0] == "right" or item['item']["slot"][0] == "left":
-                        hand = item['item']["slot"][0] + " handed"
+                    if len(item['item']['slot']) == 2: # two handed weapons add their bonuses twice
+                        hand = "two handed"
+                        att = item['item']["att"]*2
+                        cha = item['item']["cha"]*2
                     else:
-                        hand = item['item']["slot"][0] + " slot"
-                    att = item['item']["att"]
-                    cha = item['item']["cha"]
-                text += "```css\n" + "[{}] {} (Attack: {}, Charisma: {} [{}]) for {} cp.".format(str(index+1),item['itemname'],str(att),str(cha),hand,item['price'])+ " ```"
-            elif item['item']["slot"] == 'consumable':
-                text += "```css\n" + "[{}] {}x {} for {} cp.".format(str(index+1),item['item']['uses'],item['itemname'],item['price'])+ " ```"
+                        if item['item']['slot'][0] == "right" or item['item']["slot"][0] == "left":
+                            hand = item['item']['slot'][0] + " handed"
+                        else:
+                            hand = item['item']['slot'][0] + " slot"
+                        att = item['item']["att"]
+                        cha = item['item']["cha"]
+                    text += "```css\n" + "[{}] {} (Attack: {}, Charisma: {} [{}]) for {} cp.".format(str(index+1),item['itemname'],str(att),str(cha),hand,item['price'])+ " ```"
             else:
                 text += "```css\n" + "[{}] {} for {} cp.".format(str(index+1),item['itemname'],item['price'])+ " ```"
         text += "Do you want to buy any of these fine items? Tell me which one below:"

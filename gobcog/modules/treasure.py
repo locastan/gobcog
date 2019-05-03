@@ -278,8 +278,6 @@ class Treasure:
                     lootpile.update({itemname: {"itemname": itemname,"item":item}})
         itempile = []
         conspile = []
-        pilereport = "```css\n"
-        consreport = "```css\n"
         for thing in lootpile:
             itemname = lootpile[thing]['itemname']
             item = lootpile[thing]['item']
@@ -299,7 +297,7 @@ class Treasure:
                         hand = item["slot"][0] + " slot"
                     att = item["att"]
                     cha = item["cha"]
-                    itempile.append("{} (Attack: {}, Charisma: {} [{}])".format(itemname,str(att),str(cha),hand))
+                itempile.append("{} (Attack: {}, Charisma: {} [{}])".format(itemname,str(att),str(cha),hand))
         conspile.sort()
         itempile.sort()
         consreport = " - " + "\n - ".join(conspile) + "```"
