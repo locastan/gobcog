@@ -539,9 +539,12 @@ class Quest:
                         critlist.append(user)
                     if Userdata.users[str(member.id)]['class']['name']=="Berserker" and Userdata.users[str(member.id)]['class']['ability']:
                         ability = "🗯️"
+                        bonus = random.randint(5,max(15,int(Userdata.users[str(member.id)]['lvl'])))
                     elif Userdata.users[str(member.id)]['class']['name']=="Ranger" and "bow" in list(Userdata.users[str(member.id)]['items']['right'].keys())[0]:
                         ability = "🏹"
-                    bonus = random.randint(5,max(15,int(Userdata.users[str(member.id)]['lvl'])))
+                        bonus = random.randint(5,max(15,int(Userdata.users[str(member.id)]['lvl'])))
+                    else:
+                        bonus = random.randint(5,15)
                     attack += roll + bonus + att_value + monster_value
                     bonus = ability + str(bonus)
                     report += "**" + user + "**: " +  "🎲({}) +".format(roll) + " {} + ".format(bonus) + "🗡" + str(att_value) + effect + monster_string + " |"
