@@ -299,7 +299,7 @@ class GobCog(BaseCog):
                 return await ctx.send("I could not find that item, check your spelling.")
             bkpk = []
             for item in Userdata.users[str(user)]['items']['backpack']:
-                if "{.:'" not in item:
+                if item not in consumed and "{.:'" not in item:
                     if len(Userdata.users[str(user)]['items']['backpack'][item]['slot']) == 1:
                         bkpk.append(item + " - (ATT: "+ str(Userdata.users[str(user)]['items']['backpack'][item]['att']) + " | DPL: "+ str(Userdata.users[str(user)]['items']['backpack'][item]['cha']) +" ["+ Userdata.users[str(user)]['items']['backpack'][item]['slot'][0] + " slot])")
                     else:
@@ -313,7 +313,7 @@ class GobCog(BaseCog):
                     await asyncio.sleep(0.3)
             else:
                 await ctx.send("```css\n[{}'s forgeables]" + pile + " \n\n```".format(ctx.author.display_name))
-            await ctx.send("```css\n\n (Reply with the full or partial name of item 1 to select for forging. Try to be specific.)```")
+            await ctx.send("```css\n\n (Reply with the full or partial name of item 2 to select for forging. Try to be specific.)```")
             try:
                 reply = await ctx.bot.wait_for("message", check=MessagePredicate.same_context(ctx), timeout=30)
             except asyncio.TimeoutError:
