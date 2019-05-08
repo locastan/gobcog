@@ -1202,7 +1202,7 @@ class GobCog(BaseCog):
 
         async def handle_buy(itemindex, user, stock, msg):
             global users
-            item = stock[itemindex]
+            item = stock[itemindex].copy()
             spender = user
             react = None
             if await bank.can_spend(spender,int(item['price'])):
@@ -1252,9 +1252,9 @@ class GobCog(BaseCog):
         controls = {em_list[1]: 0, em_list[2]: 1, em_list[3]: 2, em_list[4]: 3}
         modRole = discord.utils.get(ctx.guild.roles, name='Goblin Adventurer!')
         if modRole is not None:
-            text = modRole.mention + "\n" + "```css\n [Hawls brother is bringing the cart around!]```"
+            text = modRole.mention + "\n" + "```css\n [Alchemist Dodo is bringing the cart around!]```"
         else:
-            text = "```css\n [Hawls brother is bringing the cart around!]```"
+            text = "```css\n [Alchemist Dodo is bringing the cart around!]```"
         if GobCog.last_trade == 0 or summoned:
             GobCog.last_trade = time.time()
         elif GobCog.last_trade >= time.time()-10800: #trader can return after 3 hours have passed since last visit.

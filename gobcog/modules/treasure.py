@@ -416,15 +416,21 @@ class Treasure:
             if chance != None: #item is selected from a droplist, not a manually created chest
                 itemname = random.choice(list(chance.keys()))
                 item = chance[itemname]
-                if "[" in itemname:
-                    base = (1000,2000)
-                elif "." in itemname:
-                    base = (200,1000)
-                else :
-                    base = (10,200)
                 if item['slot'] == ['consumable']:
+                    if "[" in itemname:
+                        base = (3000,10000)
+                    elif "." in itemname:
+                        base = (500,3000)
+                    else :
+                        base = (100,500)
                     price = random.randint(base[0],base[1])*max(item['uses'],1)
                 else:
+                    if "[" in itemname:
+                        base = (1000,2000)
+                    elif "." in itemname:
+                        base = (200,1000)
+                    else :
+                        base = (10,200)
                     if len(item["slot"]) == 2: # two handed weapons add their bonuses twice
                         hand = "two handed"
                         att = item["att"]*2
@@ -433,7 +439,7 @@ class Treasure:
                         att = item["att"]
                         cha = item["cha"]
                     price = random.randint(base[0],base[1])*max(item['att']+item['cha'],1)
-                if itemname not in items:
+                if itemname not in items and item['slot'] == ['consumable']:
                     items.update({itemname: {"itemname": itemname,"item":item, "price": price}})
         for index, item in enumerate(items):
             output.update({index: items[item]})
