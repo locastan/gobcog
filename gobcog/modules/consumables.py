@@ -9,9 +9,9 @@ class Consumables:
     # need to figure out durations, if only for number of fights or opened chests for example.
     #soul essence is a special consumable only available to tinkerers. Chance to get one when dismantling a device.
     consbles = {".potion_of_strength":{'type':"buff", 'attrib':"att", 'min':1, 'max':4, 'duration':1, 'desc':"Increases your attack bonus for one fight."},
-                    ".vial_of_strength":{'type':"buff", 'attrib':"att", 'min':1, 'max':2, 'duration':1, 'desc':"Small increase of your attack bonus for one fight."},
+                    ".vial_of_aggression":{'type':"buff", 'attrib':"att", 'min':1, 'max':2, 'duration':1, 'desc':"Small increase of your attack bonus for one fight."},
                     ".potion_of_eloquence":{'type':"buff", 'attrib':"cha", 'min':1, 'max':4, 'duration':1, 'desc':"Increases your diplomacy bonus for one fight."},
-                    ".vial_of_eloquence":{'type':"buff", 'attrib':"cha", 'min':1, 'max':2, 'duration':1, 'desc':"Small increase of your diplomanc bonus for one fight."},
+                    ".vial_of_wit":{'type':"buff", 'attrib':"cha", 'min':1, 'max':2, 'duration':1, 'desc':"Small increase of your diplomanc bonus for one fight."},
                     "four leaf clover":{'type':"buff", 'attrib':"luck", 'min':5, 'max':15, 'duration':1, 'desc':"This will bestow good luck during the next fight or chest opening."},
                     "[luckworth essence]":{'type':"buff", 'attrib':"luck", 'min':15, 'max':50, 'duration':5, 'desc':"This will bestow good luck during 5 fights or opening 5 chests."},
                     ".dust_of_midas":{'type':"buff", 'attrib':"money", 'min':10, 'max':100, 'duration':1, 'desc':"Increases amount of cp gained for one fight."},
@@ -68,14 +68,14 @@ class Consumables:
                 for chunk in chunks:
                     await ctx.send("```css\n" + chunk + "```")
                     await asyncio.sleep(0.3)
-            await ctx.send("```css\n\n (Reply with the full or partial name of item 1 to select for augmenting. Try to be specific.)```")
+            await ctx.send("```css\n\n (Reply with the full or partial name of the item to select for augmenting. Try to be specific.)```")
             try:
                 reply = await ctx.bot.wait_for("message", check=MessagePredicate.same_context(ctx), timeout=30)
             except asyncio.TimeoutError:
                 await ctx.send("I don't have all day, you know.")
                 return False
             item1 = {}
-            for item in Userdata.users[str(user.id)]['items']['backpack']:
+            for item in Userdata.users[str(user.id)]['items']['backpack'].keys():
                 if reply.content.lower() in item:
                     if  "{.:'" not in item and ")*" not in item:
                         item1 = Userdata.users[str(user.id)]['items']['backpack'].get(item)

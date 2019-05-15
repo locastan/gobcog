@@ -56,9 +56,9 @@ class Treasure:
             ".pistol_crossbow":{"slot":["right"],"att":2,"cha":1},
             ".ring_of_balance":{"slot":["ring"],"att":2,"cha":2},
             ".potion_of_strength":{"slot":["consumable"],"uses":3},
-            ".vial_of_strength":{"slot":["consumable"],"uses":5},
+            ".vial_of_aggression":{"slot":["consumable"],"uses":5},
             ".potion_of_eloquence":{"slot":["consumable"],"uses":3},
-            ".vial_of_eloquence":{"slot":["consumable"],"uses":5},
+            ".vial_of_wit":{"slot":["consumable"],"uses":5},
             ".dust_of_midas":{"slot":["consumable"],"uses":5},
             ".scroll_of_learning":{"slot":["consumable"],"uses":3}
             }

@@ -153,6 +153,11 @@ class GobCog(BaseCog):
             if 'consumables' not in Userdata.users[str(user)]:
                 Userdata.users[str(user)]['consumables'] = {}
                 Userdata.users[str(user)]['buffs'] = {}
+            for consumable in Userdata.users[str(user)]['consumables'].keys():
+                if consumable == ".vial_of_strength":
+                    Userdata.users[str(user)]['consumables']['.vial_of_aggression'] = Userdata.users[str(user)]['consumables'].pop('.vial_of_strength')
+                if consumable == ".vial_of_eloquence":
+                    Userdata.users[str(user)]['consumables']['.vial_of_wit'] = Userdata.users[str(user)]['consumables'].pop('.vial_of_eloquence')
             if Userdata.users[str(user)]['class'] == {}:
                 Userdata.users[str(user)]['class'] = {'name': "Hero", 'ability': False, 'desc': "Your basic adventuring hero."}
             if 'skill' not in Userdata.users[str(user)]:
@@ -263,7 +268,7 @@ class GobCog(BaseCog):
             if forgeables <= 1:
                 ctx.command.reset_cooldown(ctx)
                 return await ctx.send("You need at least two forgeable items in your backpack to forge.")
-            for item in Userdata.users[str(user)]['items']['backpack']:
+            for item in Userdata.users[str(user)]['items']['backpack'].keys():
                 if "{.:'" not in item:
                     if len(Userdata.users[str(user)]['items']['backpack'][item]['slot']) == 1:
                         bkpk.append(item + " - (ATT: "+ str(Userdata.users[str(user)]['items']['backpack'][item]['att']) + " | DPL: "+ str(Userdata.users[str(user)]['items']['backpack'][item]['cha']) +" ["+ Userdata.users[str(user)]['items']['backpack'][item]['slot'][0] + " slot])")
@@ -277,7 +282,7 @@ class GobCog(BaseCog):
                     await ctx.send("```css\n" + chunk + "```")
                     await asyncio.sleep(0.3)
             else:
-                await ctx.send("```css\n[{}'s forgeables]" + pile + " \n\n```".format(ctx.author.display_name))
+                await ctx.send("```css\n[{}'s forgeables]".format(ctx.author.display_name) + pile + " \n\n```")
             await ctx.send("```css\n\n (Reply with the full or partial name of item 1 to select for forging. Try to be specific.)```")
             try:
                 reply = await ctx.bot.wait_for("message", check=MessagePredicate.same_context(ctx), timeout=30)
@@ -285,7 +290,7 @@ class GobCog(BaseCog):
                 ctx.command.reset_cooldown(ctx)
                 return await ctx.send("I don't have all day, you know.")
             item1 = {}
-            for item in Userdata.users[str(user)]['items']['backpack']:
+            for item in Userdata.users[str(user)]['items']['backpack'].keys():
                 if reply.content.lower() in item:
                     if  "{.:'" not in item:
                         item1 = Userdata.users[str(user)]['items']['backpack'].get(item)
@@ -298,7 +303,7 @@ class GobCog(BaseCog):
                 ctx.command.reset_cooldown(ctx)
                 return await ctx.send("I could not find that item, check your spelling.")
             bkpk = []
-            for item in Userdata.users[str(user)]['items']['backpack']:
+            for item in Userdata.users[str(user)]['items']['backpack'].keys():
                 if item not in consumed and "{.:'" not in item:
                     if len(Userdata.users[str(user)]['items']['backpack'][item]['slot']) == 1:
                         bkpk.append(item + " - (ATT: "+ str(Userdata.users[str(user)]['items']['backpack'][item]['att']) + " | DPL: "+ str(Userdata.users[str(user)]['items']['backpack'][item]['cha']) +" ["+ Userdata.users[str(user)]['items']['backpack'][item]['slot'][0] + " slot])")
@@ -312,7 +317,7 @@ class GobCog(BaseCog):
                     await ctx.send("```css\n" + chunk + "```")
                     await asyncio.sleep(0.3)
             else:
-                await ctx.send("```css\n[{}'s forgeables]" + pile + " \n\n```".format(ctx.author.display_name))
+                await ctx.send("```css\n[{}'s forgeables]".format(ctx.author.display_name) + pile + " \n\n```")
             await ctx.send("```css\n\n (Reply with the full or partial name of item 2 to select for forging. Try to be specific.)```")
             try:
                 reply = await ctx.bot.wait_for("message", check=MessagePredicate.same_context(ctx), timeout=30)
@@ -320,7 +325,7 @@ class GobCog(BaseCog):
                 ctx.command.reset_cooldown(ctx)
                 return await ctx.send("I don't have all day, you know.")
             item2 = {}
-            for item in Userdata.users[str(user)]['items']['backpack']:
+            for item in Userdata.users[str(user)]['items']['backpack'].keys():
                 if reply.content.lower() in item and reply.content.lower() not in consumed:
                     if  "{.:'" not in item:
                         item2 = Userdata.users[str(user)]['items']['backpack'].get(item)
