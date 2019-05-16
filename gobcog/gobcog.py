@@ -282,7 +282,7 @@ class GobCog(BaseCog):
                     await ctx.send("```css\n" + chunk + "```")
                     await asyncio.sleep(0.3)
             else:
-                await ctx.send("```css\n[{}'s forgeables]".format(ctx.author.display_name) + pile + " \n\n```")
+                await ctx.send("```css\n[{}'s forgeables] \n\n".format(ctx.author.display_name) + pile + " \n\n```")
             await ctx.send("```css\n\n (Reply with the full or partial name of item 1 to select for forging. Try to be specific.)```")
             try:
                 reply = await ctx.bot.wait_for("message", check=MessagePredicate.same_context(ctx), timeout=30)
@@ -317,7 +317,7 @@ class GobCog(BaseCog):
                     await ctx.send("```css\n" + chunk + "```")
                     await asyncio.sleep(0.3)
             else:
-                await ctx.send("```css\n[{}'s forgeables]".format(ctx.author.display_name) + pile + " \n\n```")
+                await ctx.send("```css\n[{}'s forgeables] \n\n".format(ctx.author.display_name) + pile + " \n\n```")
             await ctx.send("```css\n\n (Reply with the full or partial name of item 2 to select for forging. Try to be specific.)```")
             try:
                 reply = await ctx.bot.wait_for("message", check=MessagePredicate.same_context(ctx), timeout=30)
