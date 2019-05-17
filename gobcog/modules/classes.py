@@ -75,14 +75,27 @@ class Classes:
         await ctx.send('**{}** is starting an inspiring sermon. 📜'.format(ctx.author.display_name))
         return
 
-    async def sing(ctx):
+    async def sing(ctx, *args):
         user = ctx.author.id
         if Userdata.users[str(user)]['class']['ability'] == True:
             await ctx.send("Ability already in use.")
             return
-        Userdata.users[str(user)]['class']['ability'] = True
-        await ctx.send('♪♫♬ **{}** is whipping up a performance. ♬♫♪'.format(ctx.author.display_name))
-        return
+        if len(args) == 0: #user did not pass a song
+            Userdata.users[str(user)]['class']['ability'] = True
+            await ctx.send('♪♫♬ **{}** is whipping up a performance. ♬♫♪'.format(ctx.author.display_name))
+            return
+        else:
+            basebonus = await Classes.calc_song(abs(hash(args)), Userdata.users[str(user)]['lvl'])
+            Userdata.users[str(user)]['class']['ability'] = True
+            Userdata.users[str(user)]['class'].update({"basebonus": basebonus})
+            rating = round(basebonus/Userdata.users[str(user)]['lvl']*5)
+            stars = ""
+            for i in range(1, rating+1):
+                stars += "★"
+            for i in range(1, 5-rating+1):
+                stars += "☆"
+            await ctx.send('♪♫♬ **{}** is singing \"{}\" [{}]. ♬♫♪'.format(ctx.author.display_name, " ".join(args), stars))
+            return
 
     pets = {"flitterwisp": {'name': "flitterwisp", 'bonus': 1.05, 'cha': 10},
             "hufflepuff": {'name': "hufflepuff", 'bonus': 1.1, 'cha': 12},
@@ -128,3 +141,10 @@ class Classes:
                 ctx.command.reset_cooldown(ctx)
                 await ctx.send('You already have a pet. Try foraging.')
                 return None
+
+    async def calc_song(n,lvl):
+        x = sum(int(digit) for digit in str(n))
+        if x <= lvl:
+            return x
+        else:
+            return await Classes.calc_song(x,lvl)

@@ -239,8 +239,9 @@ class GobCog(BaseCog):
     @commands.command()
     @commands.guild_only()
     @commands.cooldown(rate=1, per=900, type=commands.BucketType.user)
-    async def sing(self,ctx):
+    async def sing(self,ctx, *args):
         """This allows a Bard to add substantial diplomacy bonuses for one battle.
+            You can also type in a songname or phrase you want to sing affecting your bonus.
         """
         global users
         user = ctx.author.id
@@ -248,7 +249,7 @@ class GobCog(BaseCog):
             ctx.command.reset_cooldown(ctx)
             return await ctx.send("You need to be a Bard to do this.")
         else:
-            users = await Classes.sing(ctx)
+            users = await Classes.sing(ctx, *args)
 
     @commands.command()
     @commands.guild_only()
@@ -387,7 +388,7 @@ class GobCog(BaseCog):
                     'Berserker':{'name': "Berserker", 'ability': False, 'desc': "Berserker have the option to rage and add big bonuses to attacks, but fumbles hurt.\n Use !rage when attacking in an adventure."},
                     'Cleric': {'name': "Cleric", 'ability': False, 'desc': "Clerics can bless the entire group when praying.\n Use !bless when fighting in an adventure."},
                     'Ranger': {'name': "Ranger", 'ability': False, 'desc': "Rangers can gain a special pet, which can find items and give reward bonuses.\n Use !pet."},
-                    'Bard': {'name': "Bard", 'ability': False, 'desc': "Bards can perform to aid their comrades in diplomacy.\n Use !sing when being diplomatic in an adventure."}}
+                    'Bard': {'name': "Bard", 'ability': False, 'desc': "Bards can perform to aid their comrades in diplomacy.\n Use !sing and maybe add a song when being diplomatic in an adventure."}}
         user = ctx.author
         if clz == None:
             ctx.command.reset_cooldown(ctx)
@@ -949,6 +950,9 @@ class GobCog(BaseCog):
                 if 'name' in Userdata.users[str(member.id)]['class']:
                     if Userdata.users[str(member.id)]['class']['name'] != "Ranger" and Userdata.users[str(member.id)]['class']['ability']:
                         Userdata.users[str(member.id)]['class']['ability'] = False
+                    songbonus = Userdata.users[str(member.id)]['class'].get("basebonus", 0)
+                    if Userdata.users[str(member.id)]['class']['name'] == "Bard" and songbonus != 0:
+                        Userdata.users[str(member.id)]['class'].pop('basebonus')
                 expired = []
                 for buff in Userdata.users[str(member.id)]['buffs'].keys(): #reduce duration of active buffs
                     if Userdata.users[str(member.id)]['buffs'][buff]['duration'] <= 1:
@@ -1011,6 +1015,9 @@ class GobCog(BaseCog):
                 if 'name' in Userdata.users[str(member.id)]['class']:
                     if Userdata.users[str(member.id)]['class']['name'] != "Ranger" and Userdata.users[str(member.id)]['class']['ability']:
                         Userdata.users[str(member.id)]['class']['ability'] = False
+                    songbonus = Userdata.users[str(member.id)]['class'].get("basebonus", 0)
+                    if Userdata.users[str(member.id)]['class']['name'] == "Bard" and songbonus != 0:
+                        Userdata.users[str(member.id)]['class'].pop('basebonus')
                 expired = []
                 for buff in Userdata.users[str(member.id)]['buffs'].keys(): #reduce duration of active buffs
                     if Userdata.users[str(member.id)]['buffs'][buff]['duration'] <= 1:

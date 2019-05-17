@@ -522,14 +522,14 @@ class Quest:
                     await ctx.send("**" + user + "**" + " fumbled the attack.")
                     fumblelist.append(user)
                     if Userdata.users[str(member.id)]['class']['name']=="Berserker" and Userdata.users[str(member.id)]['class']['ability']:
-                        bonus = random.randint(5,15)
+                        bonus = random.randint(5,max(15,int(Userdata.users[str(member.id)]['lvl'])))
                         attack += -roll - bonus - att_value + monster_value
                         report += "**" + user + "**: " +  "- 🎲({}) -".format(roll) + "💥{} + ".format(bonus) + "- 🗡" + str(att_value) + monster_string + " |"
                 elif user in Quest.affected and Quest.effect == "Fumble" and 1 < roll <= 5:
                     await ctx.send("**" + user + "**" + " has been fumbled.")
                     fumblelist.append(user)
                     if Userdata.users[str(member.id)]['class']['name']=="Berserker" and Userdata.users[str(member.id)]['class']['ability']:
-                        bonus = random.randint(5,15)
+                        bonus = random.randint(5,max(15,int(Userdata.users[str(member.id)]['lvl'])))
                         attack += -roll - bonus - att_value + monster_value
                         report += "**" + user + "**: " +  "- 🎲({}) -".format(roll) + " 💥{} - ".format(bonus) + "🗡" + str(att_value) + effect + monster_string + " |"
                 elif roll == 20 or (Userdata.users[str(member.id)]['class']['name']=="Berserker" and Userdata.users[str(member.id)]['class']['ability']):
@@ -620,6 +620,9 @@ class Quest:
                     dipl_effect = Quest.effects[Quest.effect][2]
                     effect = " *" + Quest.effect + "*"
                 dipl_value = round((Userdata.users[str(member.id)]['cha'] + Userdata.users[str(member.id)]['skill']['cha'] + Userdata.users[str(member.id)]['buffs'].get('cha', {'bonus':0})['bonus'])*dipl_effect)
+                songbonus = 0
+                if Userdata.users[str(member.id)]['class']['name']=="Bard" and Userdata.users[str(member.id)]['class']['ability']:
+                    songbonus = Userdata.users[str(member.id)]['class'].get("basebonus", 0)
                 monster_string = ""
                 monster_value = 0
                 if "monster" in Userdata.users[str(member.id)]['buffs']:
@@ -630,6 +633,8 @@ class Quest:
                     fumblelist.append(user)
                     if Userdata.users[str(member.id)]['class']['name']=="Bard" and Userdata.users[str(member.id)]['class']['ability']:
                         bonus = random.randint(5,15)
+                        if songbonus != 0: #recalc if song is sung
+                            bonus = random.randint(5,max(6,songbonus))
                         diplomacy += -roll - bonus - dipl_value + monster_value
                         report += "**" + user + "**: " +  "- 🎲({})-".format(roll) + " 💥{} - ".format(bonus) + "🗨" + str(dipl_value) + effect + monster_string + " |"
                 elif user in Quest.affected and Quest.effect == "Fumble" and 1 < roll <= 5:
@@ -637,6 +642,8 @@ class Quest:
                     fumblelist.append(user)
                     if Userdata.users[str(member.id)]['class']['name']=="Bard" and Userdata.users[str(member.id)]['class']['ability']:
                         bonus = random.randint(5,15)
+                        if songbonus != 0: #recalc if song is sung
+                            bonus = random.randint(5,max(6,songbonus))
                         diplomacy += -roll - bonus - dipl_value + monster_value
                         report += "**" + user + "**: " +  "- 🎲({})-".format(roll) + " 💥{} - ".format(bonus) + "🗨" + str(dipl_value) + effect + monster_string + " |"
                 elif roll == 20 or (Userdata.users[str(member.id)]['class']['name']=="Bard" and Userdata.users[str(member.id)]['class']['ability']):
@@ -647,6 +654,8 @@ class Quest:
                     if Userdata.users[str(member.id)]['class']['name']=="Bard" and Userdata.users[str(member.id)]['class']['ability']:
                         ability = "🎵"
                     bonus = random.randint(5,15)
+                    if songbonus != 0: #recalc if song is sung
+                        bonus = random.randint(5,max(6,songbonus))
                     diplomacy += roll + bonus + dipl_value + monster_value
                     bonus = ability + str(bonus)
                     report += "**" + user + "**: " +  "🎲({})+".format(roll) + " {} + ".format(bonus) + "🗨" +str(dipl_value) + effect + monster_string + " |"
@@ -796,6 +805,9 @@ class Quest:
             if 'name' in Userdata.users[str(member.id)]['class']:
                 if Userdata.users[str(member.id)]['class']['name'] != "Ranger" and Userdata.users[str(member.id)]['class']['ability']:
                     Userdata.users[str(member.id)]['class']['ability'] = False
+                songbonus = Userdata.users[str(member.id)]['class'].get("basebonus", 0)
+                if Userdata.users[str(member.id)]['class']['name'] == "Bard" and songbonus != 0:
+                    Userdata.users[str(member.id)]['class'].pop('basebonus')
             expired = []
             for buff in Userdata.users[str(member.id)]['buffs'].keys(): #reduce duration of active buffs
                 if Userdata.users[str(member.id)]['buffs'][buff]['duration'] <= 1:

@@ -313,7 +313,7 @@ class Adventure:
                     await ctx.send("**" + user + "**" + " fumbled the attack.")
                     fumblelist.append(user)
                     if Userdata.users[str(member.id)]['class']['name']=="Berserker" and Userdata.users[str(member.id)]['class']['ability']:
-                        bonus = random.randint(5,15)
+                        bonus = random.randint(5,max(15,int(Userdata.users[str(member.id)]['lvl'])))
                         attack += -roll -bonus -att_value + monster_value
                         report += "**" + user + "**: " +  "- 🎲({}) -".format(roll) + "💥{} + ".format(bonus) + "- 🗡" + str(att_value) + monster_string + " |"
                 elif roll == 20 or (Userdata.users[str(member.id)]['class']['name']=="Berserker" and Userdata.users[str(member.id)]['class']['ability']):
@@ -396,6 +396,9 @@ class Adventure:
                 roll = random.randint(1,20)
                 member = discord.utils.find(lambda m: m.display_name == user, ctx.guild.members)
                 dipl_value = Userdata.users[str(member.id)]['cha'] + Userdata.users[str(member.id)]['skill']['cha'] + Userdata.users[str(member.id)]['buffs'].get('cha', {'bonus':0})['bonus']
+                songbonus = 0
+                if Userdata.users[str(member.id)]['class']['name']=="Bard" and Userdata.users[str(member.id)]['class']['ability']:
+                    songbonus = Userdata.users[str(member.id)]['class'].get("basebonus", 0)
                 monster_string = ""
                 monster_value = 0
                 if "monster" in Userdata.users[str(member.id)]['buffs']:
@@ -406,6 +409,8 @@ class Adventure:
                     fumblelist.append(user)
                     if Userdata.users[str(member.id)]['class']['name']=="Bard" and Userdata.users[str(member.id)]['class']['ability']:
                         bonus = random.randint(5,15)
+                        if songbonus != 0: #recalc if song is sung
+                            bonus = random.randint(5,max(6,songbonus))
                         diplomacy += -roll - bonus - dipl_value + monster_value
                         report += "**" + user + "**: " +  "- 🎲({})-".format(roll) + " 💥{} - ".format(bonus) + "🗨" + str(dipl_value) + monster_string + " |"
                 elif roll == 20 or (Userdata.users[str(member.id)]['class']['name']=="Bard" and Userdata.users[str(member.id)]['class']['ability']):
@@ -416,9 +421,11 @@ class Adventure:
                     if Userdata.users[str(member.id)]['class']['name']=="Bard" and Userdata.users[str(member.id)]['class']['ability']:
                         ability = "🎵"
                     bonus = random.randint(5,15)
+                    if songbonus != 0: #recalc if song is sung
+                        bonus = random.randint(5,max(6,songbonus))
                     diplomacy += roll + bonus + dipl_value + monster_value
-                    bonus = ability + str(bonus)
-                    report += "**" + user + "**: " +  "🎲({})+".format(roll) + " {} + ".format(bonus) + "🗨" +str(dipl_value) + monster_string + " |"
+                    bonus_str = ability + str(bonus)
+                    report += "**" + user + "**: " +  "🎲({})+".format(roll) + " {} + ".format(bonus_str) + "🗨" +str(dipl_value) + monster_string + " |"
                 else:
                     diplomacy += roll + dipl_value + monster_value
                     report += "**" + user + "**: " +  "🎲({})+".format(roll) + "🗨" + str(dipl_value) + monster_string + " |"
