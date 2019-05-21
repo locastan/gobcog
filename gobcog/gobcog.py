@@ -197,11 +197,28 @@ class GobCog(BaseCog):
                         price = await GobCog.sell(ctx.author,item)
                         await ctx.send("{} sold the {} for {} copperpieces.".format(ctx.author.display_name,item['itemname'],price))
                     elif item['equip'] == "equip":
-                        equip = {"itemname": item['itemname'],"item": item['item']}
-                        await self.equip_item(ctx, equip, False)
+                        if item['item']['slot'] == ['consumable']:
+                            if item['itemname'] in Userdata.users[str(user)]['consumables'].keys():
+                                Userdata.users[str(user)]['consumables'][item['itemname']]['uses'] = Userdata.users[str(user)]['consumables'][item['itemname']].get("uses", 0) + item['item']['uses']
+                            else:
+                                Userdata.users[str(user)]['consumables'].update({item['itemname']:item['item']})
+                            await Consumables.use_con(ctx, user, item['itemname'])
+                        else:
+                            equip = {"itemname": item['itemname'],"item": item['item']}
+                            await self.equip_item(ctx, equip, False)
                     else:
-                        Userdata.users[str(user)]['items']['backpack'].update({item['itemname']: item['item']})
-                        await ctx.send("{} put the {} into the backpack.".format(ctx.author.display_name,item['itemname']))
+                        if item['item']['slot'] == ['consumable']:
+                            if item['itemname'] in Userdata.users[str(user)]['consumables'].keys():
+                                Userdata.users[str(user)]['consumables'][item['itemname']]['uses'] = Userdata.users[str(user)]['consumables'][item['itemname']].get("uses", 0) + item['item']['uses']
+                            else:
+                                Userdata.users[str(user)]['consumables'].update({item['itemname']:item['item']})
+                        else:
+                            if item['itemname'] in Userdata.users[str(user)]['items']['backpack'].keys():
+                                price = await GobCog.sell(ctx.author,item)
+                                await ctx.send("**{}** already had this item: Sold {} for {} copperpieces.".format(ctx.author.display_name,item['itemname'],price))
+                            else:
+                                Userdata.users[str(user)]['items']['backpack'].update({item['itemname']: item['item']})
+                                await ctx.send("{} put the {} into the backpack.".format(ctx.author.display_name,item['itemname']))
                         await GobCog.save()
             elif switch == 'free':
                 await Classes.pet(ctx, switch)
@@ -802,7 +819,7 @@ class GobCog(BaseCog):
             if len(lookup) > 1:
                 await ctx.send("I found multiple items ({}) matching that name in your backpack.\nPlease be more specific.".format(" and ".join([", ".join(lookup[:-1]),lookup[-1]] if len(lookup) > 2 else lookup)))
                 return
-            if any([x for x in lookup if "{.:'" in x.lower()]+[x for x in lookup if "[soul essence]" in x.lower()]):
+            if any([x for x in lookup if "{.:'" in x.lower()]):
                 device = [x for x in lookup if "{.:'" in x.lower()]
                 await ctx.send("```css\n Your {} does not want to leave you. ```".format(device))
                 return
