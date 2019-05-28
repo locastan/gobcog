@@ -37,12 +37,14 @@ class Adventure:
                 "Orc":{"str":16,"dipl":10},
                 "Ghoul":{"str":10,"dipl":10},
                 "Zombie":{"str":15,"dipl":12},
+                "Slaad":{"str":12,"dipl":15},
                 "Gelatinous Cube":{"str":12,"dipl":30},
                 "Green Ooze":{"str":10,"dipl":30},
                 "Golem":{"str":40,"dipl":20},
                 "Wizard":{"str":8,"dipl":15},
                 "Demon":{"str":30,"dipl":17},
                 "Owlbear":{"str":30,"dipl":25},
+                "Umber Hulk":{"str":35,"dipl":50},
                 "Cave Rat":{"str":5,"dipl":30},
                 "Pack of Wolves":{"str":19,"dipl":35},
                 "Fire Elemental":{"str":20,"dipl":20},
@@ -50,11 +52,16 @@ class Adventure:
                 "Giant":{"str":35,"dipl":20},
                 "Archmage":{"str":28,"dipl":30},
                 "Basilisk":{"str":50,"dipl":50},
+                "Displacer Beast":{"str":45,"dipl":80},
+                "Fire Giant":{"str":55,"dipl":45},
                 "Medusa":{"str":65,"dipl":65},
                 "Wyvern":{"str":70,"dipl":60},
                 "Hydra":{"str":75,"dipl":65},
+                "Purpleworm":{"str":80,"dipl":55},
                 "Red Dragon":{"str":95,"dipl":95},
-                "Black Dragon":{"str":130,"dipl":120}}
+                "Blue Dragon":{"str":110,"dipl":100},
+                "Black Dragon":{"str":130,"dipl":120},
+                "White Dragon":{"str":200,"dipl":220}}
 
     challenge = ""
     attrib = ""
@@ -313,7 +320,7 @@ class Adventure:
                     await ctx.send("**" + user + "**" + " fumbled the attack.")
                     fumblelist.append(user)
                     if Userdata.users[str(member.id)]['class']['name']=="Berserker" and Userdata.users[str(member.id)]['class']['ability']:
-                        bonus = random.randint(5,max(15,int(Userdata.users[str(member.id)]['lvl'])))
+                        bonus = random.randint(max(5,Userdata.users[str(member.id)]['lvl']/2),max(15,int(Userdata.users[str(member.id)]['lvl'])))
                         attack += -roll -bonus -att_value + monster_value
                         report += "**" + user + "**: " +  "- 🎲({}) -".format(roll) + "💥{} + ".format(bonus) + "- 🗡" + str(att_value) + monster_string + " |"
                 elif roll == 20 or (Userdata.users[str(member.id)]['class']['name']=="Berserker" and Userdata.users[str(member.id)]['class']['ability']):
@@ -323,10 +330,10 @@ class Adventure:
                         critlist.append(user)
                     if Userdata.users[str(member.id)]['class']['name']=="Berserker" and Userdata.users[str(member.id)]['class']['ability']:
                         ability = "🗯️"
-                        bonus = random.randint(5,max(15,int(Userdata.users[str(member.id)]['lvl'])))
+                        bonus = random.randint(max(5,Userdata.users[str(member.id)]['lvl']/2),max(15,int(Userdata.users[str(member.id)]['lvl'])))
                     elif Userdata.users[str(member.id)]['class']['name']=="Ranger" and "bow" in list(Userdata.users[str(member.id)]['items']['right'].keys())[0]:
                         ability = "🏹"
-                        bonus = random.randint(5,max(15,int(Userdata.users[str(member.id)]['lvl'])))
+                        bonus = random.randint(max(5,Userdata.users[str(member.id)]['lvl']/2),max(15,int(Userdata.users[str(member.id)]['lvl'])))
                     else:
                         bonus = random.randint(5,15)
                     attack += roll + bonus + att_value + monster_value

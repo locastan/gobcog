@@ -212,6 +212,7 @@ class GobCog(BaseCog):
                                 Userdata.users[str(user)]['consumables'][item['itemname']]['uses'] = Userdata.users[str(user)]['consumables'][item['itemname']].get("uses", 0) + item['item']['uses']
                             else:
                                 Userdata.users[str(user)]['consumables'].update({item['itemname']:item['item']})
+                            await ctx.send("{} put the {} into the backpack.".format(ctx.author.display_name,item['itemname']))
                         else:
                             if item['itemname'] in Userdata.users[str(user)]['items']['backpack'].keys():
                                 price = await GobCog.sell(ctx.author,item)
@@ -344,7 +345,7 @@ class GobCog(BaseCog):
                 return await ctx.send("I don't have all day, you know.")
             item2 = {}
             for item in Userdata.users[str(user)]['items']['backpack'].keys():
-                if reply.content.lower() in item and reply.content.lower() not in consumed:
+                if reply.content.lower() in item and item not in consumed:
                     if  "{.:'" not in item:
                         item2 = Userdata.users[str(user)]['items']['backpack'].get(item)
                         consumed.append(item)
@@ -356,8 +357,8 @@ class GobCog(BaseCog):
                     ctx.command.reset_cooldown(ctx)
                     return await ctx.send("I could not find that item, check your spelling.")
             newitem = await Classes.forge(ctx, item1, item2)
-            for item in consumed:
-                Userdata.users[str(user)]['items']['backpack'].pop(item)
+            for scrapping in consumed:
+                Userdata.users[str(user)]['items']['backpack'].pop(scrapping)
             await GobCog.sub_unequip(ctx,"{.:'")
             lookup = list(x for x in Userdata.users[str(user)]['items']['backpack'] if "{.:'" in x.lower())
             if len(lookup) > 0:
