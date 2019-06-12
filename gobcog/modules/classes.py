@@ -98,7 +98,7 @@ class Classes:
             for i in range(1, 10-rating+1):
                 stars += "☆"
             #await ctx.send('♪♫♬ **{}** is singing \"{}\" [{}]. ♬♫♪ (Hash: {}; Bonus:{})'.format(ctx.author.display_name, " ".join(args), stars, abs(hash(args)), basebonus))
-            await ctx.send('♪♫♬ **{}** is singing \"{}\" [{}]. ♬♫♪'.format(ctx.author.display_name, " ".join(args), stars)
+            await ctx.send('♪♫♬ **{}** is singing \"{}\" [{}]. ♬♫♪'.format(ctx.author.display_name, " ".join(args), stars))
             return
 
     pets = {"flitterwisp": {'name': "flitterwisp", 'bonus': 1.05, 'cha': 10},
