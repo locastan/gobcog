@@ -1,5 +1,6 @@
 import random
 import asyncio
+import hashlib
 from redbot.core.utils.predicates import MessagePredicate
 from .treasure import Treasure
 from .userdata import Userdata
@@ -85,16 +86,19 @@ class Classes:
             await ctx.send('♪♫♬ **{}** is whipping up a performance. ♬♫♪'.format(ctx.author.display_name))
             return
         else:
-            basebonus = await Classes.calc_song(abs(hash(args)), Userdata.users[str(user)]['lvl'])
+            argstring = ''.join(map(str, args))
+            n = int(hashlib.sha1(argstring.encode()).hexdigest(),16)
+            basebonus = await Classes.calc_song(n, Userdata.users[str(user)]['lvl'])
             Userdata.users[str(user)]['class']['ability'] = True
             Userdata.users[str(user)]['class'].update({"basebonus": basebonus})
-            rating = round(basebonus/Userdata.users[str(user)]['lvl']*5)
+            rating = round(basebonus/Userdata.users[str(user)]['lvl']*10)
             stars = ""
             for i in range(1, rating+1):
                 stars += "★"
-            for i in range(1, 5-rating+1):
+            for i in range(1, 10-rating+1):
                 stars += "☆"
-            await ctx.send('♪♫♬ **{}** is singing \"{}\" [{}]. ♬♫♪'.format(ctx.author.display_name, " ".join(args), stars))
+            #await ctx.send('♪♫♬ **{}** is singing \"{}\" [{}]. ♬♫♪ (Hash: {}; Bonus:{})'.format(ctx.author.display_name, " ".join(args), stars, abs(hash(args)), basebonus))
+            await ctx.send('♪♫♬ **{}** is singing \"{}\" [{}]. ♬♫♪'.format(ctx.author.display_name, " ".join(args), stars)
             return
 
     pets = {"flitterwisp": {'name': "flitterwisp", 'bonus': 1.05, 'cha': 10},

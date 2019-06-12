@@ -868,7 +868,12 @@ class Quest:
             ctype = types[Quest.sumtreasure.index(1)]
             phrase += "\nYou have {} xp and found {} copperpieces so far. You also secured **a{} treasure chest**!".format(Quest.sumxp,Quest.sumcp,ctype)
         elif Quest.sumtreasure != [0,0,0,0] and sum(Quest.sumtreasure) > 1:
-            phrase += "\nYou have {} xp and found {} copperpieces so far. You also secured {} normal, {} rare, {} epic and {} quest chests!".format(Quest.sumxp,Quest.sumcp, Quest.sumtreasure[0],Quest.sumtreasure[1],Quest.sumtreasure[2],Quest.sumtreasure[3])
+            chesttext = []
+            ctypes = ["{} normal","{} rare","{} epic", "{} quest"]
+            for i,c in enumerate(Quest.sumtreasure):
+                if c >= 1:
+                    chesttext.append(ctypes[i].format(c))
+            phrase += "\nBase rewards: {} xp and {} copperpieces. You also secured **{} treasure chests**!".format(xp,cp, " and ".join([", ".join(chesttext[:-1]),chesttext[-1]] if len(chesttext) > 2 else chesttext))
         else:
             phrase += "\nYou have {} xp and found {} copperpieces so far.".format(Quest.sumxp,Quest.sumcp)
         return phrase

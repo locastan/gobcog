@@ -171,7 +171,7 @@ class GobCog(BaseCog):
 
     @commands.command()
     @commands.guild_only()
-    @commands.cooldown(rate=1, per=43200, type=commands.BucketType.user)
+    @commands.cooldown(rate=1, per=7200, type=commands.BucketType.user)
     async def pet(self,ctx, switch:str=None):
         """This allows a Ranger to tame or set free a pet or send it foraging (once per day).
             !pet
@@ -271,7 +271,7 @@ class GobCog(BaseCog):
 
     @commands.command()
     @commands.guild_only()
-    @commands.cooldown(rate=1, per=43200, type=commands.BucketType.user)
+    @commands.cooldown(rate=1, per=7200, type=commands.BucketType.user)
     async def forge(self,ctx):
         """This allows a Tinkerer to forge two items into a device.
         """
@@ -377,8 +377,8 @@ class GobCog(BaseCog):
                         Userdata.users[str(user)]['items']['backpack'].update({newitem['itemname']: newitem['item']})
                         await ctx.send('```css\n Your new {} consumed {} and is now lurking in your backpack. ```'.format(newitem['itemname'], ', '.join(lookup)))
                 else:
-                    roll = random.randint(1,5)
-                    if roll == 5:
+                    roll = random.randint(1,3)
+                    if roll == 3:
                         await ctx.send('```css\n You carefully dismantle the {} and salvaged its [soul essence]. ```'.format(newitem['itemname']))
                         if "[soul essence]" in Userdata.users[str(user)]['consumables'].keys():
                             Userdata.users[str(user)]['consumables']['[soul essence]']['uses'] = Userdata.users[str(user)]['consumables']['[soul essence]'].get("uses", 0) + 1

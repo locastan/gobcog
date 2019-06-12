@@ -492,6 +492,10 @@ class Adventure:
                 treasure = random.choice([[0,1,0,0],[1,0,0,0]])
             elif CR >= 180: #rewards 50:50 epic:rare chest for killing hard stuff.
                 treasure = random.choice([[0,0,1,0],[0,1,0,0]])
+            elif CR >= 250:
+                treasure = random.choice([[0,1,2,0],[0,2,1,0],[3,1,0,0],[0,2,2,0],[0,0,3,0]])
+            elif CR >= 400:
+                treasure = random.choice([[1,2,3,0],[1,3,2,0],[4,2,1,0],[0,3,3,0],[0,0,4,0],[0,0,0,1]])
             if "Dragon" in Adventure.challenge: #always rewards an epic chest.
                 treasure[2] += 1
             if len(critlist) != 0:
@@ -598,7 +602,12 @@ class Adventure:
             type = types[special.index(1)]
             phrase += "\nBase rewards: {} xp and {} copperpieces. You also secured **a{} treasure chest**!".format(xp,cp,type)
         elif special != False and sum(special) > 1:
-            phrase += "\nBase rewards: {} xp and {} copperpieces. You also secured **several treasure chests**!".format(xp,cp)
+            chesttext = []
+            ctypes = ["{} normal","{} rare","{} epic", "{} quest"]
+            for i,c in enumerate(special):
+                if c >= 1:
+                    chesttext.append(ctypes[i].format(c))
+            phrase += "\nBase rewards: {} xp and {} copperpieces. You also secured **{} treasure chests**!".format(xp,cp, " and ".join([", ".join(chesttext[:-1]),chesttext[-1]] if len(chesttext) > 2 else chesttext))
         else:
             phrase += "\nBase rewards: {} xp and {} copperpieces.".format(xp,cp)
         return phrase
