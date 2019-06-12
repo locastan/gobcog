@@ -459,7 +459,7 @@ class Adventure:
         except discord.Forbidden:  # cannot remove all reactions
             for key in controls.keys():
                 await message.remove_reaction(key, ctx.bot.user)
-        pages = [w.replace('\nHeroes have 30s to participate via reaction:', '') for w in pages]
+        pages = [w.replace('\nHeroes participate via reaction:', '') for w in pages]
         current_page = pages[page]
         if isinstance(current_page, discord.Embed):
             await message.edit(embed=current_page)
