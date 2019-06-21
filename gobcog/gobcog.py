@@ -190,6 +190,9 @@ class GobCog(BaseCog):
                     ctx.command.reset_cooldown(ctx) #reset cooldown so ppl can forage right after taming a new pet.
                     Userdata.users[str(user)]['class']['ability'] = {'active': True, 'pet': pet}
                     await GobCog.save()
+            elif switch == "pet":
+                ctx.command.reset_cooldown(ctx)
+                return await ctx.send("Your {} enjoyed this very much.".format(Userdata.users[str(user)]['class']['ability']['pet']['name']))
             elif switch == 'forage':
                 item = await Classes.pet(ctx, switch)
                 if item != None:
@@ -650,6 +653,8 @@ class GobCog(BaseCog):
             user = ctx.author
         if user.bot:
             return
+        if user.id not in Usersata.users:
+            await self.update_data(Userdata.users, user)
         bal = await bank.get_balance(user)
         currency = await bank.get_currency_name(ctx.guild)
         global users
@@ -1104,6 +1109,7 @@ class GobCog(BaseCog):
                 file.write(str(users))
             pass
 
+    @commands.Cog.listener()
     async def on_message(self, message):
         global users
         if not message.author.bot:
@@ -1116,13 +1122,14 @@ class GobCog(BaseCog):
                     ctx = await self.bot.get_context(message)
                     await self.trader(ctx, False)
 
-
+    @commands.Cog.listener()
     async def on_member_join(self, member):
         global users
         await self.update_data(Userdata.users, member)
 
         await GobCog.save()
 
+    @commands.Cog.listener()
     async def on_member_leave(self, member):
         global users
         Userdata.users.pop(str(member.id))
