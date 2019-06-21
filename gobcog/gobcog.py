@@ -653,7 +653,7 @@ class GobCog(BaseCog):
             user = ctx.author
         if user.bot:
             return
-        if user.id not in Usersata.users:
+        if user.id not in Userdata.users:
             await self.update_data(Userdata.users, user)
         bal = await bank.get_balance(user)
         currency = await bank.get_currency_name(ctx.guild)
