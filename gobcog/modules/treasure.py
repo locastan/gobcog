@@ -160,6 +160,7 @@ class Treasure:
                 pred = ReactionPredicate.with_emojis(tuple(Treasure.controls.keys()), msg, user)
             else:
                 pred = ReactionPredicate.with_emojis(tuple(Treasure.controls.keys()), msg, ctx.author)
+            react, user = None
             try:
                 react, user = await ctx.bot.wait_for("reaction_add", check=pred, timeout=60)
             except asyncio.TimeoutError:
@@ -193,6 +194,7 @@ class Treasure:
                 pred = ReactionPredicate.with_emojis(tuple(Treasure.controls.keys()), msg, user)
             else:
                 pred = ReactionPredicate.with_emojis(tuple(Treasure.controls.keys()), msg, ctx.author)
+            react, user = None
             try:
                 react, user = await ctx.bot.wait_for("reaction_add", check=pred, timeout=60)
             except asyncio.TimeoutError:
@@ -327,6 +329,7 @@ class Treasure:
                 pred = ReactionPredicate.with_emojis(tuple(Treasure.controls.keys()), msg, user)
             else:
                 pred = ReactionPredicate.with_emojis(tuple(Treasure.controls.keys()), msg, ctx.author)
+            react, user = None
             try:
                 react, user = await ctx.bot.wait_for("reaction_add", check=pred, timeout=60)
             except asyncio.TimeoutError:
@@ -354,6 +357,7 @@ class Treasure:
             msg = await ctx.send("Do you want to equip, put in backpack or sell this item?")
             start_adding_reactions(msg, Treasure.controls.keys())
             pred = ReactionPredicate.with_emojis(tuple(Treasure.controls.keys()), msg, user)
+            react, user = None
             try:
                 react, user = await ctx.bot.wait_for("reaction_add", check=pred, timeout=60)
             except asyncio.TimeoutError:
