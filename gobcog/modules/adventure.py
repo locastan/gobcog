@@ -735,7 +735,3 @@ class Adventure:
             loop = asyncio.get_event_loop()
 
         return loop.create_task(task())
-
-
-
-    DEFAULT_CONTROLS = {"🗡": fight, "🗨": talk, "🛐": pray, "❌": close_menu}

@@ -16,6 +16,7 @@ from .modules.treasure import Treasure
 from .modules.classes import Classes
 from .modules.userdata import Userdata
 from .modules.consumables import Consumables
+from .modules.explore import Explore
 
 BaseCog = getattr(commands, "Cog", object)
 
@@ -98,6 +99,11 @@ class GobCog(BaseCog):
                     await ctx.send("You removed {} and put it into your backpack.".format(olditem))
             await ctx.send("Your new stats: **Attack**: {} [+{}], **Diplomacy**: {} [+{}].".format(Userdata.users[str(user.id)]['att'],(Userdata.users[str(user.id)]['skill']['att']+ Userdata.users[str(user.id)]['buffs'].get('att', {'bonus':0})['bonus']),Userdata.users[str(user.id)]['cha'],(Userdata.users[str(user.id)]['skill']['cha']+ Userdata.users[str(user.id)]['buffs'].get('cha',{'bonus':0})['bonus'])))
 
+    @commands.command()
+    @commands.guild_only()
+    @commands.cooldown(rate=1, per=43200, type=commands.BucketType.user)
+    async def explore(self, ctx):
+        await Explore.explore(ctx,ctx.author)
 
     @commands.command()
     @checks.admin_or_permissions(administrator=True)
