@@ -885,14 +885,14 @@ class Quest:
                 counter = 0
                 try:
                     secondint = int(seconds)
-                    finish = getEpochS(secondint)
+                    finish = await getEpochS(secondint)
                     if secondint < 0:
                         await ctx.send("I dont think im allowed to do negatives \U0001f914")
                         return
-
-                    message = await ctx.send(title +" " + remaining(finish, False)[0])
+                    rem, done = await remaining(finish, False)
+                    message = await ctx.send(title +" " + str(rem))
                     while True:
-                        timer, done = remaining(finish, False)
+                        timer, done = await remaining(finish, False)
                         if done:
                             await message.delete()
                             break
@@ -904,14 +904,14 @@ class Quest:
                 counter = 0
                 try:
                     secondint = int(Quest.timeout)
-                    Quest.finish = getEpoch()
+                    Quest.finish = await getEpoch()
                     if secondint < 0:
                         await ctx.send("I dont think im allowed to do negatives \U0001f914")
                         return
-
-                    message = await ctx.send(title + " " + remaining(Quest.finish, True)[0])
+                    rem, done = await remaining(Quest.finish, True)
+                    message = await ctx.send(title + " " + str(rem))
                     while True:
-                        timer, done = remaining(Quest.finish, True)
+                        timer, done = await remaining(Quest.finish, True)
                         if done:
                             Quest.timeout = 0
                             await message.delete()
@@ -921,7 +921,7 @@ class Quest:
                 except ValueError:
                     await ctx.send("Must be a number!")
 
-        def remaining(epoch, fromAdv):
+        async def remaining(epoch, fromAdv):
             remaining = epoch - time.time()
             finish = (remaining < 0)
             m, s = divmod(remaining, 60)
@@ -939,13 +939,13 @@ class Quest:
                 out = "{:01d}:{:02d}:{:02d}".format(h, m, s)
             return out, finish
 
-        def getEpoch():
+        async def getEpoch():
             #epoch = time.time()
             epoch = Quest.started
             epoch += Quest.timeout
             return epoch
 
-        def getEpochS(seconds : int):
+        async def getEpochS(seconds : int):
             epoch = time.time()
             epoch += seconds
             return epoch

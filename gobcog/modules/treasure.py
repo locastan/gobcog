@@ -455,14 +455,14 @@ class Treasure:
             counter = 0
             try:
                 secondint = int(seconds)
-                Treasure.finish = getEpoch(secondint)
+                Treasure.finish = await getEpoch(secondint)
                 if secondint < 0 or secondint == 0:
                     await ctx.send("I dont think im allowed to do negatives \U0001f914")
                     return
-
-                message = await ctx.send("[" + title +"] " + remaining(Treasure.finish)[0])
+                rem, done = await remaining(Treasure.finish)
+                message = await ctx.send("[" + title +"] " + rem)
                 while True:
-                    timer, done = remaining(Treasure.finish)
+                    timer, done = await remaining(Treasure.finish)
                     if done:
                         await message.delete()
                         break
@@ -471,7 +471,7 @@ class Treasure:
             except ValueError:
                 await ctx.send("Must be a number!")
 
-        def remaining(epoch):
+        async def remaining(epoch):
             remaining = epoch - time.time()
             finish = (remaining < 0)
             m, s = divmod(remaining, 60)
@@ -487,7 +487,7 @@ class Treasure:
                 out = "{:01d}:{:02d}:{:02d}".format(h, m, s)
             return out, finish
 
-        def getEpoch(seconds : int):
+        async def getEpoch(seconds : int):
             epoch = time.time()
             epoch += seconds
             return epoch

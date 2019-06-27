@@ -40,7 +40,8 @@ class Explore:
             "Chestnut":{"tile": "🌰", "desc":"Some chestnuts. Good for eating and brewing."},
             "Fog":{"tile": "⬜", "desc":"Step in to find out."},
             "Rock":{"tile": "🌑", "desc":"A big rock. You cannot move here."},
-            "Grass":{"tile": "<:Grassland:593422372468686859>", "desc":"Just grassland."},
+            #"Grass":{"tile": "<:Grassland:593422372468686859>", "desc":"Just grassland."}, #use this for beta server
+            "Grass":{"tile": "<:Grassland:593755278328201226>", "desc":"Just grassland."}, #use this for Goblinscomic Discord
             "Player":{"tile": "🗿", "desc":"Player"}
             }
 
@@ -74,9 +75,9 @@ class Explore:
             }
 
     #biomes carry rarities and what can be found in the tileset.
-    biomes = {"forest": {"legendary":["Ooze","Sageworth","Whipweed","Conifer","Cyanka Lilly","Flyleaf"],"epic":["Mushroom","Whipweed","Maple","Rust Leafs","Oak"],"rare":["Rock"],"common":["Oak","Oak","Grass"]},
+    biomes = {"forest": {"legendary":["Ooze","Sageworth","Whipweed","Conifer","Cyanka Lilly","Flyleaf"],"epic":["Mushroom","Whipweed","Maple","Oak"],"rare":["Rock"],"common":["Oak","Oak","Grass"]},
             "grassland": {"legendary":["Moneypenny","Raging Frills","Rose","Oak"],"epic":["Mourning Star","Twolip","Honeytail","Clover","Rock"],"rare":["Oilflower"],"common":["Daisy","Grass","Grass"]},
-            "drygrass":{"legendary":["Na-Palm","Fleshthorn","Rock"],"epic":["Tongue Sprout","Rust Leafs","Rock"],"rare":["Oilflower"],"common":["Rock","Grass","Grass"]}
+            "drygrass":{"legendary":["Na-Palm","Fleshthorn","Rock"],"epic":["Tongue Sprout","Rock"],"rare":["Rust Leafs"],"common":["Rock","Grass","Grass"]}
             }
 
     mapsize = [13,13]
@@ -103,6 +104,7 @@ class Explore:
         output = await Explore.mapdrawer(list(Explore.fowmap)) #passing just a copy of the original tile list so original does not get changed.
         Explore.mapmsg = await ctx.send(output)
         await Explore.menu(ctx, ["Move with these controls:"], {"\U00002B05": Explore.left, "\U00002B06" : Explore.up, "\U00002B07" : Explore.down, "\U000027A1" : Explore.right, "\U00002139": Explore.inspect, "\U0001F44A" : Explore.pick, "\U000023CF": Explore.exit}, Explore.statusmsg)
+        return Explore.loot
 
     async def mapdrawer(map):
         # calculating render ranges

@@ -945,6 +945,40 @@ class GobCog(BaseCog):
         """
         await self.trader(ctx, True)
 
+    '''
+    @commands.command()                 # just used for playtesting quests.
+    @checks.admin_or_permissions(administrator=True)
+    async def testquest(self, ctx):
+        """This will send you on a quest with 1 player.
+        """
+        await ctx.send("A valiant party assembled! **" + ctx.author.display_name + "** is going on a soloquest!")
+        reward, participants, dead = await Quest.queste(ctx, [ctx.author.display_name])
+        if reward is not None:
+            for user in reward.keys():
+                member = discord.utils.find(lambda m: m.display_name == user, ctx.guild.members)
+                await self.add_rewards(ctx, member, reward[user]["xp"], reward[user]["cp"], reward[user]["special"])
+            for user in participants: #reset activated abilities
+                member = discord.utils.find(lambda m: m.display_name == user, ctx.guild.members)
+                if 'name' in Userdata.users[str(member.id)]['class']:
+                    if Userdata.users[str(member.id)]['class']['name'] != "Ranger" and Userdata.users[str(member.id)]['class']['ability']:
+                        Userdata.users[str(member.id)]['class']['ability'] = False
+                    songbonus = Userdata.users[str(member.id)]['class'].get("basebonus", 0)
+                    if Userdata.users[str(member.id)]['class']['name'] == "Bard" and songbonus != 0:
+                        Userdata.users[str(member.id)]['class'].pop('basebonus')
+                expired = []
+                for buff in Userdata.users[str(member.id)]['buffs'].keys(): #reduce duration of active buffs
+                    if Userdata.users[str(member.id)]['buffs'][buff]['duration'] <= 1:
+                        expired.append(buff)
+                    else:
+                        Userdata.users[str(member.id)]['buffs'][buff]['duration'] = Userdata.users[str(member.id)]['buffs'][buff]['duration'] - 1
+                for buff in expired: #remove buffs outside loop not to change size during iteration
+                    Userdata.users[str(member.id)]['buffs'].pop(buff)
+            if len(dead) > 0:
+                casualties = " and ".join([", ".join(dead[:-1]),dead[-1]] if len(dead) > 2 else dead)
+                await ctx.send("**" + casualties + "**" + " did not make it back alive.")
+            await GobCog.save()
+    '''
+
     @commands.command()
     @checks.admin_or_permissions(administrator=True)
     async def compensate(self, ctx, xp: int=0, cp: int=0, normal: int=0, rare: int=0, epic: int=0,):
@@ -1026,7 +1060,6 @@ class GobCog(BaseCog):
             if Userdata.users[str(member.id)]['lvl'] < 15:
                 party.remove(user)
                 await ctx.send("Sorry **{}**. You need to be at least level 15 to go on a quest.".format(user))
-        print(party)
         if len(party) <= 1:
             ctx.command.reset_cooldown(ctx)
             return await ctx.send("Not enough heroes are willing or able to go on this quest. Try again later.")
@@ -1035,7 +1068,6 @@ class GobCog(BaseCog):
         await ctx.send("A valiant party assembled! **" + text_party + "** are going on a quest!")
         reward, participants, dead = await Quest.queste(ctx, party)
         if reward is not None:
-            print(reward, participants, dead)
             for user in reward.keys():
                 member = discord.utils.find(lambda m: m.display_name == user, ctx.guild.members)
                 await self.add_rewards(ctx, member, reward[user]["xp"], reward[user]["cp"], reward[user]["special"])
