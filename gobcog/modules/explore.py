@@ -70,7 +70,8 @@ class Explore:
             "🌰": "Chestnut",
             "⬜": "Fog",
             "🌑": "Rock",
-            "<:Grassland:593422372468686859>": "Grass",
+            #"<:Grassland:593422372468686859>": "Grass", #use this on testserver
+            "<:Grassland:593755278328201226>": "Grass", #use this on Goblins Discord server
             "🗿": "Player"
             }
 
