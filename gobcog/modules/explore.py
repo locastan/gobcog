@@ -403,6 +403,7 @@ class Explore:
         else:
             text = "** This cannot be picked. " + tilename + "**"
             await Explore.statusmsg.edit(content=text)
+            await Explore.check(ctx, pages, controls, message, page, Explore.timeout, emoji, user)
 
     async def check(ctx, pages, controls, message, page, timeout, emoji, user):
         if Explore.moves <= 0:
