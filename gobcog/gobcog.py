@@ -1338,7 +1338,7 @@ class GobCog(BaseCog):
         GobCog.last_trade = time.time()
         stock = await Treasure.trader_get_items()
         for index, name in enumerate(stock):
-            item = stock[index]
+            item = stock[index].copy()
             if "chest" not in item['itemname']:
                 if item['item']['slot'] == ['consumable']:
                     text += "```css\n" + "[{}] {}x {} for {} cp.".format(str(index+1),item['item']['uses'],item['itemname'],item['price'])+ " ```"
