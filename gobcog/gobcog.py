@@ -318,18 +318,44 @@ class GobCog(BaseCog):
                 ctx.command.reset_cooldown(ctx)
                 return await ctx.send("I don't have all day, you know.")
             item1 = {}
-            for item in Userdata.users[str(user)]['items']['backpack'].keys():
-                if reply.content.lower() in item:
-                    if  "{.:'" not in item:
-                        item1 = Userdata.users[str(user)]['items']['backpack'].get(item)
-                        consumed.append(item)
-                        break
+            lookup = list(x for x in Userdata.users[str(user)]['items']['backpack'] if reply.content.lower() in x.lower())
+            if len(lookup) > 1:
+                text = "```css\n"
+                for num, name in enumerate(lookup, start=1):
+                    text += ("[{}]: {}\n".format(num, name))
+                text += "```"
+                await ctx.send("I found these items matching that name:\n{}Please reply with a number from the list.".format(text))
+                try:
+                    reply = await ctx.bot.wait_for("message", check=MessagePredicate.same_context(ctx), timeout=30)
+                except asyncio.TimeoutError:
+                    await ctx.send("I don't have all day, you know.")
+                    ctx.command.reset_cooldown(ctx)
+                    return
+                if reply.content.isdigit() and (int(reply.content)-1) < len(lookup):
+                    idx = int(reply.content)-1
+                    if  "{.:'" not in lookup[idx]:
+                        item1 = Userdata.users[str(user)]['items']['backpack'].get(lookup[idx])
+                        consumed.append(lookup[idx])
                     else:
+                        await ctx.send("Tinkered devices cannot be forged.")
                         ctx.command.reset_cooldown(ctx)
-                        return await ctx.send("Tinkered devices cannot be reforged.")
-            if item1 == {}:
+                        return
+                else:
+                    await ctx.send("Sorry, but there was something wrong with that reply.")
+                    ctx.command.reset_cooldown(ctx)
+                    return
+            elif len(lookup) == 0:
+                await ctx.send("I could not find that item, check your spelling.")
                 ctx.command.reset_cooldown(ctx)
-                return await ctx.send("I could not find that item, check your spelling.")
+                return
+            else: #len(lookup) equals 1 item
+                if  "{.:'" not in lookup[0]:
+                    item1 = Userdata.users[str(user)]['items']['backpack'].get(lookup[0])
+                    consumed.append(lookup[0])
+                else:
+                    await ctx.send("Tinkered devices cannot be forged.")
+                    ctx.command.reset_cooldown(ctx)
+                    return
             bkpk = []
             for item in Userdata.users[str(user)]['items']['backpack'].keys():
                 if item not in consumed and "{.:'" not in item:
@@ -353,18 +379,44 @@ class GobCog(BaseCog):
                 ctx.command.reset_cooldown(ctx)
                 return await ctx.send("I don't have all day, you know.")
             item2 = {}
-            for item in Userdata.users[str(user)]['items']['backpack'].keys():
-                if reply.content.lower() in item and item not in consumed:
-                    if  "{.:'" not in item:
-                        item2 = Userdata.users[str(user)]['items']['backpack'].get(item)
-                        consumed.append(item)
-                        break
-                    else:
-                        ctx.command.reset_cooldown(ctx)
-                        return await ctx.send("Tinkered devices cannot be forged.")
-            if item2 == {}:
+            lookup = list(x for x in Userdata.users[str(user)]['items']['backpack'] if reply.content.lower() in x.lower())
+            if len(lookup) > 1:
+                text = "```css\n"
+                for num, name in enumerate(lookup, start=1):
+                    text += ("[{}]: {}\n".format(num, name))
+                text += "```"
+                await ctx.send("I found these items matching that name:\n{}Please reply with a number from the list.".format(text))
+                try:
+                    reply = await ctx.bot.wait_for("message", check=MessagePredicate.same_context(ctx), timeout=30)
+                except asyncio.TimeoutError:
+                    await ctx.send("I don't have all day, you know.")
                     ctx.command.reset_cooldown(ctx)
-                    return await ctx.send("I could not find that item, check your spelling.")
+                    return
+                if reply.content.isdigit() and (int(reply.content)-1) < len(lookup):
+                    idx = int(reply.content)-1
+                    if  "{.:'" not in lookup[idx]:
+                        item2 = Userdata.users[str(user)]['items']['backpack'].get(lookup[idx])
+                        consumed.append(lookup[idx])
+                    else:
+                        await ctx.send("Tinkered devices cannot be forged.")
+                        ctx.command.reset_cooldown(ctx)
+                        return
+                else:
+                    await ctx.send("Sorry, but there was something wrong with that reply.")
+                    ctx.command.reset_cooldown(ctx)
+                    return
+            elif len(lookup) == 0:
+                await ctx.send("I could not find that item, check your spelling.")
+                ctx.command.reset_cooldown(ctx)
+                return
+            else: #len(lookup) equals 1 item
+                if  "{.:'" not in lookup[0]:
+                    item2 = Userdata.users[str(user)]['items']['backpack'].get(lookup[0])
+                    consumed.append(lookup[0])
+                else:
+                    await ctx.send("Tinkered devices cannot be forged.")
+                    ctx.command.reset_cooldown(ctx)
+                    return
             newitem = await Classes.forge(ctx, item1, item2)
             for scrapping in consumed:
                 Userdata.users[str(user)]['items']['backpack'].pop(scrapping)
@@ -776,7 +828,25 @@ class GobCog(BaseCog):
                 return
             lookup = list(x for x in Userdata.users[str(user.id)]['items']['backpack'] if item in x.lower())
             if len(lookup) > 1:
-                await ctx.send("I found multiple items ({}) matching that name in your backpack.\nPlease be more specific.".format(" and ".join([", ".join(lookup[:-1]),lookup[-1]] if len(lookup) > 2 else lookup)))
+                text = "```css\n"
+                for num, name in enumerate(lookup, start=1):
+                    text += ("[{}]: {}\n".format(num, name))
+                text += "```"
+                await ctx.send("I found these items matching that name:\n{}Please reply with a number from the list.".format(text))
+                try:
+                    reply = await ctx.bot.wait_for("message", check=MessagePredicate.same_context(ctx), timeout=30)
+                except asyncio.TimeoutError:
+                    await ctx.send("I don't have all day, you know.")
+                    return
+                if reply.content.isdigit() and (int(reply.content)-1) < len(lookup):
+                    idx = int(reply.content)-1
+                    equip = {"itemname": item,"item": Userdata.users[str(user.id)]['items']['backpack'][lookup[idx]]}
+                    await self.equip_item(ctx, equip, True)
+                else:
+                    await ctx.send("Sorry, but there was something wrong with that reply.")
+                    return
+            elif len(lookup) == 0:
+                await ctx.send("I could not find that item, check your spelling.")
                 return
             else:
                 item = lookup[0]
@@ -829,76 +899,89 @@ class GobCog(BaseCog):
             lookup = list(x for x in Userdata.users[str(user.id)]['items']['backpack'] if item in x.lower())
             lookup += list(x for x in Userdata.users[str(user.id)]['consumables'] if item in x.lower())
             if len(lookup) > 1:
-                await ctx.send("I found multiple items ({}) matching that name in your backpack.\nPlease be more specific.".format(" and ".join([", ".join(lookup[:-1]),lookup[-1]] if len(lookup) > 2 else lookup)))
-                return
-            if any([x for x in lookup if "{.:'" in x.lower()]):
-                device = [x for x in lookup if "{.:'" in x.lower()]
-                await ctx.send("```css\n Your {} does not want to leave you. ```".format(device))
-                return
+                text = "```css\n"
+                for num, name in enumerate(lookup, start=1):
+                    text += ("[{}]: {}\n".format(num, name))
+                text += "```"
+                await ctx.send("I found these items matching that name:\n{}Please reply with a number from the list.".format(text))
+                try:
+                    reply = await ctx.bot.wait_for("message", check=MessagePredicate.same_context(ctx), timeout=30)
+                except asyncio.TimeoutError:
+                    await ctx.send("I don't have all day, you know.")
+                    return
+                if reply.content.isdigit() and (int(reply.content)-1) < len(lookup):
+                    idx = int(reply.content)-1
+                    item = lookup[idx]
+                else:
+                    await ctx.send("Sorry, but there was something wrong with that reply.")
+                    return
             else:
                 item = lookup[0]
-                if item in Consumables.consbles.keys():
-                    if Userdata.users[str(user.id)]['consumables'].get(item)['uses'] >= quant:
-                        await ctx.send("{} wants to sell {}x {}.".format(user.display_name,quant,item))
-                    else:
-                        await ctx.send("You only have {} doses of {} to sell.".format(Userdata.users[str(user.id)]['consumables'].get(item)['uses'],item))
-                        return
+            if "{.:'" in item:
+                await ctx.send("```css\n Your {} does not want to leave you. ```".format(item))
+                return
+            if item in Consumables.consbles.keys():
+                if Userdata.users[str(user.id)]['consumables'].get(item)['uses'] >= quant:
+                    await ctx.send("{} wants to sell {}x {}.".format(user.display_name,quant,item))
                 else:
-                    if len(Userdata.users[str(user.id)]['items']['backpack'][item]["slot"]) == 2: # two handed weapons add their bonuses twice
-                        hand = "two handed"
-                        att = Userdata.users[str(user.id)]['items']['backpack'][item]["att"]*2
-                        cha = Userdata.users[str(user.id)]['items']['backpack'][item]["cha"]*2
+                    await ctx.send("You only have {} doses of {} to sell.".format(Userdata.users[str(user.id)]['consumables'].get(item)['uses'],item))
+                    return
+            else:
+                if len(Userdata.users[str(user.id)]['items']['backpack'][item]["slot"]) == 2: # two handed weapons add their bonuses twice
+                    hand = "two handed"
+                    att = Userdata.users[str(user.id)]['items']['backpack'][item]["att"]*2
+                    cha = Userdata.users[str(user.id)]['items']['backpack'][item]["cha"]*2
+                else:
+                    if Userdata.users[str(user.id)]['items']['backpack'][item]["slot"][0] == "right" or Userdata.users[str(user.id)]['items']['backpack'][item]["slot"][0] == "left":
+                        hand = Userdata.users[str(user.id)]['items']['backpack'][item]["slot"][0] + " handed"
                     else:
-                        if Userdata.users[str(user.id)]['items']['backpack'][item]["slot"][0] == "right" or Userdata.users[str(user.id)]['items']['backpack'][item]["slot"][0] == "left":
-                            hand = Userdata.users[str(user.id)]['items']['backpack'][item]["slot"][0] + " handed"
-                        else:
-                            hand = Userdata.users[str(user.id)]['items']['backpack'][item]["slot"][0] + " slot"
-                        att = Userdata.users[str(user.id)]['items']['backpack'][item]["att"]
-                        cha = Userdata.users[str(user.id)]['items']['backpack'][item]["cha"]
-                    await ctx.send("{} wants to sell {}. (Attack: {}, Charisma: {} [{}])".format(user.display_name,item,str(att),str(cha),hand))
-                msg = await ctx.send("Do you want to buy this item for {} cp?".format(str(asking)))
-                start_adding_reactions(msg, ReactionPredicate.YES_OR_NO_EMOJIS)
-                pred = ReactionPredicate.yes_or_no(msg, buyer)
-                try:
-                    await ctx.bot.wait_for("reaction_add", check=pred, timeout=60)
-                except asyncio.TimeoutError:
-                    return await ctx.send("Trade timed out after one minute.")
-                try:
-                    await msg.delete()
-                except discord.Forbidden:  # cannot remove message try remove emojis
-                    for key in ReactionPredicate.YES_OR_NO_EMOJIS:
-                        await msg.remove_reaction(key, ctx.bot.user)
-                if pred.result: #buyer reacted with Yes.
-                    spender = buyer
-                    to = user
-                    if await bank.can_spend(spender,asking):
-                        bal = await bank.transfer_credits(spender, to, asking)
-                        currency = await bank.get_currency_name(ctx.guild)
-                        if item in Consumables.consbles.keys():
-                            if Userdata.users[str(user.id)]['consumables'][item]['uses'] > quant:
-                                Userdata.users[str(user.id)]['consumables'][item]['uses'] = Userdata.users[str(user.id)]['consumables'][item]['uses'] - quant
-                                tradeitem = Userdata.users[str(user.id)]['consumables'][item].copy()
-                                tradeitem['uses'] = quant
-                                if item in Userdata.users[str(buyer.id)]['consumables'].keys():
-                                    Userdata.users[str(buyer.id)]['consumables'][item['itemname']]['uses'] = Userdata.users[str(buyer.id)]['consumables'][item['itemname']].get("uses", 0) + item['item']['uses']
-                                else:
-                                    Userdata.users[str(buyer.id)]['consumables'].update({item: tradeitem})
+                        hand = Userdata.users[str(user.id)]['items']['backpack'][item]["slot"][0] + " slot"
+                    att = Userdata.users[str(user.id)]['items']['backpack'][item]["att"]
+                    cha = Userdata.users[str(user.id)]['items']['backpack'][item]["cha"]
+                await ctx.send("{} wants to sell {}. (Attack: {}, Charisma: {} [{}])".format(user.display_name,item,str(att),str(cha),hand))
+            msg = await ctx.send("Do you want to buy this item for {} cp?".format(str(asking)))
+            start_adding_reactions(msg, ReactionPredicate.YES_OR_NO_EMOJIS)
+            pred = ReactionPredicate.yes_or_no(msg, buyer)
+            try:
+                await ctx.bot.wait_for("reaction_add", check=pred, timeout=60)
+            except asyncio.TimeoutError:
+                return await ctx.send("Trade timed out after one minute.")
+            try:
+                await msg.delete()
+            except discord.Forbidden:  # cannot remove message try remove emojis
+                for key in ReactionPredicate.YES_OR_NO_EMOJIS:
+                    await msg.remove_reaction(key, ctx.bot.user)
+            if pred.result: #buyer reacted with Yes.
+                spender = buyer
+                to = user
+                if await bank.can_spend(spender,asking):
+                    bal = await bank.transfer_credits(spender, to, asking)
+                    currency = await bank.get_currency_name(ctx.guild)
+                    if item in Consumables.consbles.keys():
+                        if Userdata.users[str(user.id)]['consumables'][item]['uses'] > quant:
+                            Userdata.users[str(user.id)]['consumables'][item]['uses'] = Userdata.users[str(user.id)]['consumables'][item]['uses'] - quant
+                            tradeitem = Userdata.users[str(user.id)]['consumables'][item].copy()
+                            tradeitem['uses'] = quant
+                            if item in Userdata.users[str(buyer.id)]['consumables'].keys():
+                                Userdata.users[str(buyer.id)]['consumables'][item['itemname']]['uses'] = Userdata.users[str(buyer.id)]['consumables'][item['itemname']].get("uses", 0) + item['item']['uses']
                             else:
-                                tradeitem = Userdata.users[str(user.id)]['consumables'].pop(item)
-                                if item in Userdata.users[str(buyer.id)]['consumables'].keys():
-                                    Userdata.users[str(buyer.id)]['consumables'][item['itemname']]['uses'] = Userdata.users[str(buyer.id)]['consumables'][item['itemname']].get("uses", 0) + item['item']['uses']
-                                else:
-                                    Userdata.users[str(buyer.id)]['consumables'].update({item: tradeitem})
+                                Userdata.users[str(buyer.id)]['consumables'].update({item: tradeitem})
                         else:
-                            tradeitem = Userdata.users[str(user.id)]['items']['backpack'].pop(item)
-                            Userdata.users[str(buyer.id)]['items']['backpack'].update({item: tradeitem})
-                        await GobCog.save()
-                        await ctx.send(
-                            "```css\n" + "{} traded to {} for {} {}```".format(
-                                item, buyer.display_name, asking, currency
-                            ))
+                            tradeitem = Userdata.users[str(user.id)]['consumables'].pop(item)
+                            if item in Userdata.users[str(buyer.id)]['consumables'].keys():
+                                Userdata.users[str(buyer.id)]['consumables'][item['itemname']]['uses'] = Userdata.users[str(buyer.id)]['consumables'][item['itemname']].get("uses", 0) + item['item']['uses']
+                            else:
+                                Userdata.users[str(buyer.id)]['consumables'].update({item: tradeitem})
                     else:
-                        await ctx.send("You do not have enough copperpieces.")
+                        tradeitem = Userdata.users[str(user.id)]['items']['backpack'].pop(item)
+                        Userdata.users[str(buyer.id)]['items']['backpack'].update({item: tradeitem})
+                    await GobCog.save()
+                    await ctx.send(
+                        "```css\n" + "{} traded to {} for {} {}```".format(
+                            item, buyer.display_name, asking, currency
+                        ))
+                else:
+                    await ctx.send("You do not have enough copperpieces.")
 
     @commands.command()
     @commands.guild_only()

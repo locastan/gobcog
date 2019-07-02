@@ -77,18 +77,39 @@ class Consumables:
                 await ctx.send("I don't have all day, you know.")
                 return False
             item1 = {}
-            for item in Userdata.users[str(user.id)]['items']['backpack'].keys():
-                if reply.content.lower() in item:
-                    if  "{.:'" not in item and ")*" not in item:
-                        item1 = Userdata.users[str(user.id)]['items']['backpack'].get(item)
-                        consumed = item
-                        break
+            lookup = list(x for x in Userdata.users[str(user.id)]['items']['backpack'] if reply.content.lower() in x.lower())
+            if len(lookup) > 1:
+                text = "```css\n"
+                for num, name in enumerate(lookup, start=1):
+                    text += ("[{}]: {}\n".format(num, name))
+                text += "```"
+                await ctx.send("I found these items matching that name:\n{}Please reply with a number from the list.".format(text))
+                try:
+                    reply = await ctx.bot.wait_for("message", check=MessagePredicate.same_context(ctx), timeout=30)
+                except asyncio.TimeoutError:
+                    await ctx.send("I don't have all day, you know.")
+                    return False
+                if reply.content.isdigit() and (int(reply.content)-1) < len(lookup):
+                    idx = int(reply.content)-1
+                    if  "{.:'" not in item and ")*" not in lookup[idx]:
+                        item1 = Userdata.users[str(user.id)]['items']['backpack'].get(lookup[idx])
+                        consumed = lookup[idx]
                     else:
                         await ctx.send("Devices and already augmented items cannot be augmented.")
                         return False
-            if item1 == {}:
+                else:
+                    await ctx.send("Sorry, but there was something wrong with that reply.")
+                    return False
+            elif len(lookup) == 0:
                 await ctx.send("I could not find that item, check your spelling.")
                 return False
+            else: #len(lookup) equals 1 item
+                if  "{.:'" not in item and ")*" not in lookup[0]:
+                    item1 = Userdata.users[str(user.id)]['items']['backpack'].get(lookup[0])
+                    consumed = lookup[0]
+                else:
+                    await ctx.send("Devices and already augmented items cannot be augmented.")
+                    return False
             roll = random.randint(1,20)
             if roll == 1:
                 modifier = -1
@@ -108,9 +129,9 @@ class Consumables:
             if modifier < 0:
                 prefix = ""
             if len(item1['slot']) == 2:
-                await ctx.send('Your augment roll was 🎲({}).\nYour weapon is now a {}{} item and will have {}🗡 and {}🗨.'.format(roll,prefix,modifier,newatt*2,newdip*2))
+                await ctx.send('Your augment roll was 🎲({}).\nYour {} augmented to {}{} and will have {}🗡 and {}🗨.'.format(roll,consumed,prefix,modifier,newatt*2,newdip*2))
             else:
-                await ctx.send('Your augment roll was 🎲({}).\nYour weapon is now a {}{} item and will have {}🗡 and {}🗨.'.format(roll,prefix,modifier,newatt,newdip))
+                await ctx.send('Your augment roll was 🎲({}).\nYour {} augmented to {}{} and will have {}🗡 and {}🗨.'.format(roll,consumed,prefix,modifier,newatt,newdip))
             name = consumed + ":({}{})*".format(prefix,modifier)
             newitem = {"itemname": name,"item": {"slot":item1['slot'],"att":newatt,"cha":newdip}}
             Userdata.users[str(user.id)]['items']['backpack'].pop(consumed)
