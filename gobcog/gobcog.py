@@ -840,7 +840,7 @@ class GobCog(BaseCog):
                     return
                 if reply.content.isdigit() and (int(reply.content)-1) < len(lookup):
                     idx = int(reply.content)-1
-                    equip = {"itemname": item,"item": Userdata.users[str(user.id)]['items']['backpack'][lookup[idx]]}
+                    equip = {"itemname": lookup[idx],"item": Userdata.users[str(user.id)]['items']['backpack'][lookup[idx]]}
                     await self.equip_item(ctx, equip, True)
                 else:
                     await ctx.send("Sorry, but there was something wrong with that reply.")
