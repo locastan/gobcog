@@ -3,6 +3,7 @@ import asyncio
 from redbot.core.utils.predicates import MessagePredicate
 from .userdata import Userdata
 from .adventure import Adventure
+from .treasure import Treasure
 
 class Consumables:
     #Name table to assign effects to consumables. Consumable items themselfes are defined in treasure.py
@@ -135,7 +136,11 @@ class Consumables:
             name = consumed + ":({}{})*".format(prefix,modifier)
             newitem = {"itemname": name,"item": {"slot":item1['slot'],"att":newatt,"cha":newdip}}
             Userdata.users[str(user.id)]['items']['backpack'].pop(consumed)
-            Userdata.users[str(user.id)]['items']['backpack'].update({newitem['itemname']: newitem['item']})
+            if newitem['itemname'] in Userdata.users[str(user.id)]['items']['backpack'].keys():
+                price = await Treasure.t_sell(user,newitem)
+                await ctx.send("**{}** already had this item: Sold {} for {} copperpieces.".format(user.display_name,newitem['itemname'],price))
+            else:
+                Userdata.users[str(user.id)]['items']['backpack'].update({newitem['itemname']: newitem['item']})
             await Userdata.save()
             return True
         elif cons['type'] == "summon":
