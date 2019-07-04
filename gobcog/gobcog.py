@@ -557,10 +557,10 @@ class GobCog(BaseCog):
             gotcons = True
         if gotcons == False:
             return await ctx.send("You do not have any consumables.")
-        if consumable == "None" or not any([x for x in Userdata.users[str(user.id)]['consumables'] if consumable in x.lower()]):
+        if consumable == "None" or not any([x for x in Userdata.users[str(user.id)]['consumables'] if consumable.lower() in x.lower()]):
             await ctx.send("You have to specify a consumable you own.")
             return
-        lookup = list(x for x in Userdata.users[str(user.id)]['consumables'] if consumable in x.lower())
+        lookup = list(x for x in Userdata.users[str(user.id)]['consumables'] if consumable.lower() in x.lower())
         if len(lookup) > 1:
             await ctx.send("I found multiple consumables ({}) matching that name.\nPlease be more specific.".format(" and ".join([", ".join(lookup[:-1]),lookup[-1]] if len(lookup) > 2 else lookup)))
             return
