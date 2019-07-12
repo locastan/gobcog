@@ -25,7 +25,7 @@ class Explore:
             "Oilflower":{"tile": "🌻", "desc":"Generally used for its emulsifying oils."},
             "Daisy":{"tile": "🌼", "desc":"Common ingredient in various stews and potions."},
             "Twolip":{"tile": "🌷", "desc":"Said to improve speech and performance activities."},
-            "Tongue Sprout":{"tile": "🌱", "desc":"Created a beautiful singing voice if prepared properly."},
+            "Tongue Sprout":{"tile": "🌱", "desc":"Creates a beautiful singing voice if prepared properly."},
             "Conifer":{"tile": "🌲", "desc":"A big evergreen tree."},
             "Oak":{"tile": "🌳", "desc":"A huge oak."},
             "Na-Palm":{"tile": "🌴", "desc":"This weird tree is known to spontaneously combust. Better stay away from it."},
@@ -77,7 +77,7 @@ class Explore:
 
     #biomes carry rarities and what can be found in the tileset.
     biomes = {"forest": {"legendary":["Ooze","Sageworth","Whipweed","Conifer","Cyanka Lilly","Flyleaf"],"epic":["Mushroom","Whipweed","Maple","Oak"],"rare":["Rock"],"common":["Oak","Oak","Grass"]},
-            "grassland": {"legendary":["Moneypenny","Raging Frills","Rose","Oak"],"epic":["Mourning Star","Twolip","Honeytail","Clover","Rock"],"rare":["Oilflower"],"common":["Daisy","Grass","Grass"]},
+            "grassland": {"legendary":["Twolip","Moneypenny","Raging Frills","Rose","Oak"],"epic":["Mourning Star","Honeytail","Clover","Rock"],"rare":["Oilflower"],"common":["Daisy","Grass","Grass"]},
             "drygrass":{"legendary":["Na-Palm","Fleshthorn","Rock"],"epic":["Tongue Sprout","Rock"],"rare":["Rust Leafs"],"common":["Rock","Grass","Grass"]}
             }
 

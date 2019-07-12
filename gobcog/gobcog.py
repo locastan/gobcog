@@ -1361,6 +1361,7 @@ class GobCog(BaseCog):
         async def handle_buy(itemindex, user, stock, msg):
             global users
             item = stock[itemindex].copy()
+            print("copyitem: {}".format(item))
             spender = user
             react = None
             if await bank.can_spend(spender,int(item['price'])):
@@ -1374,7 +1375,9 @@ class GobCog(BaseCog):
                         Userdata.users[str(user.id)]['treasure'][0] += 1
                 elif item['itemname'] in Consumables.consbles.keys():
                         if item['itemname'] in Userdata.users[str(user.id)]['consumables'].keys():
+                            print("Cons in pouch before: {}".format(Userdata.users[str(user.id)]['consumables'][item['itemname']]['uses']))
                             Userdata.users[str(user.id)]['consumables'][item['itemname']]['uses'] = Userdata.users[str(user.id)]['consumables'][item['itemname']].get("uses", 0) + item['item']['uses']
+                            print("Uses added: {}, Uses in userpouch: {}".format(item['item']['uses'],Userdata.users[str(user.id)]['consumables'][item['itemname']]['uses']))
                         else:
                             Userdata.users[str(user.id)]['consumables'].update({item['itemname']:item['item']})
                 else:
@@ -1384,7 +1387,7 @@ class GobCog(BaseCog):
                     else:
                         Userdata.users[str(user.id)]['items']['backpack'].update({item['itemname']: item['item']})
                 await GobCog.save()
-                await ctx.send("{} bought the {} for {} cp and put it into the backpack.".format(user.display_name,item['itemname'],str(item['price'])))
+                await ctx.send("{} bought {}x {} for {} cp and put it into the backpack.".format(user.display_name,item['item']['uses'],item['itemname'],str(item['price'])))
             else:
                 await ctx.send("You do not have enough copperpieces.")
             try:
@@ -1403,6 +1406,7 @@ class GobCog(BaseCog):
                     for key in controls.keys():
                         await message.remove_reaction(key, ctx.bot.user)
             if react != None and user:
+                print(stock)
                 await handle_buy(controls[react.emoji], user, stock, msg)
 
         em_list = ReactionPredicate.NUMBER_EMOJIS[:5]
@@ -1421,26 +1425,26 @@ class GobCog(BaseCog):
         GobCog.last_trade = time.time()
         stock = await Treasure.trader_get_items()
         for index, name in enumerate(stock):
-            item = stock[index].copy()
-            if "chest" not in item['itemname']:
-                if item['item']['slot'] == ['consumable']:
-                    text += "```css\n" + "[{}] {}x {} for {} cp.".format(str(index+1),item['item']['uses'],item['itemname'],item['price'])+ " ```"
+            sitem = stock[index].copy()
+            if "chest" not in sitem['itemname']:
+                if sitem['item']['slot'] == ['consumable']:
+                    text += "```css\n" + "[{}] {}x {} for {} cp.".format(str(index+1),sitem['item']['uses'],sitem['itemname'],sitem['price'])+ " ```"
                     continue
                 else:
-                    if len(item['item']['slot']) == 2: # two handed weapons add their bonuses twice
+                    if len(sitem['item']['slot']) == 2: # two handed weapons add their bonuses twice
                         hand = "two handed"
-                        att = item['item']["att"]*2
-                        cha = item['item']["cha"]*2
+                        att = sitem['item']["att"]*2
+                        cha = sitem['item']["cha"]*2
                     else:
-                        if item['item']['slot'][0] == "right" or item['item']["slot"][0] == "left":
-                            hand = item['item']['slot'][0] + " handed"
+                        if sitem['item']['slot'][0] == "right" or sitem['item']["slot"][0] == "left":
+                            hand = sitem['item']['slot'][0] + " handed"
                         else:
-                            hand = item['item']['slot'][0] + " slot"
-                        att = item['item']["att"]
-                        cha = item['item']["cha"]
-                    text += "```css\n" + "[{}] {} (Attack: {}, Charisma: {} [{}]) for {} cp.".format(str(index+1),item['itemname'],str(att),str(cha),hand,item['price'])+ " ```"
+                            hand = sitem['item']['slot'][0] + " slot"
+                        att = sitem['item']["att"]
+                        cha = sitem['item']["cha"]
+                    text += "```css\n" + "[{}] {} (Attack: {}, Charisma: {} [{}]) for {} cp.".format(str(index+1),sitem['itemname'],str(att),str(cha),hand,sitem['price'])+ " ```"
             else:
-                text += "```css\n" + "[{}] {} for {} cp.".format(str(index+1),item['itemname'],item['price'])+ " ```"
+                text += "```css\n" + "[{}] {} for {} cp.".format(str(index+1),sitem['itemname'],sitem['price'])+ " ```"
         text += "Do you want to buy any of these fine items? Tell me which one below:"
         msg = await ctx.send(text)
         Adventure.start_adding_reactions(msg, controls.keys(), ctx.bot.loop)

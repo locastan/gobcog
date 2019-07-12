@@ -325,8 +325,11 @@ class Adventure:
                         report += "**" + user + "**: " +  "- 🎲({}) -".format(roll) + "💥{} + ".format(bonus) + "- 🗡" + str(att_value) + monster_string + " |"
                 elif roll == 20 or (Userdata.users[str(member.id)]['class']['name']=="Berserker" and Userdata.users[str(member.id)]['class']['ability']):
                     ability = ""
+                    bonus = 0
+                    critbonus = 0
                     if roll == 20:
                         await ctx.send("**" + user + "**" + " landed a critical hit.")
+                        critbonus = random.randint(5,15)
                         critlist.append(user)
                     if Userdata.users[str(member.id)]['class']['name']=="Berserker" and Userdata.users[str(member.id)]['class']['ability']:
                         ability = "🗯️"
@@ -334,11 +337,9 @@ class Adventure:
                     elif Userdata.users[str(member.id)]['class']['name']=="Ranger" and "bow" in list(Userdata.users[str(member.id)]['items']['right'].keys())[0]:
                         ability = "🏹"
                         bonus = random.randint(max(5,int(Userdata.users[str(member.id)]['lvl']/2)),max(15,int(Userdata.users[str(member.id)]['lvl'])))
-                    else:
-                        bonus = random.randint(5,15)
-                    attack += roll + bonus + att_value + monster_value
-                    bonus = ability + str(bonus)
-                    report += "**" + user + "**: " +  "🎲({}) +".format(roll) + " {} + ".format(bonus) + "🗡" + str(att_value) + monster_string + " |"
+                    attack += roll + bonus + critbonus + att_value + monster_value
+                    bonus_str = ability + str(bonus+critbonus)
+                    report += "**" + user + "**: " +  "🎲({}) +".format(roll) + " {} + ".format(bonus_str) + "🗡" + str(att_value) + monster_string + " |"
                 else:
                     bonus = 0
                     if Userdata.users[str(member.id)]['class']['name']=="Ranger" and "bow" in list(Userdata.users[str(member.id)]['items']['right'].keys())[0]:
@@ -422,16 +423,18 @@ class Adventure:
                         report += "**" + user + "**: " +  "- 🎲({})-".format(roll) + " 💥{} - ".format(bonus) + "🗨" + str(dipl_value) + monster_string + " |"
                 elif roll == 20 or (Userdata.users[str(member.id)]['class']['name']=="Bard" and Userdata.users[str(member.id)]['class']['ability']):
                     ability = ""
+                    bonus = 0
+                    critbonus = 0
                     if roll == 20:
                         await ctx.send("**" + user + "**" + " made a compelling argument.")
+                        critbonus = random.randint(5,15)
                         critlist.append(user)
                     if Userdata.users[str(member.id)]['class']['name']=="Bard" and Userdata.users[str(member.id)]['class']['ability']:
                         ability = "🎵"
-                    bonus = random.randint(5,15)
                     if songbonus != 0: #recalc if song is sung
                         bonus = random.randint(5,max(6,songbonus))
-                    diplomacy += roll + bonus + dipl_value + monster_value
-                    bonus_str = ability + str(bonus)
+                    diplomacy += roll + bonus + critbonus + dipl_value + monster_value
+                    bonus_str = ability + str(bonus+critbonus)
                     report += "**" + user + "**: " +  "🎲({})+".format(roll) + " {} + ".format(bonus_str) + "🗨" +str(dipl_value) + monster_string + " |"
                 else:
                     diplomacy += roll + dipl_value + monster_value
