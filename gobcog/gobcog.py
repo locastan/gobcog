@@ -1387,7 +1387,10 @@ class GobCog(BaseCog):
                     else:
                         Userdata.users[str(user.id)]['items']['backpack'][item['itemname']] = item['item']
                 await GobCog.save()
-                await ctx.send("{} bought {}x {} for {} cp and put it into the backpack.".format(user.display_name,item['item']['uses'],item['itemname'],str(item['price'])))
+                if item['itemname'] in Consumables.consbles.keys():
+                    await ctx.send("{} bought {}x {} for {} cp and put it into the backpack.".format(user.display_name,item['item']['uses'],item['itemname'],str(item['price'])))
+                else:
+                    await ctx.send("{} bought the {} for {} cp and put it into the backpack.".format(user.display_name,item['itemname'],str(item['price'])))
             else:
                 await ctx.send("You do not have enough copperpieces.")
             try:
