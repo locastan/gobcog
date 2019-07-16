@@ -4,6 +4,7 @@ import random
 import discord
 import asyncio
 import time
+import copy
 from redbot.core.utils.predicates import MessagePredicate
 from redbot.core.utils.menus import start_adding_reactions
 from redbot.core.utils.predicates import ReactionPredicate
@@ -876,7 +877,7 @@ class GobCog(BaseCog):
                 for item in lookup:
                     if item in Consumables.consbles.keys() and asking != 0:
                         if int(Userdata.users[str(user.id)]['consumables'][item]['uses']) > asking:
-                            queryitem = {'itemname': item,'item':Userdata.users[str(user.id)]['consumables'][item].copy()}
+                            queryitem = {'itemname': item,'item':Userdata.users[str(user.id)]['consumables'][item].copy.deepcopy()}
                             queryitem['item']['uses'] = asking
                         else:
                             queryitem = {'itemname': item,'item': Userdata.users[str(user.id)]['items']['backpack'].get(item, Userdata.users[str(user.id)]['consumables'].get(item))}
@@ -960,7 +961,7 @@ class GobCog(BaseCog):
                     if item in Consumables.consbles.keys():
                         if Userdata.users[str(user.id)]['consumables'][item]['uses'] > quant:
                             Userdata.users[str(user.id)]['consumables'][item]['uses'] = Userdata.users[str(user.id)]['consumables'][item]['uses'] - quant
-                            tradeitem = Userdata.users[str(user.id)]['consumables'][item].copy()
+                            tradeitem = Userdata.users[str(user.id)]['consumables'][item].copy.deepcopy()
                             tradeitem['uses'] = quant
                             if item in Userdata.users[str(buyer.id)]['consumables'].keys():
                                 Userdata.users[str(buyer.id)]['consumables'][item['itemname']]['uses'] = Userdata.users[str(buyer.id)]['consumables'][item['itemname']].get("uses", 0) + item['item']['uses']
@@ -1360,7 +1361,7 @@ class GobCog(BaseCog):
 
         async def handle_buy(itemindex, user, stock, msg):
             global users
-            item = stock[itemindex].copy()
+            item = stock[itemindex].copy.deepcopy()
             print("copyitem: {}".format(item))
             spender = user
             react = None
@@ -1376,7 +1377,7 @@ class GobCog(BaseCog):
                 elif item['itemname'] in Consumables.consbles.keys():
                         if item['itemname'] in Userdata.users[str(user.id)]['consumables'].keys():
                             print("Cons in pouch before: {}".format(Userdata.users[str(user.id)]['consumables'][item['itemname']]['uses']))
-                            Userdata.users[str(user.id)]['consumables'][item['itemname']]['uses'] = Userdata.users[str(user.id)]['consumables'][item['itemname']].get("uses", 0) + item['item']['uses']
+                            Userdata.users[str(user.id)]['consumables'][item['itemname']]['uses'] = Userdata.users[str(user.id)]['consumables'][item['itemname']].get("uses", 0) + item['item'].get("uses", 0)
                             print("Uses added: {}, Uses in userpouch: {}".format(item['item']['uses'],Userdata.users[str(user.id)]['consumables'][item['itemname']]['uses']))
                         else:
                             Userdata.users[str(user.id)]['consumables'][item['itemname']] = item['item']
@@ -1428,7 +1429,7 @@ class GobCog(BaseCog):
         GobCog.last_trade = time.time()
         stock = await Treasure.trader_get_items()
         for index, name in enumerate(stock):
-            sitem = stock[index].copy()
+            sitem = stock[index].copy.deepcopy()
             if "chest" not in sitem['itemname']:
                 if sitem['item']['slot'] == ['consumable']:
                     text += "```css\n" + "[{}] {}x {} for {} cp.".format(str(index+1),sitem['item']['uses'],sitem['itemname'],sitem['price'])+ " ```"
