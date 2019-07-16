@@ -877,7 +877,7 @@ class GobCog(BaseCog):
                 for item in lookup:
                     if item in Consumables.consbles.keys() and asking != 0:
                         if int(Userdata.users[str(user.id)]['consumables'][item]['uses']) > asking:
-                            queryitem = {'itemname': item,'item':Userdata.users[str(user.id)]['consumables'][item].copy.deepcopy()}
+                            queryitem = {'itemname': item,'item': copy.deepcopy(Userdata.users[str(user.id)]['consumables'][item])}
                             queryitem['item']['uses'] = asking
                         else:
                             queryitem = {'itemname': item,'item': Userdata.users[str(user.id)]['items']['backpack'].get(item, Userdata.users[str(user.id)]['consumables'].get(item))}
@@ -961,7 +961,7 @@ class GobCog(BaseCog):
                     if item in Consumables.consbles.keys():
                         if Userdata.users[str(user.id)]['consumables'][item]['uses'] > quant:
                             Userdata.users[str(user.id)]['consumables'][item]['uses'] = Userdata.users[str(user.id)]['consumables'][item]['uses'] - quant
-                            tradeitem = Userdata.users[str(user.id)]['consumables'][item].copy.deepcopy()
+                            tradeitem = copy.deepcopy(Userdata.users[str(user.id)]['consumables'][item])
                             tradeitem['uses'] = quant
                             if item in Userdata.users[str(buyer.id)]['consumables'].keys():
                                 Userdata.users[str(buyer.id)]['consumables'][item['itemname']]['uses'] = Userdata.users[str(buyer.id)]['consumables'][item['itemname']].get("uses", 0) + item['item']['uses']
@@ -1361,7 +1361,7 @@ class GobCog(BaseCog):
 
         async def handle_buy(itemindex, user, stock, msg):
             global users
-            item = stock[itemindex].copy.deepcopy()
+            item = copy.deepcopy(stock[itemindex])
             print("copyitem: {}".format(item))
             spender = user
             react = None
@@ -1429,7 +1429,7 @@ class GobCog(BaseCog):
         GobCog.last_trade = time.time()
         stock = await Treasure.trader_get_items()
         for index, name in enumerate(stock):
-            sitem = stock[index].copy.deepcopy()
+            sitem = copy.deepcopy(stock[index])
             if "chest" not in sitem['itemname']:
                 if sitem['item']['slot'] == ['consumable']:
                     text += "```css\n" + "[{}] {}x {} for {} cp.".format(str(index+1),sitem['item']['uses'],sitem['itemname'],sitem['price'])+ " ```"
