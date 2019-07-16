@@ -1362,7 +1362,7 @@ class GobCog(BaseCog):
         async def handle_buy(itemindex, user, stock, msg):
             global users
             item = copy.deepcopy(stock[itemindex])
-            print("copyitem: {}".format(item))
+            #print("copyitem: {}".format(item))
             spender = user
             react = None
             if await bank.can_spend(spender,int(item['price'])):
@@ -1376,17 +1376,17 @@ class GobCog(BaseCog):
                         Userdata.users[str(user.id)]['treasure'][0] += 1
                 elif item['itemname'] in Consumables.consbles.keys():
                         if item['itemname'] in Userdata.users[str(user.id)]['consumables'].keys():
-                            print("Cons in pouch before: {}".format(Userdata.users[str(user.id)]['consumables'][item['itemname']]['uses']))
-                            Userdata.users[str(user.id)]['consumables'][item['itemname']]['uses'] = Userdata.users[str(user.id)]['consumables'][item['itemname']].get("uses", 0) + item['item'].get("uses", 0)
-                            print("Uses added: {}, Uses in userpouch: {}".format(item['item']['uses'],Userdata.users[str(user.id)]['consumables'][item['itemname']]['uses']))
+                            #print("Cons in pouch before: {}".format(Userdata.users[str(user.id)]['consumables'][item['itemname']]['uses']))
+                            Userdata.users[str(user.id)]['consumables'][item['itemname']]['uses'] = Userdata.users[str(user.id)]['consumables'][item['itemname']].get("uses", 0) + item['item']['uses']
+                            #print("Uses added: {}, Uses in userpouch: {}".format(item['item']['uses'],Userdata.users[str(user.id)]['consumables'][item['itemname']]['uses']))
                         else:
-                            Userdata.users[str(user.id)]['consumables'][item['itemname']] = item['item']
+                            Userdata.users[str(user.id)]['consumables'].update({item['itemname']:item['item']})
                 else:
                     if item['itemname'] in Userdata.users[str(user.id)]['items']['backpack'].keys():
                         price = await GobCog.sell(user,item)
                         await ctx.send("**{}** was already in your backpack: Sold for {} copperpieces.".format(item['itemname'],price))
                     else:
-                        Userdata.users[str(user.id)]['items']['backpack'][item['itemname']] = item['item']
+                        Userdata.users[str(user.id)]['items']['backpack'].update({item['itemname']:item['item']})
                 await GobCog.save()
                 if item['itemname'] in Consumables.consbles.keys():
                     await ctx.send("{} bought {}x {} for {} cp and put it into the backpack.".format(user.display_name,item['item']['uses'],item['itemname'],str(item['price'])))
@@ -1410,7 +1410,7 @@ class GobCog(BaseCog):
                     for key in controls.keys():
                         await message.remove_reaction(key, ctx.bot.user)
             if react != None and user:
-                print(stock)
+                #print(stock)
                 await handle_buy(controls[react.emoji], user, stock, msg)
 
         em_list = ReactionPredicate.NUMBER_EMOJIS[:5]
@@ -1424,7 +1424,6 @@ class GobCog(BaseCog):
         if GobCog.last_trade == 0 or summoned:
             GobCog.last_trade = time.time()
         elif GobCog.last_trade >= time.time()-10800: #trader can return after 3 hours have passed since last visit.
-            print("Last Trade Visit: {}, current time: {}".format(str(GobCog.last_trade), str(time.time())))
             return #silent return.
         GobCog.last_trade = time.time()
         stock = await Treasure.trader_get_items()
