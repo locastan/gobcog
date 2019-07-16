@@ -257,7 +257,7 @@ class Treasure:
             item = chance[itemname]
             if item['slot'] == ['consumable']:
                 item['uses'] = random.randint(1,item['uses'])
-                if luckbonus != 0:
+                if luckbonus != 0 and hasattr(Userdata.users[str(user.id)]['buffs'], "luck"):
                     if Userdata.users[str(user.id)]['buffs']['luck']['duration'] <= 1:
                         Userdata.users[str(user.id)]['buffs'].pop('luck')
                     else:

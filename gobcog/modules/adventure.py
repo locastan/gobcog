@@ -309,6 +309,9 @@ class Adventure:
             for user in Adventure.userslist["fight"]:
                 roll = random.randint(1,20)
                 member = discord.utils.find(lambda m: m.display_name == user, ctx.guild.members)
+                if member == None:
+                    await ctx.send("**" + user + "**" + " wandered off to look at a particular interesting bird. Tell locastan, because he wants to know this happened.")
+                    return (fumblelist, critlist, attack)
                 att_value = Userdata.users[str(member.id)]['att'] + Userdata.users[str(member.id)]['skill']['att'] + Userdata.users[str(member.id)]['buffs'].get('att', {'bonus':0})['bonus']
                 monster_string = ""
                 bow_bonus = ""
@@ -326,10 +329,8 @@ class Adventure:
                 elif roll == 20 or (Userdata.users[str(member.id)]['class']['name']=="Berserker" and Userdata.users[str(member.id)]['class']['ability']):
                     ability = ""
                     bonus = 0
-                    critbonus = 0
                     if roll == 20:
                         await ctx.send("**" + user + "**" + " landed a critical hit.")
-                        critbonus = random.randint(5,15)
                         critlist.append(user)
                     if Userdata.users[str(member.id)]['class']['name']=="Berserker" and Userdata.users[str(member.id)]['class']['ability']:
                         ability = "🗯️"
@@ -337,8 +338,8 @@ class Adventure:
                     elif Userdata.users[str(member.id)]['class']['name']=="Ranger" and "bow" in list(Userdata.users[str(member.id)]['items']['right'].keys())[0]:
                         ability = "🏹"
                         bonus = random.randint(max(5,int(Userdata.users[str(member.id)]['lvl']/2)),max(15,int(Userdata.users[str(member.id)]['lvl'])))
-                    attack += roll + bonus + critbonus + att_value + monster_value
-                    bonus_str = ability + str(bonus+critbonus)
+                    attack += roll + bonus + att_value + monster_value
+                    bonus_str = ability + str(bonus)
                     report += "**" + user + "**: " +  "🎲({}) +".format(roll) + " {} + ".format(bonus_str) + "🗡" + str(att_value) + monster_string + " |"
                 else:
                     bonus = 0

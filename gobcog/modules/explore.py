@@ -374,8 +374,8 @@ class Explore:
         emoji: str,
         user: discord.User,
     ):
-        tilename = Explore.tile_lookup.get(Explore.map[Explore.player_pos[0]][Explore.player_pos[1]])
-        text = "**" + tilename + ": " + Explore.tiles[tilename].get("desc") + "**"
+        tilename = Explore.tile_lookup.get(Explore.map[Explore.player_pos[0]][Explore.player_pos[1]],"Unknown Tile")
+        text = "**" + tilename + ": " + Explore.tiles[tilename].get("desc","Error") + "**"
         Explore.moves -= 1
         await Explore.movesmsg.edit(content="{} moves remaining.".format(Explore.moves))
         await Explore.statusmsg.edit(content=text)

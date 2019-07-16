@@ -544,7 +544,7 @@ class GobCog(BaseCog):
 
     @commands.command()
     @commands.guild_only()
-    async def use(self, ctx, consumable:str=None, switch:str=None):
+    async def use(self, ctx, consumable:str="None", switch:str=None):
         """This allows you to use consumables.
             !use "partial name of consumable"
             Get a description of the consumable with:
@@ -1379,13 +1379,13 @@ class GobCog(BaseCog):
                             Userdata.users[str(user.id)]['consumables'][item['itemname']]['uses'] = Userdata.users[str(user.id)]['consumables'][item['itemname']].get("uses", 0) + item['item']['uses']
                             print("Uses added: {}, Uses in userpouch: {}".format(item['item']['uses'],Userdata.users[str(user.id)]['consumables'][item['itemname']]['uses']))
                         else:
-                            Userdata.users[str(user.id)]['consumables'].update({item['itemname']:item['item']})
+                            Userdata.users[str(user.id)]['consumables'][item['itemname']] = item['item']
                 else:
                     if item['itemname'] in Userdata.users[str(user.id)]['items']['backpack'].keys():
                         price = await GobCog.sell(user,item)
                         await ctx.send("**{}** was already in your backpack: Sold for {} copperpieces.".format(item['itemname'],price))
                     else:
-                        Userdata.users[str(user.id)]['items']['backpack'].update({item['itemname']: item['item']})
+                        Userdata.users[str(user.id)]['items']['backpack'][item['itemname']] = item['item']
                 await GobCog.save()
                 await ctx.send("{} bought {}x {} for {} cp and put it into the backpack.".format(user.display_name,item['item']['uses'],item['itemname'],str(item['price'])))
             else:

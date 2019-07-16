@@ -147,9 +147,11 @@ class Quest:
         Quest.quest = getattr(Quest, Quest.name)
         Quest.monsters = getattr(Quest, Quest.name + "_monsters")
         Quest.bosses = getattr(Quest, Quest.name + "_bosses")
-        await ctx.send(Quest.quest[Quest.idx][0].format(len(Quest.participants)))
+
         if Quest.endless:
-            del Quest.quest[0]
+            await ctx.send(Quest.quest.pop(Quest.idx)[0].format(len(Quest.participants)))
+        else:
+            await ctx.send(Quest.quest[Quest.idx][0].format(len(Quest.participants)))
         await Quest.narrate(ctx)
         dead = []
         if Quest.failed:
@@ -535,10 +537,8 @@ class Quest:
                 elif roll == 20 or (Userdata.users[str(member.id)]['class']['name']=="Berserker" and Userdata.users[str(member.id)]['class']['ability']):
                     ability = ""
                     bonus = 0
-                    critbonus = 0
                     if roll == 20:
                         await ctx.send("**" + user + "**" + " landed a critical hit.")
-                        critbonus = random.randint(5,15)
                         critlist.append(user)
                     if Userdata.users[str(member.id)]['class']['name']=="Berserker" and Userdata.users[str(member.id)]['class']['ability']:
                         ability = "🗯️"
@@ -546,8 +546,8 @@ class Quest:
                     elif Userdata.users[str(member.id)]['class']['name']=="Ranger" and "bow" in list(Userdata.users[str(member.id)]['items']['right'].keys())[0]:
                         ability = "🏹"
                         bonus = random.randint(max(5,int(Userdata.users[str(member.id)]['lvl']/2)),max(15,int(Userdata.users[str(member.id)]['lvl'])))
-                    attack += roll + bonus + critbonus + att_value + monster_value
-                    bonus_str = ability + str(bonus+critbonus)
+                    attack += roll + bonus + att_value + monster_value
+                    bonus_str = ability + str(bonus)
                     report += "**" + user + "**: " +  "🎲({}) +".format(roll) + " {} + ".format(bonus_str) + "🗡" + str(att_value) + effect + monster_string + " |"
                 else:
                     bonus = 0
