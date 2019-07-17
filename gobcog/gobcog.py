@@ -1361,37 +1361,37 @@ class GobCog(BaseCog):
 
         async def handle_buy(itemindex, user, stock, msg):
             global users
-            item = copy.deepcopy(stock[itemindex])
+            titem = copy.deepcopy(stock[itemindex])
             #print("copyitem: {}".format(item))
             spender = user
             react = None
-            if await bank.can_spend(spender,int(item['price'])):
-                await bank.withdraw_credits(spender, int(item['price']))
-                if 'chest' in item['itemname']:
-                    if item['itemname'] == ".rare_chest":
+            if await bank.can_spend(spender,int(titem['price'])):
+                await bank.withdraw_credits(spender, int(titem['price']))
+                if 'chest' in titem['itemname']:
+                    if titem['itemname'] == ".rare_chest":
                         Userdata.users[str(user.id)]['treasure'][1] += 1
-                    elif item['itemname'] == "[epic chest]":
+                    elif titem['itemname'] == "[epic chest]":
                         Userdata.users[str(user.id)]['treasure'][2] += 1
                     else:
                         Userdata.users[str(user.id)]['treasure'][0] += 1
-                elif item['itemname'] in Consumables.consbles.keys():
-                        if item['itemname'] in Userdata.users[str(user.id)]['consumables'].keys():
+                elif titem['itemname'] in Consumables.consbles.keys():
+                        if titem['itemname'] in Userdata.users[str(user.id)]['consumables'].keys():
                             #print("Cons in pouch before: {}".format(Userdata.users[str(user.id)]['consumables'][item['itemname']]['uses']))
-                            Userdata.users[str(user.id)]['consumables'][item['itemname']]['uses'] = Userdata.users[str(user.id)]['consumables'][item['itemname']].get("uses", 0) + item['item']['uses']
+                            Userdata.users[str(user.id)]['consumables'][titem['itemname']]['uses'] = Userdata.users[str(user.id)]['consumables'][titem['itemname']].get("uses", 0) + titem['item']['uses']
                             #print("Uses added: {}, Uses in userpouch: {}".format(item['item']['uses'],Userdata.users[str(user.id)]['consumables'][item['itemname']]['uses']))
                         else:
-                            Userdata.users[str(user.id)]['consumables'].update({item['itemname']:item['item']})
+                            Userdata.users[str(user.id)]['consumables'].update({titem['itemname']:titem['item']})
                 else:
-                    if item['itemname'] in Userdata.users[str(user.id)]['items']['backpack'].keys():
-                        price = await GobCog.sell(user,item)
-                        await ctx.send("**{}** was already in your backpack: Sold for {} copperpieces.".format(item['itemname'],price))
+                    if titem['itemname'] in Userdata.users[str(user.id)]['items']['backpack'].keys():
+                        price = await GobCog.sell(user,titem)
+                        await ctx.send("**{}** was already in your backpack: Sold for {} copperpieces.".format(titem['itemname'],price))
                     else:
-                        Userdata.users[str(user.id)]['items']['backpack'].update({item['itemname']:item['item']})
+                        Userdata.users[str(user.id)]['items']['backpack'].update({titem['itemname']:titem['item']})
                 await GobCog.save()
-                if item['itemname'] in Consumables.consbles.keys():
-                    await ctx.send("{} bought {}x {} for {} cp and put it into the backpack.".format(user.display_name,item['item']['uses'],item['itemname'],str(item['price'])))
+                if titem['itemname'] in Consumables.consbles.keys():
+                    await ctx.send("{} bought {}x {} for {} cp and put it into the backpack.".format(user.display_name,titem['item']['uses'],titem['itemname'],str(titem['price'])))
                 else:
-                    await ctx.send("{} bought the {} for {} cp and put it into the backpack.".format(user.display_name,item['itemname'],str(item['price'])))
+                    await ctx.send("{} bought the {} for {} cp and put it into the backpack.".format(user.display_name,titem['itemname'],str(titem['price'])))
             else:
                 await ctx.send("You do not have enough copperpieces.")
             try:
