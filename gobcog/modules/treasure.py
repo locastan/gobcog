@@ -171,6 +171,12 @@ class Treasure:
             except discord.Forbidden:  # cannot remove all reactions
                 for key in Treasure.controls.keys():
                     await msg.remove_reaction(key, ctx.bot.user)
+            if luckbonus != 0:
+                if Userdata.users[str(user.id)]['buffs']['luck']['duration'] <= 1:
+                    Userdata.users[str(user.id)]['buffs'].pop('luck')
+                else:
+                    Userdata.users[str(user.id)]['buffs']['luck']['duration'] = Userdata.users[str(user.id)]['buffs']['luck']['duration'] - 1
+            await Userdata.save()
             return {"itemname": itemname,"item":item,"equip":Treasure.controls[react.emoji]}
         else:
             if len(item["slot"]) == 2: # two handed weapons add their bonuses twice
@@ -257,7 +263,7 @@ class Treasure:
             item = chance[itemname]
             if item['slot'] == ['consumable']:
                 item['uses'] = random.randint(1,item['uses'])
-                if luckbonus != 0 and hasattr(Userdata.users[str(user.id)]['buffs'], "luck"):
+                if luckbonus != 0:
                     if Userdata.users[str(user.id)]['buffs']['luck']['duration'] <= 1:
                         Userdata.users[str(user.id)]['buffs'].pop('luck')
                     else:
