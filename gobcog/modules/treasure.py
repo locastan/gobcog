@@ -466,7 +466,9 @@ class Treasure:
                     await ctx.send("I dont think im allowed to do negatives \U0001f914")
                     return
                 rem, done = await remaining(Treasure.finish)
-                message = await ctx.send("[" + title +"] " + rem)
+                channel = ctx.bot.get_channel(522778389606825984) #restrict trader to loot-spam channel
+                if channel is not None:
+                    message = await channel.send("[" + title +"] " + rem)
                 while True:
                     timer, done = await remaining(Treasure.finish)
                     if done:

@@ -1455,6 +1455,7 @@ class GobCog(BaseCog):
             msg = await channel.send(text)
         else:
             print("channel not found!")
+            return
         #msg = await ctx.send(text) #old line for bug testing on beta server.
         Adventure.start_adding_reactions(msg, controls.keys(), ctx.bot.loop)
         try:
