@@ -1366,53 +1366,55 @@ class GobCog(BaseCog):
             #print("copyitem: {}".format(item))
             spender = user
             react = None
-            if await bank.can_spend(spender,int(titem['price'])):
-                await bank.withdraw_credits(spender, int(titem['price']))
-                if 'chest' in titem['itemname']:
-                    if titem['itemname'] == ".rare_chest":
-                        Userdata.users[str(user.id)]['treasure'][1] += 1
-                    elif titem['itemname'] == "[epic chest]":
-                        Userdata.users[str(user.id)]['treasure'][2] += 1
-                    else:
-                        Userdata.users[str(user.id)]['treasure'][0] += 1
-                elif titem['itemname'] in Consumables.consbles.keys():
-                        if titem['itemname'] in Userdata.users[str(user.id)]['consumables'].keys():
-                            #print("Cons in pouch before: {}".format(Userdata.users[str(user.id)]['consumables'][item['itemname']]['uses']))
-                            Userdata.users[str(user.id)]['consumables'][titem['itemname']]['uses'] = Userdata.users[str(user.id)]['consumables'][titem['itemname']].get("uses", 0) + titem['item']['uses']
-                            #print("Uses added: {}, Uses in userpouch: {}".format(item['item']['uses'],Userdata.users[str(user.id)]['consumables'][item['itemname']]['uses']))
+            channel = ctx.bot.get_channel(522778389606825984) #restrict trader to loot-spam channel
+            if channel is not None:
+                if await bank.can_spend(spender,int(titem['price'])):
+                    await bank.withdraw_credits(spender, int(titem['price']))
+                    if 'chest' in titem['itemname']:
+                        if titem['itemname'] == ".rare_chest":
+                            Userdata.users[str(user.id)]['treasure'][1] += 1
+                        elif titem['itemname'] == "[epic chest]":
+                            Userdata.users[str(user.id)]['treasure'][2] += 1
                         else:
-                            Userdata.users[str(user.id)]['consumables'].update({titem['itemname']:titem['item']})
-                else:
-                    if titem['itemname'] in Userdata.users[str(user.id)]['items']['backpack'].keys():
-                        price = await GobCog.sell(user,titem)
-                        await ctx.send("**{}** was already in your backpack: Sold for {} copperpieces.".format(titem['itemname'],price))
+                            Userdata.users[str(user.id)]['treasure'][0] += 1
+                    elif titem['itemname'] in Consumables.consbles.keys():
+                            if titem['itemname'] in Userdata.users[str(user.id)]['consumables'].keys():
+                                #print("Cons in pouch before: {}".format(Userdata.users[str(user.id)]['consumables'][item['itemname']]['uses']))
+                                Userdata.users[str(user.id)]['consumables'][titem['itemname']]['uses'] = Userdata.users[str(user.id)]['consumables'][titem['itemname']].get("uses", 0) + titem['item']['uses']
+                                #print("Uses added: {}, Uses in userpouch: {}".format(item['item']['uses'],Userdata.users[str(user.id)]['consumables'][item['itemname']]['uses']))
+                            else:
+                                Userdata.users[str(user.id)]['consumables'].update({titem['itemname']:titem['item']})
                     else:
-                        Userdata.users[str(user.id)]['items']['backpack'].update({titem['itemname']:titem['item']})
-                await GobCog.save()
-                if titem['itemname'] in Consumables.consbles.keys():
-                    await ctx.send("{} bought {}x {} for {} cp and put it into the backpack.".format(user.display_name,titem['item']['uses'],titem['itemname'],str(titem['price'])))
+                        if titem['itemname'] in Userdata.users[str(user.id)]['items']['backpack'].keys():
+                            price = await GobCog.sell(user,titem)
+                            await channel.send("**{}** was already in your backpack: Sold for {} copperpieces.".format(titem['itemname'],price))
+                        else:
+                            Userdata.users[str(user.id)]['items']['backpack'].update({titem['itemname']:titem['item']})
+                    await GobCog.save()
+                    if titem['itemname'] in Consumables.consbles.keys():
+                        await channel.send("{} bought {}x {} for {} cp and put it into the backpack.".format(user.display_name,titem['item']['uses'],titem['itemname'],str(titem['price'])))
+                    else:
+                        await channel.send("{} bought the {} for {} cp and put it into the backpack.".format(user.display_name,titem['itemname'],str(titem['price'])))
                 else:
-                    await ctx.send("{} bought the {} for {} cp and put it into the backpack.".format(user.display_name,titem['itemname'],str(titem['price'])))
-            else:
-                await ctx.send("You do not have enough copperpieces.")
-            try:
-                timeout = GobCog.last_trade+1200-time.time()
-                if timeout <= 0:
-                    timeout = 0
-                react, user = await ctx.bot.wait_for(
-                    "reaction_add",
-                    check=CustomPredicate.with_emojis(tuple(controls.keys()), msg),
-                    timeout=timeout
-                )
-            except asyncio.TimeoutError:  #the timeout only applies if no reactions are made!
+                    await channel.send("You do not have enough copperpieces.")
                 try:
-                    await msg.delete()
-                except discord.Forbidden:  # cannot remove all reactions
-                    for key in controls.keys():
-                        await message.remove_reaction(key, ctx.bot.user)
-            if react != None and user:
-                #print(stock)
-                await handle_buy(controls[react.emoji], user, stock, msg)
+                    timeout = GobCog.last_trade+1200-time.time()
+                    if timeout <= 0:
+                        timeout = 0
+                    react, user = await ctx.bot.wait_for(
+                        "reaction_add",
+                        check=CustomPredicate.with_emojis(tuple(controls.keys()), msg),
+                        timeout=timeout
+                    )
+                except asyncio.TimeoutError:  #the timeout only applies if no reactions are made!
+                    try:
+                        await msg.delete()
+                    except discord.Forbidden:  # cannot remove all reactions
+                        for key in controls.keys():
+                            await message.remove_reaction(key, ctx.bot.user)
+                if react != None and user:
+                    #print(stock)
+                    await handle_buy(controls[react.emoji], user, stock, msg)
 
         em_list = ReactionPredicate.NUMBER_EMOJIS[:5]
         react = False
