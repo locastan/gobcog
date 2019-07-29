@@ -1452,7 +1452,7 @@ class GobCog(BaseCog):
         text += "Do you want to buy any of these fine items? Tell me which one below:"
         channel = ctx.bot.get_channel('522778389606825984') #restrict trader to loot-spam channel
         if channel is not None:
-            await channel.send(text)
+            msg = await channel.send(text)
         else:
             print("channel not found!")
         #msg = await ctx.send(text) #old line for bug testing on beta server.
