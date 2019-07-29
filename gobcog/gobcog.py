@@ -1449,7 +1449,7 @@ class GobCog(BaseCog):
             else:
                 text += "```css\n" + "[{}] {} for {} cp.".format(str(index+1),sitem['itemname'],sitem['price'])+ " ```"
         text += "Do you want to buy any of these fine items? Tell me which one below:"
-        msg = await ctx.message.guild.channel.get("522778389606825984").send(text) #restrict trader to loot-spam channel
+        msg = await ctx.message.guild.channels.get("522778389606825984").send(text) #restrict trader to loot-spam channel
         #msg = await ctx.send(text) #old line for bug testing on beta server.
         Adventure.start_adding_reactions(msg, controls.keys(), ctx.bot.loop)
         try:
