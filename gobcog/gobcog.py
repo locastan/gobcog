@@ -1450,7 +1450,11 @@ class GobCog(BaseCog):
             else:
                 text += "```css\n" + "[{}] {} for {} cp.".format(str(index+1),sitem['itemname'],sitem['price'])+ " ```"
         text += "Do you want to buy any of these fine items? Tell me which one below:"
-        msg = await client.send_message(client.get_channel('522778389606825984'), text)  #restrict trader to loot-spam channel
+        channel = ctx.bot.get_channel('522778389606825984') #restrict trader to loot-spam channel
+        if channel is not None:
+            await channel.send(text)
+        else:
+            print("channel not found!")
         #msg = await ctx.send(text) #old line for bug testing on beta server.
         Adventure.start_adding_reactions(msg, controls.keys(), ctx.bot.loop)
         try:
