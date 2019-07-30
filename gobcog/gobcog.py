@@ -235,6 +235,9 @@ class GobCog(BaseCog):
             elif switch == 'free':
                 await Classes.pet(ctx, switch)
                 await GobCog.save()
+            else:
+                ctx.command.reset_cooldown(ctx)
+                return await ctx.send("Check your spelling son.")
 
     @commands.command()
     @commands.guild_only()
@@ -1035,7 +1038,7 @@ class GobCog(BaseCog):
         bal = await bank.set_balance(to, amount)
         currency = await bank.get_currency_name(ctx.guild)
         await ctx.send(
-            "```You set {3}s balance at {2}. {0} now has {1} {2}```".format(
+            "```You set {0}s balance. {0} now has {1} {2}```".format(
                 to.display_name, bal, currency, amount
             )
         )
