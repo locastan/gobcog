@@ -1025,6 +1025,23 @@ class GobCog(BaseCog):
 
     @commands.command()
     @checks.admin_or_permissions(administrator=True)
+    async def setbalance(self, ctx, amount: int=1, to: discord.Member=None):
+        """This will SET cp for a specified member.
+            !setbalance 10 @Elder Aramis
+            will set balance at 10 cp for Elder Aramis.
+        """
+        if to is None:
+            return await ctx.send("You need to specify a receiving member, " + ctx.author.name + ".")
+        bal = await bank.set_balance(to, amount)
+        currency = await bank.get_currency_name(ctx.guild)
+        await ctx.send(
+            "```You set {3}s balance at {2}. {0} now has {1} {2}```".format(
+                to.display_name, bal, currency, amount
+            )
+        )
+
+    @commands.command()
+    @checks.admin_or_permissions(administrator=True)
     async def getyerassoverhere(self, ctx):
         """This will summon hawls brother asap.
         """
