@@ -91,7 +91,7 @@ class Consumables:
                     return False
                 if reply.content.isdigit() and (int(reply.content)-1) < len(lookup):
                     idx = int(reply.content)-1
-                    if  "{.:'" not in item and ")*" not in lookup[idx]:
+                    if  "{.:'" not in lookup[idx] and ")*" not in lookup[idx]:
                         item1 = Userdata.users[str(user.id)]['items']['backpack'].get(lookup[idx])
                         consumed = lookup[idx]
                     else:
@@ -104,7 +104,7 @@ class Consumables:
                 await ctx.send("I could not find that item, check your spelling.")
                 return False
             else: #len(lookup) equals 1 item
-                if  "{.:'" not in item and ")*" not in lookup[0]:
+                if  "{.:'" not in lookup[0] and ")*" not in lookup[0]:
                     item1 = Userdata.users[str(user.id)]['items']['backpack'].get(lookup[0])
                     consumed = lookup[0]
                 else:
