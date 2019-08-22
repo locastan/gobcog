@@ -557,9 +557,9 @@ class Adventure:
                 elif scale <= 10:
                     text= ("**{}** stumped the {} with eloquent skill.").format(talkers,Adventure.challenge)
                 elif scale <= 25:
-                    text= ("That {} was all ears for **{}**.").format(Adventure.challenge,fighters)
+                    text= ("That {} was all ears for **{}**.").format(Adventure.challenge,talkers)
                 else:
-                    text= ("**{}** skillfully charmed the {}. There was no resistance.").format(fighters,Adventure.challenge)
+                    text= ("**{}** skillfully charmed the {}. There was no resistance.").format(talkers,Adventure.challenge)
                 text += await Adventure.reward(ctx, Adventure.userslist["talk"]+Adventure.userslist["pray"],amount,(diplomacy/Adventure.dipl),treasure)
 
             if not slain and not persuaded:
@@ -609,9 +609,9 @@ class Adventure:
                 elif scale <= 10:
                     text= ("**{}** dumbfounded the {} cunningly").format(talkers,Adventure.challenge)
                 elif scale <= 25:
-                    text= ("The {} has quite taken to **{}**").format(Adventure.challenge,fighters)
+                    text= ("The {} has quite taken to **{}**").format(Adventure.challenge,talkers)
                 else:
-                    text= ("**{}** slyly mesmerized the {}. There never was a chance").format(fighters,Adventure.challenge)
+                    text= ("**{}** slyly mesmerized the {}. There never was a chance").format(talkers,Adventure.challenge)
                 if len(Adventure.userslist["pray"]) > 0:
                     text += (", with **{}'s** blessing'.").format(preachermen)
                 else:
