@@ -77,8 +77,8 @@ class Explore:
 
     #biomes carry rarities and what can be found in the tileset.
     biomes = {"forest": {"legendary":["Ooze","Sageworth","Whipweed","Conifer","Cyanka Lilly","Flyleaf"],"epic":["Mushroom","Whipweed","Maple","Oak"],"rare":["Rock"],"common":["Oak","Oak","Grass"]},
-            "grassland": {"legendary":["Twolip","Moneypenny","Raging Frills","Rose","Oak"],"epic":["Mourning Star","Honeytail","Clover","Rock"],"rare":["Oilflower"],"common":["Daisy","Grass","Grass"]},
-            "drygrass":{"legendary":["Na-Palm","Fleshthorn","Rock"],"epic":["Tongue Sprout","Rock"],"rare":["Rust Leafs"],"common":["Rock","Grass","Grass"]}
+            "grassland": {"legendary":["Twolip","Moneypenny","Raging Frills","Rose","Oak"],"epic":["Mourning Star","Honeytail","Clover","Rock"],"rare":["Oilflower","Grass","Grass"],"common":["Daisy","Grass","Grass"]},
+            "drygrass":{"legendary":["Na-Palm","Fleshthorn","Rock"],"epic":["Tongue Sprout","Rock"],"rare":["Rust Leafs","Grass","Grass"],"common":["Rock","Grass","Grass"]}
             }
 
     mapsize = [13,13]
@@ -95,6 +95,7 @@ class Explore:
     async def explore(ctx,user):
         Explore.intro = await ctx.send("{} is exploring:".format(user.display_name))
         Explore.statusmsg = None
+        Explore.pending = []
         Explore.loot = {}
         Explore.mapmsg = None
         Explore.player_pos = [6,6]
@@ -244,7 +245,7 @@ class Explore:
                 await Explore.statusmsg.edit(content=current_page)
 
         try:
-            done, pending = await asyncio.wait([ctx.bot.wait_for(
+            done, Explore.pending = await asyncio.wait([ctx.bot.wait_for(
                 "reaction_add",
                 check=CustomPredicate.with_emojis(tuple(controls.keys()), Explore.statusmsg, [ctx.author.id]),
                 timeout=Explore.timeout
@@ -264,10 +265,10 @@ class Explore:
                     await Explore.statusmsg.remove_reaction(key, ctx.bot.user)
             pages = ["but nobody did anything. You failed."]
             await Explore.statusmsg.edit(content=pages[0])
-            for future in pending:
+            for future in Explore.pending:
                 future.cancel()
             return
-        for future in pending:
+        for future in Explore.pending:
             future.cancel()
         await controls[react.emoji](ctx, pages, controls, Explore.statusmsg, page, Explore.timeout, react.emoji, user)
 
@@ -410,7 +411,7 @@ class Explore:
         if Explore.moves <= 0:
             return await Explore.result(ctx, pages, controls, message, page, Explore.timeout, user)
         try:
-            done, pending = await asyncio.wait([ctx.bot.wait_for(
+            done, Explore.pending = await asyncio.wait([ctx.bot.wait_for(
                 "reaction_add",
                 check=CustomPredicate.with_emojis(tuple(controls.keys()), message, [user.id]),
                 timeout=Explore.timeout
@@ -423,10 +424,10 @@ class Explore:
             for task in done:
                 react, user = task.result()
         except asyncio.TimeoutError:
-            for future in pending:
+            for future in Explore.pending:
                 future.cancel()
             return await Explore.result(ctx, pages, controls, message, page, Explore.timeout, user)
-        for future in pending:
+        for future in Explore.pending:
             future.cancel()
         return await controls[react.emoji](ctx, pages, controls, message, page, Explore.timeout, react.emoji, user)
 
@@ -452,6 +453,8 @@ class Explore:
             for key in Explore.loot.keys():
                 text += "{}x {} \n".format(Explore.loot.get(key),key)
             await Explore.intro.edit(content=text)
+        for future in Explore.pending:
+            future.cancel()
         return None
 
     async def result(

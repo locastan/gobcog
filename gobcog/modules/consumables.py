@@ -18,7 +18,13 @@ class Consumables:
                     ".scroll_of_learning":{'type':"buff", 'attrib':"xp", 'min':10, 'max':100, 'duration':1, 'desc':"Increases amount of xp gained for one fight."},
                     "[foliant of wisdom]":{'type':"buff", 'attrib':"xp", 'min':10, 'max':100, 'duration':10, 'desc':"Increases amount of xp gained for 10 fights."},
                     "[chaos egg]":{'type':"summon", 'attrib':"monster", 'min':10, 'max':100, 'duration':1, 'desc':"Summons a random allied monster for the next fight."},
-                    "[soul essence]":{'type':"augment", 'attrib':"item", 'min':1, 'max':5, 'duration':10, 'desc':"This can be used to improve items."}
+                    "[soul essence]":{'type':"augment", 'attrib':"item", 'min':1, 'max':5, 'duration':10, 'desc':"This can be used to improve items."},
+                    "[distilled charisma]":{'type':"buff", 'attrib':"cha", 'min':5, 'max':10, 'duration':1, 'desc':"Strong buff to your diplomacy bonus for one fight."},
+                    "[brutal philtre]":{'type':"buff", 'attrib':"att", 'min':5, 'max':10, 'duration':1, 'desc':"Strong buff to your attack bonus for one fight."},
+                    "bitter stew":{'type':"food", 'attrib':"rest", 'min':1, 'max':2, 'duration':1, 'desc':"Nourishing gruel. Horrible taste."},
+                    ".sweet_stew":{'type':"food", 'attrib':"rest", 'min':2, 'max':5, 'duration':1, 'desc':"A sweet meal. Dental care not included."},
+                    ".hearty_stew":{'type':"food", 'attrib':"rest", 'min':3, 'max':4, 'duration':1, 'desc':"Nourishing and artery hardening soup."},
+                    "[sweetbread]":{'type':"food", 'attrib':"rest", 'min':4, 'max':6, 'duration':1, 'desc':"Delicious bread provides a good meal."}
                 }
 
     async def use_con(ctx, user, con):

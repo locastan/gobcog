@@ -535,40 +535,121 @@ class Adventure:
         amount = ((Adventure.str+Adventure.dipl)*people)
         if people == 1:
             if slain:
-                text= ("**{}** has slain the {} in epic battle!").format(fighters,Adventure.challenge)
+                scale = attack-Adventure.str
+                if scale == 0:
+                    text= ("**{}** bested the {} by a hairs width.").format(fighters,Adventure.challenge)
+                elif scale <= 5:
+                    text= ("**{}** barely managed to defeat the {}.").format(fighters,Adventure.challenge)
+                elif scale <= 10:
+                    text= ("**{}** defeated the {} with a skillful blow.").format(fighters,Adventure.challenge)
+                elif scale <= 25:
+                    text= ("That {} was no match for **{}s** fighting skills.").format(Adventure.challenge,fighters)
+                else:
+                    text= ("**{}** dispatched the {} effortlessly like swatting a fly.").format(fighters,Adventure.challenge)
                 text += await Adventure.reward(ctx, Adventure.userslist["fight"]+Adventure.userslist["pray"],amount,(attack/Adventure.str),treasure)
 
-            if  persuaded:
-                text= ("**{}** almost died in battle,").format(talkers) + (" but confounded the {} in the last second.").format(Adventure.challenge)
+            if persuaded:
+                scale = diplomacy-Adventure.dipl
+                if scale == 0:
+                    text= ("**{}** almost died in battle,").format(talkers) + (" but confounded the {} in the last second.").format(Adventure.challenge)
+                elif scale <= 5:
+                    text= ("The {} resisted a bit,").format(Adventure.challenge) + (" but **{}** had the last word.").format(talkers)
+                elif scale <= 10:
+                    text= ("**{}** stumped the {} with eloquent skill.").format(talkers,Adventure.challenge)
+                elif scale <= 25:
+                    text= ("That {} was all ears for **{}**.").format(Adventure.challenge,fighters)
+                else:
+                    text= ("**{}** skillfully charmed the {}. There was no resistance.").format(fighters,Adventure.challenge)
                 text += await Adventure.reward(ctx, Adventure.userslist["talk"]+Adventure.userslist["pray"],amount,(diplomacy/Adventure.dipl),treasure)
 
             if not slain and not persuaded:
-                options = ["No amount of diplomacy or valiant fighting could save you. You died.", "This challenge was too much for one hero.", "You tried your best, but couldn't succeed alone."]
+                if attack == 0:
+                    scale = Adventure.dipl-diplomacy
+                else:
+                    scale = Adventure.str-attack
+                if scale <= 5:
+                    options = ["That was slightly too difficult. Better luck next time.", "You could almost taste the glory of victory, now all you taste is blood.", "You almost won this."]
+                elif scale <= 25:
+                    options = ["No amount of diplomacy or valiant fighting could save you. You died.", "This challenge was too much for one hero.", "You tried your best, but couldn't succeed alone."]
+                else:
+                    options = ["You never really had a chance.", "That one really mopped the floor with you.", "That could not have gone worse...", "You were beaten into a little gooey pulp."]
                 text= random.choice(options)
         else:
             if slain and persuaded:
-                if len(Adventure.userslist["pray"]) > 0:
-                    text= ("**{}** slayed the {} in battle,").format(fighters,Adventure.challenge) + ("while **{}** distracted with flattery and **{}** aided in Herberts name.").format(talkers, preachermen)
+                ascale = attack-Adventure.str
+                if ascale <= 5:
+                    atxt = ("**{}** barely beat the {} in battle,").format(fighters,Adventure.challenge)
+                elif ascale <= 10:
+                    atxt = ("**{}** slayed the {} in battle,").format(fighters,Adventure.challenge)
+                elif ascale <= 25:
+                    atxt = ("**{}** skillfully defeated the {},").format(fighters,Adventure.challenge)
                 else:
-                    text= ("**{}** slayed the {} in battle,").format(fighters,Adventure.challenge) + ("while **{}** distracted with insults.").format(talkers)
+                    atxt = ("**{}** annihilated the {},").format(fighters,Adventure.challenge)
+                dscale = diplomacy-Adventure.dipl
+                if dscale <= 5:
+                    dtxt = (" while **{}** desperately kept talking").format(talkers)
+                elif dscale <= 10:
+                    dtxt = (" during which **{}** distracted with flattery").format(talkers)
+                elif dscale <= 25:
+                    dtxt = (" as **{}** provided a charming distraction").format(talkers)
+                else:
+                    dtxt = (" but compared to the diplomacy of **{}**, there was no contest").format(talkers)
+                if len(Adventure.userslist["pray"]) > 0:
+                    text=  atxt + dtxt + (" and **{}** aided in Herberts name.").format(preachermen)
+                else:
+                    text= atxt + dtxt + "."
                 text += await Adventure.reward(ctx, Adventure.userslist["fight"]+Adventure.userslist["talk"]+Adventure.userslist["pray"],amount,(attack/Adventure.str+diplomacy/Adventure.dipl),treasure)
 
-            if  not slain and persuaded:
-                if len(Adventure.userslist["pray"]) > 0:
-                    text= ("**{}** talked the {} down with **{}'s** blessing'.").format(talkers,Adventure.challenge, preachermen)
+            if not slain and persuaded:
+                scale = diplomacy-Adventure.dipl
+                if scale == 0:
+                    text= ("**{}** almost died in battle,").format(talkers) + (" but survived solely on wit {} in the end").format(Adventure.challenge)
+                elif scale <= 5:
+                    text= ("The {} resisted a bit,").format(Adventure.challenge) + (" but **{}** had better arguments").format(talkers)
+                elif scale <= 10:
+                    text= ("**{}** dumbfounded the {} cunningly").format(talkers,Adventure.challenge)
+                elif scale <= 25:
+                    text= ("The {} has quite taken to **{}**").format(Adventure.challenge,fighters)
                 else:
-                    text= ("**{}** talked the {} down.").format(talkers,Adventure.challenge)
+                    text= ("**{}** slyly mesmerized the {}. There never was a chance").format(fighters,Adventure.challenge)
+                if len(Adventure.userslist["pray"]) > 0:
+                    text += (", with **{}'s** blessing'.").format(preachermen)
+                else:
+                    text += "."
                 text += await Adventure.reward(ctx, Adventure.userslist["talk"]+Adventure.userslist["pray"],amount,(diplomacy/Adventure.dipl),treasure)
 
             if slain and not persuaded:
-                if len(Adventure.userslist["pray"]) > 0:
-                    text= ("**{}** killed the {} in a most heroic battle with a little help from **{}**.").format(fighters,Adventure.challenge, preachermen)
+                scale = attack-Adventure.str
+                if scale == 0:
+                    text= ("**{}** almost died to the {} but got the upper hand in the end").format(fighters,Adventure.challenge)
+                elif scale <= 5:
+                    text= ("**{}** slew the {} in a tough fight").format(fighters,Adventure.challenge)
+                elif scale <= 10:
+                    text= ("**{}** ended the {} with some cunning blows").format(fighters,Adventure.challenge)
+                elif scale <= 25:
+                    text= ("The {} had a really bad day meeting **{}**").format(Adventure.challenge,fighters)
                 else:
-                    text= ("**{}** killed the {} in an epic fight.").format(fighters,Adventure.challenge)
+                    text= ("**{}** just casually destroyed the {}").format(fighters,Adventure.challenge)
+                if len(Adventure.userslist["pray"]) > 0:
+                    text += (", with a little help from **{}**.").format(preachermen)
+                else:
+                    text += "."
                 text += await Adventure.reward(ctx, Adventure.userslist["fight"]+Adventure.userslist["pray"],amount,(attack/Adventure.str),treasure)
 
             if not slain and not persuaded:
-                options = ["No amount of diplomacy or valiant fighting could save you. Everyone died.", "This challenge was too much for this group.", "You tried your best, but succumbed to overwhelming forces in the end."]
+                if attack == 0:
+                    scale = Adventure.dipl-diplomacy
+                elif diplomacy == 0:
+                    scale = Adventure.str-attack
+                else:
+                    scale = (attack+diplomany)-(Adventure.dipl+Adventure.str)
+                if scale <= 5:
+                    options = ["That was slightly too difficult. Better luck next time.", "The group could almost taste the glory of victory, now all you taste is blood.", "You almost had this. What a pity."]
+                elif scale <= 25:
+                    options = ["No amount of diplomacy or valiant fighting could save you. Everyone died.", "This challenge was too much for this group.", "You tried your best, but succumbed to overwhelming forces in the end."]
+                else:
+                    options = ["The party never really had a chance.", "That one really mopped the floor with the entire group.", "Not. Even. Close.", "All that remains of the valiant party are some greasy smears on the floor..."]
+                text= random.choice(options)
                 text= random.choice(options)
 
         Adventure.timeout = 0
