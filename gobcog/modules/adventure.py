@@ -32,6 +32,7 @@ class Adventure:
     monsters = {"Ogre":{"str":18,"dipl":10},
                 "Gnoll":{"str":12,"dipl":8},
                 "Wood Spider":{"str":20,"dipl":20},
+                "Yuan-ti":{"str":20,"dipl":30},
                 "Mountain Troll":{"str":25,"dipl":10},
                 "Kobold":{"str":15,"dipl":18},
                 "Orc":{"str":16,"dipl":10},
@@ -49,15 +50,20 @@ class Adventure:
                 "Pack of Wolves":{"str":19,"dipl":35},
                 "Fire Elemental":{"str":20,"dipl":20},
                 "Bandit":{"str":10,"dipl":10},
+                "Vigilante":{"str":15,"dipl":18},
+                "Thief":{"str":15,"dipl":18},
                 "Giant":{"str":35,"dipl":20},
                 "Archmage":{"str":28,"dipl":30},
                 "Basilisk":{"str":50,"dipl":50},
                 "Displacer Beast":{"str":45,"dipl":80},
                 "Fire Giant":{"str":55,"dipl":45},
+                "Ice Giant":{"str":60,"dipl":55},
                 "Medusa":{"str":65,"dipl":65},
                 "Wyvern":{"str":70,"dipl":60},
                 "Hydra":{"str":75,"dipl":65},
                 "Purpleworm":{"str":80,"dipl":55},
+                "Mind-Flayer":{"str":55,"dipl":85},
+                "Warforged Golem":{"str":90,"dipl":100},
                 "Red Dragon":{"str":95,"dipl":95},
                 "Blue Dragon":{"str":110,"dipl":100},
                 "Black Dragon":{"str":130,"dipl":120},
@@ -371,26 +377,26 @@ class Adventure:
                         fumblelist.append(user)
                         await ctx.send("**" + user + "**" + "'s sermon offended the mighty Herbert. (-{}🗡/-{}🗨)".format(5 * len(Adventure.userslist["fight"]),5 * len(Adventure.userslist["talk"])))
                     elif roll > 1 and roll <= 10:
-                        attack += 1 * len(Adventure.userslist["fight"])
-                        diplomacy += 1 * len(Adventure.userslist["talk"])
+                        attack += 2 * len(Adventure.userslist["fight"])
+                        diplomacy += 2 * len(Adventure.userslist["talk"])
                         await ctx.send("**" + user + "**" + "'s blessed you all in Herberts name. (+{}🗡/+{}🗨)".format(2 * len(Adventure.userslist["fight"]),2 * len(Adventure.userslist["talk"])))
                     elif roll > 10 and roll <= 19:
                         attack += 5 * len(Adventure.userslist["fight"])
                         diplomacy += 5 * len(Adventure.userslist["talk"])
                         await ctx.send("**" + user + "**" + "'s blessed you all in Herberts name. (+{}🗡/+{}🗨)".format(5 * len(Adventure.userslist["fight"]),5 * len(Adventure.userslist["talk"])))
                     else:
-                        attack += 10 * len(Adventure.userslist["fight"])
-                        diplomacy += 10 * len(Adventure.userslist["talk"])
-                        await ctx.send("**" + user + "**" + " turned into an avatar of mighty Herbert. (+{}🗡/+{}🗨)".format(10 * len(Adventure.userslist["fight"]),10 * len(Adventure.userslist["talk"])))
+                        attack += 20 * len(Adventure.userslist["fight"])
+                        diplomacy += 20 * len(Adventure.userslist["talk"])
+                        await ctx.send("**" + user + "**" + " turned into an avatar of mighty Herbert. (+{}🗡/+{}🗨)".format(20 * len(Adventure.userslist["fight"]),20 * len(Adventure.userslist["talk"])))
                 else:
                     roll = random.randint(1,4)
                     if len(Adventure.userslist["fight"]+Adventure.userslist["talk"]) == 0:
                         await ctx.send("**" + user + "**" + " prayed like a madman but nobody else helped him.")
                         return (fumblelist, attack, diplomacy)
                     if roll == 4:
-                        attack += 20 * len(Adventure.userslist["fight"])
-                        diplomacy += 20 * len(Adventure.userslist["talk"])
-                        await ctx.send("**" + user + "**" + "'s prayer called upon the mighty Herbert to help you. (+{}🗡/+{}🗨)".format(20 * len(Adventure.userslist["fight"]),20 * len(Adventure.userslist["talk"])))
+                        attack += 10 * len(Adventure.userslist["fight"])
+                        diplomacy += 10 * len(Adventure.userslist["talk"])
+                        await ctx.send("**" + user + "**" + "'s prayer called upon the mighty Herbert to help you. (+{}🗡/+{}🗨)".format(10 * len(Adventure.userslist["fight"]),10 * len(Adventure.userslist["talk"])))
                     else:
                         fumblelist.append(user)
                         await ctx.send("**" + user + "**" + "'s prayers went unanswered.")
@@ -485,6 +491,7 @@ class Adventure:
 
         slain = attack >= Adventure.str
         persuaded = diplomacy >= Adventure.dipl
+        CR = Adventure.str + Adventure.dipl
 
         fighters = " and ".join([", ".join(Adventure.userslist["fight"][:-1]),Adventure.userslist["fight"][-1]] if len(Adventure.userslist["fight"]) > 2 else Adventure.userslist["fight"])
         talkers = " and ".join([", ".join(Adventure.userslist["talk"][:-1]),Adventure.userslist["talk"][-1]] if len(Adventure.userslist["talk"]) > 2 else Adventure.userslist["talk"])
@@ -492,7 +499,6 @@ class Adventure:
         text = ""
 
         if slain or persuaded and not failed:
-            CR = Adventure.str + Adventure.dipl
             treasure = [0,0,0,0]
             if CR >= 80 or Adventure.challenge == "Basilisk" or Adventure.challenge == "Medusa": #rewards 50:50 rare:normal chest for killing something like the basilisk
                 treasure = random.choice([[0,1,0,0],[1,0,0,0]])
@@ -505,7 +511,7 @@ class Adventure:
             if "Dragon" in Adventure.challenge: #always rewards an epic chest.
                 treasure[2] += 1
             if len(critlist) != 0:
-                treasure[0] += 1
+                treasure[0] += len(critlist)
             checklist = Adventure.userslist["fight"]+Adventure.userslist["talk"]+Adventure.userslist["pray"]
             for user in checklist:
                 member = discord.utils.find(lambda m: m.display_name == user, ctx.guild.members)
@@ -527,10 +533,12 @@ class Adventure:
         if (Adventure.challenge == "Basilisk" or Adventure.challenge == "Medusa") and failed:
             Adventure.participants= Adventure.userslist["fight"]+Adventure.userslist["talk"]+Adventure.userslist["pray"]+Adventure.userslist["run"]+fumblelist
             await ctx.send("The {}s gaze turned everyone to stone.".format(Adventure.challenge))
+            await Adventure.damage(ctx,[item for item in Adventure.participants if item not in Adventure.userslist["run"]],CR*2)
             return
         if (Adventure.challenge == "Basilisk" or Adventure.challenge == "Medusa") and not slain and not persuaded:
             Adventure.participants= Adventure.userslist["fight"]+Adventure.userslist["talk"]+Adventure.userslist["pray"]+Adventure.userslist["run"]+fumblelist
-            await ctx.send("The mirror shield reflected the {}s gaze, but it still managed to kill you.".format(Adventure.challenge))
+            await ctx.send("The mirror shield reflected the {}s gaze, but it still managed to defeat you.".format(Adventure.challenge))
+            await Adventure.damage(ctx,[item for item in Adventure.participants if item not in Adventure.userslist["run"]],CR)
             return
         amount = ((Adventure.str+Adventure.dipl)*people)
         if people == 1:
@@ -650,11 +658,12 @@ class Adventure:
                 else:
                     options = ["The party never really had a chance.", "That one really mopped the floor with the entire group.", "Not. Even. Close.", "All that remains of the valiant party are some greasy smears on the floor..."]
                 text= random.choice(options)
-                text= random.choice(options)
 
         Adventure.timeout = 0
         await ctx.send(text)
         Adventure.participants= Adventure.userslist["fight"]+Adventure.userslist["talk"]+Adventure.userslist["pray"]+Adventure.userslist["run"]+fumblelist
+        if not slain and not persuaded:
+            await Adventure.damage(ctx,[item for item in Adventure.participants if item not in Adventure.userslist["run"]],CR)
 
     async def reward(ctx, list, amount, modif, special):
         xp = max(1,round(amount))
@@ -665,6 +674,13 @@ class Adventure:
             member = discord.utils.find(lambda m: m.display_name == user, ctx.guild.members)
             bxp = 0
             bcp = 0
+            rroll = random.randint(1,50)
+            if rroll == 50:
+                await ctx.send("\n**{}** found an old scroll of parchment".format(member.display_name))
+                if 'alchemy scroll' in Userdata.users[str(member.id)]['consumables'].keys():
+                    Userdata.users[str(member.id)]['consumables']['alchemy scroll']['uses'] = Userdata.users[str(member.id)]['consumables']['alchemy scroll'].get("uses", 0) + 1
+                else:
+                    Userdata.users[str(member.id)]['consumables'].update({'alchemy scroll':{"slot":["consumable"],"uses":1}})
             if "xp" in Userdata.users[str(member.id)]['buffs'].keys():
                 bxp = int(xp * (Userdata.users[str(member.id)]['buffs']['xp']['bonus']/100))
                 phrase += "\n**{}** received **+{}** bonus xp.".format(member.display_name, bxp)
@@ -698,6 +714,28 @@ class Adventure:
         else:
             phrase += "\nBase rewards: {} xp and {} copperpieces.".format(xp,cp)
         return phrase
+
+    async def damage(ctx,injured,CR):
+        if "Dragon" in Adventure.challenge:
+            base_dmg = max(1,round(CR/10))
+        else:
+            base_dmg = max(1,round(CR/20))
+        incap = []
+        d_txt = ""
+        for user in injured:
+            member = discord.utils.find(lambda m: m.display_name == user, ctx.guild.members)
+            if Userdata.users[str(member.id)]['hp'] > base_dmg:
+                Userdata.users[str(member.id)]['hp'] -= base_dmg
+            else:
+                Userdata.users[str(member.id)]['hp'] = 0
+                incap.append(user)
+        incapacitated = " and ".join([", ".join(incap[:-1]),incap[-1]] if len(incap) > 2 else incap)
+        inj_txt = " and ".join([", ".join(injured[:-1]),injured[-1]] if len(injured) > 2 else injured)
+        d_txt += "**{}** took {} damage during this encounter. ".format(inj_txt,base_dmg)
+        if len(incap) > 0:
+            d_txt += "Time to rest for **{}** in order to recover some health.".format(incapacitated)
+        await ctx.send(d_txt)
+
 
     def countdown(ctx, seconds = None, title = "Remaining: ", loop: Optional[asyncio.AbstractEventLoop] = None,) -> asyncio.Task:
 

@@ -84,7 +84,9 @@ class Quest:
                 "Blind":["str",0.2,0.9],
                 "Entangle":["str",0.3,1],
                 "Fumble":["dipl",0,0],
-                "Silence":["dipl",1,0.1]}
+                "Silence":["dipl",1,0.1],
+                "Magic Missile":["dmg",1,4],
+                "Fireball":["dmg",5,12]}
 
                     # structure of quest entries: text, challenge attrib, challenge, effect, effect text, chance to cause effect
     tomb = [["**The tomb of Grz'al Brömpf** is beckoning. {} mighty heroes are brave and mad enough to attempt loot the vast riches deep in the mountain.", None, None, None, None, 0],
@@ -130,6 +132,7 @@ class Quest:
         Quest.rewards = {}
         Quest.effect = None
         Quest.affected = []
+        Quest.dead = []
         Quest.participants = party
         Quest.partyIDs = []
         Quest.idx = 0
@@ -153,14 +156,13 @@ class Quest:
         else:
             await ctx.send(Quest.quest[Quest.idx][0].format(len(Quest.participants)))
         await Quest.narrate(ctx)
-        dead = []
         if Quest.failed:
             for ID in Quest.partyIDs:
                 member = discord.utils.find(lambda m: m.id == ID, ctx.guild.members)
-                dead.append(member.display_name)
+                Quest.dead.append(member.display_name)
                 if member.display_name in Quest.rewards:
                     Quest.rewards.pop(member.display_name)
-        return (Quest.rewards, party, dead)
+        return (Quest.rewards, party, Quest.dead)
 
     async def narrate(ctx):
         while Quest.running:
@@ -453,6 +455,18 @@ class Quest:
                         Quest.userslist["pray"].remove(sleepyhead)
                     fumblelist.append(sleepyhead)
                     await ctx.send("**" + sleepyhead + "**" + " fell asleep.")
+                elif Quest.effects[Quest.effect][0] == "dmg":
+                    for ID in Quest.partyIDs:
+                        roll = random.randint(1,20) #50% chance to get hit.
+                        if roll <= 10:
+                            member = discord.utils.find(lambda m: m.id == ID, ctx.guild.members)
+                            Quest.affected.append(member.display_name)
+                    if len(Quest.affected) > 0:
+                        s_damage = random.randint(Quest.effects[Quest.effect][1],Quest.effects[Quest.effect][2])
+                        affected = " and ".join([", ".join(Quest.affected[:-1]),Quest.affected[-1]] if len(Quest.affected) > 2 else Quest.affected)
+                        await Quest.damage(ctx,Quest.affected,s_damage*20)
+                    else:
+                        await ctx.send("Everyone dodged.")
                 else:
                     fails = []
                     if Quest.endless:
@@ -582,26 +596,26 @@ class Quest:
                         fumblelist.append(user)
                         await ctx.send("**" + user + "**" + "'s sermon offended the mighty Herbert. (-{}🗡/-{}🗨)".format(5 * len(Quest.userslist["fight"]),5 * len(Quest.userslist["talk"])))
                     elif roll > 1 and roll <= 10:
-                        attack += 1 * len(Quest.userslist["fight"])
-                        diplomacy += 1 * len(Quest.userslist["talk"])
+                        attack += 2 * len(Quest.userslist["fight"])
+                        diplomacy += 2 * len(Quest.userslist["talk"])
                         await ctx.send("**" + user + "**" + "'s blessed you all in Herberts name. (+{}🗡/+{}🗨)".format(2 * len(Quest.userslist["fight"]),2 * len(Quest.userslist["talk"])))
                     elif roll > 10 and roll <= 19:
                         attack += 5 * len(Quest.userslist["fight"])
                         diplomacy += 5 * len(Quest.userslist["talk"])
                         await ctx.send("**" + user + "**" + "'s blessed you all in Herberts name. (+{}🗡/+{}🗨)".format(5 * len(Quest.userslist["fight"]),5 * len(Quest.userslist["talk"])))
                     else:
-                        attack += 10 * len(Quest.userslist["fight"])
-                        diplomacy += 10 * len(Quest.userslist["talk"])
-                        await ctx.send("**" + user + "**" + " turned into an avatar of mighty Herbert. (+{}🗡/+{}🗨)".format(10 * len(Quest.userslist["fight"]),10 * len(Quest.userslist["talk"])))
+                        attack += 20 * len(Quest.userslist["fight"])
+                        diplomacy += 20 * len(Quest.userslist["talk"])
+                        await ctx.send("**" + user + "**" + " turned into an avatar of mighty Herbert. (+{}🗡/+{}🗨)".format(20 * len(Quest.userslist["fight"]),20 * len(Quest.userslist["talk"])))
                 else:
                     roll = random.randint(1,4)
                     if len(Quest.userslist["fight"]+Quest.userslist["talk"]) == 0:
                         await ctx.send("**" + user + "**" + " prayed like a madman but nobody else helped him.")
                         return (fumblelist, attack, diplomacy)
                     if roll == 4:
-                        attack += 20 * len(Quest.userslist["fight"])
-                        diplomacy += 20 * len(Quest.userslist["talk"])
-                        await ctx.send("**" + user + "**" + "'s prayer called upon the mighty Herbert to help you. (+{}🗡/+{}🗨)".format(20 * len(Quest.userslist["fight"]),20 * len(Quest.userslist["talk"])))
+                        attack += 10 * len(Quest.userslist["fight"])
+                        diplomacy += 10 * len(Quest.userslist["talk"])
+                        await ctx.send("**" + user + "**" + "'s prayer called upon the mighty Herbert to help you. (+{}🗡/+{}🗨)".format(10 * len(Quest.userslist["fight"]),10 * len(Quest.userslist["talk"])))
                     else:
                         fumblelist.append(user)
                         await ctx.send("**" + user + "**" + "'s prayers went unanswered.")
@@ -713,6 +727,7 @@ class Quest:
 
         slain = attack >= Quest.str
         persuaded = diplomacy >= Quest.dipl
+        CR = Quest.str + Quest.dipl
 
         fighters = " and ".join([", ".join(Quest.userslist["fight"][:-1]),Quest.userslist["fight"][-1]] if len(Quest.userslist["fight"]) > 2 else Quest.userslist["fight"])
         talkers = " and ".join([", ".join(Quest.userslist["talk"][:-1]),Quest.userslist["talk"][-1]] if len(Quest.userslist["talk"]) > 2 else Quest.userslist["talk"])
@@ -720,7 +735,6 @@ class Quest:
         text = ""
 
         if slain or persuaded and not Quest.failed:
-            CR = Quest.str + Quest.dipl
             treasure = [0,0,0,0]
             if CR >= 80 or Quest.challenge == "Basilisk" or Quest.challenge == "Medusa": #rewards 50:50 rare:normal chest for killing something like the basilisk
                 treasure = random.choice([[0,1,0,0],[1,0,0,0]])
@@ -729,7 +743,7 @@ class Quest:
             if "Dragon" in Quest.challenge: #always rewards an epic chest.
                 treasure[2] += 1
             if len(critlist) != 0:
-                treasure[0] += 1
+                treasure[0] += len(critlist)
             checklist = Quest.userslist["fight"]+Quest.userslist["talk"]+Quest.userslist["pray"]
             for user in checklist:
                 member = discord.utils.find(lambda m: m.display_name == user, ctx.guild.members)
@@ -751,12 +765,14 @@ class Quest:
         if (Quest.challenge == "Basilisk" or Quest.challenge == "Medusa") and Quest.failed:
             Quest.participants= Quest.userslist["fight"]+Quest.userslist["talk"]+Quest.userslist["pray"]+Quest.userslist["run"]+fumblelist
             await ctx.send("The {}s gaze turned everyone to stone.".format(Quest.challenge))
+            await Quest.damage(ctx,[item for item in Quest.participants if item not in Quest.userslist["run"]],CR*2)
             Quest.running = False
             Quest.failed = True
             return
         if (Quest.challenge == "Basilisk" or Quest.challenge == "Medusa") and not slain and not persuaded:
             Quest.participants= Quest.userslist["fight"]+Quest.userslist["talk"]+Quest.userslist["pray"]+Quest.userslist["run"]+fumblelist
             await ctx.send("The mirror shield reflected the {}s gaze, but it still managed to kill you.".format(Quest.challenge))
+            await Quest.damage(ctx,[item for item in Quest.participants if item not in Quest.userslist["run"]],CR*2)
             Quest.running = False
             Quest.failed = True
             return
@@ -805,6 +821,9 @@ class Quest:
                 Quest.failed = True
 
         await ctx.send(text)
+        if not slain and not persuaded:
+            await Quest.damage(ctx,[item for item in Quest.participants if item not in Quest.userslist["run"]],CR)
+
         for user in Quest.participants: #reset activated abilities
             member = discord.utils.find(lambda m: m.display_name == user, ctx.guild.members)
             if 'name' in Userdata.users[str(member.id)]['class']:
@@ -882,6 +901,31 @@ class Quest:
         else:
             phrase += "\nYou have {} xp and found {} copperpieces so far.".format(Quest.sumxp,Quest.sumcp)
         return phrase
+
+    async def damage(ctx,injured,CR):
+        if "Dragon" in Quest.challenge or Quest.challenge in Quest.bosses.keys():
+            base_dmg = max(1,round(CR/10))
+        else:
+            base_dmg = max(1,round(CR/20))
+        incap = []
+        d_txt = ""
+        for user in injured:
+            member = discord.utils.find(lambda m: m.display_name == user, ctx.guild.members)
+            if Userdata.users[str(member.id)]['hp'] > base_dmg:
+                Userdata.users[str(member.id)]['hp'] -= base_dmg
+            else:
+                Userdata.users[str(member.id)]['hp'] = 0
+                incap.append(user)
+                Quest.dead.append(user)
+                Quest.partyIDs.remove(member.id) #user is dead and can no longer participate with reactions
+                if user in Quest.rewards:
+                    Quest.rewards.pop(user)
+        incapacitated = " and ".join([", ".join(incap[:-1]),incap[-1]] if len(incap) > 2 else incap)
+        inj_txt = " and ".join([", ".join(injured[:-1]),injured[-1]] if len(injured) > 2 else injured)
+        d_txt += "**{}** took {} damage. ".format(inj_txt,base_dmg)
+        if len(incap) > 0:
+            d_txt += "**{}** died and will not receive any rewards from this quest.".format(incapacitated)
+        await ctx.send(d_txt)
 
     def countdown(ctx, seconds = None, title = "Remaining: ", loop: Optional[asyncio.AbstractEventLoop] = None,) -> asyncio.Task:
 

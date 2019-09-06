@@ -28,7 +28,7 @@ class Explore:
             "Tongue Sprout":{"tile": "🌱", "desc":"Creates a beautiful singing voice if prepared properly."},
             "Conifer":{"tile": "🌲", "desc":"A big evergreen tree."},
             "Oak":{"tile": "🌳", "desc":"A huge oak."},
-            "Na-Palm":{"tile": "🌴", "desc":"This weird tree is known to spontaneously combust. Better stay away from it."},
+            "Na-palm":{"tile": "🌴", "desc":"This weird tree is known to spontaneously combust. Better stay away from it."},
             "Fleshthorn":{"tile": "🌵", "desc":"The resin is supposed to harden skin, although it could also be from the callouses induced when being covered in spikes."},
             "Honeytail":{"tile": "🌾", "desc":"A sweet grass with marvelous taste."},
             "Whipweed":{"tile": "🌿", "desc":"Lashing, long, whiplike shrubbery. Useful bark."},
@@ -40,8 +40,8 @@ class Explore:
             "Chestnut":{"tile": "🌰", "desc":"Some chestnuts. Good for eating and brewing."},
             "Fog":{"tile": "⬜", "desc":"Step in to find out."},
             "Rock":{"tile": "🌑", "desc":"A big rock. You cannot move here."},
-            #"Grass":{"tile": "<:Grassland:593422372468686859>", "desc":"Just grassland."}, #use this for beta server
-            "Grass":{"tile": "<:Grassland:593755278328201226>", "desc":"Just grassland."}, #use this for Goblinscomic Discord
+            "Grass":{"tile": "<:Grassland:593422372468686859>", "desc":"Just grassland."}, #use this for beta server
+            #"Grass":{"tile": "<:Grassland:593755278328201226>", "desc":"Just grassland."}, #use this for Goblinscomic Discord
             "Player":{"tile": "🗿", "desc":"Player"}
             }
 
@@ -58,7 +58,7 @@ class Explore:
             "🌱": "Tongue Sprout",
             "🌲": "Conifer",
             "🌳": "Oak",
-            "🌴": "Na-Palm",
+            "🌴": "Na-palm",
             "🌵": "Fleshthorn",
             "🌾": "Honeytail",
             "🌿": "Whipweed",
@@ -70,15 +70,15 @@ class Explore:
             "🌰": "Chestnut",
             "⬜": "Fog",
             "🌑": "Rock",
-            #"<:Grassland:593422372468686859>": "Grass", #use this on testserver
-            "<:Grassland:593755278328201226>": "Grass", #use this on Goblins Discord server
+            "<:Grassland:593422372468686859>": "Grass", #use this on testserver
+            #"<:Grassland:593755278328201226>": "Grass", #use this on Goblins Discord server
             "🗿": "Player"
             }
 
     #biomes carry rarities and what can be found in the tileset.
-    biomes = {"forest": {"legendary":["Ooze","Sageworth","Whipweed","Conifer","Cyanka Lilly","Flyleaf"],"epic":["Mushroom","Whipweed","Maple","Oak"],"rare":["Rock"],"common":["Oak","Oak","Grass"]},
+    biomes = {"forest": {"legendary":["Ooze","Sageworth","Whipweed","Conifer","Cyanka Lilly","Flyleaf"],"epic":["Mushroom","Whipweed","Maple","Oak"],"rare":["Maple","Rock"],"common":["Oak","Oak","Grass"]},
             "grassland": {"legendary":["Twolip","Moneypenny","Raging Frills","Rose","Oak"],"epic":["Mourning Star","Honeytail","Clover","Rock"],"rare":["Oilflower","Grass","Grass"],"common":["Daisy","Grass","Grass"]},
-            "drygrass":{"legendary":["Na-Palm","Fleshthorn","Rock"],"epic":["Tongue Sprout","Rock"],"rare":["Rust Leafs","Grass","Grass"],"common":["Rock","Grass","Grass"]}
+            "drygrass":{"legendary":["Na-palm","Fleshthorn","Rock"],"epic":["Tongue Sprout","Grass","Rock"],"rare":["Rust Leafs","Grass","Grass"],"common":["Rock","Grass","Grass"]}
             }
 
     mapsize = [13,13]
@@ -289,6 +289,7 @@ class Explore:
             await Explore.movesmsg.edit(content="{} moves remaining.".format(Explore.moves))
             output = await Explore.mapdrawer(list(Explore.fowmap))
             await Explore.mapmsg.edit(content=output)
+            await Explore.statusmsg.edit(content="Moved Left")
             await Explore.check(ctx, pages, controls, message, page, Explore.timeout, emoji, user)
         else:
             text = "** You cannot move there. **"
@@ -313,6 +314,7 @@ class Explore:
             await Explore.movesmsg.edit(content="{} moves remaining.".format(Explore.moves))
             output = await Explore.mapdrawer(list(Explore.fowmap))
             await Explore.mapmsg.edit(content=output)
+            await Explore.statusmsg.edit(content="Moved Up")
             await Explore.check(ctx, pages, controls, message, page, Explore.timeout, emoji, user)
         else:
             text = "** You cannot move there. **"
@@ -336,6 +338,7 @@ class Explore:
             await Explore.movesmsg.edit(content="{} moves remaining.".format(Explore.moves))
             output = await Explore.mapdrawer(list(Explore.fowmap))
             await Explore.mapmsg.edit(content=output)
+            await Explore.statusmsg.edit(content="Moved Down")
             await Explore.check(ctx, pages, controls, message, page, Explore.timeout, emoji, user)
         else:
             text = "** You cannot move there. **"
@@ -359,6 +362,7 @@ class Explore:
             await Explore.movesmsg.edit(content="{} moves remaining.".format(Explore.moves))
             output = await Explore.mapdrawer(list(Explore.fowmap))
             await Explore.mapmsg.edit(content=output)
+            await Explore.statusmsg.edit(content="Moved Right")
             await Explore.check(ctx, pages, controls, message, page, Explore.timeout, emoji, user)
         else:
             text = "** You cannot move there. **"
@@ -377,7 +381,7 @@ class Explore:
     ):
         tilename = Explore.tile_lookup.get(Explore.map[Explore.player_pos[0]][Explore.player_pos[1]],"Unknown Tile")
         text = "**" + tilename + ": " + Explore.tiles[tilename].get("desc","Error") + "**"
-        Explore.moves -= 1
+        #Explore.moves -= 1 #inspection should be a free action.
         await Explore.movesmsg.edit(content="{} moves remaining.".format(Explore.moves))
         await Explore.statusmsg.edit(content=text)
         await Explore.check(ctx, pages, controls, message, page, Explore.timeout, emoji, user)
@@ -395,6 +399,20 @@ class Explore:
         unpickable = ["Fog","Rock","Oak","Conifer","Grass"]
         tilename = Explore.tile_lookup.get(Explore.map[Explore.player_pos[0]][Explore.player_pos[1]])
         if tilename not in unpickable:
+            if tilename == "Na-palm":
+                roll = random.randint(1,10)
+                if roll <= 5:
+                    damage = random.randint(1,12)
+                    if Userdata.users[str(user.id)]['hp'] > damage:
+                        Userdata.users[str(user.id)]['hp'] -= damage
+                        text = "** The Na-palm exploded! You took {} damage and need to return home.**".format(damage)
+                    else:
+                        Userdata.users[str(user.id)]['hp'] = 0
+                        text = "** The Na-palm exploded! You took {} damage and need to rest now.**".format(damage)
+                    await Explore.statusmsg.edit(content=text)
+                    await Userdata.save()
+                    await asyncio.sleep(2)
+                    return await Explore.result(ctx, pages, controls, message, page, Explore.timeout, user)
             text = "** You picked up: " + tilename + "**"
             Explore.moves -= 1
             await Explore.movesmsg.edit(content="{} moves remaining.".format(Explore.moves))
@@ -450,8 +468,16 @@ class Explore:
             await Explore.movesmsg.delete()
         if Explore.intro:
             text = "{} went exploring here and found:\n".format(user.display_name)
-            for key in Explore.loot.keys():
-                text += "{}x {} \n".format(Explore.loot.get(key),key)
+            if Explore.loot != {}:
+                for key in Explore.loot.keys():
+                    text += "{}x {} \n".format(Explore.loot.get(key),key)
+                    if key in Userdata.users[str(user.id)]['ingredients'].keys():
+                        Userdata.users[str(user.id)]['ingredients'][key]['uses'] = Userdata.users[str(user.id)]['ingredients'][key].get("uses", 0) + Explore.loot.get(key)
+                    else:
+                        Userdata.users[str(user.id)]['ingredients'].update({key:{'uses':Explore.loot.get(key)}})
+                await Userdata.save()
+            else:
+                text += "Nothing."
             await Explore.intro.edit(content=text)
         for future in Explore.pending:
             future.cancel()
@@ -474,9 +500,20 @@ class Explore:
             await Explore.movesmsg.delete()
         if Explore.intro:
             text = "{} went exploring here and found:\n".format(user.display_name)
-            for key in Explore.loot.keys():
-                text += "{}x {} \n".format(Explore.loot.get(key),key)
+            if Explore.loot != {}:
+                for key in Explore.loot.keys():
+                    text += "{}x {} \n".format(Explore.loot.get(key),key)
+                    if key in Userdata.users[str(user.id)]['ingredients'].keys():
+                        Userdata.users[str(user.id)]['ingredients'][key]['uses'] = Userdata.users[str(user.id)]['ingredients'][key].get("uses", 0) + Explore.loot.get(key)
+                    else:
+                        Userdata.users[str(user.id)]['ingredients'].update({key:{'uses':Explore.loot.get(key)}})
+                await Userdata.save()
+            else:
+                text += "Nothing."
             await Explore.intro.edit(content=text)
+
+        for future in Explore.pending:
+            future.cancel()
         return None
 
     def start_adding_reactions(

@@ -76,6 +76,20 @@ class Classes:
         await ctx.send('**{}** is starting an inspiring sermon. 📜'.format(ctx.author.display_name))
         return
 
+    async def heal(ctx,healer,user):
+        d8 = random.randint(1,8)
+        bonus = d8 + int(round(Userdata.users[str(healer)]['lvl']/5))
+        if Userdata.users[str(user.id)]['hp'] + bonus <= Userdata.users[str(user.id)]['base_hp']:
+            Userdata.users[str(user.id)]['hp'] += bonus
+        else:
+            Userdata.users[str(user.id)]['hp'] = int(Userdata.users[str(user.id)]['base_hp'])
+        hp_pcnt = round((Userdata.users[str(user.id)]['hp']/Userdata.users[str(user.id)]['base_hp'])*100)
+        if healer == user:
+            await ctx.send("**{}** healed himself for {} hitpoints ({}/{} {}%).".format(healer,bonus,Userdata.users[str(user.id)]['hp'],Userdata.users[str(user.id)]['base_hp'],hp_pcnt))
+        else:
+            await ctx.send("**{}** healed **{}** for {} hitpoints ({}/{} {}%).".format(healer,user,bonus,Userdata.users[str(user.id)]['hp'],Userdata.users[str(user.id)]['base_hp'],hp_pcnt))
+        return
+
     async def sing(ctx, *args):
         user = ctx.author.id
         if Userdata.users[str(user)]['class']['ability'] == True:

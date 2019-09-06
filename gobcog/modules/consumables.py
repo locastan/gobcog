@@ -4,6 +4,7 @@ from redbot.core.utils.predicates import MessagePredicate
 from .userdata import Userdata
 from .adventure import Adventure
 from .treasure import Treasure
+from .alchemy import Alchemy
 
 class Consumables:
     #Name table to assign effects to consumables. Consumable items themselfes are defined in treasure.py
@@ -14,17 +15,22 @@ class Consumables:
                     ".vial_of_wit":{'type':"buff", 'attrib':"cha", 'min':1, 'max':2, 'duration':1, 'desc':"Small increase of your diplomanc bonus for one fight."},
                     "four leaf clover":{'type':"buff", 'attrib':"luck", 'min':5, 'max':15, 'duration':1, 'desc':"This will bestow good luck during the next fight or chest opening."},
                     "[luckworth essence]":{'type':"buff", 'attrib':"luck", 'min':15, 'max':50, 'duration':5, 'desc':"This will bestow good luck during 5 fights or opening 5 chests."},
+                    "[bottled fortune]":{'type':"buff", 'attrib':"luck", 'min':50, 'max':100, 'duration':1, 'desc':"This will bestow exceptional luck during the next fight or chest opening."},
                     ".dust_of_midas":{'type':"buff", 'attrib':"money", 'min':10, 'max':100, 'duration':1, 'desc':"Increases amount of cp gained for one fight."},
                     ".scroll_of_learning":{'type':"buff", 'attrib':"xp", 'min':10, 'max':100, 'duration':1, 'desc':"Increases amount of xp gained for one fight."},
                     "[foliant of wisdom]":{'type':"buff", 'attrib':"xp", 'min':10, 'max':100, 'duration':10, 'desc':"Increases amount of xp gained for 10 fights."},
                     "[chaos egg]":{'type':"summon", 'attrib':"monster", 'min':10, 'max':100, 'duration':1, 'desc':"Summons a random allied monster for the next fight."},
                     "[soul essence]":{'type':"augment", 'attrib':"item", 'min':1, 'max':5, 'duration':10, 'desc':"This can be used to improve items."},
-                    "[distilled charisma]":{'type':"buff", 'attrib':"cha", 'min':5, 'max':10, 'duration':1, 'desc':"Strong buff to your diplomacy bonus for one fight."},
-                    "[brutal philtre]":{'type':"buff", 'attrib':"att", 'min':5, 'max':10, 'duration':1, 'desc':"Strong buff to your attack bonus for one fight."},
-                    "bitter stew":{'type':"food", 'attrib':"rest", 'min':1, 'max':2, 'duration':1, 'desc':"Nourishing gruel. Horrible taste."},
-                    ".sweet_stew":{'type':"food", 'attrib':"rest", 'min':2, 'max':5, 'duration':1, 'desc':"A sweet meal. Dental care not included."},
-                    ".hearty_stew":{'type':"food", 'attrib':"rest", 'min':3, 'max':4, 'duration':1, 'desc':"Nourishing and artery hardening soup."},
-                    "[sweetbread]":{'type':"food", 'attrib':"rest", 'min':4, 'max':6, 'duration':1, 'desc':"Delicious bread provides a good meal."}
+                    "[distilled charisma]":{'type':"buff", 'attrib':"cha", 'min':5, 'max':20, 'duration':1, 'desc':"Strong buff to your diplomacy bonus for one fight."},
+                    "[brutal philtre]":{'type':"buff", 'attrib':"att", 'min':5, 'max':20, 'duration':1, 'desc':"Strong buff to your attack bonus for one fight."},
+                    "bitter stew":{'type':"buff", 'attrib':"rest", 'min':1, 'max':2, 'duration':1, 'desc':"Nourishing gruel. Horrible taste."},
+                    ".sweet_stew":{'type':"buff", 'attrib':"rest", 'min':2, 'max':5, 'duration':1, 'desc':"A sweet meal. Dental care not included."},
+                    ".hearty_stew":{'type':"buff", 'attrib':"rest", 'min':3, 'max':4, 'duration':1, 'desc':"Nourishing and artery hardening soup."},
+                    "[sweetbread]":{'type':"buff", 'attrib':"rest", 'min':4, 'max':6, 'duration':1, 'desc':"Delicious bread, provides a good meal."},
+                    "bandaid":{'type':"medicine", 'attrib':"hp", 'min':1, 'max':4, 'duration':1, 'desc':"Small bandaid to mend little scratches."},
+                    ".potion_of_healing":{'type':"medicine", 'attrib':"hp", 'min':1, 'max':8, 'duration':1, 'desc':"Standard healing potion."},
+                    "[potion of rejuvenation]":{'type':"medicine", 'attrib':"hp", 'min':50, 'max':100, 'duration':1, 'desc':"Restores a % of your HP (min 50%)."},
+                    "alchemy scroll":{'type':"read", 'attrib':"recipe", 'min':1, 'max':1, 'duration':1, 'desc':"Studying the blurred scribbles might reveal an alchemical recipe."}
                 }
 
     async def use_con(ctx, user, con):
@@ -45,6 +51,14 @@ class Consumables:
                     await ctx.send("Your {} yielded {}% increased luck during the next fight or chest opening.".format(con,bonus))
                 else:
                     await ctx.send("Your {} yielded {}% increased luck during {} fights or chest openings.".format(con,bonus,cons['duration']))
+                return True
+            elif cons['attrib'] == 'rest':
+                bonus = random.randint(cons['min'],cons['max'])
+                Userdata.users[str(user.id)]['buffs'].update({cons['attrib']:{'bonus':bonus, 'duration':cons['duration']}})
+                if cons['duration'] == 1:
+                    await ctx.send("Your {} yielded {}x faster recovery during the next rest.".format(con,bonus))
+                else:
+                    await ctx.send("Your {} yielded {}x faster recovery during {} rests.".format(con,bonus,cons['duration']))
                 return True
             elif cons['attrib'] == 'xp' or cons['attrib'] == 'money':
                 bonus = random.randint(cons['min'],cons['max'])
@@ -156,3 +170,64 @@ class Consumables:
             Userdata.users[str(user.id)]['buffs'].update({cons['attrib']:{'bonus':{'att':att,'cha':cha}, 'duration':cons['duration']}})
             await ctx.send("**{}** summoned a{} {} (🗡 {} | 🗨 {}).".format(user.display_name,attrib,monster,att,cha))
             return True
+        elif cons['type'] == "medicine":
+            bonus = random.randint(cons['min'],cons['max'])
+            if "rejuvenation" in con:
+                bonus = int(round(Userdata.users[str(user.id)]['base_hp']*bonus/100))
+            if Userdata.users[str(user.id)]['hp'] + bonus <= Userdata.users[str(user.id)]['base_hp']:
+                Userdata.users[str(user.id)]['hp'] += bonus
+            else:
+                Userdata.users[str(user.id)]['hp'] = int(Userdata.users[str(user.id)]['base_hp'])
+            hp_pcnt = round((Userdata.users[str(user.id)]['hp']/Userdata.users[str(user.id)]['base_hp'])*100)
+            await ctx.send("Your {} healed you for {} hitpoints ({}/{} {}%).".format(con,bonus,Userdata.users[str(user.id)]['hp'],Userdata.users[str(user.id)]['base_hp'],hp_pcnt))
+            return True
+        elif cons['type'] == "read": #maybe add chances of misreading or partial reading, obfuscate recipes, riddle form, pain to berserkers?
+            if Userdata.users[str(user.id)]['class']['name']=="Berserker":
+                crapfactor = random.choice([0,1,1,2,2,2,2,2,2,2])
+                if crapfactor != 0:
+                    await ctx.send("As a berserker you are not at home with reading stuff...")
+            else:
+                crapfactor = random.choice([0,1,1,1,1,2,2,2,2,2])
+            result = random.choice(list(Alchemy.recipes.keys()))
+            yields = Alchemy.recipes[result]['yields']
+            recipe = ''.join(" " + x if x.isupper() else x for x in result).strip(" ").split(" ")
+            indices = [i for i, x in enumerate(recipe) if x == ""]
+            killlist = []
+            for e in indices:
+                recipe[e-1]= recipe[e-1] + " " + recipe[e+1]
+                killlist.append(recipe[e+1])
+                killlist.append(recipe[e])
+            for e in killlist:
+                recipe.remove(e)   #search and destroy copied elements without iterating over a list that changes size.
+            recipe[:] = (value for value in recipe if value != "") #strip empty elements
+            recipe = " and ".join([", ".join(recipe[:-1]),recipe[-1]])
+            if crapfactor == 1:
+                scr_recipe = await Consumables.scramble(recipe)
+                await ctx.send("It seems to be a recipe for {}: {} ({}-{} uses).".format(yields,scr_recipe,Alchemy.recipes[result]['uses'][0],Alchemy.recipes[result]['uses'][1]))
+            elif crapfactor == 2:
+                scr_recipe = await Consumables.Xscramble(recipe)
+                yields = await Consumables.Xscramble(yields)
+                await ctx.send("A very badly damaged and smudged recipe for {}?. {}.".format(yields,scr_recipe))
+            else:
+                scr_recipe = recipe
+                await ctx.send("You deciphered a recipe for {}: {} ({}-{} uses).".format(yields,scr_recipe,Alchemy.recipes[result]['uses'][0],Alchemy.recipes[result]['uses'][1]))
+
+
+    async def Xscramble(recipe):
+        wordlist = recipe.split()
+        for idx, word in enumerate(wordlist):
+            word = ''.join(random.sample(word + "X"*len(word), len(word)))
+            charlist = list(word)
+            random.shuffle(charlist)
+            wordlist[idx] = ''.join(charlist)
+            print(word)
+        return ' '.join(wordlist)
+
+    async def scramble(recipe):
+        wordlist = recipe.split()
+        for idx, word in enumerate(wordlist):
+            charlist = list(word[1:-1])
+            random.shuffle(charlist)
+            wordlist[idx] = word[0] + ''.join(charlist) + word[-1]
+            print(word)
+        return ' '.join(wordlist)

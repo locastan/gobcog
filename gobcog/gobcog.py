@@ -18,6 +18,7 @@ from .modules.classes import Classes
 from .modules.userdata import Userdata
 from .modules.consumables import Consumables
 from .modules.explore import Explore
+from .modules.alchemy import Alchemy
 
 BaseCog = getattr(commands, "Cog", object)
 client = discord.Client()
@@ -29,6 +30,68 @@ def charge(amount: int):
         except ValueError:
             await ctx.send("You don't have enough copperpieces.")
             return False
+        else:
+            return True
+    return commands.check(pred)
+
+def has_hp():
+    async def pred(ctx):
+        if Userdata.users[str(ctx.author.id)]['hp'] > 0:
+            return True
+        else:
+            if Userdata.users[str(ctx.author.id)]['resting'] != {}:
+                if Userdata.users[str(ctx.author.id)]['resting']['rest_end'] <= time.time():
+                    Userdata.users[str(ctx.author.id)]['hp'] = int(Userdata.users[str(ctx.author.id)]['base_hp'])
+                    Userdata.users[str(ctx.author.id)]['resting'] = {}
+                    await Userdata.save()
+                    await ctx.send("You awake fully recovered from your rest.")
+                    return True
+            else:
+                await ctx.send("You are too injured to do anything. You need to rest a bit.")
+                return False
+    return commands.check(pred)
+
+def not_resting():
+    async def pred(ctx):
+        if Userdata.users[str(ctx.author.id)]['resting'] != {}:
+            if Userdata.users[str(ctx.author.id)]['resting']['rest_end'] <= time.time():
+                Userdata.users[str(ctx.author.id)]['hp'] = int(Userdata.users[str(ctx.author.id)]['base_hp'])
+                Userdata.users[str(ctx.author.id)]['resting'] = {}
+                await Userdata.save()
+                await ctx.send("You awake fully recovered from your rest.")
+                return True
+            else:
+                now = time.time()
+                lapsed = now - Userdata.users[str(ctx.author.id)]['resting']['rest_start']
+                togo = Userdata.users[str(ctx.author.id)]['resting']['rest_end'] - now
+                m, s = divmod(togo, 60)
+                h, m = divmod(m, 60)
+                s = int(s)
+                m = int(m)
+                h = int(h)
+                if h == 0 and m == 0:
+                    out = "{:02d}s".format(s)
+                elif h == 0:
+                    out = "{:02d}m:{:02d}s".format(m, s)
+                else:
+                    out = "{:01d}h:{:02d}m:{:02d}s".format(h, m, s)
+                r_perc = round(lapsed/togo*100)
+                msg = await ctx.send("```css\n You are currently resting ({} remaining). Do you want to break your rest and only regain {}% of your health? ```".format(out, r_perc))
+                start_adding_reactions(msg, ReactionPredicate.YES_OR_NO_EMOJIS)
+                pred = ReactionPredicate.yes_or_no(msg, ctx.author)
+                await ctx.bot.wait_for("reaction_add", check=pred)
+                try:
+                    await msg.delete()
+                except discord.Forbidden:  # cannot remove message try remove emojis
+                    for key in ReactionPredicate.YES_OR_NO_EMOJIS:
+                        await msg.remove_reaction(key, ctx.bot.user)
+                if pred.result: #user reacted with Yes.
+                    Userdata.users[str(ctx.author.id)]['hp'] = int(Userdata.users[str(ctx.author.id)]['base_hp']*(r_perc/100))
+                    Userdata.users[str(ctx.author.id)]['resting'] = {}
+                    await ctx.send("You broke your rest. Your hitpoints are currently at {}/{} ({}%)".format(Userdata.users[str(ctx.author.id)]['hp'],Userdata.users[str(ctx.author.id)]['base_hp'],r_perc))
+                    return True
+                else:
+                    return False
         else:
             return True
     return commands.check(pred)
@@ -62,9 +125,96 @@ class GobCog(BaseCog):
             )
         )
 
+    @commands.command()
+    @commands.guild_only()
+    @not_resting()
+    @has_hp()
+    @commands.cooldown(rate=1, per=600, type=commands.BucketType.user)
+    async def brew(self, ctx):
+        """This allows you to brew something from ingredients.
+            !brew
+            will bring up the brewing dialogue.
+        """
+        Done, inbrew = await Alchemy.brew(ctx, ctx.author)
+        if Done:
+            for ingredient in inbrew:
+                amount = int(Userdata.users[str(ctx.author.id)]['ingredients'][ingredient].get('uses'))
+                if amount <= 1:
+                    del Userdata.users[str(ctx.author.id)]['ingredients'][ingredient]
+                else:
+                    Userdata.users[str(ctx.author.id)]['ingredients'][ingredient]['uses'] = Userdata.users[str(ctx.author.id)]['ingredients'][ingredient]['uses'] - 1
+            await Userdata.save()
+        else:
+            ctx.command.reset_cooldown(ctx)
 
     @commands.command()
     @commands.guild_only()
+    async def rest(self, ctx):
+        """This allows you to rest to cure your wounds over time.
+            !rest
+            Resting time depends on severity of wounds.
+        """
+        user = ctx.author
+        if Userdata.users[str(user.id)]['resting'] == {}:
+            hp_ratio = 1-(Userdata.users[str(user.id)]['hp']/Userdata.users[str(user.id)]['base_hp'])
+            heal_duration = round(28800*hp_ratio)
+            now = time.time()
+            Userdata.users[str(user.id)]['resting'].update({'rest_start': now, 'rest_end': now+heal_duration})
+            togo = heal_duration
+            m, s = divmod(togo, 60)
+            h, m = divmod(m, 60)
+            s = int(s)
+            m = int(m)
+            h = int(h)
+            if h == 0 and m == 0:
+                out = "{:02d}s".format(s)
+            elif h == 0:
+                out = "{:02d}m:{:02d}s".format(m, s)
+            else:
+                out = "{:01d}h:{:02d}m:{:02d}s".format(h, m, s)
+            await ctx.send("```css\n You are now resting for {}.```".format(out))
+            await Userdata.save()
+        else:
+            if Userdata.users[str(ctx.author.id)]['resting']['rest_end'] <= time.time():
+                Userdata.users[str(ctx.author.id)]['hp'] = int(Userdata.users[str(ctx.author.id)]['base_hp'])
+                Userdata.users[str(ctx.author.id)]['resting'] = {}
+                await Userdata.save()
+                await ctx.send("You awake fully recovered from your rest.")
+                return True
+            else:
+                now = time.time()
+                lapsed = now - Userdata.users[str(user.id)]['resting']['rest_start']
+                togo = Userdata.users[str(user.id)]['resting']['rest_end'] - now
+                m, s = divmod(togo, 60)
+                h, m = divmod(m, 60)
+                s = int(s)
+                m = int(m)
+                h = int(h)
+                if h == 0 and m == 0:
+                    out = "{:02d}s".format(s)
+                elif h == 0:
+                    out = "{:02d}m:{:02d}s".format(m, s)
+                else:
+                    out = "{:01d}h:{:02d}m:{:02d}s".format(h, m, s)
+                r_perc = round(lapsed/togo*100)
+                msg = await ctx.send("```css\n You are currently resting ({} remaining). Do you want to break your rest and only regain {}% of your health? ```".format(out, r_perc))
+                start_adding_reactions(msg, ReactionPredicate.YES_OR_NO_EMOJIS)
+                pred = ReactionPredicate.yes_or_no(msg, ctx.author)
+                await ctx.bot.wait_for("reaction_add", check=pred)
+                try:
+                    await msg.delete()
+                except discord.Forbidden:  # cannot remove message try remove emojis
+                    for key in ReactionPredicate.YES_OR_NO_EMOJIS:
+                        await msg.remove_reaction(key, ctx.bot.user)
+                if pred.result: #user reacted with Yes.
+                    Userdata.users[str(user.id)]['hp'] = int(Userdata.users[str(user.id)]['base_hp']*(r_perc/100))
+                    Userdata.users[str(user.id)]['resting'] = {}
+                    await ctx.send("You broke your rest. Your hitpoints are currently at {}/{} ({}%)".format(Userdata.users[str(user.id)]['hp'],Userdata.users[str(user.id)]['base_hp'],r_perc))
+
+    @commands.command()
+    @commands.guild_only()
+    @not_resting()
+    @has_hp()
     async def unequip(self, ctx, item: str="None"):
         """This stashes a specifed equipped item
             into your backpack.
@@ -103,6 +253,8 @@ class GobCog(BaseCog):
 
     @commands.command()
     @commands.guild_only()
+    @not_resting()
+    @has_hp()
     @commands.cooldown(rate=1, per=43200, type=commands.BucketType.user)
     async def explore(self, ctx):
         await Explore.explore(ctx,ctx.author)
@@ -156,16 +308,16 @@ class GobCog(BaseCog):
                     diplomacy += Userdata.users[str(user)]['items'][slot][item]['cha']
             Userdata.users[str(user)]['att'] = attack
             Userdata.users[str(user)]['cha'] = diplomacy
+            Userdata.users[str(user)]['base_hp'] = 5 + Userdata.users[str(user)]['lvl']
+            Userdata.users[str(user)]['hp'] = int(Userdata.users[str(user)]['base_hp'])
             Userdata.users[str(user)]['name'] = {}
+            Userdata.users[str(user)]['resting'] = {}
             Userdata.users[str(user)]['name'] = member.display_name
+            if 'ingredients' not in Userdata.users[str(user)]:
+                Userdata.users[str(user)]['ingredients'] = {}
             if 'consumables' not in Userdata.users[str(user)]:
                 Userdata.users[str(user)]['consumables'] = {}
                 Userdata.users[str(user)]['buffs'] = {}
-            for consumable in Userdata.users[str(user)]['consumables'].keys():
-                if consumable == ".vial_of_strength":
-                    Userdata.users[str(user)]['consumables']['.vial_of_aggression'] = Userdata.users[str(user)]['consumables'].pop('.vial_of_strength')
-                if consumable == ".vial_of_eloquence":
-                    Userdata.users[str(user)]['consumables']['.vial_of_wit'] = Userdata.users[str(user)]['consumables'].pop('.vial_of_eloquence')
             if Userdata.users[str(user)]['class'] == {}:
                 Userdata.users[str(user)]['class'] = {'name': "Hero", 'ability': False, 'desc': "Your basic adventuring hero."}
             if 'skill' not in Userdata.users[str(user)]:
@@ -176,9 +328,13 @@ class GobCog(BaseCog):
         for userID in deadsies:
             users.pop(userID)
         await GobCog.save()
+        await ctx.send("Command run successful.")
+
 
     @commands.command()
     @commands.guild_only()
+    @not_resting()
+    @has_hp()
     @commands.cooldown(rate=1, per=7200, type=commands.BucketType.user)
     async def pet(self,ctx, switch:str=None):
         """This allows a Ranger to tame or set free a pet or send it foraging (once per day).
@@ -241,6 +397,8 @@ class GobCog(BaseCog):
 
     @commands.command()
     @commands.guild_only()
+    @not_resting()
+    @has_hp()
     @commands.cooldown(rate=1, per=900, type=commands.BucketType.user)
     async def rage(self,ctx):
         """This allows a Berserker to add substantial attack bonuses for one battle.
@@ -251,11 +409,13 @@ class GobCog(BaseCog):
             ctx.command.reset_cooldown(ctx)
             return await ctx.send("You need to be a Berserker to do this.")
         else:
-            users = await Classes.rage(ctx)
+            await Classes.rage(ctx)
 
 
     @commands.command()
     @commands.guild_only()
+    @not_resting()
+    @has_hp()
     @commands.cooldown(rate=1, per=900, type=commands.BucketType.user)
     async def bless(self,ctx):
         """This allows a praying Cleric to add substantial bonuses for heroes fighting the battle.
@@ -266,10 +426,31 @@ class GobCog(BaseCog):
             ctx.command.reset_cooldown(ctx)
             return await ctx.send("You need to be a Cleric to do this.")
         else:
-            users = await Classes.bless(ctx)
+            await Classes.bless(ctx)
 
     @commands.command()
     @commands.guild_only()
+    @not_resting()
+    @has_hp()
+    @commands.cooldown(rate=3, per=3600, type=commands.BucketType.user) #can heal 4 times per hour
+    async def heal(self,ctx, user: discord.Member=None):
+        """This allows a Cleric to heal himself or others up to 3 times per hour.
+            Use !heal to heal yourself. !heal @user to heal others.
+            (1d8 + 1 every 5 levels)
+        """
+        global users
+        if user == None:
+            user = ctx.author.id
+        if 'name' in Userdata.users[str(ctx.author.id)]['class'] and Userdata.users[str(ctx.author.id)]['class']['name'] != "Cleric":
+            ctx.command.reset_cooldown(ctx)
+            return await ctx.send("You need to be a Cleric to do this.")
+        else:
+            await Classes.heal(ctx,ctx.author.id,user)
+
+    @commands.command()
+    @commands.guild_only()
+    @not_resting()
+    @has_hp()
     @commands.cooldown(rate=1, per=900, type=commands.BucketType.user)
     async def sing(self,ctx, *args):
         """This allows a Bard to add substantial diplomacy bonuses for one battle.
@@ -281,10 +462,12 @@ class GobCog(BaseCog):
             ctx.command.reset_cooldown(ctx)
             return await ctx.send("You need to be a Bard to do this.")
         else:
-            users = await Classes.sing(ctx, *args)
+            await Classes.sing(ctx, *args)
 
     @commands.command()
     @commands.guild_only()
+    @not_resting()
+    @has_hp()
     @commands.cooldown(rate=1, per=7200, type=commands.BucketType.user)
     async def forge(self,ctx):
         """This allows a Tinkerer to forge two items into a device.
@@ -461,6 +644,7 @@ class GobCog(BaseCog):
 
     @commands.command()
     @commands.guild_only()
+    @not_resting()
     @commands.cooldown(rate=1, per=300, type=commands.BucketType.user)
     async def heroclass(self, ctx, clz:str=None, action:str=None):
         """This allows you to select a class.
@@ -469,8 +653,8 @@ class GobCog(BaseCog):
         """
         global users
         classes = {'Tinkerer': {'name': "Tinkerer", 'ability': False, 'desc': "Tinkerers can forge two different items into a device bound to their very soul.\nThey can also use soul essence to augment items.\n Use !forge."},
-                    'Berserker':{'name': "Berserker", 'ability': False, 'desc': "Berserker have the option to rage and add big bonuses to attacks, but fumbles hurt.\n Use !rage when attacking in an adventure."},
-                    'Cleric': {'name': "Cleric", 'ability': False, 'desc': "Clerics can bless the entire group when praying.\n Use !bless when fighting in an adventure."},
+                    'Berserker':{'name': "Berserker", 'ability': False, 'desc': "Berserkers have the option to rage and add big bonuses to attacks, but fumbles hurt.\n Use !rage when attacking in an adventure."},
+                    'Cleric': {'name': "Cleric", 'ability': False, 'desc': "Clerics can bless the entire group when praying and have the power to !heal.\n Use !bless when fighting in an adventure."},
                     'Ranger': {'name': "Ranger", 'ability': False, 'desc': "Rangers can gain a special pet, which can find items and give reward bonuses.\n Use !pet."},
                     'Bard': {'name': "Bard", 'ability': False, 'desc': "Bards can perform to aid their comrades in diplomacy.\n Use !sing and maybe add a song when being diplomatic in an adventure."}}
         user = ctx.author
@@ -525,6 +709,7 @@ class GobCog(BaseCog):
 
     @commands.command()
     @commands.guild_only()
+    @not_resting()
     async def skill(self, ctx, spend:str=None):
         """This allows you to spend skillpoints.
             !skill attack/diplomacy
@@ -549,6 +734,7 @@ class GobCog(BaseCog):
 
     @commands.command()
     @commands.guild_only()
+    @not_resting()
     async def use(self, ctx, consumable:str="None", switch:str=None):
         """This allows you to use consumables.
             !use "partial name of consumable"
@@ -587,6 +773,8 @@ class GobCog(BaseCog):
 
     @commands.command()
     @commands.guild_only()
+    @not_resting()
+    @has_hp()
     async def loot(self, ctx, type: str="normal", many: int=1):
         """This opens one of your precious treasure chests.
             (specify "rare", "epic" or "quest" and
@@ -728,6 +916,8 @@ class GobCog(BaseCog):
         cha = Userdata.users[str(user.id)]['cha']
         scha = Userdata.users[str(user.id)]['skill']['cha'] + Userdata.users[str(user.id)]['buffs'].get('cha', {'bonus':0})['bonus']
         pool = Userdata.users[str(user.id)]['skill']['pool']
+        hp_perc = round((Userdata.users[str(user.id)]['hp']/Userdata.users[str(user.id)]['base_hp'])*100)
+        hitpoints = "HP: {}/{} ({}%)".format(Userdata.users[str(user.id)]['hp'],Userdata.users[str(user.id)]['base_hp'],hp_perc)
         buffs = ""
         if Userdata.users[str(user.id)]['buffs'] != {}:
             buffs = "\n- Active Buffs:"
@@ -744,6 +934,8 @@ class GobCog(BaseCog):
                     buffs += " 📚 (+{}%/{}⏳) ".format(Userdata.users[str(user.id)]['buffs'][key]['bonus'],Userdata.users[str(user.id)]['buffs'][key]['duration'])
                 elif key == "monster":
                     buffs += " 🦖 (🗡{}|🗨{}/{}⏳) ".format(Userdata.users[str(user.id)]['buffs'][key]['bonus']['att'],Userdata.users[str(user.id)]['buffs'][key]['bonus']['cha'],Userdata.users[str(user.id)]['buffs'][key]['duration'])
+                elif key == "rest":
+                    buffs += " 💤 ({}x/{}⏳) ".format(Userdata.users[str(user.id)]['buffs'][key]['bonus'],Userdata.users[str(user.id)]['buffs'][key]['duration'])
             buffs += " -"
         equip = "Equipped Items: \n"
         i = iter(Userdata.users[str(user.id)]['items'])
@@ -767,8 +959,8 @@ class GobCog(BaseCog):
         else:
             clazz = "Hero."
         await ctx.send(
-            "```css\n[{}'s Character Sheet] \n\n```".format(user.display_name) + "```css\nA level {} {} \n\n- ATTACK: {} [+{}] - DIPLOMACY: {} [+{}] -{}\n\n- Credits: {} {} \n- Experience: {}/{} \n- Unspent skillpoints: {} \n```".format(
-                lvl, clazz, att, satt, cha, scha, buffs, bal, currency, xp, next_lvl, pool
+            "```css\n[{}'s Character Sheet] \n\n```".format(user.display_name) + "```css\nA level {} {} \n\n- ATTACK: {} [+{}] - DIPLOMACY: {} [+{}] - {} -{}\n\n- Credits: {} {} \n- Experience: {}/{} \n- Unspent skillpoints: {} \n```".format(
+                lvl, clazz, att, satt, cha, scha, hitpoints, buffs, bal, currency, xp, next_lvl, pool
             ) + "```css\n" + equip + "```" +
             "```css\n" + "You own {} normal, {} rare, {} epic and {} quest chests.```".format(
                 str(Userdata.users[str(user.id)]['treasure'][0]),str(Userdata.users[str(user.id)]['treasure'][1]),str(Userdata.users[str(user.id)]['treasure'][2]),str(Userdata.users[str(user.id)]['treasure'][3]))
@@ -791,6 +983,8 @@ class GobCog(BaseCog):
         bkpklist = []
         cspouch = "Consumables: \n"
         conslist = []
+        inpouch = "⚗️ Ingredients: \n"
+        inslist = []
         if Userdata.users[str(user.id)]['consumables'] == {}:
             cspouch = "No Consumables owned."
         if switch == "None":
@@ -801,8 +995,11 @@ class GobCog(BaseCog):
                     bkpklist.append(" - " + item + " -(ATT: "+ str(Userdata.users[str(user.id)]['items']['backpack'][item]['att']*2) + " | DPL: "+ str(Userdata.users[str(user.id)]['items']['backpack'][item]['cha']*2) +" [two handed])\n")
             for item in Userdata.users[str(user.id)]['consumables']: # added second if level for two handed weapons so their slots show properly.
                     conslist.append(" - " + item + " ({}x)\n".format(Userdata.users[str(user.id)]['consumables'][item]['uses']))
+            for item in Userdata.users[str(ctx.author.id)]['ingredients']:
+                    inslist.append(" - {} ({}x)\n".format(item,Userdata.users[str(user.id)]['ingredients'][item]['uses']))
             conslist.sort()
             bkpklist.sort()
+            inslist.sort()
             textline = "[{}'s baggage] \n\n```".format(user.display_name) + "```css\n" + bkpk + "".join(bkpklist) + "\n (Reply with the name of an item or use !backpack equip \"name of item\" to equip it.)\n\n"
             if len(textline) > 1900: #split dangerously long texts into chunks.
                 chunks = [textline[i:i+1900] for i in range(0, len(textline), 1900)]
@@ -812,6 +1009,7 @@ class GobCog(BaseCog):
             else:
                 await ctx.send("```css\n"+ textline +"```")
             await ctx.send("```css\n" + cspouch + "".join(conslist) + "\n```")
+            await ctx.send("```css\n" + inpouch + "".join(inslist) + "\n```")
             try:
                 reply = await ctx.bot.wait_for("message", check=MessagePredicate.same_context(ctx), timeout=30)
             except asyncio.TimeoutError:
@@ -990,6 +1188,8 @@ class GobCog(BaseCog):
 
     @commands.command()
     @commands.guild_only()
+    @not_resting()
+    @has_hp()
     async def give(self, ctx, amount: int=1, to: discord.Member=None):
         """This will transfer cp from you to a specified member.
             !give 10 @Elder Aramis
@@ -1050,7 +1250,7 @@ class GobCog(BaseCog):
         """
         await self.trader(ctx, True)
 
-    '''
+
     @commands.command()                 # just used for playtesting quests.
     @checks.admin_or_permissions(administrator=True)
     async def testquest(self, ctx):
@@ -1080,9 +1280,9 @@ class GobCog(BaseCog):
                     Userdata.users[str(member.id)]['buffs'].pop(buff)
             if len(dead) > 0:
                 casualties = " and ".join([", ".join(dead[:-1]),dead[-1]] if len(dead) > 2 else dead)
-                await ctx.send("**" + casualties + "**" + " did not make it back alive.")
+                await ctx.send("**" + casualties + "**" + " came back empty handed.")
             await GobCog.save()
-    '''
+
 
     @commands.command()
     @checks.admin_or_permissions(administrator=True)
@@ -1100,6 +1300,8 @@ class GobCog(BaseCog):
 
     @commands.command(name="adventure", aliases=['a'])
     @commands.guild_only()
+    @not_resting()
+    @has_hp()
     @commands.cooldown(rate=1, per=120, type=commands.BucketType.guild)
     async def _adventure(self, ctx):
         """This will send you on an adventure!
@@ -1133,6 +1335,8 @@ class GobCog(BaseCog):
 
     @commands.command(name="quest", aliases=['q'])
     @charge(amount=500)
+    @not_resting()
+    @has_hp()
     @commands.guild_only()
     @commands.cooldown(rate=1, per=600, type=commands.BucketType.guild)
     async def _quest(self, ctx):
@@ -1194,12 +1398,14 @@ class GobCog(BaseCog):
                     Userdata.users[str(member.id)]['buffs'].pop(buff)
             if len(dead) > 0:
                 casualties = " and ".join([", ".join(dead[:-1]),dead[-1]] if len(dead) > 2 else dead)
-                await ctx.send("**" + casualties + "**" + " did not make it back alive.")
+                await ctx.send("**" + casualties + "**" + " came back empty handed.")
             await GobCog.save()
 
 
     @commands.command(name="negaverse", aliases=['nv'])
     @commands.guild_only()
+    @not_resting()
+    @has_hp()
     @commands.cooldown(rate=1, per=60, type=commands.BucketType.user)
     async def _negaverse(self, ctx, amount: int = None):
         """This will send you to fight a nega-member!
@@ -1229,7 +1435,9 @@ class GobCog(BaseCog):
         else:
             await ctx.send("**" + ctx.author.name + "** 🎲({})".format(roll) + " was killed by " + negachar + " 🎲({}).".format(versus))
 
-    async def __error(self, ctx: commands.Context, error):
+    '''  #uncomment once the custom error handler has been released.
+    @commands.error
+    async def commands_error_handler(self, ctx: commands.Context, error):
         if isinstance(error, commands.CommandOnCooldown):
             m, s = divmod(error.retry_after, 60)
             h, m = divmod(m, 60)
@@ -1242,15 +1450,18 @@ class GobCog(BaseCog):
                 out = "{:02d}:{:02d}s".format(m, s)
             else:
                 out = "{:01d}:{:02d}:{:02d}s".format(h, m, s)
-            if h == 0 and m < 3:
+            if ctx.command.qualified_name == "brew":
+                lookup = list(Userdata.users[str(ctx.author.id)]['ingredients'])
+                for num, name in enumerate(lookup, start=1):
+                    text += ("[{}]: {} ({}x)\n".format(num, name, Userdata.users[str(user.id)]['ingredients'][name].get('uses', 0)))
+                await ctx.send("⏳ " + "Don't be hasty, {}. You can use !{} again in: ".format(ctx.author.display_name, ctx.command.qualified_name) + out + "\n Here is a list of your ingredients for reference: \n" + text)
+            elif h == 0 and m < 3:
                 await Adventure.countdown(ctx, error.retry_after, "I feel a little tired now. !{} is available again in: ".format(ctx.command.qualified_name))
             else:
                 await ctx.send("⏳ " + "Don't be hasty, {}. You can use !{} again in: ".format(ctx.author.display_name, ctx.command.qualified_name) + out)
         else:
-            ep = cog_data_path(None, "gobcog") / 'crashbackup.txt'  # failsave dumb-dumping entire live data to string for recovery.
-            with ep.open('w') as file:
-                file.write(str(users))
-            pass
+            await ctx.bot.on_command_error(ctx, error, unhandled_by_cog=True)
+        '''
 
     @commands.Cog.listener()
     async def on_message(self, message):
@@ -1319,6 +1530,9 @@ class GobCog(BaseCog):
             Userdata.users[str(user.id)] = {}
             Userdata.users[str(user.id)]['exp'] = 0
             Userdata.users[str(user.id)]['lvl'] = 1
+            Userdata.users[str(user.id)]['hp'] = 5
+            Userdata.users[str(user.id)]['base_hp'] = 5
+            Userdata.users[str(user.id)]['resting'] = {}
             Userdata.users[str(user.id)]['att'] = 0
             Userdata.users[str(user.id)]['cha'] = 0
             Userdata.users[str(user.id)]['treasure'] = [0,0,0,0]
@@ -1358,6 +1572,8 @@ class GobCog(BaseCog):
         if lvl_start < lvl_end: #recalculate free skillpoint pool based on new level and already spent points.
             await ctx.send('{} is now level {}!'.format(user.display_name,lvl_end))
             Userdata.users[str(user.id)]['lvl'] = lvl_end
+            Userdata.users[str(user.id)]['base_hp'] = 5 + lvl_end
+            Userdata.users[str(user.id)]['hp'] = 5 + lvl_end
             Userdata.users[str(user.id)]['skill']['pool'] = int(lvl_end / 5) - (Userdata.users[str(user.id)]['skill']['att']+Userdata.users[str(user.id)]['skill']['cha'])
             if Userdata.users[str(user.id)]['skill']['pool'] > 0:
                 await ctx.send('You have skillpoints available.')
