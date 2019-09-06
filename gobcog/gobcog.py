@@ -180,24 +180,28 @@ class GobCog(BaseCog):
         """
         user = ctx.author
         if Userdata.users[str(user.id)]['resting'] == {}:
-            hp_ratio = 1-(Userdata.users[str(user.id)]['hp']/Userdata.users[str(user.id)]['base_hp'])
-            heal_duration = round(28800*hp_ratio/Userdata.users[str(user.id)]['buffs'].get('rest',{'bonus':0})['bonus'])
-            now = time.time()
-            Userdata.users[str(user.id)]['resting'].update({'rest_start': now, 'rest_end': now+heal_duration})
-            togo = heal_duration
-            m, s = divmod(togo, 60)
-            h, m = divmod(m, 60)
-            s = int(s)
-            m = int(m)
-            h = int(h)
-            if h == 0 and m == 0:
-                out = "{:02d}s".format(s)
-            elif h == 0:
-                out = "{:02d}m:{:02d}s".format(m, s)
+            if Userdata.users[str(user.id)]['hp'] = Userdata.users[str(user.id)]['base_hp']
+                ctx.command.reset_cooldown(ctx)
+                return await ctx.send("You are already at full health.".format(user.display_name))
             else:
-                out = "{:01d}h:{:02d}m:{:02d}s".format(h, m, s)
-            await ctx.send("```css\n You are now resting for {}.```".format(out))
-            await Userdata.save()
+                hp_ratio = 1-(Userdata.users[str(user.id)]['hp']/Userdata.users[str(user.id)]['base_hp'])
+                heal_duration = round(28800*hp_ratio/Userdata.users[str(user.id)]['buffs'].get('rest',{'bonus':0})['bonus'])
+                now = time.time()
+                Userdata.users[str(user.id)]['resting'].update({'rest_start': now, 'rest_end': now+heal_duration})
+                togo = heal_duration
+                m, s = divmod(togo, 60)
+                h, m = divmod(m, 60)
+                s = int(s)
+                m = int(m)
+                h = int(h)
+                if h == 0 and m == 0:
+                    out = "{:02d}s".format(s)
+                elif h == 0:
+                    out = "{:02d}m:{:02d}s".format(m, s)
+                else:
+                    out = "{:01d}h:{:02d}m:{:02d}s".format(h, m, s)
+                await ctx.send("```css\n You are now resting for {}.```".format(out))
+                await Userdata.save()
         else:
             if Userdata.users[str(ctx.author.id)]['resting']['rest_end'] <= time.time():
                 Userdata.users[str(ctx.author.id)]['hp'] = int(Userdata.users[str(ctx.author.id)]['base_hp'])
@@ -481,7 +485,11 @@ class GobCog(BaseCog):
             ctx.command.reset_cooldown(ctx)
             return await ctx.send("You need to be a Cleric to do this.")
         else:
-            await Classes.heal(ctx,ctx.author.id,user)
+            if Userdata.users[str(user.id)]['hp'] = Userdata.users[str(user.id)]['base_hp']
+                ctx.command.reset_cooldown(ctx)
+                return await ctx.send("**{}** is already at full health.".format(user.display_name))
+            else:
+                await Classes.heal(ctx,ctx.author,user)
 
     @commands.command()
     @commands.guild_only()
