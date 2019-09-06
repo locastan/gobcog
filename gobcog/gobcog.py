@@ -185,7 +185,7 @@ class GobCog(BaseCog):
                 return await ctx.send("You are already at full health.".format(user.display_name))
             else:
                 hp_ratio = 1-(Userdata.users[str(user.id)]['hp']/Userdata.users[str(user.id)]['base_hp'])
-                heal_duration = round(28800*hp_ratio/Userdata.users[str(user.id)]['buffs'].get('rest',{'bonus':0})['bonus'])
+                heal_duration = round(28800*hp_ratio/Userdata.users[str(user.id)]['buffs'].get('rest',{'bonus':1})['bonus'])
                 now = time.time()
                 Userdata.users[str(user.id)]['resting'].update({'rest_start': now, 'rest_end': now+heal_duration})
                 togo = heal_duration
