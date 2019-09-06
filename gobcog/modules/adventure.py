@@ -729,6 +729,7 @@ class Adventure:
             else:
                 Userdata.users[str(member.id)]['hp'] = 0
                 incap.append(user)
+        await Userdata.save()
         incapacitated = " and ".join([", ".join(incap[:-1]),incap[-1]] if len(incap) > 2 else incap)
         inj_txt = " and ".join([", ".join(injured[:-1]),injured[-1]] if len(injured) > 2 else injured)
         d_txt += "**{}** took {} damage during this encounter. ".format(inj_txt,base_dmg)

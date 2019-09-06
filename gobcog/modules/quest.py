@@ -921,6 +921,7 @@ class Quest:
                 Quest.partyIDs.remove(member.id) #user is dead and can no longer participate with reactions
                 if user in Quest.rewards:
                     Quest.rewards.pop(user)
+        await Userdata.save()
         incapacitated = " and ".join([", ".join(incap[:-1]),incap[-1]] if len(incap) > 2 else incap)
         inj_txt = " and ".join([", ".join(injured[:-1]),injured[-1]] if len(injured) > 2 else injured)
         d_txt += "**{}** took {} damage. ".format(inj_txt,base_dmg)
