@@ -180,7 +180,7 @@ class GobCog(BaseCog):
         """
         user = ctx.author
         if Userdata.users[str(user.id)]['resting'] == {}:
-            if Userdata.users[str(user.id)]['hp'] == Userdata.users[str(user.id)]['base_hp']
+            if Userdata.users[str(user.id)]['hp'] == Userdata.users[str(user.id)]['base_hp']:
                 ctx.command.reset_cooldown(ctx)
                 return await ctx.send("You are already at full health.".format(user.display_name))
             else:
@@ -485,7 +485,7 @@ class GobCog(BaseCog):
             ctx.command.reset_cooldown(ctx)
             return await ctx.send("You need to be a Cleric to do this.")
         else:
-            if Userdata.users[str(user.id)]['hp'] == Userdata.users[str(user.id)]['base_hp']
+            if Userdata.users[str(user.id)]['hp'] == Userdata.users[str(user.id)]['base_hp']:
                 ctx.command.reset_cooldown(ctx)
                 return await ctx.send("**{}** is already at full health.".format(user.display_name))
             else:
