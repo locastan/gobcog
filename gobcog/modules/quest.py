@@ -834,10 +834,11 @@ class Quest:
                     Userdata.users[str(member.id)]['class'].pop('basebonus')
             expired = []
             for buff in Userdata.users[str(member.id)]['buffs'].keys(): #reduce duration of active buffs
-                if Userdata.users[str(member.id)]['buffs'][buff]['duration'] <= 1:
-                    expired.append(buff)
-                else:
-                    Userdata.users[str(member.id)]['buffs'][buff]['duration'] = Userdata.users[str(member.id)]['buffs'][buff]['duration'] - 1
+                if buff != "rest:"
+                    if Userdata.users[str(member.id)]['buffs'][buff]['duration'] <= 1:
+                        expired.append(buff)
+                    else:
+                        Userdata.users[str(member.id)]['buffs'][buff]['duration'] = Userdata.users[str(member.id)]['buffs'][buff]['duration'] - 1
             for buff in expired: #remove buffs outside loop not to change size during iteration
                 Userdata.users[str(member.id)]['buffs'].pop(buff)
         Quest.timeout = 0

@@ -43,6 +43,14 @@ def has_hp():
                 if Userdata.users[str(ctx.author.id)]['resting']['rest_end'] <= time.time():
                     Userdata.users[str(ctx.author.id)]['hp'] = int(Userdata.users[str(ctx.author.id)]['base_hp'])
                     Userdata.users[str(ctx.author.id)]['resting'] = {}
+                    for buff in Userdata.users[str(member.id)]['buffs'].keys(): #reduce duration of active buffs
+                        if buff == "rest":
+                            if Userdata.users[str(member.id)]['buffs'][buff]['duration'] <= 1:
+                                expired.append(buff)
+                            else:
+                                Userdata.users[str(member.id)]['buffs'][buff]['duration'] = Userdata.users[str(member.id)]['buffs'][buff]['duration'] - 1
+                    for buff in expired: #remove buffs outside loop not to change size during iteration
+                        Userdata.users[str(member.id)]['buffs'].pop(buff)
                     await Userdata.save()
                     await ctx.send("You awake fully recovered from your rest.")
                     return True
@@ -57,6 +65,14 @@ def not_resting():
             if Userdata.users[str(ctx.author.id)]['resting']['rest_end'] <= time.time():
                 Userdata.users[str(ctx.author.id)]['hp'] = int(Userdata.users[str(ctx.author.id)]['base_hp'])
                 Userdata.users[str(ctx.author.id)]['resting'] = {}
+                for buff in Userdata.users[str(member.id)]['buffs'].keys(): #reduce duration of active buffs
+                    if buff == "rest":
+                        if Userdata.users[str(member.id)]['buffs'][buff]['duration'] <= 1:
+                            expired.append(buff)
+                        else:
+                            Userdata.users[str(member.id)]['buffs'][buff]['duration'] = Userdata.users[str(member.id)]['buffs'][buff]['duration'] - 1
+                for buff in expired: #remove buffs outside loop not to change size during iteration
+                    Userdata.users[str(member.id)]['buffs'].pop(buff)
                 await Userdata.save()
                 await ctx.send("You awake fully recovered from your rest.")
                 return True
@@ -88,6 +104,14 @@ def not_resting():
                 if pred.result: #user reacted with Yes.
                     Userdata.users[str(ctx.author.id)]['hp'] = int(Userdata.users[str(ctx.author.id)]['base_hp']*(r_perc/100))
                     Userdata.users[str(ctx.author.id)]['resting'] = {}
+                    for buff in Userdata.users[str(member.id)]['buffs'].keys(): #reduce duration of active buffs
+                        if buff == "rest":
+                            if Userdata.users[str(member.id)]['buffs'][buff]['duration'] <= 1:
+                                expired.append(buff)
+                            else:
+                                Userdata.users[str(member.id)]['buffs'][buff]['duration'] = Userdata.users[str(member.id)]['buffs'][buff]['duration'] - 1
+                    for buff in expired: #remove buffs outside loop not to change size during iteration
+                        Userdata.users[str(member.id)]['buffs'].pop(buff)
                     await ctx.send("You broke your rest. Your hitpoints are currently at {}/{} ({}%)".format(Userdata.users[str(ctx.author.id)]['hp'],Userdata.users[str(ctx.author.id)]['base_hp'],r_perc))
                     return True
                 else:
@@ -157,7 +181,7 @@ class GobCog(BaseCog):
         user = ctx.author
         if Userdata.users[str(user.id)]['resting'] == {}:
             hp_ratio = 1-(Userdata.users[str(user.id)]['hp']/Userdata.users[str(user.id)]['base_hp'])
-            heal_duration = round(28800*hp_ratio)
+            heal_duration = round(28800*hp_ratio/Userdata.users[str(user.id)]['buffs'].get('rest',{'bonus':0})['bonus'])
             now = time.time()
             Userdata.users[str(user.id)]['resting'].update({'rest_start': now, 'rest_end': now+heal_duration})
             togo = heal_duration
@@ -178,6 +202,14 @@ class GobCog(BaseCog):
             if Userdata.users[str(ctx.author.id)]['resting']['rest_end'] <= time.time():
                 Userdata.users[str(ctx.author.id)]['hp'] = int(Userdata.users[str(ctx.author.id)]['base_hp'])
                 Userdata.users[str(ctx.author.id)]['resting'] = {}
+                for buff in Userdata.users[str(member.id)]['buffs'].keys(): #reduce duration of active buffs
+                    if buff == "rest":
+                        if Userdata.users[str(member.id)]['buffs'][buff]['duration'] <= 1:
+                            expired.append(buff)
+                        else:
+                            Userdata.users[str(member.id)]['buffs'][buff]['duration'] = Userdata.users[str(member.id)]['buffs'][buff]['duration'] - 1
+                for buff in expired: #remove buffs outside loop not to change size during iteration
+                    Userdata.users[str(member.id)]['buffs'].pop(buff)
                 await Userdata.save()
                 await ctx.send("You awake fully recovered from your rest.")
                 return True
@@ -258,6 +290,7 @@ class GobCog(BaseCog):
     @commands.cooldown(rate=1, per=43200, type=commands.BucketType.user)
     async def explore(self, ctx):
         if Explore.mapmsg != None:
+            ctx.command.reset_cooldown(ctx)
             await ctx.send("Sorry somebody is exploring at the moment. Wait for him to return.")
         else:
             await Explore.explore(ctx,ctx.author)
@@ -1253,7 +1286,7 @@ class GobCog(BaseCog):
         """
         await self.trader(ctx, True)
 
-
+    '''
     @commands.command()                 # just used for playtesting quests.
     @checks.admin_or_permissions(administrator=True)
     async def testquest(self, ctx):
@@ -1285,7 +1318,7 @@ class GobCog(BaseCog):
                 casualties = " and ".join([", ".join(dead[:-1]),dead[-1]] if len(dead) > 2 else dead)
                 await ctx.send("**" + casualties + "**" + " came back empty handed.")
             await GobCog.save()
-
+    '''
 
     @commands.command()
     @checks.admin_or_permissions(administrator=True)
@@ -1328,10 +1361,11 @@ class GobCog(BaseCog):
                         Userdata.users[str(member.id)]['class'].pop('basebonus')
                 expired = []
                 for buff in Userdata.users[str(member.id)]['buffs'].keys(): #reduce duration of active buffs
-                    if Userdata.users[str(member.id)]['buffs'][buff]['duration'] <= 1:
-                        expired.append(buff)
-                    else:
-                        Userdata.users[str(member.id)]['buffs'][buff]['duration'] = Userdata.users[str(member.id)]['buffs'][buff]['duration'] - 1
+                    if buff != "rest":
+                        if Userdata.users[str(member.id)]['buffs'][buff]['duration'] <= 1:
+                            expired.append(buff)
+                        else:
+                            Userdata.users[str(member.id)]['buffs'][buff]['duration'] = Userdata.users[str(member.id)]['buffs'][buff]['duration'] - 1
                 for buff in expired: #remove buffs outside loop not to change size during iteration
                     Userdata.users[str(member.id)]['buffs'].pop(buff)
             await GobCog.save()
@@ -1393,10 +1427,11 @@ class GobCog(BaseCog):
                         Userdata.users[str(member.id)]['class'].pop('basebonus')
                 expired = []
                 for buff in Userdata.users[str(member.id)]['buffs'].keys(): #reduce duration of active buffs
-                    if Userdata.users[str(member.id)]['buffs'][buff]['duration'] <= 1:
-                        expired.append(buff)
-                    else:
-                        Userdata.users[str(member.id)]['buffs'][buff]['duration'] = Userdata.users[str(member.id)]['buffs'][buff]['duration'] - 1
+                    if buff != "rest":
+                        if Userdata.users[str(member.id)]['buffs'][buff]['duration'] <= 1:
+                            expired.append(buff)
+                        else:
+                            Userdata.users[str(member.id)]['buffs'][buff]['duration'] = Userdata.users[str(member.id)]['buffs'][buff]['duration'] - 1
                 for buff in expired: #remove buffs outside loop not to change size during iteration
                     Userdata.users[str(member.id)]['buffs'].pop(buff)
             if len(dead) > 0:
