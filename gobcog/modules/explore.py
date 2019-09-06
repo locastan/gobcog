@@ -40,8 +40,8 @@ class Explore:
             "Chestnut":{"tile": "🌰", "desc":"Some chestnuts. Good for eating and brewing."},
             "Fog":{"tile": "⬜", "desc":"Step in to find out."},
             "Rock":{"tile": "🌑", "desc":"A big rock. You cannot move here."},
-            "Grass":{"tile": "<:Grassland:593422372468686859>", "desc":"Just grassland."}, #use this for beta server
-            #"Grass":{"tile": "<:Grassland:593755278328201226>", "desc":"Just grassland."}, #use this for Goblinscomic Discord
+            #"Grass":{"tile": "<:Grassland:593422372468686859>", "desc":"Just grassland."}, #use this for beta server
+            "Grass":{"tile": "<:Grassland:593755278328201226>", "desc":"Just grassland."}, #use this for Goblinscomic Discord
             "Player":{"tile": "🗿", "desc":"Player"}
             }
 
@@ -70,8 +70,8 @@ class Explore:
             "🌰": "Chestnut",
             "⬜": "Fog",
             "🌑": "Rock",
-            "<:Grassland:593422372468686859>": "Grass", #use this on testserver
-            #"<:Grassland:593755278328201226>": "Grass", #use this on Goblins Discord server
+            #"<:Grassland:593422372468686859>": "Grass", #use this on testserver
+            "<:Grassland:593755278328201226>": "Grass", #use this on Goblins Discord server
             "🗿": "Player"
             }
 
