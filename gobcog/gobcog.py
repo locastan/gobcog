@@ -257,7 +257,10 @@ class GobCog(BaseCog):
     @has_hp()
     @commands.cooldown(rate=1, per=43200, type=commands.BucketType.user)
     async def explore(self, ctx):
-        await Explore.explore(ctx,ctx.author)
+        if Explore.mapmsg != None:
+            await ctx.send("Sorry somebody is exploring at the moment. Wait for him to return.")
+        else:
+            await Explore.explore(ctx,ctx.author)
 
     @commands.command()
     @checks.admin_or_permissions(administrator=True)

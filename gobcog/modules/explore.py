@@ -462,6 +462,7 @@ class Explore:
     ):
         if Explore.mapmsg:
             await Explore.mapmsg.delete()
+            Explore.mapmsg = None
         if Explore.statusmsg:
             await Explore.statusmsg.delete()
         if Explore.movesmsg:
@@ -494,6 +495,7 @@ class Explore:
     ):
         if Explore.mapmsg:
             await Explore.mapmsg.delete()
+            Explore.mapmsg = None
         if Explore.statusmsg:
             await Explore.statusmsg.delete()
         if Explore.movesmsg:
