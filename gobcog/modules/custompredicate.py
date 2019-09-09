@@ -147,6 +147,10 @@ class CustomPredicate(Callable[[discord.Reaction, discord.abc.User], bool]):
         def predicate(self: CustomPredicate, r: discord.Reaction, u: discord.abc.User):
             if u.bot:
                 return False
+            if Userdata.users[str(u.id)]['resting'] != {}:
+                return False
+            if Userdata.users[str(u.id)]['resting'] <= 0:
+                return False
             if userlist != []:
                 if u.id not in userlist:
                     return False
