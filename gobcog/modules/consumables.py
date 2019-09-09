@@ -204,13 +204,16 @@ class Consumables:
             if crapfactor == 1:
                 scr_recipe = await Consumables.scramble(recipe)
                 await ctx.send("It seems to be a recipe for {}: {} ({}-{} uses).".format(yields,scr_recipe,Alchemy.recipes[result]['uses'][0],Alchemy.recipes[result]['uses'][1]))
+                return True
             elif crapfactor == 2:
                 scr_recipe = await Consumables.Xscramble(recipe)
                 yields = await Consumables.Xscramble(yields)
                 await ctx.send("A very badly damaged and smudged recipe for {}?. {}.".format(yields,scr_recipe))
+                return True
             else:
                 scr_recipe = recipe
                 await ctx.send("You deciphered a recipe for {}: {} ({}-{} uses).".format(yields,scr_recipe,Alchemy.recipes[result]['uses'][0],Alchemy.recipes[result]['uses'][1]))
+                return True
 
 
     async def Xscramble(recipe):

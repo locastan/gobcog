@@ -295,7 +295,7 @@ class GobCog(BaseCog):
     async def explore(self, ctx):
         if Explore.mapmsg != None:
             ctx.command.reset_cooldown(ctx)
-            await ctx.send("Sorry somebody is exploring at the moment. Wait for him to return.")
+            await ctx.send("Sorry somebody is exploring at the moment.")
         else:
             await Explore.explore(ctx,ctx.author)
 
