@@ -102,7 +102,7 @@ def not_resting():
                     for key in ReactionPredicate.YES_OR_NO_EMOJIS:
                         await msg.remove_reaction(key, ctx.bot.user)
                 if pred.result: #user reacted with Yes.
-                    Userdata.users[str(ctx.author.id)]['hp'] = int(Userdata.users[str(ctx.author.id)]['base_hp']*(r_perc/100))
+                    Userdata.users[str(user.id)]['hp'] = int((Userdata.users[str(user.id)]['base_hp']-Userdata.users[str(user.id)]['hp'])*(r_perc/100))
                     Userdata.users[str(ctx.author.id)]['resting'] = {}
                     for buff in Userdata.users[str(ctx.author.id)]['buffs'].keys(): #reduce duration of active buffs
                         if buff == "rest":
@@ -185,7 +185,10 @@ class GobCog(BaseCog):
                 return await ctx.send("You are already at full health.".format(user.display_name))
             else:
                 hp_ratio = 1-(Userdata.users[str(user.id)]['hp']/Userdata.users[str(user.id)]['base_hp'])
-                heal_duration = round(28800*hp_ratio/Userdata.users[str(user.id)]['buffs'].get('rest',{'bonus':1})['bonus'])
+                if "rest" in Userdata.users[str(member.id)]['buffs'].keys():
+                    heal_duration = round(28800*hp_ratio/Userdata.users[str(user.id)]['buffs']['rest']['bonus'])
+                else:
+                    heal_duration = round(28800*hp_ratio)
                 now = time.time()
                 Userdata.users[str(user.id)]['resting'].update({'rest_start': now, 'rest_end': now+heal_duration})
                 togo = heal_duration
@@ -243,8 +246,16 @@ class GobCog(BaseCog):
                     for key in ReactionPredicate.YES_OR_NO_EMOJIS:
                         await msg.remove_reaction(key, ctx.bot.user)
                 if pred.result: #user reacted with Yes.
-                    Userdata.users[str(user.id)]['hp'] = int(Userdata.users[str(user.id)]['base_hp']*(r_perc/100))
+                    Userdata.users[str(user.id)]['hp'] = int((Userdata.users[str(user.id)]['base_hp']-Userdata.users[str(user.id)]['hp'])*(r_perc/100))
                     Userdata.users[str(user.id)]['resting'] = {}
+                    for buff in Userdata.users[str(user.id)]['buffs'].keys(): #reduce duration of active buffs
+                        if buff == "rest":
+                            if Userdata.users[str(user.id)]['buffs'][buff]['duration'] <= 1:
+                                expired.append(buff)
+                            else:
+                                Userdata.users[str(user.id)]['buffs'][buff]['duration'] = Userdata.users[str(user.id)]['buffs'][buff]['duration'] - 1
+                    for buff in expired: #remove buffs outside loop not to change size during iteration
+                        Userdata.users[str(user.id)]['buffs'].pop(buff)
                     await ctx.send("You broke your rest. Your hitpoints are currently at {}/{} ({}%)".format(Userdata.users[str(user.id)]['hp'],Userdata.users[str(user.id)]['base_hp'],r_perc))
 
     @commands.command()

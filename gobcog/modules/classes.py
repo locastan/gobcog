@@ -85,7 +85,7 @@ class Classes:
             Userdata.users[str(user.id)]['hp'] = int(Userdata.users[str(user.id)]['base_hp'])
         hp_pcnt = round((Userdata.users[str(user.id)]['hp']/Userdata.users[str(user.id)]['base_hp'])*100)
         if healer == user:
-            await ctx.send("**{}** healed himself for {} hitpoints ({}/{} {}%).".format(healer.display_name,bonus,Userdata.users[str(user.id)]['hp'],Userdata.users[str(user.id)]['base_hp'],hp_pcnt))
+            await ctx.send("**{}** selfhealed for {} hitpoints ({}/{} {}%).".format(healer.display_name,bonus,Userdata.users[str(user.id)]['hp'],Userdata.users[str(user.id)]['base_hp'],hp_pcnt))
         else:
             await ctx.send("**{}** healed **{}** for {} hitpoints ({}/{} {}%).".format(healer.display_name,user.display_name,bonus,Userdata.users[str(user.id)]['hp'],Userdata.users[str(user.id)]['base_hp'],hp_pcnt))
         return
