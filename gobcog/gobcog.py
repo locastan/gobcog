@@ -102,7 +102,7 @@ def not_resting():
                     for key in ReactionPredicate.YES_OR_NO_EMOJIS:
                         await msg.remove_reaction(key, ctx.bot.user)
                 if pred.result: #user reacted with Yes.
-                    Userdata.users[str(user.id)]['hp'] = int((Userdata.users[str(user.id)]['base_hp']-Userdata.users[str(user.id)]['hp'])*(r_perc/100))
+                    Userdata.users[str(user.id)]['hp'] += int((Userdata.users[str(user.id)]['base_hp']-Userdata.users[str(user.id)]['hp'])*(r_perc/100))
                     Userdata.users[str(ctx.author.id)]['resting'] = {}
                     for buff in Userdata.users[str(ctx.author.id)]['buffs'].keys(): #reduce duration of active buffs
                         if buff == "rest":
@@ -246,7 +246,7 @@ class GobCog(BaseCog):
                     for key in ReactionPredicate.YES_OR_NO_EMOJIS:
                         await msg.remove_reaction(key, ctx.bot.user)
                 if pred.result: #user reacted with Yes.
-                    Userdata.users[str(user.id)]['hp'] = int((Userdata.users[str(user.id)]['base_hp']-Userdata.users[str(user.id)]['hp'])*(r_perc/100))
+                    Userdata.users[str(user.id)]['hp'] += int((Userdata.users[str(user.id)]['base_hp']-Userdata.users[str(user.id)]['hp'])*(r_perc/100))
                     Userdata.users[str(user.id)]['resting'] = {}
                     for buff in Userdata.users[str(user.id)]['buffs'].keys(): #reduce duration of active buffs
                         if buff == "rest":
