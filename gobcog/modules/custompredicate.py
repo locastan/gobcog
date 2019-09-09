@@ -150,7 +150,7 @@ class CustomPredicate(Callable[[discord.Reaction, discord.abc.User], bool]):
                 return False
             if Userdata.users[str(u.id)]['resting'] != {}:
                 return False
-            if Userdata.users[str(u.id)]['resting'] <= 0:
+            if Userdata.users[str(u.id)]['hp'] <= 0:
                 return False
             if userlist != []:
                 if u.id not in userlist:
