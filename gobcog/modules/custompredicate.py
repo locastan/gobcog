@@ -4,6 +4,7 @@ from typing import Callable, ClassVar, List, Optional, Pattern, Sequence, Tuple,
 import discord
 
 from redbot.core import commands
+from .userdata import Userdata
 
 class CustomPredicate(Callable[[discord.Reaction, discord.abc.User], bool]):
     """A collection of predicates for reaction events.
