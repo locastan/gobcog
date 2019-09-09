@@ -80,7 +80,7 @@ def not_resting():
                 return True
             else:
                 now = time.time()
-                lapsed = now - Userdata.users[str(ctx.author.id)]['resting']['rest_start']
+                needed = Userdata.users[str(user.id)]['resting']['rest_end'] - Userdata.users[str(user.id)]['resting']['rest_start']
                 togo = Userdata.users[str(ctx.author.id)]['resting']['rest_end'] - now
                 m, s = divmod(togo, 60)
                 h, m = divmod(m, 60)
@@ -93,10 +93,10 @@ def not_resting():
                     out = "{:02d}m:{:02d}s".format(m, s)
                 else:
                     out = "{:01d}h:{:02d}m:{:02d}s".format(h, m, s)
-                if lapsed >= togo:
+                if togo <= 0:
                     r_perc = 100
                 else:
-                    r_perc = round(togo/lapsed*100)
+                    r_perc = round(togo/needed*100)
                 msg = await ctx.send("```css\n You are currently resting ({} remaining). Do you want to break your rest and only regain {}% of your health? ```".format(out, r_perc))
                 start_adding_reactions(msg, ReactionPredicate.YES_OR_NO_EMOJIS)
                 pred = ReactionPredicate.yes_or_no(msg, ctx.author)
@@ -229,7 +229,7 @@ class GobCog(BaseCog):
                 return True
             else:
                 now = time.time()
-                lapsed = now - Userdata.users[str(user.id)]['resting']['rest_start']
+                needed = Userdata.users[str(user.id)]['resting']['rest_end'] - Userdata.users[str(user.id)]['resting']['rest_start']
                 togo = Userdata.users[str(user.id)]['resting']['rest_end'] - now
                 m, s = divmod(togo, 60)
                 h, m = divmod(m, 60)
@@ -242,10 +242,10 @@ class GobCog(BaseCog):
                     out = "{:02d}m:{:02d}s".format(m, s)
                 else:
                     out = "{:01d}h:{:02d}m:{:02d}s".format(h, m, s)
-                if lapsed >= togo:
+                if togo <= 0:
                     r_perc = 100
                 else:
-                    r_perc = round(togo/lapsed*100)
+                    r_perc = round(togo/needed*100)
                 msg = await ctx.send("```css\n You are currently resting ({} remaining). Do you want to break your rest and only regain {}% of your health? ```".format(out, r_perc))
                 start_adding_reactions(msg, ReactionPredicate.YES_OR_NO_EMOJIS)
                 pred = ReactionPredicate.yes_or_no(msg, ctx.author)
