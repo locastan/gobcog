@@ -93,7 +93,10 @@ def not_resting():
                     out = "{:02d}m:{:02d}s".format(m, s)
                 else:
                     out = "{:01d}h:{:02d}m:{:02d}s".format(h, m, s)
-                r_perc = round(lapsed/togo*100)
+                if lapsed >= togo:
+                    r_perc = 100
+                else:
+                    r_perc = round(lapsed/togo*100)
                 msg = await ctx.send("```css\n You are currently resting ({} remaining). Do you want to break your rest and only regain {}% of your health? ```".format(out, r_perc))
                 start_adding_reactions(msg, ReactionPredicate.YES_OR_NO_EMOJIS)
                 pred = ReactionPredicate.yes_or_no(msg, ctx.author)
@@ -239,7 +242,10 @@ class GobCog(BaseCog):
                     out = "{:02d}m:{:02d}s".format(m, s)
                 else:
                     out = "{:01d}h:{:02d}m:{:02d}s".format(h, m, s)
-                r_perc = round(lapsed/togo*100)
+                if lapsed >= togo:
+                    r_perc = 100
+                else:
+                    r_perc = round(lapsed/togo*100)
                 msg = await ctx.send("```css\n You are currently resting ({} remaining). Do you want to break your rest and only regain {}% of your health? ```".format(out, r_perc))
                 start_adding_reactions(msg, ReactionPredicate.YES_OR_NO_EMOJIS)
                 pred = ReactionPredicate.yes_or_no(msg, ctx.author)
