@@ -578,7 +578,7 @@ class Adventure:
                 if scale <= 5:
                     options = ["That was slightly too difficult. Better luck next time.", "You could almost taste the glory of victory, now all you taste is blood.", "You almost won this."]
                 elif scale <= 25:
-                    options = ["No amount of diplomacy or valiant fighting could save you. You died.", "This challenge was too much for one hero.", "You tried your best, but couldn't succeed alone."]
+                    options = ["No amount of diplomacy or valiant fighting could save you.", "This challenge was too much for one hero.", "You tried your best, but couldn't succeed alone."]
                 else:
                     options = ["You never really had a chance.", "That one really mopped the floor with you.", "That could not have gone worse...", "You were beaten into a little gooey pulp."]
                 text= random.choice(options)
@@ -654,7 +654,7 @@ class Adventure:
                 if scale <= 5:
                     options = ["That was slightly too difficult. Better luck next time.", "The group could almost taste the glory of victory, now all you taste is blood.", "You almost had this. What a pity."]
                 elif scale <= 25:
-                    options = ["No amount of diplomacy or valiant fighting could save you. Everyone died.", "This challenge was too much for this group.", "You tried your best, but succumbed to overwhelming forces in the end."]
+                    options = ["No amount of diplomacy or valiant fighting could save you.", "This challenge was too much for this group.", "You tried your best, but succumbed to overwhelming forces in the end."]
                 else:
                     options = ["The party never really had a chance.", "That one really mopped the floor with the entire group.", "Not. Even. Close.", "All that remains of the valiant party are some greasy smears on the floor..."]
                 text= random.choice(options)

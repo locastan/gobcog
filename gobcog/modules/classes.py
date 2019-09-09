@@ -78,7 +78,7 @@ class Classes:
 
     async def heal(ctx,healer,user):
         d8 = random.randint(1,8)
-        bonus = d8 + int(round(Userdata.users[str(healer)]['lvl']/5))
+        bonus = d8 + int(round(Userdata.users[str(healer.id)]['lvl']/5))
         if Userdata.users[str(user.id)]['hp'] + bonus <= Userdata.users[str(user.id)]['base_hp']:
             Userdata.users[str(user.id)]['hp'] += bonus
         else:

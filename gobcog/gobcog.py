@@ -43,14 +43,14 @@ def has_hp():
                 if Userdata.users[str(ctx.author.id)]['resting']['rest_end'] <= time.time():
                     Userdata.users[str(ctx.author.id)]['hp'] = int(Userdata.users[str(ctx.author.id)]['base_hp'])
                     Userdata.users[str(ctx.author.id)]['resting'] = {}
-                    for buff in Userdata.users[str(member.id)]['buffs'].keys(): #reduce duration of active buffs
+                    for buff in Userdata.users[str(ctx.author.id)]['buffs'].keys(): #reduce duration of active buffs
                         if buff == "rest":
-                            if Userdata.users[str(member.id)]['buffs'][buff]['duration'] <= 1:
+                            if Userdata.users[str(ctx.author.id)]['buffs'][buff]['duration'] <= 1:
                                 expired.append(buff)
                             else:
-                                Userdata.users[str(member.id)]['buffs'][buff]['duration'] = Userdata.users[str(member.id)]['buffs'][buff]['duration'] - 1
+                                Userdata.users[str(ctx.author.id)]['buffs'][buff]['duration'] = Userdata.users[str(ctx.author.id)]['buffs'][buff]['duration'] - 1
                     for buff in expired: #remove buffs outside loop not to change size during iteration
-                        Userdata.users[str(member.id)]['buffs'].pop(buff)
+                        Userdata.users[str(ctx.author.id)]['buffs'].pop(buff)
                     await Userdata.save()
                     await ctx.send("You awake fully recovered from your rest.")
                     return True
@@ -65,14 +65,14 @@ def not_resting():
             if Userdata.users[str(ctx.author.id)]['resting']['rest_end'] <= time.time():
                 Userdata.users[str(ctx.author.id)]['hp'] = int(Userdata.users[str(ctx.author.id)]['base_hp'])
                 Userdata.users[str(ctx.author.id)]['resting'] = {}
-                for buff in Userdata.users[str(member.id)]['buffs'].keys(): #reduce duration of active buffs
+                for buff in Userdata.users[str(ctx.author.id)]['buffs'].keys(): #reduce duration of active buffs
                     if buff == "rest":
-                        if Userdata.users[str(member.id)]['buffs'][buff]['duration'] <= 1:
+                        if Userdata.users[str(ctx.author.id)]['buffs'][buff]['duration'] <= 1:
                             expired.append(buff)
                         else:
-                            Userdata.users[str(member.id)]['buffs'][buff]['duration'] = Userdata.users[str(member.id)]['buffs'][buff]['duration'] - 1
+                            Userdata.users[str(ctx.author.id)]['buffs'][buff]['duration'] = Userdata.users[str(ctx.author.id)]['buffs'][buff]['duration'] - 1
                 for buff in expired: #remove buffs outside loop not to change size during iteration
-                    Userdata.users[str(member.id)]['buffs'].pop(buff)
+                    Userdata.users[str(ctx.author.id)]['buffs'].pop(buff)
                 await Userdata.save()
                 await ctx.send("You awake fully recovered from your rest.")
                 return True
@@ -104,14 +104,14 @@ def not_resting():
                 if pred.result: #user reacted with Yes.
                     Userdata.users[str(ctx.author.id)]['hp'] = int(Userdata.users[str(ctx.author.id)]['base_hp']*(r_perc/100))
                     Userdata.users[str(ctx.author.id)]['resting'] = {}
-                    for buff in Userdata.users[str(member.id)]['buffs'].keys(): #reduce duration of active buffs
+                    for buff in Userdata.users[str(ctx.author.id)]['buffs'].keys(): #reduce duration of active buffs
                         if buff == "rest":
-                            if Userdata.users[str(member.id)]['buffs'][buff]['duration'] <= 1:
+                            if Userdata.users[str(ctx.author.id)]['buffs'][buff]['duration'] <= 1:
                                 expired.append(buff)
                             else:
-                                Userdata.users[str(member.id)]['buffs'][buff]['duration'] = Userdata.users[str(member.id)]['buffs'][buff]['duration'] - 1
+                                Userdata.users[str(ctx.author.id)]['buffs'][buff]['duration'] = Userdata.users[str(ctx.author.id)]['buffs'][buff]['duration'] - 1
                     for buff in expired: #remove buffs outside loop not to change size during iteration
-                        Userdata.users[str(member.id)]['buffs'].pop(buff)
+                        Userdata.users[str(ctx.author.id)]['buffs'].pop(buff)
                     await ctx.send("You broke your rest. Your hitpoints are currently at {}/{} ({}%)".format(Userdata.users[str(ctx.author.id)]['hp'],Userdata.users[str(ctx.author.id)]['base_hp'],r_perc))
                     return True
                 else:
@@ -206,14 +206,14 @@ class GobCog(BaseCog):
             if Userdata.users[str(ctx.author.id)]['resting']['rest_end'] <= time.time():
                 Userdata.users[str(ctx.author.id)]['hp'] = int(Userdata.users[str(ctx.author.id)]['base_hp'])
                 Userdata.users[str(ctx.author.id)]['resting'] = {}
-                for buff in Userdata.users[str(member.id)]['buffs'].keys(): #reduce duration of active buffs
+                for buff in Userdata.users[str(ctx.author.id)]['buffs'].keys(): #reduce duration of active buffs
                     if buff == "rest":
-                        if Userdata.users[str(member.id)]['buffs'][buff]['duration'] <= 1:
+                        if Userdata.users[str(ctx.author.id)]['buffs'][buff]['duration'] <= 1:
                             expired.append(buff)
                         else:
-                            Userdata.users[str(member.id)]['buffs'][buff]['duration'] = Userdata.users[str(member.id)]['buffs'][buff]['duration'] - 1
+                            Userdata.users[str(ctx.author.id)]['buffs'][buff]['duration'] = Userdata.users[str(ctx.author.id)]['buffs'][buff]['duration'] - 1
                 for buff in expired: #remove buffs outside loop not to change size during iteration
-                    Userdata.users[str(member.id)]['buffs'].pop(buff)
+                    Userdata.users[str(ctx.author.id)]['buffs'].pop(buff)
                 await Userdata.save()
                 await ctx.send("You awake fully recovered from your rest.")
                 return True
