@@ -115,7 +115,7 @@ def not_resting():
                                 Userdata.users[str(ctx.author.id)]['buffs'][buff]['duration'] = Userdata.users[str(ctx.author.id)]['buffs'][buff]['duration'] - 1
                     for buff in expired: #remove buffs outside loop not to change size during iteration
                         Userdata.users[str(ctx.author.id)]['buffs'].pop(buff)
-                    await ctx.send("You broke your rest. Your hitpoints are currently at {}/{} ({}%)".format(Userdata.users[str(ctx.author.id)]['hp'],Userdata.users[str(ctx.author.id)]['base_hp'],r_perc))
+                    await ctx.send("You broke your rest. Your hitpoints are currently at {}/{} (+{}%)".format(Userdata.users[str(ctx.author.id)]['hp'],Userdata.users[str(ctx.author.id)]['base_hp'],r_perc))
                     return True
                 else:
                     return False
@@ -261,7 +261,7 @@ class GobCog(BaseCog):
                                 Userdata.users[str(user.id)]['buffs'][buff]['duration'] = Userdata.users[str(user.id)]['buffs'][buff]['duration'] - 1
                     for buff in expired: #remove buffs outside loop not to change size during iteration
                         Userdata.users[str(user.id)]['buffs'].pop(buff)
-                    await ctx.send("You broke your rest. Your hitpoints are currently at {}/{} ({}%)".format(Userdata.users[str(user.id)]['hp'],Userdata.users[str(user.id)]['base_hp'],r_perc))
+                    await ctx.send("You broke your rest. Your hitpoints are currently at {}/{} (+{}%)".format(Userdata.users[str(user.id)]['hp'],Userdata.users[str(user.id)]['base_hp'],r_perc))
 
     @commands.command()
     @commands.guild_only()
