@@ -82,6 +82,7 @@ def not_resting():
                 now = time.time()
                 needed = Userdata.users[str(user.id)]['resting']['rest_end'] - Userdata.users[str(user.id)]['resting']['rest_start']
                 lapsed = now - Userdata.users[str(user.id)]['resting']['rest_start']
+                togo = Userdata.users[str(user.id)]['resting']['rest_end'] - now
                 m, s = divmod(togo, 60)
                 h, m = divmod(m, 60)
                 s = int(s)
@@ -231,6 +232,7 @@ class GobCog(BaseCog):
                 now = time.time()
                 needed = Userdata.users[str(user.id)]['resting']['rest_end'] - Userdata.users[str(user.id)]['resting']['rest_start']
                 lapsed = now - Userdata.users[str(user.id)]['resting']['rest_start']
+                togo = Userdata.users[str(user.id)]['resting']['rest_end'] - now
                 m, s = divmod(togo, 60)
                 h, m = divmod(m, 60)
                 s = int(s)
