@@ -1124,11 +1124,12 @@ class GobCog(BaseCog):
                 equip = {"itemname": item,"item": Userdata.users[str(user.id)]['items']['backpack'][item]}
                 await self.equip_item(ctx, equip, True)
         elif switch == "sell": #new logic allows for bulk sales. It also always confirms the sale by yes/no query to avoid accidents.
-            if item == "None" or not any([x for x in Userdata.users[str(user.id)]['items']['backpack'] if item in x.lower()]+[x for x in Userdata.users[str(user.id)]['consumables'] if item in x.lower()]):
+            if item == "None" or not any([x for x in Userdata.users[str(user.id)]['items']['backpack'] if item in x.lower()]+[x for x in Userdata.users[str(user.id)]['consumables'] if item in x.lower()]+[x for x in Userdata.users[str(user.id)]['ingredients'] if item in x.lower()]):
                 await ctx.send("You have to specify an item (or partial name) from your backpack to sell.")
                 return
             lookup = list(x for x in Userdata.users[str(user.id)]['items']['backpack'] if item in x.lower())
             lookup += list(x for x in Userdata.users[str(user.id)]['consumables'] if item in x.lower())
+            lookup += list(x for x in Userdata.users[str(user.id)]['ingredients'] if item in x.lower())
             if any([x for x in lookup if "{.:'" in x.lower()]):
                 device = [x for x in lookup if "{.:'" in x.lower()]
                 await ctx.send("```css\n Your {} is refusing to be sold and bit your finger for trying. ```".format(device))
@@ -1150,25 +1151,40 @@ class GobCog(BaseCog):
                             queryitem = {'itemname': item,'item': copy.deepcopy(Userdata.users[str(user.id)]['consumables'][item])}
                             queryitem['item']['uses'] = asking
                         else:
-                            queryitem = {'itemname': item,'item': Userdata.users[str(user.id)]['items']['backpack'].get(item, Userdata.users[str(user.id)]['consumables'].get(item))}
+                            queryitem = {'itemname': item,'item': Userdata.users[str(user.id)]['consumables'].get(item)}
+                    elif item in Userdata.users[str(user.id)]['ingredients'].keys() and asking != 0:
+                        if int(Userdata.users[str(user.id)]['ingredients'][item]['uses']) > asking:
+                            queryitem = {'itemname': item,'item': copy.deepcopy(Userdata.users[str(user.id)]['ingredients'][item])}
+                            queryitem['item']['uses'] = asking
+                        else:
+                            queryitem = {'itemname': item,'item': Userdata.users[str(user.id)]['ingredients'].get(item)}
                     else:
-                        queryitem = {'itemname': item,'item': Userdata.users[str(user.id)]['items']['backpack'].get(item, Userdata.users[str(user.id)]['consumables'].get(item))}
+                        queryitem = {'itemname': item,'item': Userdata.users[str(user.id)]['items']['backpack'].get(item, Userdata.users[str(user.id)]['consumables'].get(item, Userdata.users[str(user.id)]['ingredients'].get(item)))} #multiple fallbacks to other inventories needed when no sell amount is specified.
                     moneypile += await GobCog.sell(user,queryitem)
                     if item in Consumables.consbles.keys():
                         if int(Userdata.users[str(user.id)]['consumables'][item]['uses']) > asking and asking != 0:
                             Userdata.users[str(user.id)]['consumables'][item]['uses'] = int(Userdata.users[str(user.id)]['consumables'][item]['uses']) - asking
                         else:
                             Userdata.users[str(user.id)]['consumables'].pop(item)
+                    elif item in Userdata.users[str(user.id)]['ingredients'].keys():
+                        if int(Userdata.users[str(user.id)]['ingredients'][item]['uses']) > asking and asking != 0:
+                            Userdata.users[str(user.id)]['ingredients'][item]['uses'] = int(Userdata.users[str(user.id)]['ingredients'][item]['uses']) - asking
+                        else:
+                            Userdata.users[str(user.id)]['ingredients'].pop(item)
                     else:
                         Userdata.users[str(user.id)]['items']['backpack'].pop(item)
                 await ctx.send("Sold {} for {} copperpieces.".format(str(lookup),moneypile))
                 await GobCog.save()
         elif switch == "trade":
-            if item == "None" or not any([x for x in Userdata.users[str(user.id)]['items']['backpack'] if item in x.lower()]+[x for x in Userdata.users[str(user.id)]['consumables'] if item in x.lower()]):
+            if item == "None" or not any([x for x in Userdata.users[str(user.id)]['items']['backpack'] if item in x.lower()]+[x for x in Userdata.users[str(user.id)]['consumables'] if item in x.lower()]+[x for x in Userdata.users[str(user.id)]['ingredients'] if item in x.lower()]):
                 await ctx.send("You have to specify an item from your backpack to trade.")
+                return
+            if buyer == None:
+                await ctx.send("You have to @ somebody to trade with.")
                 return
             lookup = list(x for x in Userdata.users[str(user.id)]['items']['backpack'] if item in x.lower())
             lookup += list(x for x in Userdata.users[str(user.id)]['consumables'] if item in x.lower())
+            lookup += list(x for x in Userdata.users[str(user.id)]['ingredients'] if item in x.lower())
             if len(lookup) > 1:
                 text = "```css\n"
                 for num, name in enumerate(lookup, start=1):
@@ -1193,6 +1209,12 @@ class GobCog(BaseCog):
                 return
             if item in Consumables.consbles.keys():
                 if Userdata.users[str(user.id)]['consumables'].get(item)['uses'] >= quant:
+                    await ctx.send("{} wants to sell {}x {}.".format(user.display_name,quant,item))
+                else:
+                    await ctx.send("You only have {} doses of {} to sell.".format(Userdata.users[str(user.id)]['consumables'].get(item)['uses'],item))
+                    return
+            elif item in Userdata.users[str(user.id)]['ingredients'].keys():
+                if Userdata.users[str(user.id)]['ingredients'][name].get('uses', 0) >= quant:
                     await ctx.send("{} wants to sell {}x {}.".format(user.display_name,quant,item))
                 else:
                     await ctx.send("You only have {} doses of {} to sell.".format(Userdata.users[str(user.id)]['consumables'].get(item)['uses'],item))
@@ -1243,6 +1265,21 @@ class GobCog(BaseCog):
                                 Userdata.users[str(buyer.id)]['consumables'][item['itemname']]['uses'] = Userdata.users[str(buyer.id)]['consumables'][item['itemname']].get("uses", 0) + item['item']['uses']
                             else:
                                 Userdata.users[str(buyer.id)]['consumables'].update({item: tradeitem})
+                    elif item in Userdata.users[str(user.id)]['ingredients'].keys():
+                        if Userdata.users[str(user.id)]['ingredients'][item]['uses'] > quant:
+                            Userdata.users[str(user.id)]['ingredients'][item]['uses'] = Userdata.users[str(user.id)]['ingredients'][item]['uses'] - quant
+                            tradeitem = copy.deepcopy(Userdata.users[str(user.id)]['ingredients'][item])
+                            tradeitem['uses'] = quant
+                            if item in Userdata.users[str(buyer.id)]['ingredients'].keys():
+                                Userdata.users[str(buyer.id)]['ingredients'][item['itemname']]['uses'] = Userdata.users[str(buyer.id)]['ingredients'][item['itemname']].get("uses", 0) + item['item']['uses']
+                            else:
+                                Userdata.users[str(buyer.id)]['ingredients'].update({item: tradeitem})
+                        else:
+                            tradeitem = Userdata.users[str(user.id)]['ingredients'].pop(item)
+                            if item in Userdata.users[str(buyer.id)]['ingredients'].keys():
+                                Userdata.users[str(buyer.id)]['ingredients'][item['itemname']]['uses'] = Userdata.users[str(buyer.id)]['ingredients'][item['itemname']].get("uses", 0) + item['item']['uses']
+                            else:
+                                Userdata.users[str(buyer.id)]['ingredients'].update({item: tradeitem})
                     else:
                         tradeitem = Userdata.users[str(user.id)]['items']['backpack'].pop(item)
                         Userdata.users[str(buyer.id)]['items']['backpack'].update({item: tradeitem})
@@ -1654,9 +1691,11 @@ class GobCog(BaseCog):
             base = (500,1000)
         elif "." in item['itemname']:
             base = (100,500)
-        else :
+        else:
             base = (10,200)
-        if item['item']['slot'] == ['consumable']:
+        if not hasattr(item['item'], 'slot'):
+            price = random.randint(base[0]*2,base[1]*2)*max(item['item']['uses'],1)
+        elif item['item']['slot'] == ['consumable']:
             price = random.randint(base[0],base[1])*max(item['item']['uses'],1)
         else:
             price = random.randint(base[0],base[1])*max(item['item']['att']+item['item']['cha'],1)

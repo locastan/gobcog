@@ -28,6 +28,7 @@ class Consumables:
                     ".hearty_stew":{'type':"buff", 'attrib':"rest", 'min':3, 'max':4, 'duration':1, 'desc':"Nourishing and artery hardening soup."},
                     "[sweetbread]":{'type':"buff", 'attrib':"rest", 'min':4, 'max':6, 'duration':1, 'desc':"Delicious bread, provides a good meal."},
                     "bandaid":{'type':"medicine", 'attrib':"hp", 'min':1, 'max':4, 'duration':1, 'desc':"Small bandaid to mend little scratches."},
+                    "bandages":{'type':"medicine", 'attrib':"hp", 'min':2, 'max':6, 'duration':1, 'desc':"Bandages to mend wounds and set broken bones."},
                     ".potion_of_healing":{'type':"medicine", 'attrib':"hp", 'min':1, 'max':8, 'duration':1, 'desc':"Standard healing potion."},
                     "[potion of rejuvenation]":{'type':"medicine", 'attrib':"hp", 'min':50, 'max':100, 'duration':1, 'desc':"Restores a % of your HP (min 50%)."},
                     "alchemy scroll":{'type':"read", 'attrib':"recipe", 'min':1, 'max':1, 'duration':1, 'desc':"Studying the blurred scribbles might reveal an alchemical recipe."}
