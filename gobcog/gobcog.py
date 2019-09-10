@@ -1693,7 +1693,7 @@ class GobCog(BaseCog):
             base = (100,500)
         else:
             base = (10,200)
-        if not hasattr(item['item'], 'slot'):
+        if not 'slot' in item['item']:
             price = random.randint(base[0]*2,base[1]*2)*max(item['item']['uses'],1)
         elif item['item']['slot'] == ['consumable']:
             price = random.randint(base[0],base[1])*max(item['item']['uses'],1)
