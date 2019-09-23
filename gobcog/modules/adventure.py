@@ -545,7 +545,7 @@ class Adventure:
             if slain:
                 scale = attack-Adventure.str
                 if scale == 0:
-                    text= ("**{}** bested the {} by a hairs width.").format(fighters,Adventure.challenge)
+                    text= ("**{}** bested the {} by a hair\'s breadth.").format(fighters,Adventure.challenge)
                 elif scale <= 5:
                     text= ("**{}** barely managed to defeat the {}.").format(fighters,Adventure.challenge)
                 elif scale <= 10:

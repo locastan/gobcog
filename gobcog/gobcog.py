@@ -80,9 +80,9 @@ def not_resting():
                 return True
             else:
                 now = time.time()
-                needed = Userdata.users[str(user.id)]['resting']['rest_end'] - Userdata.users[str(user.id)]['resting']['rest_start']
-                lapsed = now - Userdata.users[str(user.id)]['resting']['rest_start']
-                togo = Userdata.users[str(user.id)]['resting']['rest_end'] - now
+                needed = Userdata.users[str(ctx.author.id)]['resting']['rest_end'] - Userdata.users[str(ctx.author.id)]['resting']['rest_start']
+                lapsed = now - Userdata.users[str(ctx.author.id)]['resting']['rest_start']
+                togo = Userdata.users[str(ctx.author.id)]['resting']['rest_end'] - now
                 m, s = divmod(togo, 60)
                 h, m = divmod(m, 60)
                 s = int(s)
@@ -108,7 +108,7 @@ def not_resting():
                     for key in ReactionPredicate.YES_OR_NO_EMOJIS:
                         await msg.remove_reaction(key, ctx.bot.user)
                 if pred.result: #user reacted with Yes.
-                    Userdata.users[str(user.id)]['hp'] += int((Userdata.users[str(user.id)]['base_hp']-Userdata.users[str(user.id)]['hp'])*(r_perc/100))
+                    Userdata.users[str(ctx.author.id)]['hp'] += int((Userdata.users[str(ctx.author.id)]['base_hp']-Userdata.users[str(ctx.author.id)]['hp'])*(r_perc/100))
                     Userdata.users[str(ctx.author.id)]['resting'] = {}
                     expired = []
                     for buff in Userdata.users[str(ctx.author.id)]['buffs'].keys(): #reduce duration of active buffs
