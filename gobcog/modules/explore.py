@@ -76,7 +76,7 @@ class Explore:
             }
 
     #biomes carry rarities and what can be found in the tileset.
-    biomes = {"forest": {"legendary":["Ooze","Sageworth","Whipweed","Conifer","Cyanka Lilly","Flyleaf"],"epic":["Mushroom","Whipweed","Maple","Oak"],"rare":["Maple","Rock"],"common":["Mushroom","Oak","Oak","Grass"]},
+    biomes = {"forest": {"legendary":["Ooze","Sageworth","Whipweed","Conifer","Cyanka Lilly","Flyleaf"],"epic":["Chestnut","Whipweed","Maple","Oak"],"rare":["Maple","Rock"],"common":["Mushroom","Oak","Oak","Grass"]},
             "grassland": {"legendary":["Twolip","Moneypenny","Raging Frills","Rose","Oak"],"epic":["Mourning Star","Honeytail","Clover","Rock"],"rare":["Oilflower","Grass","Grass"],"common":["Daisy","Grass","Grass"]},
             "drygrass":{"legendary":["Na-palm","Fleshthorn","Rock"],"epic":["Tongue Sprout","Grass","Rock"],"rare":["Rust Leafs","Grass","Grass"],"common":["Rock","Grass","Grass"]}
             }
