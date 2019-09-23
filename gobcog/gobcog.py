@@ -97,7 +97,11 @@ def has_hp():
                         for buff in expired: #remove buffs outside loop not to change size during iteration
                             Userdata.users[str(ctx.author.id)]['buffs'].pop(buff)
                         await ctx.send("You broke your rest. Your hitpoints are currently at {}/{} (+{}%)".format(Userdata.users[str(ctx.author.id)]['hp'],Userdata.users[str(ctx.author.id)]['base_hp'],r_perc))
-                        return True
+                        if Userdata.users[str(ctx.author.id)]['hp'] > 0:
+                            return True
+                        else:
+                            await ctx.send("You are still too injured to do anything.")
+                            return False
                     else:
                         await ctx.send("You are too injured to do anything.")
                         return False
