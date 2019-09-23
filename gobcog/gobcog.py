@@ -55,6 +55,52 @@ def has_hp():
                     await Userdata.save()
                     await ctx.send("You awake fully recovered from your rest.")
                     return True
+                else:
+                    now = time.time()
+                    needed = Userdata.users[str(ctx.author.id)]['resting']['rest_end'] - Userdata.users[str(ctx.author.id)]['resting']['rest_start']
+                    lapsed = now - Userdata.users[str(ctx.author.id)]['resting']['rest_start']
+                    togo = Userdata.users[str(ctx.author.id)]['resting']['rest_end'] - now
+                    m, s = divmod(togo, 60)
+                    h, m = divmod(m, 60)
+                    s = int(s)
+                    m = int(m)
+                    h = int(h)
+                    if h == 0 and m == 0:
+                        out = "{:02d}s".format(s)
+                    elif h == 0:
+                        out = "{:02d}m:{:02d}s".format(m, s)
+                    else:
+                        out = "{:01d}h:{:02d}m:{:02d}s".format(h, m, s)
+                    if lapsed >= needed:
+                        r_perc = 100
+                    else:
+                        r_perc = round(lapsed/needed*100)
+                    msg = await ctx.send("```css\n You are currently resting ({} remaining). Do you want to break your rest and only regain {}% of your health? ```".format(out, r_perc))
+                    start_adding_reactions(msg, ReactionPredicate.YES_OR_NO_EMOJIS)
+                    pred = ReactionPredicate.yes_or_no(msg, ctx.author)
+                    await ctx.bot.wait_for("reaction_add", check=pred, timeout=30)
+                    try:
+                        await msg.delete()
+                    except discord.Forbidden or asyncio.TimeoutError:  # cannot remove message try remove emojis
+                        for key in ReactionPredicate.YES_OR_NO_EMOJIS:
+                            await msg.remove_reaction(key, ctx.bot.user)
+                    if pred.result: #user reacted with Yes.
+                        Userdata.users[str(ctx.author.id)]['hp'] += int((Userdata.users[str(ctx.author.id)]['base_hp']-Userdata.users[str(ctx.author.id)]['hp'])*(r_perc/100))
+                        Userdata.users[str(ctx.author.id)]['resting'] = {}
+                        expired = []
+                        for buff in Userdata.users[str(ctx.author.id)]['buffs'].keys(): #reduce duration of active buffs
+                            if buff == "rest":
+                                if Userdata.users[str(ctx.author.id)]['buffs'][buff]['duration'] <= 1:
+                                    expired.append(buff)
+                                else:
+                                    Userdata.users[str(ctx.author.id)]['buffs'][buff]['duration'] = Userdata.users[str(ctx.author.id)]['buffs'][buff]['duration'] - 1
+                        for buff in expired: #remove buffs outside loop not to change size during iteration
+                            Userdata.users[str(ctx.author.id)]['buffs'].pop(buff)
+                        await ctx.send("You broke your rest. Your hitpoints are currently at {}/{} (+{}%)".format(Userdata.users[str(ctx.author.id)]['hp'],Userdata.users[str(ctx.author.id)]['base_hp'],r_perc))
+                        return True
+                    else:
+                        await ctx.send("You are too injured to do anything.")
+                        return False
             else:
                 await ctx.send("You are too injured to do anything. You need to rest a bit.")
                 return False
