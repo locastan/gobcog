@@ -502,7 +502,7 @@ class Explore:
         if Explore.movesmsg:
             await Explore.movesmsg.delete()
         if Explore.intro:
-            text = "{} went exploring {} and found:\n".format(user.display_name, Explore.biome)
+            text = "{} went exploring the {} and found:\n".format(user.display_name, Explore.biome)
             if Explore.loot != {}:
                 for key in Explore.loot.keys():
                     text += "{}x {} \n".format(Explore.loot.get(key),key)
