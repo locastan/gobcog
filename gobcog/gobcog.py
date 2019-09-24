@@ -554,7 +554,7 @@ class GobCog(BaseCog):
         """
         global users
         if user == None:
-            user = ctx.author.id
+            user = ctx.author
         if 'name' in Userdata.users[str(ctx.author.id)]['class'] and Userdata.users[str(ctx.author.id)]['class']['name'] != "Cleric":
             ctx.command.reset_cooldown(ctx)
             return await ctx.send("You need to be a Cleric to do this.")
