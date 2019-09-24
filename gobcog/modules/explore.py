@@ -15,7 +15,7 @@ class Explore:
 
     #This class provides a simple emoji based 2D game engine for discord.
 
-    tiles = {"Ooze":{"tile": " 🦠 ", "desc":"Some kind of goo. It seems forever changing in color and shapes."},
+    tiles = {"Ooze":{"tile": "🥑", "desc":"Some kind of goo. It seems forever changing in color and shapes."},
             "Moneypenny":{"tile": "🌸", "desc":"A delicate pink flower, supposed to bring good fortune."},
             "Raging Frills":{"tile": "💮", "desc":"A white flower with red rimmed petals, likened to resemble the blooshot eyes of raging warriors."},
             "Cyanka Lilly":{"tile": "🏵", "desc":"A poisonous blue flowered weed. Experimental ingredient used in small doses."},
@@ -45,7 +45,7 @@ class Explore:
             "Player":{"tile": "🗿", "desc":"Player"}
             }
 
-    tile_lookup = {" 🦠 ":"Ooze",
+    tile_lookup = {"🥑":"Ooze",
             "🌸":"Moneypenny",
             "💮":"Raging Frills",
             "🏵": "Cyanka Lilly",
