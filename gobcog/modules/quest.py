@@ -594,19 +594,19 @@ class Quest:
                         attack -= 5 * len(Quest.userslist["fight"])
                         diplomacy -= 5 * len(Quest.userslist["talk"])
                         fumblelist.append(user)
-                        await ctx.send("**" + user + "**" + "'s sermon offended the mighty Herbert. (-{}🗡/-{}🗨)".format(5 * len(Quest.userslist["fight"]),5 * len(Quest.userslist["talk"])))
+                        await ctx.send("**" + user + "**" + "'s sermon offended the mighty Herbert. (🎲({}) -{}🗡/-{}🗨)".format(roll, 5 * len(Quest.userslist["fight"]),5 * len(Quest.userslist["talk"])))
                     elif roll > 1 and roll <= 10:
                         attack += 2 * len(Quest.userslist["fight"])
                         diplomacy += 2 * len(Quest.userslist["talk"])
-                        await ctx.send("**" + user + "**" + "'s blessed you all in Herberts name. (+{}🗡/+{}🗨)".format(2 * len(Quest.userslist["fight"]),2 * len(Quest.userslist["talk"])))
+                        await ctx.send("**" + user + "**" + "'s blessed you all in Herberts name. (🎲({}) +{}🗡/+{}🗨)".format(roll, 2 * len(Quest.userslist["fight"]),2 * len(Quest.userslist["talk"])))
                     elif roll > 10 and roll <= 19:
                         attack += 5 * len(Quest.userslist["fight"])
                         diplomacy += 5 * len(Quest.userslist["talk"])
-                        await ctx.send("**" + user + "**" + "'s blessed you all in Herberts name. (+{}🗡/+{}🗨)".format(5 * len(Quest.userslist["fight"]),5 * len(Quest.userslist["talk"])))
+                        await ctx.send("**" + user + "**" + "'s blessed you all in Herberts name. (🎲({}) +{}🗡/+{}🗨)".format(roll, 5 * len(Quest.userslist["fight"]),5 * len(Quest.userslist["talk"])))
                     else:
                         attack += 20 * len(Quest.userslist["fight"])
                         diplomacy += 20 * len(Quest.userslist["talk"])
-                        await ctx.send("**" + user + "**" + " turned into an avatar of mighty Herbert. (+{}🗡/+{}🗨)".format(20 * len(Quest.userslist["fight"]),20 * len(Quest.userslist["talk"])))
+                        await ctx.send("**" + user + "**" + " turned into an avatar of mighty Herbert. (🎲({}) +{}🗡/+{}🗨)".format(roll, 20 * len(Quest.userslist["fight"]),20 * len(Quest.userslist["talk"])))
                 else:
                     roll = random.randint(1,4)
                     if len(Quest.userslist["fight"]+Quest.userslist["talk"]) == 0:
