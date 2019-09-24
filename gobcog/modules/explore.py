@@ -76,9 +76,9 @@ class Explore:
             }
 
     #biomes carry rarities and what can be found in the tileset.
-    biomes = {"forest": {"legendary":["Ooze","Sageworth","Whipweed","Conifer","Cyanka Lilly","Flyleaf"],"epic":["Chestnut","Whipweed","Maple","Oak"],"rare":["Maple","Rock"],"common":["Mushroom","Oak","Oak","Grass"]},
-            "grassland": {"legendary":["Twolip","Moneypenny","Raging Frills","Rose","Oak"],"epic":["Mourning Star","Honeytail","Clover","Rock"],"rare":["Oilflower","Grass","Grass"],"common":["Daisy","Grass","Grass"]},
-            "drygrass":{"legendary":["Na-palm","Fleshthorn","Rock"],"epic":["Tongue Sprout","Grass","Rock"],"rare":["Rust Leafs","Grass","Grass"],"common":["Rock","Grass","Grass"]}
+    biomes = {"Enchanted Forest": {"legendary":["Ooze","Sageworth","Whipweed","Conifer","Cyanka Lilly","Flyleaf"],"epic":["Chestnut","Whipweed","Maple","Oak"],"rare":["Maple","Rock"],"common":["Mushroom","Oak","Oak","Grass"]},
+            "Lush Grasslands": {"legendary":["Twolip","Moneypenny","Raging Frills","Rose","Oak"],"epic":["Mourning Star","Honeytail","Clover","Rock"],"rare":["Oilflower","Grass","Grass"],"common":["Daisy","Grass","Grass"]},
+            "Drygrass Steppes":{"legendary":["Na-palm","Fleshthorn","Rock"],"epic":["Tongue Sprout","Grass","Rock"],"rare":["Rust Leafs","Grass","Grass"],"common":["Rock","Grass","Grass"]}
             }
 
     mapsize = [13,13]
@@ -93,7 +93,8 @@ class Explore:
     movesmsg = None
 
     async def explore(ctx,user):
-        Explore.intro = await ctx.send("{} is exploring:".format(user.display_name))
+        Explore.biome = random.choice(list(Explore.biomes.keys()))
+        Explore.intro = await ctx.send("{} is exploring the {}:".format(user.display_name, Explore.biome))
         Explore.statusmsg = None
         Explore.pending = []
         Explore.loot = {}
@@ -101,7 +102,7 @@ class Explore:
         Explore.player_pos = [6,6]
         Explore.moves = 10 + int(Userdata.users[str(user.id)]['lvl']/2)
         Explore.movesmsg = await ctx.send("{} moves remaining.".format(Explore.moves))
-        Explore.map, Explore.fowmap = await Explore.generate(random.choice(list(Explore.biomes.keys())),Explore.mapsize)
+        Explore.map, Explore.fowmap = await Explore.generate(Explore.biome,Explore.mapsize)
         await Explore.update_fow()
         output = await Explore.mapdrawer(list(Explore.fowmap)) #passing just a copy of the original tile list so original does not get changed.
         Explore.mapmsg = await ctx.send(output)
@@ -468,7 +469,7 @@ class Explore:
         if Explore.movesmsg:
             await Explore.movesmsg.delete()
         if Explore.intro:
-            text = "{} went exploring here and found:\n".format(user.display_name)
+            text = "{} went exploring the {} and found:\n".format(user.display_name, Explore.biome)
             if Explore.loot != {}:
                 for key in Explore.loot.keys():
                     text += "{}x {} \n".format(Explore.loot.get(key),key)
@@ -501,7 +502,7 @@ class Explore:
         if Explore.movesmsg:
             await Explore.movesmsg.delete()
         if Explore.intro:
-            text = "{} went exploring here and found:\n".format(user.display_name)
+            text = "{} went exploring {} and found:\n".format(user.display_name, Explore.biome)
             if Explore.loot != {}:
                 for key in Explore.loot.keys():
                     text += "{}x {} \n".format(Explore.loot.get(key),key)
