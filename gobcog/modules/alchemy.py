@@ -41,7 +41,7 @@ class Alchemy:
                 "DaisyMoneypennyOilflower": {"yields":".dust_of_midas", "uses": (2,4)},
                 "DaisyRoseSageworth": {"yields":".scroll_of_learning", "uses": (2,4)},
                 "FlyleafRoseSageworth": {"yields":"[foliant of wisdom]", "uses": (1,2)},
-                "Mourning StarNa-palmOoze": {"yields":"[chaos egg]", "uses": (1,1)},
+                "Mourning StarNa-palmOoze": {"yields":"[chaos egg]", "uses": (2,5)},
                 "HoneytailHoneytailOilflower": {"yields":".sweet_stew", "uses": (1,2)},
                 "DaisyHoneytailOilflower": {"yields":".sweet_stew", "uses": (1,2)},
                 "HoneytailHoneytailHoneytail": {"yields":".sweet_stew", "uses": (2,3)},
