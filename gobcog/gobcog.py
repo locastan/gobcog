@@ -210,7 +210,6 @@ class GobCog(BaseCog):
     @commands.guild_only()
     @not_resting()
     @has_hp()
-    @commands.cooldown(rate=1, per=600, type=commands.BucketType.user)
     async def brew(self, ctx):
         """This allows you to brew something from ingredients.
             !brew
@@ -1264,7 +1263,7 @@ class GobCog(BaseCog):
                     await ctx.send("You only have {} doses of {} to sell.".format(Userdata.users[str(user.id)]['consumables'].get(item)['uses'],item))
                     return
             elif item in Userdata.users[str(user.id)]['ingredients'].keys():
-                if Userdata.users[str(user.id)]['ingredients'][name].get('uses', 0) >= quant:
+                if Userdata.users[str(user.id)]['ingredients'][item].get('uses', 0) >= quant:
                     await ctx.send("{} wants to sell {}x {}.".format(user.display_name,quant,item))
                 else:
                     await ctx.send("You only have {} doses of {} to sell.".format(Userdata.users[str(user.id)]['consumables'].get(item)['uses'],item))
