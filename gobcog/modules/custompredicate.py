@@ -149,6 +149,7 @@ class CustomPredicate(Callable[[discord.Reaction, discord.abc.User], bool]):
             if u.bot:
                 return False
             if Userdata.users[str(u.id)]['resting'] != {}:
+                Userdata.sleepers.add(u.display_name)
                 return False
             if Userdata.users[str(u.id)]['hp'] <= 0:
                 return False

@@ -141,6 +141,7 @@ class Quest:
         Quest.failed = False
         Quest.sumxp = 0
         Quest.sumcp = 0
+        Quest.dmgred = 1
         Quest.sumtreasure = [0,0,0,0]
         for user in party:
             member = discord.utils.find(lambda m: m.display_name == user, ctx.guild.members)
@@ -167,6 +168,7 @@ class Quest:
     async def narrate(ctx):
         while Quest.running:
             Quest.userslist = {"fight":[],"pray":[],"talk":[],"run":[]}
+            Quest.dmgred = 1
             if Quest.endless:
                 Quest.idx = random.randint(0,int(len(Quest.quest)-1)) #randomized pick from list of stages
                 Quest.depth += 1 #this keeps track of how far/deep we are now.
@@ -593,19 +595,23 @@ class Quest:
                     if roll == 1:
                         attack -= 5 * len(Quest.userslist["fight"])
                         diplomacy -= 5 * len(Quest.userslist["talk"])
+                        Quest.dmgred = 1
                         fumblelist.append(user)
                         await ctx.send("**" + user + "**" + "'s sermon offended the mighty Herbert. (🎲({}) -{}🗡/-{}🗨)".format(roll, 5 * len(Quest.userslist["fight"]),5 * len(Quest.userslist["talk"])))
                     elif roll > 1 and roll <= 10:
                         attack += 2 * len(Quest.userslist["fight"])
                         diplomacy += 2 * len(Quest.userslist["talk"])
+                        Quest.dmgred = 2
                         await ctx.send("**" + user + "**" + "'s blessed you all in Herberts name. (🎲({}) +{}🗡/+{}🗨)".format(roll, 2 * len(Quest.userslist["fight"]),2 * len(Quest.userslist["talk"])))
                     elif roll > 10 and roll <= 19:
                         attack += 5 * len(Quest.userslist["fight"])
                         diplomacy += 5 * len(Quest.userslist["talk"])
+                        Quest.dmgred = 4
                         await ctx.send("**" + user + "**" + "'s blessed you all in Herberts name. (🎲({}) +{}🗡/+{}🗨)".format(roll, 5 * len(Quest.userslist["fight"]),5 * len(Quest.userslist["talk"])))
                     else:
                         attack += 20 * len(Quest.userslist["fight"])
                         diplomacy += 20 * len(Quest.userslist["talk"])
+                        Quest.dmgred = 100
                         await ctx.send("**" + user + "**" + " turned into an avatar of mighty Herbert. (🎲({}) +{}🗡/+{}🗨)".format(roll, 20 * len(Quest.userslist["fight"]),20 * len(Quest.userslist["talk"])))
                 else:
                     roll = random.randint(1,4)
@@ -901,13 +907,19 @@ class Quest:
             phrase += "\nBase rewards: {} xp and {} copperpieces. You also secured **{} treasure chests**!".format(xp,cp, " and ".join([", ".join(chesttext[:-1]),chesttext[-1]] if len(chesttext) > 2 else chesttext))
         else:
             phrase += "\nYou have {} xp and found {} copperpieces so far.".format(Quest.sumxp,Quest.sumcp)
+        if Userdata.sleepers != {}:
+            slept = " and ".join([", ".join(Userdata.sleepers[:-1]),Userdata.sleepers[-1]] if len(Userdata.sleepers) > 2 else Userdata.sleepers)
+            phrase += "\n**{}** slept through the whole encounter.".format(slept)
+            Userdata.sleepers.clear()
         return phrase
 
     async def damage(ctx,injured,CR):
         if "Dragon" in Quest.challenge or Quest.challenge in Quest.bosses.keys():
-            base_dmg = max(1,round(CR/10))
+            org_dmg = max(1,round(CR/10))
         else:
-            base_dmg = max(1,round(CR/20))
+            org_dmg = max(1,round(CR/20))
+        base_dmg = round(org_dmg/Quest.dmgred)
+        dmg_red = org_dmg - base_dmg
         incap = []
         d_txt = ""
         for user in injured:
@@ -924,7 +936,13 @@ class Quest:
         await Userdata.save()
         incapacitated = " and ".join([", ".join(incap[:-1]),incap[-1]] if len(incap) > 2 else incap)
         inj_txt = " and ".join([", ".join(injured[:-1]),injured[-1]] if len(injured) > 2 else injured)
-        d_txt += "**{}** took {} damage. ".format(inj_txt,base_dmg)
+        preachermen = " and ".join([", ".join(Quest.userslist["pray"][:-1]),Quest.userslist["pray"][-1]] if len(Quest.userslist["pray"]) > 2 else Quest.userslist["pray"])
+        if base_dmg == 0:
+            d_txt += "**{}** mitigated all damage. ".format(preachermen)
+        elif dmg_red > 0:
+            d_txt += "**{}** reduced damage taken by {}. \n**{}** took {} damage. ".format(preachermen,dmg_red,inj_txt,base_dmg)
+        else:
+            d_txt += "**{}** took {} damage. ".format(inj_txt,base_dmg)
         if len(incap) > 0:
             d_txt += "**{}** died and will not receive any rewards from this quest.".format(incapacitated)
         await ctx.send(d_txt)

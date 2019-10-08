@@ -87,6 +87,7 @@ class Adventure:
         Adventure.dipl = Adventure.monsters[Adventure.challenge]["dipl"]*Adventure.attribs[Adventure.attrib][1]
         Adventure.userslist = {"fight":[],"pray":[],"talk":[],"run":[]}
         Adventure.rewards = {}
+        Adventure.dmgred = 1
         Adventure.participants = []
         Adventure.started = time.time()
         if "Dragon" in Adventure.challenge:
@@ -374,19 +375,23 @@ class Adventure:
                     if roll == 1:
                         attack -= 5 * len(Adventure.userslist["fight"])
                         diplomacy -= 5 * len(Adventure.userslist["talk"])
+                        Adventure.dmgred = 1
                         fumblelist.append(user)
                         await ctx.send("**" + user + "**" + "'s sermon offended the mighty Herbert. (🎲({}) -{}🗡/-{}🗨)".format(roll,5 * len(Adventure.userslist["fight"]),5 * len(Adventure.userslist["talk"])))
                     elif roll > 1 and roll <= 10:
                         attack += 2 * len(Adventure.userslist["fight"])
                         diplomacy += 2 * len(Adventure.userslist["talk"])
+                        Adventure.dmgred = 2
                         await ctx.send("**" + user + "**" + "'s blessed you all in Herberts name. (🎲({}) +{}🗡/+{}🗨)".format(roll,2 * len(Adventure.userslist["fight"]),2 * len(Adventure.userslist["talk"])))
                     elif roll > 10 and roll <= 19:
                         attack += 5 * len(Adventure.userslist["fight"])
                         diplomacy += 5 * len(Adventure.userslist["talk"])
+                        Adventure.dmgred = 4
                         await ctx.send("**" + user + "**" + "'s blessed you all in Herberts name. (🎲({}) +{}🗡/+{}🗨)".format(roll,5 * len(Adventure.userslist["fight"]),5 * len(Adventure.userslist["talk"])))
                     else:
                         attack += 20 * len(Adventure.userslist["fight"])
                         diplomacy += 20 * len(Adventure.userslist["talk"])
+                        Adventure.dmgred = 100
                         await ctx.send("**" + user + "**" + " turned into an avatar of mighty Herbert. (🎲({}) +{}🗡/+{}🗨)".format(roll,20 * len(Adventure.userslist["fight"]),20 * len(Adventure.userslist["talk"])))
                 else:
                     roll = random.randint(1,4)
@@ -713,13 +718,19 @@ class Adventure:
             phrase += "\nBase rewards: {} xp and {} copperpieces. You also secured **{} treasure chests**!".format(xp,cp, " and ".join([", ".join(chesttext[:-1]),chesttext[-1]] if len(chesttext) > 2 else chesttext))
         else:
             phrase += "\nBase rewards: {} xp and {} copperpieces.".format(xp,cp)
+        if Userdata.sleepers != {}:
+            slept = " and ".join([", ".join(Userdata.sleepers[:-1]),Userdata.sleepers[-1]] if len(Userdata.sleepers) > 2 else Userdata.sleepers)
+            phrase += "\n**{}** slept through the whole encounter.".format(slept)
+            Userdata.sleepers.clear()
         return phrase
 
     async def damage(ctx,injured,CR):
         if "Dragon" in Adventure.challenge:
-            base_dmg = max(1,round(CR/10))
+            org_dmg = max(1,round(CR/10))
         else:
-            base_dmg = max(1,round(CR/20))
+            org_dmg = max(1,round(CR/20))
+        base_dmg = round(org_dmg/Adventure.dmgred)
+        dmg_red = org_dmg - base_dmg
         incap = []
         d_txt = ""
         for user in injured:
@@ -732,7 +743,13 @@ class Adventure:
         await Userdata.save()
         incapacitated = " and ".join([", ".join(incap[:-1]),incap[-1]] if len(incap) > 2 else incap)
         inj_txt = " and ".join([", ".join(injured[:-1]),injured[-1]] if len(injured) > 2 else injured)
-        d_txt += "**{}** took {} damage during this encounter. ".format(inj_txt,base_dmg)
+        preachermen = " and ".join([", ".join(Adventure.userslist["pray"][:-1]),Adventure.userslist["pray"][-1]] if len(Adventure.userslist["pray"]) > 2 else Adventure.userslist["pray"])
+        if base_dmg == 0:
+            d_txt += "**{}** mitigated all damage during this encounter. ".format(preachermen)
+        elif dmg_red > 0:
+            d_txt += "**{}** reduced damage taken by {}. \n**{}** took {} damage during this encounter. ".format(preachermen,dmg_red,inj_txt,base_dmg)
+        else:
+            d_txt += "**{}** took {} damage during this encounter. ".format(inj_txt,base_dmg)
         if len(incap) > 0:
             d_txt += "Time to rest for **{}** in order to recover some health.".format(incapacitated)
         await ctx.send(d_txt)
