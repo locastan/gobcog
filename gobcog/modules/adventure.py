@@ -718,7 +718,7 @@ class Adventure:
             phrase += "\nBase rewards: {} xp and {} copperpieces. You also secured **{} treasure chests**!".format(xp,cp, " and ".join([", ".join(chesttext[:-1]),chesttext[-1]] if len(chesttext) > 2 else chesttext))
         else:
             phrase += "\nBase rewards: {} xp and {} copperpieces.".format(xp,cp)
-        if Userdata.sleepers != {}:
+        if len(Userdata.sleepers) != 0:
             slept = " and ".join([", ".join(Userdata.sleepers[:-1]),Userdata.sleepers[-1]] if len(Userdata.sleepers) > 2 else Userdata.sleepers)
             phrase += "\n**{}** slept through the whole encounter.".format(slept)
             Userdata.sleepers.clear()
