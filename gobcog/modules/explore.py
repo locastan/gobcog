@@ -14,6 +14,7 @@ _ReactableEmoji = Union[str, discord.Emoji]
 class Explore:
 
     #This class provides a simple emoji based 2D game engine for discord.
+    # Can add 🔳 as cave. 📜 as alchemy recipe scroll. 🌀 as some sort of portal. 💼 for a treasure chest. ⛲ to replenish/double moves.
 
     tiles = {"Ooze":{"tile": "🥑", "desc":"Some kind of goo. It seems forever changing in color and shapes."},
             "Moneypenny":{"tile": "🌸", "desc":"A delicate pink flower, supposed to bring good fortune."},

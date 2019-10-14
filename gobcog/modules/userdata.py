@@ -9,7 +9,7 @@ class Userdata:
     fp = cog_data_path(None, "gobcog") / 'users.json'  # this looks for users.json inside your RedBot/cogs/gobcog folder. Needs to be setup once: create the folder, make a users.json with just an empty {} inside.
     with fp.open('r') as f:
         users = json.load(f)
-    sleepers = {}
+    sleepers = set()
 
     @staticmethod
     async def save():
