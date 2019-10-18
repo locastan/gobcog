@@ -1759,7 +1759,7 @@ class GobCog(BaseCog):
             titem = copy.deepcopy(stock[itemindex])
             #print("copyitem: {}".format(item))
             spender = user
-            react = discord.Reaction
+            react = None
             channel = ctx.bot.get_channel(522778389606825984) #restrict trader to loot-spam channel
             if channel is not None:
                 if await bank.can_spend(spender,int(titem['price'])):

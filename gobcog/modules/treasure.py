@@ -160,12 +160,12 @@ class Treasure:
                 pred = ReactionPredicate.with_emojis(tuple(Treasure.controls.keys()), msg, user)
             else:
                 pred = ReactionPredicate.with_emojis(tuple(Treasure.controls.keys()), msg, ctx.author)
-            react = discord.Reaction
+            react = None
             try:
                 react, user = await ctx.bot.wait_for("reaction_add", check=pred, timeout=60)
             except asyncio.TimeoutError:
                 await ctx.send("Item claim timed out after one minute. Selling...")
-                react.emoji = "💰"
+                react_emoji = "💰"
             try:
                 await msg.clear_reactions()
             except discord.Forbidden:  # cannot remove all reactions
@@ -177,7 +177,9 @@ class Treasure:
                 else:
                     Userdata.users[str(user.id)]['buffs']['luck']['duration'] = Userdata.users[str(user.id)]['buffs']['luck']['duration'] - 1
             await Userdata.save()
-            return {"itemname": itemname,"item":item,"equip":Treasure.controls[react.emoji]}
+            if react != None:
+                react_emoji = react.emoji
+            return {"itemname": itemname,"item":item,"equip":Treasure.controls[react_emoji]}
         else:
             if len(item["slot"]) == 2: # two handed weapons add their bonuses twice
                 hand = "two handed"
@@ -200,12 +202,12 @@ class Treasure:
                 pred = ReactionPredicate.with_emojis(tuple(Treasure.controls.keys()), msg, user)
             else:
                 pred = ReactionPredicate.with_emojis(tuple(Treasure.controls.keys()), msg, ctx.author)
-            react = discord.Reaction
+            react = None
             try:
                 react, user = await ctx.bot.wait_for("reaction_add", check=pred, timeout=60)
             except asyncio.TimeoutError:
                 await ctx.send("Item claim timed out after one minute. Selling...")
-                react.emoji = "💰"
+                react_emoji = "💰"
             try:
                 await msg.clear_reactions()
             except discord.Forbidden:  # cannot remove all reactions
@@ -217,7 +219,9 @@ class Treasure:
                 else:
                     Userdata.users[str(user.id)]['buffs']['luck']['duration'] = Userdata.users[str(user.id)]['buffs']['luck']['duration'] - 1
             await Userdata.save()
-            return {"itemname": itemname,"item":item,"equip":Treasure.controls[react.emoji]}
+            if react != None:
+                react_emoji = react.emoji
+            return {"itemname": itemname,"item":item,"equip":Treasure.controls[react_emoji]}
 
     async def autoopen_chest(ctx, user, type, many):
         lootpile = {}
@@ -335,18 +339,20 @@ class Treasure:
                 pred = ReactionPredicate.with_emojis(tuple(Treasure.controls.keys()), msg, user)
             else:
                 pred = ReactionPredicate.with_emojis(tuple(Treasure.controls.keys()), msg, ctx.author)
-            react = discord.Reaction
+            react = None
             try:
                 react, user = await ctx.bot.wait_for("reaction_add", check=pred, timeout=60)
             except asyncio.TimeoutError:
                 await ctx.send("Item claim timed out after one minute. Selling...")
-                react.emoji = "💰"
+                react_emoji = "💰"
             try:
                 await msg.clear_reactions()
             except discord.Forbidden:  # cannot remove all reactions
                 for key in Treasure.controls.keys():
                     await msg.remove_reaction(key, ctx.bot.user)
-            return {"itemname": itemname,"item":item,"equip":Treasure.controls[react.emoji]}
+            if react != None:
+                react_emoji = react.emoji
+            return {"itemname": itemname,"item":item,"equip":Treasure.controls[react_emoji]}
         else:
             if len(item["slot"]) == 2: # two handed weapons add their bonuses twice
                 hand = "two handed"
@@ -363,18 +369,20 @@ class Treasure:
             msg = await ctx.send("Do you want to equip, put in backpack or sell this item?")
             start_adding_reactions(msg, Treasure.controls.keys())
             pred = ReactionPredicate.with_emojis(tuple(Treasure.controls.keys()), msg, user)
-            react = discord.Reaction
+            react = None
             try:
                 react, user = await ctx.bot.wait_for("reaction_add", check=pred, timeout=60)
             except asyncio.TimeoutError:
                 await ctx.send("Item claim timed out after one minute. Selling...")
-                react.emoji = "💰"
+                react_emoji = "💰"
             try:
                 await msg.clear_reactions()
             except discord.Forbidden:  # cannot remove all reactions
                 for key in Treasure.controls.keys():
                     await msg.remove_reaction(key, ctx.bot.user)
-            return {"itemname": itemname,"item":item,"equip":Treasure.controls[react.emoji]}
+            if react != None:
+                react_emoji = react.emoji
+            return {"itemname": itemname,"item":item,"equip":Treasure.controls[react_emoji]}
 
 
     async def trader_get_items():
