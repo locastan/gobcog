@@ -43,7 +43,8 @@ class Explore:
             "Rock":{"tile": "🌑", "desc":"A big rock. You cannot move here."},
             #"Grass":{"tile": "<:Grassland:593422372468686859>", "desc":"Just grassland."}, #use this for beta server
             "Grass":{"tile": "<:Grassland:593755278328201226>", "desc":"Just grassland."}, #use this for Goblinscomic Discord
-            "Player":{"tile": "🗿", "desc":"Player"}
+            "Player":{"tile": "🗿", "desc":"Player"},
+            "Chest":{"tile": "💼", "desc":"A forgotten treasure chest!"}
             }
 
     tile_lookup = {"🥑":"Ooze",
@@ -73,18 +74,19 @@ class Explore:
             "🌑": "Rock",
             #"<:Grassland:593422372468686859>": "Grass", #use this on testserver
             "<:Grassland:593755278328201226>": "Grass", #use this on Goblins Discord server
-            "🗿": "Player"
+            "🗿": "Player",
+            "💼": "Chest"
             }
 
     #biomes carry rarities and what can be found in the tileset.
     biomes = {"Enchanted Forest": {"legendary":["Ooze","Sageworth","Whipweed","Conifer","Cyanka Lilly","Flyleaf"],"epic":["Chestnut","Whipweed","Maple","Oak"],"rare":["Maple","Rock"],"common":["Mushroom","Oak","Oak","Grass"]},
             "Lush Grasslands": {"legendary":["Twolip","Moneypenny","Raging Frills","Rose","Oak"],"epic":["Mourning Star","Honeytail","Clover","Rock"],"rare":["Oilflower","Grass","Grass"],"common":["Daisy","Grass","Grass"]},
-            "Drygrass Steppes":{"legendary":["Na-palm","Fleshthorn","Rock"],"epic":["Tongue Sprout","Grass","Rock"],"rare":["Rust Leafs","Grass","Grass"],"common":["Rock","Grass","Grass"]}
+            "Drygrass Steppes":{"legendary":["Na-palm","Fleshthorn","Rock"],"epic":["Tongue Sprout","Grass","Flyleaf"],"rare":["Rust Leafs","Grass","Grass"],"common":["Rock","Grass","Grass"]}
             }
 
-    mapsize = [13,13]
+    mapsize = [21,21]
     timeout = 300
-    player_pos = [6,6]
+    player_pos = [11,11]
     lodrange = 2 #rendersize; max 6 as a 13x13 visible tilegrid is the max number of big emojis discord can put in one message.
     statusmsg = None
     mapmsg = None
@@ -160,14 +162,16 @@ class Explore:
         for r in range(len(map)):
             for t in range(len(map[r])):
                 roll = random.randint(1,100)
-                if roll <= 1:
+                if roll <= 3:
                     map[r][t] = Explore.tiles[random.choice(Explore.biomes[biome].get("legendary"))]["tile"]
-                elif roll <= 5:
+                elif roll <= 10:
                     map[r][t] = Explore.tiles[random.choice(Explore.biomes[biome].get("epic"))]["tile"]
                 elif roll <= 15:
                     map[r][t] = Explore.tiles[random.choice(Explore.biomes[biome].get("rare"))]["tile"]
-                elif roll <= 100:
+                elif roll <= 95:
                     map[r][t] = Explore.tiles[random.choice(Explore.biomes[biome].get("common"))]["tile"]
+                elif roll <= 100:
+                    map[r][t] = Explore.tiles["Chest"]["tile"]
         return map, fowmap
 
     async def update_fow(): #this unveils the Fog of war in directly adjacient tiles.
@@ -415,11 +419,40 @@ class Explore:
                     await Userdata.save()
                     await asyncio.sleep(2)
                     return await Explore.result(ctx, pages, controls, message, page, Explore.timeout, user)
-            text = "** You picked up: " + tilename + "**"
+            elif tilename == "Chest":
+                croll = random.randint(1,100)
+                if croll <= 50: #rewards 50:50 rare:normal chest for killing something like the basilisk
+                    treasure = random.choice([[0,1,0,0],[1,0,0,0]])
+                elif croll <= 75:
+                    treasure = random.choice([[1,0,0,0],[0,0,1,0],[0,1,0,0]])
+                elif croll <= 95:
+                    treasure = random.choice([[0,1,0,0],[0,0,1,0],[1,0,0,0]])
+                elif croll >= 96:
+                    treasure = random.choice([[1,0,0,0],[0,1,0,0],[0,0,1,0],[0,0,0,1]])
+                if treasure != False and sum(treasure) == 1:
+                    types = [" normal"," rare","n epic", "quest"]
+                    type = types[treasure.index(1)]
+                    text = "You found **a{} treasure chest**!".format(type)
+                elif treasure != False and sum(treasure) > 1:
+                    chesttext = []
+                    ctypes = ["{} normal","{} rare","{} epic", "{} quest"]
+                    for i,c in enumerate(treasure):
+                        if c >= 1:
+                            chesttext.append(ctypes[i].format(c))
+                    text = "You found **{} treasure chests**!".format(" and ".join([", ".join(chesttext[:-1]),chesttext[-1]] if len(chesttext) > 2 else chesttext))
+            else:
+                text = "** You picked up: " + tilename + "**"
             Explore.moves -= 1
             await Explore.movesmsg.edit(content="{} moves remaining.".format(Explore.moves))
             await Explore.statusmsg.edit(content=text)
-            Explore.loot.update({tilename:(Explore.loot.get(tilename,0)+1)})
+            if tilename == "Chest":
+                if treasure != [0,0,0,0]:
+                    if not 'treasure' in Userdata.users[str(user.id)].keys():
+                        Userdata.users[str(user.id)]['treasure'] = [0,0,0,0]
+                    Userdata.users[str(user.id)]['treasure'] = [sum(x) for x in zip(Userdata.users[str(user.id)]['treasure'], special)]
+                    await Userdata.save()
+            else:
+                Explore.loot.update({tilename:(Explore.loot.get(tilename,0)+1)})
             Explore.map[Explore.player_pos[0]][Explore.player_pos[1]] = Explore.tiles["Grass"]["tile"]
             await Explore.check(ctx, pages, controls, message, page, Explore.timeout, emoji, user)
         else:
