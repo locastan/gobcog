@@ -449,7 +449,7 @@ class Explore:
                 if treasure != [0,0,0,0]:
                     if not 'treasure' in Userdata.users[str(user.id)].keys():
                         Userdata.users[str(user.id)]['treasure'] = [0,0,0,0]
-                    Userdata.users[str(user.id)]['treasure'] = [sum(x) for x in zip(Userdata.users[str(user.id)]['treasure'], special)]
+                    Userdata.users[str(user.id)]['treasure'] = [sum(x) for x in zip(Userdata.users[str(user.id)]['treasure'], treasure)]
                     await Userdata.save()
             else:
                 Explore.loot.update({tilename:(Explore.loot.get(tilename,0)+1)})
