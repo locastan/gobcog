@@ -168,7 +168,7 @@ class Explore:
                     map[r][t] = Explore.tiles[random.choice(Explore.biomes[biome].get("epic"))]["tile"]
                 elif roll <= 15:
                     map[r][t] = Explore.tiles[random.choice(Explore.biomes[biome].get("rare"))]["tile"]
-                elif roll <= 95:
+                elif roll <= 99:
                     map[r][t] = Explore.tiles[random.choice(Explore.biomes[biome].get("common"))]["tile"]
                 elif roll <= 100:
                     map[r][t] = Explore.tiles["Chest"]["tile"]
@@ -429,17 +429,9 @@ class Explore:
                     treasure = random.choice([[0,1,0,0],[0,0,1,0],[1,0,0,0]])
                 elif croll >= 96:
                     treasure = random.choice([[1,0,0,0],[0,1,0,0],[0,0,1,0],[0,0,0,1]])
-                if treasure != False and sum(treasure) == 1:
-                    types = [" normal"," rare","n epic", "quest"]
-                    type = types[treasure.index(1)]
-                    text = "You found **a{} treasure chest**!".format(type)
-                elif treasure != False and sum(treasure) > 1:
-                    chesttext = []
-                    ctypes = ["{} normal","{} rare","{} epic", "{} quest"]
-                    for i,c in enumerate(treasure):
-                        if c >= 1:
-                            chesttext.append(ctypes[i].format(c))
-                    text = "You found **{} treasure chests**!".format(" and ".join([", ".join(chesttext[:-1]),chesttext[-1]] if len(chesttext) > 2 else chesttext))
+                types = [" normal"," rare","n epic", "quest"]
+                type = types[treasure.index(1)]
+                text = "You found **a{} treasure chest**!".format(type)
             else:
                 text = "** You picked up: " + tilename + "**"
             Explore.moves -= 1
