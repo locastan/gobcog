@@ -44,7 +44,8 @@ class Explore:
             #"Grass":{"tile": "<:Grassland:593422372468686859>", "desc":"Just grassland."}, #use this for beta server
             "Grass":{"tile": "<:Grassland:593755278328201226>", "desc":"Just grassland."}, #use this for Goblinscomic Discord
             "Player":{"tile": "🗿", "desc":"Player"},
-            "Chest":{"tile": "💼", "desc":"A forgotten treasure chest!"}
+            "Chest":{"tile": "💼", "desc":"A forgotten treasure chest!"},
+            "Fountain":{"tile": "⛲", "desc":"A refreshing fountain!"}
             }
 
     tile_lookup = {"🥑":"Ooze",
@@ -75,7 +76,8 @@ class Explore:
             #"<:Grassland:593422372468686859>": "Grass", #use this on testserver
             "<:Grassland:593755278328201226>": "Grass", #use this on Goblins Discord server
             "🗿": "Player",
-            "💼": "Chest"
+            "💼": "Chest",
+            "⛲": "Fountain"
             }
 
     #biomes carry rarities and what can be found in the tileset.
@@ -168,9 +170,11 @@ class Explore:
                     map[r][t] = Explore.tiles[random.choice(Explore.biomes[biome].get("epic"))]["tile"]
                 elif roll <= 15:
                     map[r][t] = Explore.tiles[random.choice(Explore.biomes[biome].get("rare"))]["tile"]
-                elif roll <= 99:
+                elif roll <= 98:
                     map[r][t] = Explore.tiles[random.choice(Explore.biomes[biome].get("common"))]["tile"]
-                elif roll <= 100:
+                elif roll == 99:
+                    map[r][t] = Explore.tiles["Fountain"]["tile"]
+                elif roll == 100:
                     map[r][t] = Explore.tiles["Chest"]["tile"]
         return map, fowmap
 
@@ -432,6 +436,9 @@ class Explore:
                 types = [" normal"," rare","n epic", "quest"]
                 type = types[treasure.index(1)]
                 text = "You found **a{} treasure chest**!".format(type)
+            elif tilename == "Fountain":
+                Explore.moves += 20
+                text = "Movement **stamina increased by 20!**"
             else:
                 text = "** You picked up: " + tilename + "**"
             Explore.moves -= 1
