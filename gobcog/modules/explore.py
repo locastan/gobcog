@@ -450,6 +450,8 @@ class Explore:
                         Userdata.users[str(user.id)]['treasure'] = [0,0,0,0]
                     Userdata.users[str(user.id)]['treasure'] = [sum(x) for x in zip(Userdata.users[str(user.id)]['treasure'], treasure)]
                     await Userdata.save()
+            elif tilename == "Fountain":
+                pass #nothing to do here
             else:
                 Explore.loot.update({tilename:(Explore.loot.get(tilename,0)+1)})
             Explore.map[Explore.player_pos[0]][Explore.player_pos[1]] = Explore.tiles["Grass"]["tile"]
