@@ -14,7 +14,7 @@ _ReactableEmoji = Union[str, discord.Emoji]
 class Explore:
 
     #This class provides a simple emoji based 2D game engine for discord.
-    # Can add 🔳 as cave. 📜 as alchemy recipe scroll. 🌀 as some sort of portal. 💼 for a treasure chest. ⛲ to replenish/double moves.
+    # Can add 🔳 as cave, 🔮 for unveiling FoW, 📜 as alchemy recipe scroll. 🌀 as some sort of portal. 💼 for a treasure chest. ⛲ to replenish/double moves.
 
     tiles = {"Ooze":{"tile": "🥑", "desc":"Some kind of goo. It seems forever changing in color and shapes."},
             "Moneypenny":{"tile": "🌸", "desc":"A delicate pink flower, supposed to bring good fortune."},
@@ -45,7 +45,8 @@ class Explore:
             "Grass":{"tile": "<:Grassland:593755278328201226>", "desc":"Just grassland."}, #use this for Goblinscomic Discord
             "Player":{"tile": "🗿", "desc":"Player"},
             "Chest":{"tile": "💼", "desc":"A forgotten treasure chest!"},
-            "Fountain":{"tile": "⛲", "desc":"A refreshing fountain!"}
+            "Fountain":{"tile": "⛲", "desc":"A refreshing fountain!"},
+            "Crystal Ball":{"tile": "🔮", "desc":"A ball of crystal on a pedestal..."}
             }
 
     tile_lookup = {"🥑":"Ooze",
@@ -77,7 +78,8 @@ class Explore:
             "<:Grassland:593755278328201226>": "Grass", #use this on Goblins Discord server
             "🗿": "Player",
             "💼": "Chest",
-            "⛲": "Fountain"
+            "⛲": "Fountain",
+            "🔮": "Crystal Ball"
             }
 
     #biomes carry rarities and what can be found in the tileset.
@@ -132,22 +134,6 @@ class Explore:
             visible_y = range(Explore.player_pos[1]-Explore.lodrange-compensator,Explore.mapsize[1])
         else:
             visible_y = range(Explore.player_pos[1]-Explore.lodrange,Explore.player_pos[1]+Explore.lodrange+1)
-        '''  Use this for calculating viewrange for FoW removal
-        if Explore.player_pos[0]-Explore.lodrange <= 0:
-            visible_x = range(0,Explore.player_pos[0]+Explore.lodrange+1)
-        elif Explore.player_pos[0]+Explore.lodrange+1 >= Explore.mapsize[0]:
-            visible_x = range(Explore.player_pos[0]-Explore.lodrange,Explore.mapsize[0])
-        else:
-            visible_x = range(Explore.player_pos[0]-Explore.lodrange,Explore.player_pos[0]+Explore.lodrange+1)
-        print(visible_x)
-        if Explore.player_pos[1]-Explore.lodrange <= 0:
-            visible_y = range(0,Explore.player_pos[1]+Explore.lodrange+1)
-        elif Explore.player_pos[1]+Explore.lodrange+1 >= Explore.mapsize[1]:
-            visible_y = range(Explore.player_pos[1]-Explore.lodrange,Explore.mapsize[1])
-        else:
-            visible_y = range(Explore.player_pos[1]-Explore.lodrange,Explore.player_pos[1]+Explore.lodrange+1)
-        print(visible_y)
-        '''
         text = ""
         for r in visible_x:
             for t in visible_y:
@@ -170,8 +156,10 @@ class Explore:
                     map[r][t] = Explore.tiles[random.choice(Explore.biomes[biome].get("epic"))]["tile"]
                 elif roll <= 15:
                     map[r][t] = Explore.tiles[random.choice(Explore.biomes[biome].get("rare"))]["tile"]
-                elif roll <= 98:
+                elif roll <= 97:
                     map[r][t] = Explore.tiles[random.choice(Explore.biomes[biome].get("common"))]["tile"]
+                elif roll == 98:
+                    map[r][t] = Explore.tiles["Crystal Ball"]["tile"]
                 elif roll == 99:
                     map[r][t] = Explore.tiles["Fountain"]["tile"]
                 elif roll == 100:
@@ -188,6 +176,10 @@ class Explore:
             else:
                 continue
 
+    async def unveil_fow(): #this lifts the entire FoW
+        for r in range(len(Explore.map)):
+            for t in range(len(Explore.map[r])):
+                Explore.fowmap[r][t] = Explore.map[r][t]
 
     async def menu(
         ctx: commands.Context,
@@ -423,6 +415,8 @@ class Explore:
                     await Userdata.save()
                     await asyncio.sleep(2)
                     return await Explore.result(ctx, pages, controls, message, page, Explore.timeout, user)
+                else:
+                    text = "** You picked up: " + tilename + "**"
             elif tilename == "Chest":
                 croll = random.randint(1,100)
                 if croll <= 50: #rewards 50:50 rare:normal chest for killing something like the basilisk
@@ -439,6 +433,11 @@ class Explore:
             elif tilename == "Fountain":
                 Explore.moves += 20
                 text = "Movement **stamina increased by 20!**"
+            elif tilename == "Crystal Ball":
+                await Explore.unveil_fow()
+                output = await Explore.mapdrawer(list(Explore.fowmap))
+                await Explore.mapmsg.edit(content=output)
+                text = "The fog has lifted before your eyes...you see all of creation!"
             else:
                 text = "** You picked up: " + tilename + "**"
             Explore.moves -= 1
@@ -450,7 +449,7 @@ class Explore:
                         Userdata.users[str(user.id)]['treasure'] = [0,0,0,0]
                     Userdata.users[str(user.id)]['treasure'] = [sum(x) for x in zip(Userdata.users[str(user.id)]['treasure'], treasure)]
                     await Userdata.save()
-            elif tilename == "Fountain":
+            elif tilename == "Fountain" or tilename == "Crystal Ball":
                 pass #nothing to do here
             else:
                 Explore.loot.update({tilename:(Explore.loot.get(tilename,0)+1)})
