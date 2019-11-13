@@ -444,10 +444,10 @@ class Explore:
                 text = "The fog has lifted before your eyes...you see all of creation!"
             elif tilename == "Scroll":
                 text= "You found an old scroll of parchment"
-                if 'alchemy scroll' in Userdata.users[str(member.id)]['consumables'].keys():
-                    Userdata.users[str(member.id)]['consumables']['alchemy scroll']['uses'] = Userdata.users[str(member.id)]['consumables']['alchemy scroll'].get("uses", 0) + 1
+                if 'alchemy scroll' in Userdata.users[str(user.id)]['consumables'].keys():
+                    Userdata.users[str(user.id)]['consumables']['alchemy scroll']['uses'] = Userdata.users[str(user.id)]['consumables']['alchemy scroll'].get("uses", 0) + 1
                 else:
-                    Userdata.users[str(member.id)]['consumables'].update({'alchemy scroll':{"slot":["consumable"],"uses":1}})
+                    Userdata.users[str(user.id)]['consumables'].update({'alchemy scroll':{"slot":["consumable"],"uses":1}})
             else:
                 text = "** You picked up: " + tilename + "**"
             Explore.moves -= 1
