@@ -46,7 +46,8 @@ class Explore:
             "Player":{"tile": "🗿", "desc":"Player"},
             "Chest":{"tile": "💼", "desc":"A forgotten treasure chest!"},
             "Fountain":{"tile": "⛲", "desc":"A refreshing fountain!"},
-            "Crystal Ball":{"tile": "🔮", "desc":"A ball of crystal on a pedestal..."}
+            "Crystal Ball":{"tile": "🔮", "desc":"A ball of crystal on a pedestal..."},
+            "Scroll":{"tile": "📜", "desc":"An old scroll of parchment."}
             }
 
     tile_lookup = {"🥑":"Ooze",
@@ -79,7 +80,8 @@ class Explore:
             "🗿": "Player",
             "💼": "Chest",
             "⛲": "Fountain",
-            "🔮": "Crystal Ball"
+            "🔮": "Crystal Ball",
+            "📜": "Scroll"
             }
 
     #biomes carry rarities and what can be found in the tileset.
@@ -156,8 +158,10 @@ class Explore:
                     map[r][t] = Explore.tiles[random.choice(Explore.biomes[biome].get("epic"))]["tile"]
                 elif roll <= 15:
                     map[r][t] = Explore.tiles[random.choice(Explore.biomes[biome].get("rare"))]["tile"]
-                elif roll <= 97:
+                elif roll <= 96:
                     map[r][t] = Explore.tiles[random.choice(Explore.biomes[biome].get("common"))]["tile"]
+                elif roll == 97:
+                    map[r][t] = Explore.tiles["Scroll"]["tile"]
                 elif roll == 98:
                     map[r][t] = Explore.tiles["Crystal Ball"]["tile"]
                 elif roll == 99:
@@ -438,6 +442,12 @@ class Explore:
                 output = await Explore.mapdrawer(list(Explore.fowmap))
                 await Explore.mapmsg.edit(content=output)
                 text = "The fog has lifted before your eyes...you see all of creation!"
+            elif tilename == "Scroll"
+                text= "You found an old scroll of parchment"
+                if 'alchemy scroll' in Userdata.users[str(member.id)]['consumables'].keys():
+                    Userdata.users[str(member.id)]['consumables']['alchemy scroll']['uses'] = Userdata.users[str(member.id)]['consumables']['alchemy scroll'].get("uses", 0) + 1
+                else:
+                    Userdata.users[str(member.id)]['consumables'].update({'alchemy scroll':{"slot":["consumable"],"uses":1}})
             else:
                 text = "** You picked up: " + tilename + "**"
             Explore.moves -= 1
@@ -449,7 +459,7 @@ class Explore:
                         Userdata.users[str(user.id)]['treasure'] = [0,0,0,0]
                     Userdata.users[str(user.id)]['treasure'] = [sum(x) for x in zip(Userdata.users[str(user.id)]['treasure'], treasure)]
                     await Userdata.save()
-            elif tilename == "Fountain" or tilename == "Crystal Ball":
+            elif tilename == "Fountain" or tilename == "Crystal Ball" or tilename == "Scroll":
                 pass #nothing to do here
             else:
                 Explore.loot.update({tilename:(Explore.loot.get(tilename,0)+1)})
