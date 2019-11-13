@@ -442,7 +442,7 @@ class Explore:
                 output = await Explore.mapdrawer(list(Explore.fowmap))
                 await Explore.mapmsg.edit(content=output)
                 text = "The fog has lifted before your eyes...you see all of creation!"
-            elif tilename == "Scroll"
+            elif tilename == "Scroll":
                 text= "You found an old scroll of parchment"
                 if 'alchemy scroll' in Userdata.users[str(member.id)]['consumables'].keys():
                     Userdata.users[str(member.id)]['consumables']['alchemy scroll']['uses'] = Userdata.users[str(member.id)]['consumables']['alchemy scroll'].get("uses", 0) + 1
