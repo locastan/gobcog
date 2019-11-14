@@ -687,6 +687,7 @@ class GobCog(BaseCog):
             lookup = list(x for x in Userdata.users[str(user)]['items']['backpack'] if reply.content.lower() in x.lower())
             if len(lookup) > 1:
                 text = "```css\n"
+                lookup = [x for x in lookup if x not in consumed]
                 for num, name in enumerate(lookup, start=1):
                     text += ("[{}]: {}\n".format(num, name))
                 text += "```"
