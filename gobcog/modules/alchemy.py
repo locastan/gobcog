@@ -53,8 +53,8 @@ class Alchemy:
                 "DaisyDaisyRose": {"yields":".sweet_stew", "uses": (2,4)},
                 "DaisyDaisyDaisy": {"yields":".sweet_stew", "uses": (1,1)},
                 "ChestnutChestnutChestnut": {"yields":".hearty_stew", "uses": (3,5)},
-                "DaisyChestnutChestnut": {"yields":".hearty_stew", "uses": (1,3)},
-                "DaisyDaisyChestnut": {"yields":".hearty_stew", "uses": (1,1)},
+                "ChestnutChestnutDaisy": {"yields":".hearty_stew", "uses": (1,3)},
+                "ChestnutDaisyDaisy": {"yields":".hearty_stew", "uses": (1,1)},
                 "DaisyDaisyMaple": {"yields":".hearty_stew", "uses": (1,1)},
                 "CloverCloverMoneypenny": {"yields":"four leaf clover", "uses": (6,10)},
                 "CloverCloverClover": {"yields":"four leaf clover", "uses": (2,5)},
@@ -70,7 +70,7 @@ class Alchemy:
                 "DaisyMourning StarRose": {"yields":".potion_of_healing", "uses": (1,2)},
                 "DaisyDaisyMourning Star": {"yields":".potion_of_healing", "uses": (1,1)},
                 "Mourning StarWhipweedWhipweed": {"yields":".potion_of_healing", "uses": (1,3)},
-                "FleshthornMourning StarNa-palm": {"yields":"[potion of rejuvenation]", "uses": (3,5)},
+                "FleshthornMourning StarNa-palm": {"yields":"[potion of rejuvenation]", "uses": (3,5)}
                 }
 
     async def brew(ctx, user):
