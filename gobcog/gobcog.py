@@ -1113,7 +1113,7 @@ class GobCog(BaseCog):
                     bkpklist.append(" - " + item + " -(ATT: "+ str(Userdata.users[str(user.id)]['items']['backpack'][item]['att']*2) + " | DPL: "+ str(Userdata.users[str(user.id)]['items']['backpack'][item]['cha']*2) +" [two handed])\n")
             for item in Userdata.users[str(user.id)]['consumables']: # added second if level for two handed weapons so their slots show properly.
                     conslist.append(" - " + item + " ({}x)\n".format(Userdata.users[str(user.id)]['consumables'][item]['uses']))
-            for item in Userdata.users[str(ctx.author.id)]['ingredients']:
+            for item in Userdata.users[str(user.id)]['ingredients']:
                     inslist.append(" - {} ({}x)\n".format(item,Userdata.users[str(user.id)]['ingredients'][item]['uses']))
             conslist.sort()
             bkpklist.sort()
@@ -1695,6 +1695,7 @@ class GobCog(BaseCog):
             Userdata.users[str(user.id)]['treasure'] = [0,0,0,0]
             Userdata.users[str(user.id)]['items'] = {"left":{},"right":{},"ring":{},"charm":{},"backpack": {}}
             Userdata.users[str(user.id)]['consumables'] = {}
+            Userdata.users[str(user.id)]['ingredients'] = {}
             Userdata.users[str(user.id)]['buffs'] = {}
             Userdata.users[str(user.id)]['name'] = {}
             Userdata.users[str(user.id)]['name'] = user.display_name
