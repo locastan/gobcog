@@ -474,16 +474,17 @@ class Explore:
         if Explore.moves <= 0:
             return await Explore.result(ctx, pages, controls, message, page, Explore.timeout, user)
         try:
-            done, Explore.pending = await asyncio.wait([ctx.bot.wait_for(
+            r_add = asyncio.create_task(ctx.bot.wait_for(
                 "reaction_add",
                 check=CustomPredicate.with_emojis(tuple(controls.keys()), message, [user.id]),
                 timeout=Explore.timeout
-            ),
-            ctx.bot.wait_for(
+                ))
+            r_del = asyncio.create_task(ctx.bot.wait_for(
                 "reaction_remove",
                 check=CustomPredicate.with_emojis(tuple(controls.keys()), message, [user.id]),
                 timeout=Explore.timeout
-            )], return_when=asyncio.FIRST_COMPLETED, timeout=Explore.timeout)
+                ))
+            done, Explore.pending = await asyncio.wait([r_add,r_del], return_when=asyncio.FIRST_COMPLETED, timeout=Explore.timeout)
             for task in done:
                 react, user = task.result()
         except asyncio.TimeoutError:
