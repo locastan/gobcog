@@ -108,7 +108,7 @@ class Explore:
         Explore.pending = []
         Explore.loot = {}
         Explore.mapmsg = None
-        Explore.player_pos = [6,6]
+        Explore.player_pos = [11,11]
         Explore.moves = 10 + int(Userdata.users[str(user.id)]['lvl']/2)
         Explore.movesmsg = await ctx.send("{} moves remaining.".format(Explore.moves))
         Explore.map, Explore.fowmap = await Explore.generate(Explore.biome,Explore.mapsize)
@@ -158,16 +158,14 @@ class Explore:
                     map[r][t] = Explore.tiles[random.choice(Explore.biomes[biome].get("epic"))]["tile"]
                 elif roll <= 15:
                     map[r][t] = Explore.tiles[random.choice(Explore.biomes[biome].get("rare"))]["tile"]
-                elif roll <= 96:
+                elif roll <= 99:
                     map[r][t] = Explore.tiles[random.choice(Explore.biomes[biome].get("common"))]["tile"]
-                elif roll == 97:
-                    map[r][t] = Explore.tiles["Scroll"]["tile"]
-                elif roll == 98:
-                    map[r][t] = Explore.tiles["Crystal Ball"]["tile"]
-                elif roll == 99:
-                    map[r][t] = Explore.tiles["Fountain"]["tile"]
                 elif roll == 100:
-                    map[r][t] = Explore.tiles["Chest"]["tile"]
+                    special = [Explore.tiles["Scroll"]["tile"],Explore.tiles["Crystal Ball"]["tile"],Explore.tiles["Fountain"]["tile"]]
+                    spec_tile = random.choice(special)
+                    map[r][t] = spec_tile
+        #make sure player always starts on a rock to enable movement when stranded surrounded by rocks.
+        map[Explore.player_pos[0]][Explore.player_pos[1]] = Explore.tiles["Rock"]["tile"]
         return map, fowmap
 
     async def update_fow(): #this unveils the Fog of war in directly adjacient tiles.
@@ -288,7 +286,7 @@ class Explore:
         emoji: str,
         user: discord.User,
     ):
-        if int(Explore.player_pos[1]) - 1 >= 0 and Explore.tile_lookup.get(Explore.map[Explore.player_pos[0]][Explore.player_pos[1]-1]) != "Rock":
+        if (int(Explore.player_pos[1]) - 1 >= 0 and Explore.tile_lookup.get(Explore.map[Explore.player_pos[0]][Explore.player_pos[1]-1]) != "Rock") or Explore.tile_lookup.get(Explore.map[Explore.player_pos[0]][Explore.player_pos[1]]) == "Rock":
             Explore.player_pos[1] = int(Explore.player_pos[1]) - 1
             await Explore.update_fow()
             Explore.moves -= 1
@@ -313,7 +311,7 @@ class Explore:
         emoji: str,
         user: discord.User,
     ):
-        if int(Explore.player_pos[0]) - 1 >= 0 and Explore.tile_lookup.get(Explore.map[Explore.player_pos[0]-1][Explore.player_pos[1]]) != "Rock":
+        if (int(Explore.player_pos[0]) - 1 >= 0 and Explore.tile_lookup.get(Explore.map[Explore.player_pos[0]-1][Explore.player_pos[1]]) != "Rock") or Explore.tile_lookup.get(Explore.map[Explore.player_pos[0]][Explore.player_pos[1]]) == "Rock":
             Explore.player_pos[0] = int(Explore.player_pos[0]) - 1
             await Explore.update_fow()
             Explore.moves -= 1
@@ -337,7 +335,7 @@ class Explore:
         emoji: str,
         user: discord.User,
     ):
-        if int(Explore.player_pos[0]) + 1 < Explore.mapsize[0] and Explore.tile_lookup.get(Explore.map[Explore.player_pos[0]+1][Explore.player_pos[1]]) != "Rock":
+        if (int(Explore.player_pos[0]) + 1 < Explore.mapsize[0] and Explore.tile_lookup.get(Explore.map[Explore.player_pos[0]+1][Explore.player_pos[1]]) != "Rock") or Explore.tile_lookup.get(Explore.map[Explore.player_pos[0]][Explore.player_pos[1]]) == "Rock":
             Explore.player_pos[0] = int(Explore.player_pos[0]) + 1
             await Explore.update_fow()
             Explore.moves -= 1
@@ -361,7 +359,7 @@ class Explore:
         emoji: str,
         user: discord.User,
     ):
-        if int(Explore.player_pos[1]) + 1 < Explore.mapsize[1] and Explore.tile_lookup.get(Explore.map[Explore.player_pos[0]][Explore.player_pos[1]+1]) != "Rock":
+        if (int(Explore.player_pos[1]) + 1 < Explore.mapsize[1] and Explore.tile_lookup.get(Explore.map[Explore.player_pos[0]][Explore.player_pos[1]+1]) != "Rock") or Explore.tile_lookup.get(Explore.map[Explore.player_pos[0]][Explore.player_pos[1]]) == "Rock":
             Explore.player_pos[1] = int(Explore.player_pos[1]) + 1
             await Explore.update_fow()
             Explore.moves -= 1
