@@ -429,7 +429,7 @@ class Explore:
                     treasure = random.choice([[0,1,0,0],[0,0,1,0],[1,0,0,0]])
                 elif croll >= 96:
                     treasure = random.choice([[1,0,0,0],[0,1,0,0],[0,0,1,0],[0,0,0,1]])
-                types = [" normal"," rare","n epic", "quest"]
+                types = [" normal"," rare","n epic", " quest"]
                 type = types[treasure.index(1)]
                 text = "You found **a{} treasure chest**!".format(type)
             elif tilename == "Fountain":
