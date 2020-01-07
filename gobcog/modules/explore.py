@@ -161,7 +161,7 @@ class Explore:
                 elif roll <= 99:
                     map[r][t] = Explore.tiles[random.choice(Explore.biomes[biome].get("common"))]["tile"]
                 elif roll == 100:
-                    special = [Explore.tiles["Scroll"]["tile"],Explore.tiles["Crystal Ball"]["tile"],Explore.tiles["Fountain"]["tile"]]
+                    special = [Explore.tiles["Chest"]["tile"],Explore.tiles["Scroll"]["tile"],Explore.tiles["Crystal Ball"]["tile"],Explore.tiles["Fountain"]["tile"]]
                     spec_tile = random.choice(special)
                     map[r][t] = spec_tile
         #make sure player always starts on a rock to enable movement when stranded surrounded by rocks.
