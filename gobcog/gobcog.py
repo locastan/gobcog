@@ -1779,13 +1779,13 @@ class GobCog(BaseCog):
                                 Userdata.users[str(user.id)]['consumables'][titem['itemname']]['uses'] = Userdata.users[str(user.id)]['consumables'][titem['itemname']].get("uses", 0) + titem['item']['uses']
                                 #print("Uses added: {}, Uses in userpouch: {}".format(item['item']['uses'],Userdata.users[str(user.id)]['consumables'][item['itemname']]['uses']))
                             else:
-                                Userdata.users[str(user.id)]['consumables'].update({titem['itemname']:titem['item']})
+                                Userdata.users[str(user.id)]['consumables'].update(copy.deepcopy({titem['itemname']:titem['item']}))
                     else:
                         if titem['itemname'] in Userdata.users[str(user.id)]['items']['backpack'].keys():
                             price = await GobCog.sell(user,titem)
                             await channel.send("**{}** was already in your backpack: Sold for {} copperpieces.".format(titem['itemname'],price))
                         else:
-                            Userdata.users[str(user.id)]['items']['backpack'].update({titem['itemname']:titem['item']})
+                            Userdata.users[str(user.id)]['items']['backpack'].update(copy.deepcopy({titem['itemname']:titem['item']}))
                     await GobCog.save()
                     if titem['itemname'] in Consumables.consbles.keys():
                         await channel.send("{} bought {}x {} for {} cp and put it into the backpack.".format(user.display_name,titem['item']['uses'],titem['itemname'],str(titem['price'])))
