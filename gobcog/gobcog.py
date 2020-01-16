@@ -1453,19 +1453,19 @@ class GobCog(BaseCog):
                 await self.add_rewards(ctx, member, xp, cp, [normal,rare,epic,quest])
         await ctx.send("All users were compensated with {} xp, {} cp and [{},{},{},{}] [normal, rare, epic, quest] chests.".format(xp,cp,normal,rare,epic,quest))
 
-@commands.command()
-@checks.admin_or_permissions(administrator=True)
-async def compuser(self, ctx, xp: int=0, cp: int=0, normal: int=0, rare: int=0, epic: int=0, quest: int=0, user: discord.Member=None):
-    """This will award xp, cp and chests to the specified user.
-        !compuser 10 12 1 0 0 0 @Elder_aramis
-        will give the user 10xp, 12cp and a normal chest.
-    """
-    global users
-    if user != None:
-        await self.add_rewards(ctx, user, xp, cp, [normal,rare,epic,quest])
-    else:
-        await self.add_rewards(ctx, ctx.author, xp, cp, [normal,rare,epic,quest])
-    await ctx.send("**" + user.display_name + "was compensated with {} xp, {} cp and [{},{},{},{}] [normal, rare, epic, quest] chests.".format(xp,cp,normal,rare,epic,quest))
+    @commands.command()
+    @checks.admin_or_permissions(administrator=True)
+    async def compuser(self, ctx, xp: int=0, cp: int=0, normal: int=0, rare: int=0, epic: int=0, quest: int=0, user: discord.Member=None):
+        """This will award xp, cp and chests to the specified user.
+            !compuser 10 12 1 0 0 0 @Elder_aramis
+            will give the user 10xp, 12cp and a normal chest.
+        """
+        global users
+        if user != None:
+            await self.add_rewards(ctx, user, xp, cp, [normal,rare,epic,quest])
+        else:
+            await self.add_rewards(ctx, ctx.author, xp, cp, [normal,rare,epic,quest])
+        await ctx.send("**" + user.display_name + "was compensated with {} xp, {} cp and [{},{},{},{}] [normal, rare, epic, quest] chests.".format(xp,cp,normal,rare,epic,quest))
 
     @commands.command(name="adventure", aliases=['a'])
     @commands.guild_only()
