@@ -1443,7 +1443,7 @@ class GobCog(BaseCog):
     @checks.admin_or_permissions(administrator=True)
     async def compensate(self, ctx, xp: int=0, cp: int=0, normal: int=0, rare: int=0, epic: int=0, quest: int=0):
         """This will award xp, cp and chests to all players.
-            !compendate 10 12 1 0 0 0
+            !compensate 10 12 1 0 0 0
             will give all users 10xp, 12cp and a normal chest.
         """
         global users
@@ -1452,6 +1452,20 @@ class GobCog(BaseCog):
             if member != None:
                 await self.add_rewards(ctx, member, xp, cp, [normal,rare,epic,quest])
         await ctx.send("All users were compensated with {} xp, {} cp and [{},{},{},{}] [normal, rare, epic, quest] chests.".format(xp,cp,normal,rare,epic,quest))
+
+@commands.command()
+@checks.admin_or_permissions(administrator=True)
+async def compensate_user(self, ctx, xp: int=0, cp: int=0, normal: int=0, rare: int=0, epic: int=0, quest: int=0, user: discord.Member=None):
+    """This will award xp, cp and chests to the specified user.
+        !compensate_user 10 12 1 0 0 0 @Elder_aramis
+        will give the user 10xp, 12cp and a normal chest.
+    """
+    global users
+    if user != None:
+        await self.add_rewards(ctx, user, xp, cp, [normal,rare,epic,quest])
+    else:
+        await self.add_rewards(ctx, ctx.author, xp, cp, [normal,rare,epic,quest])
+    await ctx.send("**" + user.display_name + "was compensated with {} xp, {} cp and [{},{},{},{}] [normal, rare, epic, quest] chests.".format(xp,cp,normal,rare,epic,quest))
 
     @commands.command(name="adventure", aliases=['a'])
     @commands.guild_only()
@@ -1535,7 +1549,10 @@ class GobCog(BaseCog):
         if reward is not None:
             for user in reward.keys():
                 member = discord.utils.find(lambda m: m.display_name == user, ctx.guild.members)
-                await self.add_rewards(ctx, member, reward[user]["xp"], reward[user]["cp"], reward[user]["special"])
+                if member != None:
+                    await self.add_rewards(ctx, member, reward[user]["xp"], reward[user]["cp"], reward[user]["special"])
+                else:
+                    await ctx.send("There was a problem retrieving user information for **" + user + "**. Please tell locastan.")
             for user in participants: #reset activated abilities
                 member = discord.utils.find(lambda m: m.display_name == user, ctx.guild.members)
                 if 'name' in Userdata.users[str(member.id)]['class']:
