@@ -1465,7 +1465,7 @@ class GobCog(BaseCog):
             await self.add_rewards(ctx, user, xp, cp, [normal,rare,epic,quest])
         else:
             await self.add_rewards(ctx, ctx.author, xp, cp, [normal,rare,epic,quest])
-        await ctx.send("**" + user.display_name + "was compensated with {} xp, {} cp and [{},{},{},{}] [normal, rare, epic, quest] chests.".format(xp,cp,normal,rare,epic,quest))
+        await ctx.send("**" + user.display_name + "** was compensated with {} xp, {} cp and [{},{},{},{}] [normal, rare, epic, quest] chests.".format(xp,cp,normal,rare,epic,quest))
 
     @commands.command(name="adventure", aliases=['a'])
     @commands.guild_only()
