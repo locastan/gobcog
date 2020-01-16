@@ -227,9 +227,9 @@ class GobCog(BaseCog):
         else:
             ctx.command.reset_cooldown(ctx)
 
-    @commands.command()
+    @commands.command(name="rest", aliases=['r'])
     @commands.guild_only()
-    async def rest(self, ctx):
+    async def _rest(self, ctx):
         """This allows you to rest to cure your wounds over time.
             !rest
             Resting time depends on severity of wounds.
@@ -1455,9 +1455,9 @@ class GobCog(BaseCog):
 
 @commands.command()
 @checks.admin_or_permissions(administrator=True)
-async def compensate_user(self, ctx, xp: int=0, cp: int=0, normal: int=0, rare: int=0, epic: int=0, quest: int=0, user: discord.Member=None):
+async def compuser(self, ctx, xp: int=0, cp: int=0, normal: int=0, rare: int=0, epic: int=0, quest: int=0, user: discord.Member=None):
     """This will award xp, cp and chests to the specified user.
-        !compensate_user 10 12 1 0 0 0 @Elder_aramis
+        !compuser 10 12 1 0 0 0 @Elder_aramis
         will give the user 10xp, 12cp and a normal chest.
     """
     global users
