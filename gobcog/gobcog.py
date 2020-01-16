@@ -1464,6 +1464,7 @@ class GobCog(BaseCog):
         if user != None:
             await self.add_rewards(ctx, user, xp, cp, [normal,rare,epic,quest])
         else:
+            user = ctx.author
             await self.add_rewards(ctx, ctx.author, xp, cp, [normal,rare,epic,quest])
         await ctx.send("**" + user.display_name + "** was compensated with {} xp, {} cp and [{},{},{},{}] [normal, rare, epic, quest] chests.".format(xp,cp,normal,rare,epic,quest))
 
