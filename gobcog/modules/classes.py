@@ -101,8 +101,10 @@ class Classes:
             return
         else:
             argstring = ''.join(map(str, args))
-            n = int(hashlib.sha1(argstring.encode()).hexdigest(),16)
-            basebonus = await Classes.calc_song(n, Userdata.users[str(user)]['lvl'])
+            level = Userdata.users[str(user)]['lvl']
+            #n = int(hashlib.sha1(argstring.encode()).hexdigest(),16)
+            n = abs(int(hashlib.sha1(argstring.encode()).hexdigest(),16)) % 10000000 #take last 7 digits to get first iteration between 0 and 63?
+            basebonus, optimal = await Classes.calc_song(n, level, 0)
             Userdata.users[str(user)]['class']['ability'] = True
             Userdata.users[str(user)]['class'].update({"basebonus": basebonus})
             rating = round(basebonus/Userdata.users[str(user)]['lvl']*10)
@@ -111,8 +113,18 @@ class Classes:
                 stars += "★"
             for i in range(1, 10-rating+1):
                 stars += "☆"
-            #await ctx.send('♪♫♬ **{}** is singing \"{}\" [{}]. ♬♫♪ (Hash: {}; Bonus:{})'.format(ctx.author.display_name, " ".join(args), stars, abs(hash(args)), basebonus))
-            await ctx.send('♪♫♬ **{}** is singing \"{}\" [{}]. ♬♫♪'.format(ctx.author.display_name, " ".join(args), stars))
+            await ctx.send('♪♫♬ **{}** is singing \"{}\" [{}]. ♬♫♪ (Hash:{}; Bonus:{}; Optimum: {})'.format(ctx.author.display_name, " ".join(args), stars, n, basebonus, optimal))
+            #await ctx.send('♪♫♬ **{}** is singing \"{}\" [{}]. ♬♫♪'.format(ctx.author.display_name, " ".join(args), stars))
+            if optimal == 0:
+                return
+            elif optimal-level <= 5:
+                await ctx.send("This needs just a little more practise.")
+            elif optimal-level <= 10:
+                await ctx.send("This will get better with considerable time and effort.")
+            elif optimal-level <= 20:
+                await ctx.send("You can get there with a LOT of training.")
+            else:
+                await ctx.send("This is far beyond your current skill.")
             return
 
     pets = {"flitterwisp": {'name': "flitterwisp", 'bonus': 1.05, 'cha': 10},
@@ -160,9 +172,9 @@ class Classes:
                 await ctx.send('You already have a pet. Try foraging.')
                 return None
 
-    async def calc_song(n,lvl):
+    async def calc_song(n,lvl,prev):
         x = sum(int(digit) for digit in str(n))
         if x <= lvl:
-            return x
+            return x, prev
         else:
-            return await Classes.calc_song(x,lvl)
+            return await Classes.calc_song(x,lvl,x)
