@@ -113,8 +113,8 @@ class Classes:
                 stars += "★"
             for i in range(1, 10-rating+1):
                 stars += "☆"
-            await ctx.send('♪♫♬ **{}** is singing \"{}\" [{}]. ♬♫♪ (Hash:{}; Bonus:{}; Optimum: {})'.format(ctx.author.display_name, " ".join(args), stars, n, basebonus, optimal))
-            #await ctx.send('♪♫♬ **{}** is singing \"{}\" [{}]. ♬♫♪'.format(ctx.author.display_name, " ".join(args), stars))
+            #await ctx.send('♪♫♬ **{}** is singing \"{}\" [{}]. ♬♫♪ (Hash:{}; Bonus:{}; Optimum: {})'.format(ctx.author.display_name, " ".join(args), stars, n, basebonus, optimal))
+            await ctx.send('♪♫♬ **{}** is singing \"{}\" [{}]. ♬♫♪'.format(ctx.author.display_name, " ".join(args), stars))
             if optimal == 0:
                 return
             elif optimal-level <= 5:
