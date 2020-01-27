@@ -37,10 +37,13 @@ class Adventure:
                 "Kobold":{"str":15,"dipl":18},
                 "Orc":{"str":16,"dipl":10},
                 "Ghoul":{"str":10,"dipl":10},
+                "Shrieker":{"str":11,"dipl":12},
                 "Zombie":{"str":15,"dipl":12},
+                "Skeleton":{"str":13,"dipl":16},
                 "Slaad":{"str":12,"dipl":15},
                 "Gelatinous Cube":{"str":12,"dipl":30},
                 "Green Ooze":{"str":10,"dipl":30},
+                "Black Ooze":{"str":30,"dipl":40},
                 "Golem":{"str":40,"dipl":20},
                 "Wizard":{"str":8,"dipl":15},
                 "Demon":{"str":30,"dipl":17},
@@ -67,7 +70,8 @@ class Adventure:
                 "Red Dragon":{"str":95,"dipl":95},
                 "Blue Dragon":{"str":110,"dipl":100},
                 "Black Dragon":{"str":130,"dipl":120},
-                "White Dragon":{"str":200,"dipl":220}}
+                "White Dragon":{"str":200,"dipl":220},
+                "Tarrasque":{"str":400,"dipl":400}}
 
     challenge = ""
     attrib = ""

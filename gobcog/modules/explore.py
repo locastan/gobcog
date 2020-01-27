@@ -491,7 +491,10 @@ class Explore:
             return await Explore.result(ctx, pages, controls, message, page, Explore.timeout, user)
         for future in Explore.pending:
             future.cancel()
-        return await controls[react.emoji](ctx, pages, controls, message, page, Explore.timeout, react.emoji, user)
+        if react:
+            return await controls[react.emoji](ctx, pages, controls, message, page, Explore.timeout, react.emoji, user)
+        else:
+            return await controls["\U000023CF"](ctx, pages, controls, message, page, Explore.timeout, "\U000023CF", user)
 
 
     async def exit(

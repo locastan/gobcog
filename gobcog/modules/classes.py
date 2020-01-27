@@ -118,7 +118,7 @@ class Classes:
             if optimal == 0:
                 return
             elif optimal-level <= 5:
-                await ctx.send("This needs just a little more practise.")
+                await ctx.send("This needs just a little more practice.")
             elif optimal-level <= 10:
                 await ctx.send("This will get better with considerable time and effort.")
             elif optimal-level <= 20:
