@@ -667,7 +667,7 @@ class Adventure:
                 elif diplomacy == 0:
                     scale = Adventure.str-attack
                 else:
-                    scale = (attack+diplomacy)-(Adventure.dipl+Adventure.str)
+                    scale = (Adventure.dipl+Adventure.str)-(attack+diplomacy)
                 if scale <= 5:
                     options = ["That was slightly too difficult. Better luck next time.", "The group could almost taste the glory of victory, now all you taste is blood.", "You almost had this. What a pity."]
                 elif scale <= 25:
