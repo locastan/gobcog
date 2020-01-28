@@ -94,7 +94,7 @@ class Adventure:
         Adventure.dmgred = 1
         Adventure.participants = []
         Adventure.started = time.time()
-        if "Dragon" in Adventure.challenge:
+        if "Dragon" in Adventure.challenge or "Tarrasque" in Adventure.challenge:
             Adventure.timeout = 120
             modRole = discord.utils.get(ctx.guild.roles, name='Goblin Adventurer!')
             if modRole is not None:
@@ -117,6 +117,8 @@ class Adventure:
     async def choice(ctx):
         if "Dragon" in Adventure.challenge:
             await Adventure.menu(ctx, [("but **a{} {}** just landed in front of you glaring! \n\nWhat will you do and will other heroes be brave enough to help you?\nHeroes participate via reaction:").format(Adventure.attrib,Adventure.challenge)], {"🗡": Adventure.fight, "🗨": Adventure.talk, "🛐": Adventure.pray, "❌": Adventure.run})
+        elif "Tarrasque" in Adventure.challenge:
+            await Adventure.menu(ctx, [("but **a{} {}** just reared its ugly head! \n\nDo you feel lucky today?\nHeroes participate via reaction:").format(Adventure.attrib,Adventure.challenge)], {"🗡": Adventure.fight, "🗨": Adventure.talk, "🛐": Adventure.pray, "❌": Adventure.run})
         elif Adventure.challenge == "Basilisk" or Adventure.challenge == "Medusa":
             await Adventure.menu(ctx, [("but **a{} {}** stepped out looking around. \n\nWhat will you do and will other heroes help your cause?\nHeroes participate via reaction:").format(Adventure.attrib,Adventure.challenge)], {"🗡": Adventure.fight, "🗨": Adventure.talk, "🛐": Adventure.pray, "❌": Adventure.run})
         else:
@@ -521,6 +523,10 @@ class Adventure:
                 treasure = random.choice([[1,2,3,0],[1,3,2,0],[4,2,1,0],[0,3,3,0],[0,0,4,0],[0,0,0,1]])
             if "Dragon" in Adventure.challenge: #always rewards an epic chest.
                 treasure[2] += 1
+            elif "Tarrasque" in Adventure.challenge: #rewards up to 10 rare, 5 epic and 3 quest chests
+                treasure[1] += random.randint(3,10)
+                treasure[2] += random.randint(2,5)
+                treasure[3] += random.randint(1,3)
             if len(critlist) != 0:
                 treasure[0] += len(critlist)
             checklist = Adventure.userslist["fight"]+Adventure.userslist["talk"]+Adventure.userslist["pray"]
