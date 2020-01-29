@@ -103,12 +103,12 @@ class Quest:
             ["As you return from the cave, you tear up that wretched travellers guide into shreds. **A{0} {1}** is not happy about your littering the forest it calls {2} home.", " colossal", "Owlbear", None, None, 0],
             ["Swatting your partymember to keep that infernal buzzing noise down, you realize it is coming from all around you. **A{0} {1}** has surrounded you.", None, "Swarm of Jabberflies", "Blind", "```css\n The {} is like a black cloud obscuring your vision.```", 100],
             ["Now this seems to be the cave tunnel shortcut the guide was talking about. No spidersilk anywhere and smooth walls! But this time it is guarded by **a{0} {1}**", None, "Toadward and 3 Ogres", None, None, 0],
-            ["The end of that tunnel led you up into the middle of Drekmore Castle! **{2} {1}** watched you emerge from the small grate in the courtyard and is now launching an attack.", None, None, "Any", "```css\n {2}{0} curses you with {1}.```", 80]]
+            ["The end of that tunnel led you up into the middle of Drekmore Castle! **{2} {1}** watched you emerge from the small grate in the courtyard and is now launching an attack.", None, None, "Any", "```css\n {2}{0} is casting {1}.```", 80]]
     arena = [["Our {} adventurers are bravely entering the **Arena of endless horrible Deaths**. Then suddenly all hell breaks loose.", None, None, None, None, 0],
             ["The announcer summons **a{0} {1}** into the arena.", None, None, None, None, 0],
             ["Next up on the list of contestants is **a{0} {1}**. {2} rudely gesturing what {3} going to do to your slain corpses.", None, None, None, None, 0],
             ["Time for some crowd pleasing! **A{0} {1}** is whipping up some dark magic.", None, None, "Any", "```css\n The {} casts {}.```", 100],
-            ["Her heart is as black as her soul. Meet **a{0} {1}**. A melange of blackclad witchdom and halitosis.", None, "Black Aliss", "Any", "```css\n {} giggles maniacally and curses you with {}.```", 90],
+            ["Her heart is as black as her soul. Meet **a{0} {1}**. A melange of blackclad witchdom and halitosis.", None, "Black Aliss", "Any", "```css\n {} giggles maniacally and casts {}.```", 90],
             ["Here comes **a{0} {1}**. {2} as colorful as a bruise.", None, None, None, None, 0],
             ["Some like **a{0} {1}** to the salt of the earth. Probably meaning {3} square, rough and bad for your health.", None, None, None, None, 0],
             ["Order up! Here comes **a{0} {1}**. No refunds!", None, None, "Any", "```css\n To your surprise, the {} cast {}.```", 50],
