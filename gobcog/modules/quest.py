@@ -526,7 +526,7 @@ class Quest:
                 member = discord.utils.find(lambda m: m.display_name == user, ctx.guild.members)
                 att_effect = 1
                 effect = ""
-                if user in Quest.affected and Quest.effect != "Fumble":
+                if user in Quest.affected and Quest.effect != "Fumble" and Quest.effects[Quest.effect][0] != "dmg":
                     att_effect = Quest.effects[Quest.effect][1]
                     effect = " *" + Quest.effect + "*"
                 att_value = round((Userdata.users[str(member.id)]['att'] + Userdata.users[str(member.id)]['skill']['att'] + Userdata.users[str(member.id)]['buffs'].get('att', {'bonus':0})['bonus'])*att_effect)
@@ -639,7 +639,7 @@ class Quest:
                 member = discord.utils.find(lambda m: m.display_name == user, ctx.guild.members)
                 dipl_effect = 1
                 effect = ""
-                if user in Quest.affected and Quest.effect != "Fumble":
+                if user in Quest.affected and Quest.effect != "Fumble" and Quest.effects[Quest.effect][0] != "dmg":
                     dipl_effect = Quest.effects[Quest.effect][2]
                     effect = " *" + Quest.effect + "*"
                 dipl_value = round((Userdata.users[str(member.id)]['cha'] + Userdata.users[str(member.id)]['skill']['cha'] + Userdata.users[str(member.id)]['buffs'].get('cha', {'bonus':0})['bonus'])*dipl_effect)
