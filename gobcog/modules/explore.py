@@ -491,9 +491,9 @@ class Explore:
             return await Explore.result(ctx, pages, controls, message, page, Explore.timeout, user)
         for future in Explore.pending:
             future.cancel()
-        if react:
+        try:
             return await controls[react.emoji](ctx, pages, controls, message, page, Explore.timeout, react.emoji, user)
-        else:
+        except NameError:
             return await controls["\U000023CF"](ctx, pages, controls, message, page, Explore.timeout, "\U000023CF", user)
 
 

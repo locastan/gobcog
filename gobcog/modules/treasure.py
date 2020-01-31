@@ -153,7 +153,7 @@ class Treasure:
             if hasattr(user, "display_name"):
                 await ctx.send("```css\n{} found {} ({}x).```".format(user.display_name,itemname,item['uses']))
             else:
-                await ctx.send("```css\nYour {} found {} ({}x)```.".format(user,itemname,item['uses']))
+                await ctx.send("```css\nYour {} found {} ({}x).```".format(user,itemname,item['uses']))
             msg = await ctx.send("Do you want to use, put in backpack or sell this item?")
             start_adding_reactions(msg, Treasure.controls.keys())
             if hasattr(user, "id"):
