@@ -441,7 +441,7 @@ class Treasure:
                         base = (500,3000)
                     else :
                         base = (100,500)
-                    price = random.randint(base[0],base[1])*max(item['uses'],1)
+                    price = random.randint(base[0],base[1])
                 else:
                     if "[" in itemname:
                         base = (1000,2000)
