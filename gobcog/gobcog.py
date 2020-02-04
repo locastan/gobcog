@@ -1785,7 +1785,7 @@ class GobCog(BaseCog):
             if channel is not None:
                 await channel.send("Tell me **{}**, how many {} do you want?".format(user.display_name, titem['itemname']))
                 try:
-                    reply = await ctx.bot.wait_for("message", check=MessagePredicate.same_context(ctx), timeout=30)
+                    reply = await ctx.bot.wait_for("message", check=MessagePredicate.same_context(ctx,channel,user), timeout=30)
                 except asyncio.TimeoutError:
                     await ctx.send("I don't have all day, you know.")
                     return
