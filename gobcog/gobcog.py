@@ -1780,35 +1780,52 @@ class GobCog(BaseCog):
             #print("copyitem: {}".format(item))
             spender = user
             react = None
-            channel = ctx.bot.get_channel(522778389606825984) #restrict trader to loot-spam channel
+            channel = ctx.bot.get_channel(522778389606825984) #restrict trader to loot-spam channel on live server
+            #channel = ctx.bot.get_channel(504934418289262597) #restrict trader to general channel on test server
             if channel is not None:
-                if await bank.can_spend(spender,int(titem['price'])):
-                    await bank.withdraw_credits(spender, int(titem['price']))
+                await channel.send("Tell me **{}**, how many {} do you want?".format(user.display_name, titem['itemname']))
+                try:
+                    reply = await ctx.bot.wait_for("message", check=MessagePredicate.same_context(ctx), timeout=30)
+                except asyncio.TimeoutError:
+                    await ctx.send("I don't have all day, you know.")
+                    return
+                if reply.content.isdigit():
+                    calcprice = int(titem['price'])*int(reply.content)
+                else:
+                    await ctx.send("Sorry, but that is not a proper number. Try again.")
+                    return
+                if await bank.can_spend(spender,calcprice):
+                    await bank.withdraw_credits(spender, calcprice)
                     if 'chest' in titem['itemname']:
                         if titem['itemname'] == ".rare_chest":
-                            Userdata.users[str(user.id)]['treasure'][1] += 1
+                            Userdata.users[str(user.id)]['treasure'][1] += int(reply.content)
                         elif titem['itemname'] == "[epic chest]":
-                            Userdata.users[str(user.id)]['treasure'][2] += 1
+                            Userdata.users[str(user.id)]['treasure'][2] += int(reply.content)
                         else:
-                            Userdata.users[str(user.id)]['treasure'][0] += 1
+                            Userdata.users[str(user.id)]['treasure'][0] += int(reply.content)
                     elif titem['itemname'] in Consumables.consbles.keys():
                             if titem['itemname'] in Userdata.users[str(user.id)]['consumables'].keys():
                                 #print("Cons in pouch before: {}".format(Userdata.users[str(user.id)]['consumables'][item['itemname']]['uses']))
-                                Userdata.users[str(user.id)]['consumables'][titem['itemname']]['uses'] = Userdata.users[str(user.id)]['consumables'][titem['itemname']].get("uses", 0) + titem['item']['uses']
+                                Userdata.users[str(user.id)]['consumables'][titem['itemname']]['uses'] = Userdata.users[str(user.id)]['consumables'][titem['itemname']].get("uses", 0) + int(reply.content)
                                 #print("Uses added: {}, Uses in userpouch: {}".format(item['item']['uses'],Userdata.users[str(user.id)]['consumables'][item['itemname']]['uses']))
                             else:
+                                titem['item']['uses'] = int(reply.content)
                                 Userdata.users[str(user.id)]['consumables'].update(copy.deepcopy({titem['itemname']:titem['item']}))
                     else:
                         if titem['itemname'] in Userdata.users[str(user.id)]['items']['backpack'].keys():
                             price = await GobCog.sell(user,titem)
+                            price = price * int(reply.content)
                             await channel.send("**{}** was already in your backpack: Sold for {} copperpieces.".format(titem['itemname'],price))
                         else:
                             Userdata.users[str(user.id)]['items']['backpack'].update(copy.deepcopy({titem['itemname']:titem['item']}))
+                            price = await GobCog.sell(user,titem)
+                            price = price * (int(reply.content)-1)
+                            await channel.send("Excess **{}** sold for {} copperpieces.".format(titem['itemname'],price))
                     await GobCog.save()
                     if titem['itemname'] in Consumables.consbles.keys():
-                        await channel.send("{} bought {}x {} for {} cp and put it into the backpack.".format(user.display_name,titem['item']['uses'],titem['itemname'],str(titem['price'])))
+                        await channel.send("{} bought {}x {} for {} cp and put it into the backpack.".format(user.display_name,int(reply.content),titem['itemname'],str(calcprice)))
                     else:
-                        await channel.send("{} bought the {} for {} cp and put it into the backpack.".format(user.display_name,titem['itemname'],str(titem['price'])))
+                        await channel.send("{} bought the {} for {} cp and put it into the backpack.".format(user.display_name,titem['itemname'],str(calcprice)))
                 else:
                     await channel.send("You do not have enough copperpieces.")
                 try:
@@ -1848,7 +1865,7 @@ class GobCog(BaseCog):
             sitem = copy.deepcopy(stock[index])
             if "chest" not in sitem['itemname']:
                 if sitem['item']['slot'] == ['consumable']:
-                    text += "```css\n" + "[{}] {}x {} for {} cp.".format(str(index+1),sitem['item']['uses'],sitem['itemname'],sitem['price'])+ " ```"
+                    text += "```css\n" + "[{}] {} for {} cp each.".format(str(index+1),sitem['itemname'],sitem['price'])+ " ```"
                     continue
                 else:
                     if len(sitem['item']['slot']) == 2: # two handed weapons add their bonuses twice
@@ -1866,7 +1883,8 @@ class GobCog(BaseCog):
             else:
                 text += "```css\n" + "[{}] {} for {} cp.".format(str(index+1),sitem['itemname'],sitem['price'])+ " ```"
         text += "Do you want to buy any of these fine items? Tell me which one below:"
-        channel = ctx.bot.get_channel(522778389606825984) #restrict trader to loot-spam channel
+        channel = ctx.bot.get_channel(522778389606825984) #restrict trader to loot-spam channel on live server
+        #channel = ctx.bot.get_channel(504934418289262597) #restrict trader to general channel on test server
         if channel is not None:
             msg = await channel.send(text)
         else:

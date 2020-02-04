@@ -475,6 +475,7 @@ class Treasure:
                     return
                 rem, done = await remaining(Treasure.finish)
                 channel = ctx.bot.get_channel(522778389606825984) #restrict trader to loot-spam channel
+                #channel = ctx.bot.get_channel(504934418289262597) #restrict trader to general channel on test server
                 if channel is not None:
                     message = await channel.send("[" + title +"] " + rem)
                 while True:
