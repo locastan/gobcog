@@ -231,7 +231,7 @@ class GobCog(BaseCog):
     @commands.guild_only()
     async def _rest(self, ctx):
         """This allows you to rest to cure your wounds over time.
-            !rest
+            !rest or !r
             Resting time depends on severity of wounds.
         """
         user = ctx.author
@@ -746,7 +746,7 @@ class GobCog(BaseCog):
                 else:
                     roll = random.randint(1,3)
                     if roll == 3:
-                        await ctx.send('```css\n You carefully dismantle the {} and salvaged its [soul essence]. ```'.format(newitem['itemname']))
+                        await ctx.send('```css\n You carefully dismantle the {} and salvage its [soul essence]. ```'.format(newitem['itemname']))
                         if "[soul essence]" in Userdata.users[str(user)]['consumables'].keys():
                             Userdata.users[str(user)]['consumables']['[soul essence]']['uses'] = Userdata.users[str(user)]['consumables']['[soul essence]'].get("uses", 0) + 1
                         else:
@@ -771,9 +771,9 @@ class GobCog(BaseCog):
         """
         global users
         classes = {'Tinkerer': {'name': "Tinkerer", 'ability': False, 'desc': "Tinkerers can forge two different items into a device bound to their very soul.\nThey can also use soul essence to augment items.\n Use !forge."},
-                    'Berserker':{'name': "Berserker", 'ability': False, 'desc': "Berserkers have the option to rage and add big bonuses to attacks, but fumbles hurt.\n Use !rage when attacking in an adventure."},
+                    'Berserker':{'name': "Berserker", 'ability': False, 'desc': "Berserkers have the option to rage and add big bonuses to attacks, but fumbles hurt.\n Use !rage when attacking in an adventure.\n They also receive a bonus when using two handed weapons."},
                     'Cleric': {'name': "Cleric", 'ability': False, 'desc': "Clerics can bless the entire group when praying and have the power to !heal.\n Use !bless when fighting in an adventure."},
-                    'Ranger': {'name': "Ranger", 'ability': False, 'desc': "Rangers can gain a special pet, which can find items and give reward bonuses.\n Use !pet."},
+                    'Ranger': {'name': "Ranger", 'ability': False, 'desc': "Rangers can gain a special pet, which can find items and give reward bonuses.\n Use !pet.\n They also receive a bonus when using bows."},
                     'Bard': {'name': "Bard", 'ability': False, 'desc': "Bards can perform to aid their comrades in diplomacy.\n Use !sing and maybe add a song when being diplomatic in an adventure."}}
         user = ctx.author
         if clz == None:
@@ -1074,6 +1074,10 @@ class GobCog(BaseCog):
                     bow_bonus = "{}🏹".format(bonus)
                     clazz += "\n- Current pet: {}".format(Userdata.users[str(user.id)]['class']['ability']['pet']['name'])
                     clazz += "\n\nYou get a +{} bonus to attacks when using a bow.".format(bow_bonus)
+            elif Userdata.users[str(user.id)]['class']['name']=="Berserker" and len(Userdata.users[str(user.id)]['items']['right'][list(Userdata.users[str(user.id)]['items']['right'].keys())[0]]["slot"]) == 2:
+                bonus = Userdata.users[str(user.id)]['items']['right'][list(Userdata.users[str(user.id)]['items']['right'].keys())[0]]["att"]*2
+                bow_bonus = " {}🀄 + ".format(bonus)
+                clazz += "\n\nYou currently get a +{} bonus to attacks for using a two handed item.".format(bow_bonus)
         else:
             clazz = "Hero."
         await ctx.send(
