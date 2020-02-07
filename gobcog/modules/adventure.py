@@ -98,7 +98,11 @@ class Adventure:
             Adventure.timeout = 120
             modRole = discord.utils.get(ctx.guild.roles, name='Goblin Adventurer!')
             if modRole is not None:
-                text = modRole.mention + "\n" + "```css\n [{} {} Alarm!]```".format(Adventure.attrib.split(" ")[1].capitalize(),Adventure.challenge)
+                if len(Adventure.attrib.split(" ")) <= 2:
+                    namedesc = Adventure.attrib.split(" ")[1].capitalize()
+                else:
+                    namedesc = Adventure.attrib.split(" ")[1].capitalize() + " " + Adventure.attrib.split(" ")[2].capitalize()
+                text = modRole.mention + "\n" + "```css\n [{} {} Alarm!]```".format(namedesc,Adventure.challenge)
         elif (Adventure.str + Adventure.dipl) > 100:
             Adventure.timeout = 60
         else:
@@ -354,11 +358,11 @@ class Adventure:
                     else:
                         bonus = random.randint(5,15)
                     attack += roll + bonus + att_value + monster_value
-                    bonus_str = ability + str(bonus)
-                    if Userdata.users[str(member.id)]['class']['name']=="Berserker" and len(Userdata.users[str(member.id)]['items']['right'][list(Userdata.users[str(member.id)]['items']['right'].keys())[0]]["slot"]) == 2:
+                    bonus_str = str(bonus) + ability
+                    if Userdata.users[str(member.id)]['class']['name']=="Berserker" and len(Userdata.users[str(member.id)]['items']['right'][list(Userdata.users[str(member.id)]['items']['right'].keys())[0]]["slot"]) == 2 and "bow" not in list(Userdata.users[str(member.id)]['items']['right'].keys())[0]:
                         barb_bonus = Userdata.users[str(member.id)]['items']['right'][list(Userdata.users[str(member.id)]['items']['right'].keys())[0]]["att"]*2
                         attack += barb_bonus
-                        barb_bonus_str = " {}🀄 + ".format(bonus)
+                        barb_bonus_str = " + {}🀄 ".format(bonus)
                         bonus_str += barb_bonus_str
                     report += "**" + user + "**: " +  "🎲({}) +".format(roll) + " {} + ".format(bonus_str) + "🗡" + str(att_value) + monster_string + " |"
                 else:
@@ -366,7 +370,7 @@ class Adventure:
                     if Userdata.users[str(member.id)]['class']['name']=="Ranger" and "bow" in list(Userdata.users[str(member.id)]['items']['right'].keys())[0]:
                         bonus = int(Userdata.users[str(member.id)]['lvl']/10)*2
                         bow_bonus = " {}🏹 + ".format(bonus)
-                    elif Userdata.users[str(member.id)]['class']['name']=="Berserker" and len(Userdata.users[str(member.id)]['items']['right'][list(Userdata.users[str(member.id)]['items']['right'].keys())[0]]["slot"]) == 2:
+                    elif Userdata.users[str(member.id)]['class']['name']=="Berserker" and len(Userdata.users[str(member.id)]['items']['right'][list(Userdata.users[str(member.id)]['items']['right'].keys())[0]]["slot"]) == 2 and "bow" not in list(Userdata.users[str(member.id)]['items']['right'].keys())[0]:
                         bonus = Userdata.users[str(member.id)]['items']['right'][list(Userdata.users[str(member.id)]['items']['right'].keys())[0]]["att"]*2
                         bow_bonus = " {}🀄 + ".format(bonus)
                     attack += roll + bonus + att_value + monster_value
