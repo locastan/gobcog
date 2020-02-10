@@ -392,7 +392,7 @@ class Quest:
             react, user = await ctx.bot.wait_for(
                 "reaction_add",
                 check=CustomPredicate.with_emojis(tuple(controls.keys()), message, Quest.partyIDs),
-                timeout=Quest.timeout,
+                timeout=Quest.timeout
             )
         except asyncio.TimeoutError:
             return await Quest.result(ctx, pages, controls, message, page, Quest.timeout)

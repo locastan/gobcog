@@ -275,8 +275,7 @@ class Adventure:
             react, user = await ctx.bot.wait_for(
                 "reaction_add",
                 check=CustomPredicate.with_emojis(tuple(controls.keys()), message),
-                timeout=Adventure.timeout,
-            )
+                timeout=Adventure.timeout)
         except asyncio.TimeoutError:
             return await Adventure.result(ctx, pages, controls, message, page, Adventure.timeout)
         return await controls[react.emoji](ctx, pages, controls, message, page, Adventure.timeout, react.emoji, user)
