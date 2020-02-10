@@ -227,7 +227,7 @@ class GobCog(BaseCog):
         else:
             ctx.command.reset_cooldown(ctx)
 
-    @commands.command(name="rest", aliases=['r'])
+    @commands.command(name="rest", aliases=['re'])
     @commands.guild_only()
     async def _rest(self, ctx):
         """This allows you to rest to cure your wounds over time.
@@ -366,6 +366,9 @@ class GobCog(BaseCog):
     @has_hp()
     @commands.cooldown(rate=1, per=43200, type=commands.BucketType.user)
     async def explore(self, ctx):
+        """This sends you on an exploration trip
+            on a graphical map. Move with the arrow buttons.
+        """
         if Explore.mapmsg != None:
             ctx.command.reset_cooldown(ctx)
             await ctx.send("Sorry somebody is exploring at the moment.")
@@ -1371,7 +1374,7 @@ class GobCog(BaseCog):
     @commands.command()
     @checks.admin_or_permissions(administrator=True)
     async def fund(self, ctx, amount: int=1, to: discord.Member=None):
-        """This will create cp for a specified member.
+        """[Admin] This will create cp for a specified member.
             !fund 10 @Elder Aramis
             will create 10 cp and add to Elder Aramis.
         """
@@ -1388,7 +1391,7 @@ class GobCog(BaseCog):
     @commands.command()
     @checks.admin_or_permissions(administrator=True)
     async def setbalance(self, ctx, amount: int=1, to: discord.Member=None):
-        """This will SET cp for a specified member.
+        """[Admin] This will SET cp for a specified member.
             !setbalance 10 @Elder Aramis
             will set balance at 10 cp for Elder Aramis.
         """
@@ -1405,7 +1408,7 @@ class GobCog(BaseCog):
     @commands.command()
     @checks.admin_or_permissions(administrator=True)
     async def getyerassoverhere(self, ctx):
-        """This will summon the trader asap.
+        """[Admin] This will summon the trader asap.
         """
         await self.trader(ctx, True)
 
@@ -1446,7 +1449,7 @@ class GobCog(BaseCog):
     @commands.command()
     @checks.admin_or_permissions(administrator=True)
     async def compensate(self, ctx, xp: int=0, cp: int=0, normal: int=0, rare: int=0, epic: int=0, quest: int=0):
-        """This will award xp, cp and chests to all players.
+        """[Admin] This will award xp, cp and chests to all players.
             !compensate 10 12 1 0 0 0
             will give all users 10xp, 12cp and a normal chest.
         """
@@ -1460,7 +1463,7 @@ class GobCog(BaseCog):
     @commands.command()
     @checks.admin_or_permissions(administrator=True)
     async def compuser(self, ctx, xp: int=0, cp: int=0, normal: int=0, rare: int=0, epic: int=0, quest: int=0, user: discord.Member=None):
-        """This will award xp, cp and chests to the specified user.
+        """[Admin] This will award xp, cp and chests to the specified user.
             !compuser 10 12 1 0 0 0 @Elder_aramis
             will give the user 10xp, 12cp and a normal chest.
         """
