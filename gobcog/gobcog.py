@@ -1794,12 +1794,12 @@ class GobCog(BaseCog):
                 try:
                     reply = await ctx.bot.wait_for("message", check=MessagePredicate.same_context(ctx,channel,user), timeout=30)
                 except asyncio.TimeoutError:
-                    await ctx.send("I don't have all day, you know.")
+                    await channel.send("I don't have all day, you know.")
                     return
                 if reply.content.isdigit():
                     calcprice = int(titem['price'])*int(reply.content)
                 else:
-                    await ctx.send("Sorry, but that is not a proper number. Try again.")
+                    await channel.send("Sorry, but that is not a proper number. Try again.")
                     return
                 if await bank.can_spend(spender,calcprice):
                     await bank.withdraw_credits(spender, calcprice)
