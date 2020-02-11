@@ -1830,7 +1830,7 @@ class GobCog(BaseCog):
                             await channel.send("Excess **{}** sold for {} copperpieces.".format(titem['itemname'],price))
                     await GobCog.save()
                     if titem['itemname'] in Consumables.consbles.keys():
-                        await channel.send("{} bought {}x {} for {} cp and put it into the backpack.".format(user.display_name,int(reply.content),titem['itemname'],str(calcprice)))
+                        await channel.send("{} paid {} cp and put {}x {} into the backpack.".format(user.display_name,str(calcprice),int(reply.content),titem['itemname']))
                     else:
                         await channel.send("{} bought the {} for {} cp and put it into the backpack.".format(user.display_name,titem['itemname'],str(calcprice)))
                 else:
