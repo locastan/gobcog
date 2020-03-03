@@ -773,7 +773,7 @@ class GobCog(BaseCog):
             For information on class use: !heroclass "classname" info
         """
         global users
-        classes = {'Tinkerer': {'name': "Tinkerer", 'ability': False, 'desc': "Tinkerers can forge two different items into a device bound to their very soul.\nThey can also use soul essence to augment items.\n Use !forge."},
+        classes = {'Tinkerer': {'name': "Tinkerer", 'ability': False, 'desc': "Tinkerers can forge two different items into a device bound to their very soul.\nThey also have a chance to reclaim soul essence from dismantling devices.\n Use !forge."},
                     'Berserker':{'name': "Berserker", 'ability': False, 'desc': "Berserkers have the option to rage and add big bonuses to attacks, but fumbles hurt.\n Use !rage when attacking in an adventure.\n They also receive a bonus when using two handed weapons."},
                     'Cleric': {'name': "Cleric", 'ability': False, 'desc': "Clerics can bless the entire group when praying and have the power to !heal.\n Use !bless when fighting in an adventure."},
                     'Ranger': {'name': "Ranger", 'ability': False, 'desc': "Rangers can gain a special pet, which can find items and give reward bonuses.\n Use !pet.\n They also receive a bonus when using bows."},
@@ -790,7 +790,7 @@ class GobCog(BaseCog):
                         if Userdata.users[str(user.id)]['class']['name'] == 'Tinkerer' or Userdata.users[str(user.id)]['class']['name'] == 'Ranger':
                             curclass = Userdata.users[str(user.id)]['class']['name']
                             if curclass == 'Tinkerer':
-                                msg = await ctx.send("```css\n You will loose your forged device and soul essence if you change your class.\nShall I proceed? ```")
+                                msg = await ctx.send("```css\n You will loose your forged device if you change your class.\nShall I proceed? ```")
                             else:
                                 msg = await ctx.send("```css\n You will loose your pet if you change your class.\nShall I proceed? ```")
                             start_adding_reactions(msg, ReactionPredicate.YES_OR_NO_EMOJIS)
@@ -809,8 +809,6 @@ class GobCog(BaseCog):
                                         for item in lookup:
                                             del Userdata.users[str(user.id)]['items']['backpack'][item]
                                             await ctx.send('```css\n {} has run off to find a new master. ```'.format(', '.join(lookup)))
-                                    if '[soul essence]' in Userdata.users[str(user.id)]['consumables']:
-                                        Userdata.users[str(user.id)]['consumables'].pop('[soul essence]')
                             else:
                                 ctx.command.reset_cooldown(ctx)
                                 return
