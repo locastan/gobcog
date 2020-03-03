@@ -556,6 +556,8 @@ class Adventure:
                         treasure[2] += 1
                     elif roll == 100: #1% quest
                         treasure[3] += 1
+                    if roll >= 51:
+                        await ctx.send("**{}** was lucky to dig up an extra chest for the group!".format(user))
             if treasure == [0,0,0,0]:
                 treasure = False
         if (Adventure.challenge == "Basilisk" or Adventure.challenge == "Medusa") and failed:

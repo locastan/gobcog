@@ -777,6 +777,8 @@ class Quest:
                         treasure[2] += 1
                     elif roll == 100: #1% quest
                         treasure[3] += 1
+                    if roll >= 51:
+                        await ctx.send("**{}** was lucky to find everyone an extra chest!".format(user))
             if treasure == [0,0,0,0]:
                 treasure = False
         if (Quest.challenge == "Basilisk" or Quest.challenge == "Medusa") and Quest.failed:
