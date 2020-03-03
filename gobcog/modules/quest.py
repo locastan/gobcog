@@ -921,6 +921,9 @@ class Quest:
         if len(Userdata.sleepers) != 0:
             slept = " and ".join([", ".join(Userdata.sleepers[:-1]),Userdata.sleepers[-1]] if len(Userdata.sleepers) > 2 else Userdata.sleepers)
             phrase += "\n**{}** slept through the whole encounter.".format(slept)
+            for name in Userdata.sleepers:
+                member = discord.utils.find(lambda m: m.display_name == user, ctx.guild.members)
+                phrase += " " + member.mention
             Userdata.sleepers.clear()
         return phrase
 
