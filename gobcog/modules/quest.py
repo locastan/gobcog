@@ -899,7 +899,7 @@ class Quest:
                 Quest.rewards[user]["xp"] += int((xp+bxp) * Userdata.users[str(member.id)]['class']['ability']['pet']['bonus'])
                 Quest.rewards[user]["cp"] += int((cp+bxp) * Userdata.users[str(member.id)]['class']['ability']['pet']['bonus'])
                 percent = round((Userdata.users[str(member.id)]['class']['ability']['pet']['bonus'] - 1.0) * 100)
-                phrase += "\n**{}** received a **{}%** reward bonus from his {}.".format(member.display_name, percent, Userdata.users[str(member.id)]['class']['ability']['pet']['name'])
+                phrase += "\n**{}** received a **{}%** reward bonus ({}).".format(member.display_name, percent, Userdata.users[str(member.id)]['class']['ability']['pet']['name'])
             else:
                 Quest.rewards[user]["xp"] += xp + bxp
                 Quest.rewards[user]["cp"] += cp + bcp

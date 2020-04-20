@@ -722,7 +722,7 @@ class Adventure:
                 Adventure.rewards[user]["xp"] = int((xp+bxp) * Userdata.users[str(member.id)]['class']['ability']['pet']['bonus'])
                 Adventure.rewards[user]["cp"] = int((cp+bcp) * Userdata.users[str(member.id)]['class']['ability']['pet']['bonus'])
                 percent = round((Userdata.users[str(member.id)]['class']['ability']['pet']['bonus'] - 1.0) * 100)
-                phrase += "\n**{}** received a **{}%** reward bonus from his {}.".format(member.display_name, percent, Userdata.users[str(member.id)]['class']['ability']['pet']['name'])
+                phrase += "\n**{}** received a **{}%** reward bonus ({}).".format(member.display_name, percent, Userdata.users[str(member.id)]['class']['ability']['pet']['name'])
             else:
                 Adventure.rewards[user]["xp"] = xp + bxp
                 Adventure.rewards[user]["cp"] = cp + bcp

@@ -963,7 +963,7 @@ class GobCog(BaseCog):
                 await ctx.send("```css\n" + "You own {} normal, {} rare, {} epic and {} quest chests.```".format(
                     str(Userdata.users[str(user.id)]['treasure'][0]),str(Userdata.users[str(user.id)]['treasure'][1]),str(Userdata.users[str(user.id)]['treasure'][2]),str(Userdata.users[str(user.id)]['treasure'][3])))
                 if item['equip'] == "cancel":
-                    await ctx.send("**{}** cancelled his looting session.".format(user.display_name))
+                    await ctx.send("**{}** cancelled the looting session.".format(user.display_name))
                     break
         looting.remove(ctx.author.display_name)
         await Userdata.save()
