@@ -174,6 +174,7 @@ class Treasure:
             if luckbonus != 0:
                 if Userdata.users[str(user.id)]['buffs']['luck']['duration'] <= 1:
                     Userdata.users[str(user.id)]['buffs'].pop('luck')
+                    luckbonus = 0
                 else:
                     Userdata.users[str(user.id)]['buffs']['luck']['duration'] = Userdata.users[str(user.id)]['buffs']['luck']['duration'] - 1
             await Userdata.save()
@@ -216,6 +217,7 @@ class Treasure:
             if luckbonus != 0:
                 if Userdata.users[str(user.id)]['buffs']['luck']['duration'] <= 1:
                     Userdata.users[str(user.id)]['buffs'].pop('luck')
+                    luckbonus = 0
                 else:
                     Userdata.users[str(user.id)]['buffs']['luck']['duration'] = Userdata.users[str(user.id)]['buffs']['luck']['duration'] - 1
             await Userdata.save()
@@ -270,6 +272,7 @@ class Treasure:
                 if luckbonus != 0:
                     if Userdata.users[str(user.id)]['buffs']['luck']['duration'] <= 1:
                         Userdata.users[str(user.id)]['buffs'].pop('luck')
+                        luckbonus = 0
                     else:
                         Userdata.users[str(user.id)]['buffs']['luck']['duration'] = Userdata.users[str(user.id)]['buffs']['luck']['duration'] - 1
                 await Userdata.save()
@@ -281,6 +284,7 @@ class Treasure:
                 if luckbonus != 0:
                     if Userdata.users[str(user.id)]['buffs']['luck']['duration'] <= 1:
                         Userdata.users[str(user.id)]['buffs'].pop('luck')
+                        luckbonus = 0
                     else:
                         Userdata.users[str(user.id)]['buffs']['luck']['duration'] = Userdata.users[str(user.id)]['buffs']['luck']['duration'] - 1
                 await Userdata.save()
