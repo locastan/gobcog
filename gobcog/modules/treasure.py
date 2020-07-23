@@ -435,6 +435,19 @@ class Treasure:
                         items.update({chesttext: {"itemname": "{}".format(chesttext),"item":treasure, "price": price}})
                 else:
                     chance = Treasure.rare
+            else:
+                if roll <= 50:
+                    chance = Treasure.unique
+                elif roll >= 90:
+                    treasure = random.choice([[0,1,0,0],[0,0,1,0]])
+                    types = ["normal chest",".rare_chest","[epic chest]"]
+                    prices = [2000,5000,10000]
+                    chesttext = types[treasure.index(1)]
+                    price = prices[treasure.index(1)]
+                    if chesttext not in items:
+                        items.update({chesttext: {"itemname": "{}".format(chesttext),"item":treasure, "price": price}})
+                else:
+                    chance = Treasure.rare
             if chance != None: #item is selected from a droplist, not a manually created chest
                 itemname = random.choice(list(chance.keys()))
                 item = chance[itemname]

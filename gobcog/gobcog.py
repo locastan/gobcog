@@ -923,48 +923,51 @@ class GobCog(BaseCog):
         if many > 1:
             await GobCog.autoloot(self,ctx,type,many)
             return
+        elif many <= 0:
+            await ctx.send("Maybe there are negative or zero space chests somewhere, but I am not having that here!".format(type))
+            looting.remove(ctx.author.display_name)
+            return
         user = ctx.author
         if not 'treasure' in Userdata.users[str(user.id)].keys():
             Userdata.users[str(user.id)]['treasure'] = [0,0,0,0]
-        for x in range(0, many):
-            treasure = Userdata.users[str(user.id)]['treasure'][redux.index(1)]
-            if treasure <= 0:
-                await ctx.send("You have no {} treasure chest to open.".format(type))
-                break
-            else:
-                item = await Treasure.open_chest(ctx, user, type)
-                Userdata.users[str(user.id)]['treasure'] = [x-y for x,y in zip(Userdata.users[str(user.id)]['treasure'], redux)]
-                if item['equip'] == "sell":
-                    price = await GobCog.sell(user,item)
-                    await ctx.send("**{}** sold the {} for {} copperpieces.".format(user.display_name,item['itemname'],price))
-                elif item['equip'] == "equip":
-                    if item['item']['slot'] == ['consumable']:
-                        if item['itemname'] in Userdata.users[str(user.id)]['consumables'].keys():
-                            Userdata.users[str(user.id)]['consumables'][item['itemname']]['uses'] = Userdata.users[str(user.id)]['consumables'][item['itemname']].get("uses", 0) + item['item']['uses']
-                        else:
-                            Userdata.users[str(user.id)]['consumables'].update({item['itemname']:item['item']})
-                        await Consumables.use_con(ctx, user, item['itemname'])
+        treasure = Userdata.users[str(user.id)]['treasure'][redux.index(1)]
+        if treasure <= 0:
+            await ctx.send("You have no {} treasure chest to open.".format(type))
+            break
+        else:
+            item = await Treasure.open_chest(ctx, user, type)
+            Userdata.users[str(user.id)]['treasure'] = [x-y for x,y in zip(Userdata.users[str(user.id)]['treasure'], redux)]
+            if item['equip'] == "sell":
+                price = await GobCog.sell(user,item)
+                await ctx.send("**{}** sold the {} for {} copperpieces.".format(user.display_name,item['itemname'],price))
+            elif item['equip'] == "equip":
+                if item['item']['slot'] == ['consumable']:
+                    if item['itemname'] in Userdata.users[str(user.id)]['consumables'].keys():
+                        Userdata.users[str(user.id)]['consumables'][item['itemname']]['uses'] = Userdata.users[str(user.id)]['consumables'][item['itemname']].get("uses", 0) + item['item']['uses']
                     else:
-                        equip = {"itemname": item['itemname'],"item": item['item']}
-                        await self.equip_item(ctx, equip, False)
+                        Userdata.users[str(user.id)]['consumables'].update({item['itemname']:item['item']})
+                    await Consumables.use_con(ctx, user, item['itemname'])
                 else:
-                    if item['item']['slot'] == ['consumable']:
-                        if item['itemname'] in Userdata.users[str(user.id)]['consumables'].keys():
-                            Userdata.users[str(user.id)]['consumables'][item['itemname']]['uses'] = Userdata.users[str(user.id)]['consumables'][item['itemname']].get("uses", 0) + item['item']['uses']
-                        else:
-                            Userdata.users[str(user.id)]['consumables'].update({item['itemname']:item['item']})
+                    equip = {"itemname": item['itemname'],"item": item['item']}
+                    await self.equip_item(ctx, equip, False)
+            else:
+                if item['item']['slot'] == ['consumable']:
+                    if item['itemname'] in Userdata.users[str(user.id)]['consumables'].keys():
+                        Userdata.users[str(user.id)]['consumables'][item['itemname']]['uses'] = Userdata.users[str(user.id)]['consumables'][item['itemname']].get("uses", 0) + item['item']['uses']
                     else:
-                        if item['itemname'] in Userdata.users[str(user.id)]['items']['backpack'].keys():
-                            price = await GobCog.sell(user,item)
-                            await ctx.send("**{}** already had this item: Sold {} for {} copperpieces.".format(user.display_name,item['itemname'],price))
-                        else:
-                            Userdata.users[str(user.id)]['items']['backpack'].update({item['itemname']: item['item']})
-                            await ctx.send("**{}** put the {} into the backpack.".format(user.display_name,item['itemname']))
-                await ctx.send("```css\n" + "You own {} normal, {} rare, {} epic and {} quest chests.```".format(
-                    str(Userdata.users[str(user.id)]['treasure'][0]),str(Userdata.users[str(user.id)]['treasure'][1]),str(Userdata.users[str(user.id)]['treasure'][2]),str(Userdata.users[str(user.id)]['treasure'][3])))
-                if item['equip'] == "cancel":
-                    await ctx.send("**{}** cancelled the looting session.".format(user.display_name))
-                    break
+                        Userdata.users[str(user.id)]['consumables'].update({item['itemname']:item['item']})
+                else:
+                    if item['itemname'] in Userdata.users[str(user.id)]['items']['backpack'].keys():
+                        price = await GobCog.sell(user,item)
+                        await ctx.send("**{}** already had this item: Sold {} for {} copperpieces.".format(user.display_name,item['itemname'],price))
+                    else:
+                        Userdata.users[str(user.id)]['items']['backpack'].update({item['itemname']: item['item']})
+                        await ctx.send("**{}** put the {} into the backpack.".format(user.display_name,item['itemname']))
+            await ctx.send("```css\n" + "You own {} normal, {} rare, {} epic and {} quest chests.```".format(
+                str(Userdata.users[str(user.id)]['treasure'][0]),str(Userdata.users[str(user.id)]['treasure'][1]),str(Userdata.users[str(user.id)]['treasure'][2]),str(Userdata.users[str(user.id)]['treasure'][3])))
+            if item['equip'] == "cancel":
+                await ctx.send("**{}** cancelled the looting session.".format(user.display_name))
+                break
         looting.remove(ctx.author.display_name)
         await Userdata.save()
 
@@ -1201,13 +1204,13 @@ class GobCog(BaseCog):
             if pred.result: #user reacted with Yes.
                 moneypile = 0
                 for item in lookup:
-                    if item in Consumables.consbles.keys() and asking != 0:
+                    if item in Consumables.consbles.keys() and asking > 0:
                         if int(Userdata.users[str(user.id)]['consumables'][item]['uses']) > asking:
                             queryitem = {'itemname': item,'item': copy.deepcopy(Userdata.users[str(user.id)]['consumables'][item])}
                             queryitem['item']['uses'] = asking
                         else:
                             queryitem = {'itemname': item,'item': Userdata.users[str(user.id)]['consumables'].get(item)}
-                    elif item in Userdata.users[str(user.id)]['ingredients'].keys() and asking != 0:
+                    elif item in Userdata.users[str(user.id)]['ingredients'].keys() and asking > 0:
                         if int(Userdata.users[str(user.id)]['ingredients'][item]['uses']) > asking:
                             queryitem = {'itemname': item,'item': copy.deepcopy(Userdata.users[str(user.id)]['ingredients'][item])}
                             queryitem['item']['uses'] = asking
@@ -1217,12 +1220,12 @@ class GobCog(BaseCog):
                         queryitem = {'itemname': item,'item': Userdata.users[str(user.id)]['items']['backpack'].get(item, Userdata.users[str(user.id)]['consumables'].get(item, Userdata.users[str(user.id)]['ingredients'].get(item)))} #multiple fallbacks to other inventories needed when no sell amount is specified.
                     moneypile += await GobCog.sell(user,queryitem)
                     if item in Consumables.consbles.keys():
-                        if int(Userdata.users[str(user.id)]['consumables'][item]['uses']) > asking and asking != 0:
+                        if int(Userdata.users[str(user.id)]['consumables'][item]['uses']) > asking and asking > 0:
                             Userdata.users[str(user.id)]['consumables'][item]['uses'] = int(Userdata.users[str(user.id)]['consumables'][item]['uses']) - asking
                         else:
                             Userdata.users[str(user.id)]['consumables'].pop(item)
                     elif item in Userdata.users[str(user.id)]['ingredients'].keys():
-                        if int(Userdata.users[str(user.id)]['ingredients'][item]['uses']) > asking and asking != 0:
+                        if int(Userdata.users[str(user.id)]['ingredients'][item]['uses']) > asking and asking > 0:
                             Userdata.users[str(user.id)]['ingredients'][item]['uses'] = int(Userdata.users[str(user.id)]['ingredients'][item]['uses']) - asking
                         else:
                             Userdata.users[str(user.id)]['ingredients'].pop(item)
@@ -1265,6 +1268,9 @@ class GobCog(BaseCog):
             if item in Consumables.consbles.keys():
                 if Userdata.users[str(user.id)]['consumables'].get(item)['uses'] >= quant:
                     await ctx.send("{} wants to sell {}x {}.".format(user.display_name,quant,item))
+                elif quant <= 0:
+                    await ctx.send("We don't deal with 0 or negative items, here.")
+                    return
                 else:
                     await ctx.send("You only have {} doses of {} to sell.".format(Userdata.users[str(user.id)]['consumables'].get(item)['uses'],item))
                     return
@@ -1794,7 +1800,7 @@ class GobCog(BaseCog):
                 except asyncio.TimeoutError:
                     await channel.send("I don't have all day, you know.")
                     return
-                if reply.content.isdigit():
+                if reply.content.isdigit() and int(reply.content) > 0:
                     calcprice = int(titem['price'])*int(reply.content)
                 else:
                     await channel.send("Sorry, but that is not a proper number. Try again.")
