@@ -1277,7 +1277,10 @@ class GobCog(BaseCog):
                     await ctx.send("You only have {} doses of {} to sell.".format(Userdata.users[str(user.id)]['consumables'].get(item)['uses'],item))
                     return
             elif item in Userdata.users[str(user.id)]['ingredients'].keys():
-                if Userdata.users[str(user.id)]['ingredients'][item].get('uses', 0) >= quant:
+                if quant <= 0:
+                    await ctx.send("We don't deal with 0 or negative items, here.")
+                    return
+                elif Userdata.users[str(user.id)]['ingredients'][item].get('uses', 0) >= quant:
                     await ctx.send("{} wants to sell {}x {}.".format(user.display_name,quant,item))
                 else:
                     await ctx.send("You only have {} doses of {} to sell.".format(Userdata.users[str(user.id)]['consumables'].get(item)['uses'],item))
