@@ -1268,11 +1268,11 @@ class GobCog(BaseCog):
                 await ctx.send("```css\n Your {} does not want to leave you. ```".format(item))
                 return
             if item in Consumables.consbles.keys():
-                if Userdata.users[str(user.id)]['consumables'].get(item)['uses'] >= quant:
-                    await ctx.send("{} wants to sell {}x {}.".format(user.display_name,quant,item))
-                elif quant <= 0:
+                if quant <= 0:
                     await ctx.send("We don't deal with 0 or negative items, here.")
                     return
+                elif Userdata.users[str(user.id)]['consumables'].get(item)['uses'] >= quant:
+                    await ctx.send("{} wants to sell {}x {}.".format(user.display_name,quant,item))
                 else:
                     await ctx.send("You only have {} doses of {} to sell.".format(Userdata.users[str(user.id)]['consumables'].get(item)['uses'],item))
                     return
