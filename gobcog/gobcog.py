@@ -1202,6 +1202,9 @@ class GobCog(BaseCog):
                     await msg.remove_reaction(key, ctx.bot.user)
             if pred.result: #user reacted with Yes.
                 moneypile = 0
+                if asking < 0:
+                    await ctx.send("```css\n Hey! Don't let me catch you selling negative items again! ```")
+                    return
                 for item in lookup:
                     if item in Consumables.consbles.keys() and asking > 0:
                         if int(Userdata.users[str(user.id)]['consumables'][item]['uses']) > asking:
