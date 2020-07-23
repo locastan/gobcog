@@ -933,7 +933,7 @@ class GobCog(BaseCog):
         treasure = Userdata.users[str(user.id)]['treasure'][redux.index(1)]
         if treasure <= 0:
             await ctx.send("You have no {} treasure chest to open.".format(type))
-            break
+            looting.remove(ctx.author.display_name)
         else:
             item = await Treasure.open_chest(ctx, user, type)
             Userdata.users[str(user.id)]['treasure'] = [x-y for x,y in zip(Userdata.users[str(user.id)]['treasure'], redux)]
@@ -967,7 +967,6 @@ class GobCog(BaseCog):
                 str(Userdata.users[str(user.id)]['treasure'][0]),str(Userdata.users[str(user.id)]['treasure'][1]),str(Userdata.users[str(user.id)]['treasure'][2]),str(Userdata.users[str(user.id)]['treasure'][3])))
             if item['equip'] == "cancel":
                 await ctx.send("**{}** cancelled the looting session.".format(user.display_name))
-                break
         looting.remove(ctx.author.display_name)
         await Userdata.save()
 
