@@ -613,12 +613,12 @@ class GobCog(BaseCog):
             pile = " - " + "\n - ".join(bkpk)
             if len(pile) > 1900: #split dangerously long texts into chunks.
                 chunks = [pile[i:i+1900] for i in range(0, len(pile), 1900)]
-                await ctx.send("```css\n[{}'s forgeables] \n\n```".format(ctx.author.display_name))
+                await ctx.send("```css\n[{}´s forgeables] \n\n```".format(ctx.author.display_name))
                 for chunk in chunks:
                     await ctx.send("```css\n" + chunk + "```")
                     await asyncio.sleep(0.3)
             else:
-                await ctx.send("```css\n[{}'s forgeables] \n\n".format(ctx.author.display_name) + pile + " \n\n```")
+                await ctx.send("```css\n[{}´s forgeables] \n\n".format(ctx.author.display_name) + pile + " \n\n```")
             await ctx.send("```css\n\n (Reply with the full or partial name of item 1 to select for forging. Try to be specific.)```")
             try:
                 reply = await ctx.bot.wait_for("message", check=MessagePredicate.same_context(ctx), timeout=30)
@@ -674,12 +674,12 @@ class GobCog(BaseCog):
             pile = " - " + "\n - ".join(bkpk)
             if len(pile) > 1900: #split dangerously long texts into chunks.
                 chunks = [pile[i:i+1900] for i in range(0, len(pile), 1900)]
-                await ctx.send("```css\n[{}'s forgeables] \n\n```".format(ctx.author.display_name))
+                await ctx.send("```css\n[{}´s forgeables] \n\n```".format(ctx.author.display_name))
                 for chunk in chunks:
                     await ctx.send("```css\n" + chunk + "```")
                     await asyncio.sleep(0.3)
             else:
-                await ctx.send("```css\n[{}'s forgeables] \n\n".format(ctx.author.display_name) + pile + " \n\n```")
+                await ctx.send("```css\n[{}´s forgeables] \n\n".format(ctx.author.display_name) + pile + " \n\n```")
             await ctx.send("```css\n\n (Reply with the full or partial name of item 2 to select for forging. Try to be specific.)```")
             try:
                 reply = await ctx.bot.wait_for("message", check=MessagePredicate.same_context(ctx), timeout=30)
@@ -1090,7 +1090,7 @@ class GobCog(BaseCog):
         else:
             clazz = "Hero."
         await ctx.send(
-            "```css\n[{}'s Character Sheet] \n\n```".format(user.display_name) + "```css\nA level {} {} \n\n- ATTACK: {} [+{}] - DIPLOMACY: {} [+{}] - {} -{}\n\n- Credits: {} {} \n- Experience: {}/{} \n- Unspent skillpoints: {} \n```".format(
+            "```css\n[{}´s Character Sheet] \n\n```".format(user.display_name) + "```css\nA level {} {} \n\n- ATTACK: {} [+{}] - DIPLOMACY: {} [+{}] - {} -{}\n\n- Credits: {} {} \n- Experience: {}/{} \n- Unspent skillpoints: {} \n```".format(
                 lvl, clazz, att, satt, cha, scha, hitpoints, buffs, bal, currency, xp, next_lvl, pool
             ) + "```css\n" + equip + "```" +
             "```css\n" + "You own {} normal, {} rare, {} epic and {} quest chests.```".format(
@@ -1131,7 +1131,7 @@ class GobCog(BaseCog):
             conslist.sort()
             bkpklist.sort()
             inslist.sort()
-            textline = "[{}'s baggage] \n\n```".format(user.display_name) + "```css\n" + bkpk + "".join(bkpklist) + "\n (Reply with the name of an item or use !backpack equip \"name of item\" to equip it.)\n\n"
+            textline = "[{}´s baggage] \n\n```".format(user.display_name) + "```css\n" + bkpk + "".join(bkpklist) + "\n (Reply with the name of an item or use !backpack equip \"name of item\" to equip it.)\n\n"
             if len(textline) > 1900: #split dangerously long texts into chunks.
                 chunks = [textline[i:i+1900] for i in range(0, len(textline), 1900)]
                 for chunk in chunks:

@@ -82,12 +82,12 @@ class Treasure:
             "[soul essence]":{"slot":["consumable"],"uses":1}
             }
     quest = {"[lichtooth]":{"slot":["charm"],"att":2,"cha":6},
-            "[occam\'s razor]":{"slot":["right","left"],"att":5,"cha":1},
+            "[occam´s razor]":{"slot":["right","left"],"att":5,"cha":1},
             "[compound longbow]":{"slot":["right","left"],"att":5,"cha":3},
             "[cape of shadows]":{"slot":["charm"],"att":4,"cha":4},
             "[very pointy stick]":{"slot":["right"],"att":7,"cha":-1},
             "[chattering shield]":{"slot":["left"],"att":6,"cha":2},
-            "[isildur\'s bane]":{"slot":["ring"],"att":6,"cha":3},
+            "[isildur´s bane]":{"slot":["ring"],"att":6,"cha":3},
             "[dragon scales]":{"slot":["charm"],"att":4,"cha":5},
             "[mace of many]":{"slot":["right"],"att":6,"cha":1},
             "[mesmer ring]":{"slot":["ring"],"att":1,"cha":6},
