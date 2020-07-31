@@ -918,14 +918,16 @@ class GobCog(BaseCog):
             redux = [0,0,0,1]
         else:
             await ctx.send("There is talk of a {} treasure chest but nobody ever saw one.".format(type))
-            looting.remove(ctx.author.display_name)
+            if ctx.author.display_name in looting:
+                looting.remove(ctx.author.display_name)
             return
         if many > 1:
             await GobCog.autoloot(self,ctx,type,many)
             return
         elif many <= 0:
             await ctx.send("Maybe there are negative or zero space chests somewhere, but I am not having that here!".format(type))
-            looting.remove(ctx.author.display_name)
+            if ctx.author.display_name in looting:
+                looting.remove(ctx.author.display_name)
             return
         user = ctx.author
         if not 'treasure' in Userdata.users[str(user.id)].keys():
@@ -933,7 +935,8 @@ class GobCog(BaseCog):
         treasure = Userdata.users[str(user.id)]['treasure'][redux.index(1)]
         if treasure <= 0:
             await ctx.send("You have no {} treasure chest to open.".format(type))
-            looting.remove(ctx.author.display_name)
+            if user.display_name in looting:
+                looting.remove(user.display_name)
         else:
             item = await Treasure.open_chest(ctx, user, type)
             Userdata.users[str(user.id)]['treasure'] = [x-y for x,y in zip(Userdata.users[str(user.id)]['treasure'], redux)]
@@ -967,7 +970,8 @@ class GobCog(BaseCog):
                 str(Userdata.users[str(user.id)]['treasure'][0]),str(Userdata.users[str(user.id)]['treasure'][1]),str(Userdata.users[str(user.id)]['treasure'][2]),str(Userdata.users[str(user.id)]['treasure'][3])))
             if item['equip'] == "cancel":
                 await ctx.send("**{}** cancelled the looting session.".format(user.display_name))
-        looting.remove(ctx.author.display_name)
+        if user.display_name in looting:
+            looting.remove(user.display_name)
         await Userdata.save()
 
     @staticmethod
@@ -983,7 +987,8 @@ class GobCog(BaseCog):
             redux = [0,0,0,many]
         else:
             await ctx.send("There is talk of a {} treasure chest but nobody ever saw one.".format(type))
-            looting.remove(ctx.author.display_name)
+            if ctx.author.display_name in looting:
+                looting.remove(ctx.author.display_name)
             return
         user = ctx.author
         if not 'treasure' in Userdata.users[str(user.id)].keys():
@@ -1009,7 +1014,8 @@ class GobCog(BaseCog):
                         Userdata.users[str(user.id)]['items']['backpack'].update({item['itemname']: item['item']})
             await ctx.send("```css\n" + "You own {} normal, {} rare, {} epic and {} quest chests.```".format(
                 str(Userdata.users[str(user.id)]['treasure'][0]),str(Userdata.users[str(user.id)]['treasure'][1]),str(Userdata.users[str(user.id)]['treasure'][2]),str(Userdata.users[str(user.id)]['treasure'][3])))
-        looting.remove(ctx.author.display_name)
+        if ctx.author.display_name in looting:
+            looting.remove(ctx.author.display_name)
         await Userdata.save()
 
 
@@ -1322,13 +1328,13 @@ class GobCog(BaseCog):
                             tradeitem = copy.deepcopy(Userdata.users[str(user.id)]['consumables'][item])
                             tradeitem['uses'] = quant
                             if item in Userdata.users[str(buyer.id)]['consumables'].keys():
-                                Userdata.users[str(buyer.id)]['consumables'][item['itemname']]['uses'] = Userdata.users[str(buyer.id)]['consumables'][item['itemname']].get("uses", 0) + item['item']['uses']
+                                Userdata.users[str(buyer.id)]['consumables'][item['itemname']]['uses'] = Userdata.users[str(buyer.id)]['consumables'][item['itemname']].get("uses", 0) + tradeitem['item']['uses']
                             else:
                                 Userdata.users[str(buyer.id)]['consumables'].update({item: tradeitem})
                         else:
                             tradeitem = Userdata.users[str(user.id)]['consumables'].pop(item)
                             if item in Userdata.users[str(buyer.id)]['consumables'].keys():
-                                Userdata.users[str(buyer.id)]['consumables'][item['itemname']]['uses'] = Userdata.users[str(buyer.id)]['consumables'][item['itemname']].get("uses", 0) + item['item']['uses']
+                                Userdata.users[str(buyer.id)]['consumables'][item['itemname']]['uses'] = Userdata.users[str(buyer.id)]['consumables'][item['itemname']].get("uses", 0) + tradeitem['item']['uses']
                             else:
                                 Userdata.users[str(buyer.id)]['consumables'].update({item: tradeitem})
                     elif item in Userdata.users[str(user.id)]['ingredients'].keys():
@@ -1337,13 +1343,13 @@ class GobCog(BaseCog):
                             tradeitem = copy.deepcopy(Userdata.users[str(user.id)]['ingredients'][item])
                             tradeitem['uses'] = quant
                             if item in Userdata.users[str(buyer.id)]['ingredients'].keys():
-                                Userdata.users[str(buyer.id)]['ingredients'][item['itemname']]['uses'] = Userdata.users[str(buyer.id)]['ingredients'][item['itemname']].get("uses", 0) + item['item']['uses']
+                                Userdata.users[str(buyer.id)]['ingredients'][item['itemname']]['uses'] = Userdata.users[str(buyer.id)]['ingredients'][item['itemname']].get("uses", 0) + tradeitem['item']['uses']
                             else:
                                 Userdata.users[str(buyer.id)]['ingredients'].update({item: tradeitem})
                         else:
                             tradeitem = Userdata.users[str(user.id)]['ingredients'].pop(item)
                             if item in Userdata.users[str(buyer.id)]['ingredients'].keys():
-                                Userdata.users[str(buyer.id)]['ingredients'][item['itemname']]['uses'] = Userdata.users[str(buyer.id)]['ingredients'][item['itemname']].get("uses", 0) + item['item']['uses']
+                                Userdata.users[str(buyer.id)]['ingredients'][item['itemname']]['uses'] = Userdata.users[str(buyer.id)]['ingredients'][item['itemname']].get("uses", 0) + tradeitem['item']['uses']
                             else:
                                 Userdata.users[str(buyer.id)]['ingredients'].update({item: tradeitem})
                     else:

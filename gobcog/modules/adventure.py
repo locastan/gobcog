@@ -641,7 +641,7 @@ class Adventure:
             if not slain and persuaded:
                 scale = diplomacy-Adventure.dipl
                 if scale == 0:
-                    text= ("**{}** almost died in battle,").format(talkers) + (" but survived solely on wit {} in the end").format(Adventure.challenge)
+                    text= ("**{}** almost died in battle,").format(talkers) + (" but survived solely on wit against the {} in the end").format(Adventure.challenge)
                 elif scale <= 5:
                     text= ("The {} resisted a bit,").format(Adventure.challenge) + (" but **{}** had better arguments").format(talkers)
                 elif scale <= 10:

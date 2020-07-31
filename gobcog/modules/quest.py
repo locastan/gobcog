@@ -587,7 +587,7 @@ class Quest:
                     Quest.userslist["fight"].remove(user)
                     fumble = random.randint(1,100)
                     if fumble <= 5:
-                        await handle_breakup(member)
+                        await Quest.handle_breakup(member)
             if len(Quest.userslist["fight"]) > 0:
                 await ctx.send(report)
             return (fumblelist, critlist, attack)
