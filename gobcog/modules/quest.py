@@ -146,6 +146,9 @@ class Quest:
         Quest.sumtreasure = [0,0,0,0]
         for user in party:
             member = discord.utils.find(lambda m: m.display_name == user, ctx.guild.members)
+            if member == None:
+                await ctx.send("**" + user + "**" + " wandered off to look at a particular interesting bird. (Namechange during quest)")
+                continue
             Quest.partyIDs.append(member.id)
         Quest.name = random.choice(["tomb", "wood", "arena"])
         Quest.endless = (Quest.name == "arena")
@@ -513,6 +516,9 @@ class Quest:
             if len(list(Quest.userslist["run"])) != 0:
                 for user in Quest.userslist["run"]:
                     member = discord.utils.find(lambda m: m.display_name == user, ctx.guild.members)
+                    if member == None:
+                        await ctx.send("**" + user + "**" + " wandered off to look at a particular interesting bird. (Namechange during quest)")
+                        Quest.partyIDs.remove(member.id)
                     Quest.partyIDs.remove(member.id) #user left party and can no longer participate with reactions
                 runners = " and ".join([", ".join(Quest.userslist["run"][:-1]),Quest.userslist["run"][-1]] if len(Quest.userslist["run"]) > 2 else Quest.userslist["run"])
                 await ctx.send("**" + runners + "**" + " left the party, keeping rewards earned so far.")
@@ -525,6 +531,9 @@ class Quest:
             for user in Quest.userslist["fight"]:
                 roll = random.randint(1,20)
                 member = discord.utils.find(lambda m: m.display_name == user, ctx.guild.members)
+                if member == None:
+                    await ctx.send("**" + user + "**" + " wandered off to look at a particular interesting bird. (Namechange during quest)")
+                    return (fumblelist, critlist, attack)
                 att_effect = 1
                 effect = ""
                 if user in Quest.affected and Quest.effect != "Fumble" and Quest.effects[Quest.effect][0] != "dmg":
@@ -596,6 +605,9 @@ class Quest:
         async def handle_pray(fumblelist, attack, diplomacy):
             for user in Quest.userslist["pray"]:
                 member = discord.utils.find(lambda m: m.display_name == user, ctx.guild.members)
+                if member == None:
+                    await ctx.send("**" + user + "**" + " wandered off to look at a particular interesting bird. (Namechange during quest)")
+                    return (fumblelist, critlist, attack)
                 if Userdata.users[str(member.id)]['class']['name']=="Cleric" and Userdata.users[str(member.id)]['class']['ability']:
                     roll = random.randint(1,20)
                     if len(Quest.userslist["fight"]+Quest.userslist["talk"]) == 0:
@@ -646,6 +658,9 @@ class Quest:
             for user in Quest.userslist["talk"]:
                 roll = random.randint(1,20)
                 member = discord.utils.find(lambda m: m.display_name == user, ctx.guild.members)
+                if member == None:
+                    await ctx.send("**" + user + "**" + " wandered off to look at a particular interesting bird. (Namechange during quest)")
+                    return (fumblelist, critlist, attack)
                 dipl_effect = 1
                 effect = ""
                 if user in Quest.affected and Quest.effect != "Fumble" and Quest.effects[Quest.effect][0] != "dmg":
@@ -711,6 +726,8 @@ class Quest:
                 failed = True
                 for user in Quest.userslist["fight"]+Quest.userslist["talk"]+Quest.userslist["pray"]: #check if any fighter has an equipped mirror shield to give them a chance.
                     member = discord.utils.find(lambda m: m.display_name == user, ctx.guild.members)
+                    if member == None:
+                        continue
                     if next(iter(Userdata.users[str(member.id)]['items']['left']))[0:14] == '.mirror_shield':
                         failed = False
                         break
@@ -765,6 +782,8 @@ class Quest:
             checklist = Quest.userslist["fight"]+Quest.userslist["talk"]+Quest.userslist["pray"]
             for user in checklist:
                 member = discord.utils.find(lambda m: m.display_name == user, ctx.guild.members)
+                if member == None:
+                    continue
                 lucky = Userdata.users[str(member.id)]['buffs'].get('luck')
                 if lucky != None:
                     roll = random.randint(1,50+Userdata.users[str(member.id)]['buffs']['luck']['bonus'])
@@ -853,6 +872,8 @@ class Quest:
 
         for user in Quest.participants: #reset activated abilities
             member = discord.utils.find(lambda m: m.display_name == user, ctx.guild.members)
+            if member == None:
+                continue
             if 'name' in Userdata.users[str(member.id)]['class']:
                 if Userdata.users[str(member.id)]['class']['name'] != "Ranger" and Userdata.users[str(member.id)]['class']['ability']:
                     Userdata.users[str(member.id)]['class']['ability'] = False
@@ -896,6 +917,9 @@ class Quest:
             bxp = 0
             bcp = 0
             member = discord.utils.find(lambda m: m.display_name == user, ctx.guild.members)
+            if member == None:
+                await ctx.send("**" + user + "**" + " wandered off to look at a particular interesting bird before getting rewards. (Namechange during quest)")
+                continue
             if "xp" in Userdata.users[str(member.id)]['buffs'].keys():
                 bxp = int(xp * (Userdata.users[str(member.id)]['buffs']['xp']['bonus']/100))
                 phrase += "\n**{}** received **+{}** bonus xp.".format(member.display_name, bxp)
@@ -948,6 +972,8 @@ class Quest:
         d_txt = ""
         for user in injured:
             member = discord.utils.find(lambda m: m.display_name == user, ctx.guild.members)
+            if member == None:
+                continue
             if Userdata.users[str(member.id)]['hp'] > base_dmg:
                 Userdata.users[str(member.id)]['hp'] -= base_dmg
             else:

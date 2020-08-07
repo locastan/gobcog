@@ -1188,6 +1188,7 @@ class GobCog(BaseCog):
                 equip = {"itemname": item,"item": Userdata.users[str(user.id)]['items']['backpack'][item]}
                 await self.equip_item(ctx, equip, True)
         elif switch == "sell": #new logic allows for bulk sales. It also always confirms the sale by yes/no query to avoid accidents.
+            item = item.lower() #lowercasing in case some german put in captialized items. ;)
             if item == "None" or not any([x for x in Userdata.users[str(user.id)]['items']['backpack'] if item in x.lower()]+[x for x in Userdata.users[str(user.id)]['consumables'] if item in x.lower()]+[x for x in Userdata.users[str(user.id)]['ingredients'] if item in x.lower()]):
                 await ctx.send("You have to specify an item (or partial name) from your backpack to sell.")
                 return
@@ -1243,6 +1244,7 @@ class GobCog(BaseCog):
                 await ctx.send("Sold {} for {} copperpieces.".format(str(lookup),moneypile))
                 await GobCog.save()
         elif switch == "trade":
+            item = item.lower() #lowercasing in case some german put in captialized items. ;)
             if item == "None" or not any([x for x in Userdata.users[str(user.id)]['items']['backpack'] if item in x.lower()]+[x for x in Userdata.users[str(user.id)]['consumables'] if item in x.lower()]+[x for x in Userdata.users[str(user.id)]['ingredients'] if item in x.lower()]):
                 await ctx.send("You have to specify an item from your backpack to trade.")
                 return

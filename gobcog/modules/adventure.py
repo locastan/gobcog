@@ -327,7 +327,7 @@ class Adventure:
                 roll = random.randint(1,20)
                 member = discord.utils.find(lambda m: m.display_name == user, ctx.guild.members)
                 if member == None:
-                    await ctx.send("**" + user + "**" + " wandered off to look at a particular interesting bird. Tell locastan, because he wants to know this happened.")
+                    await ctx.send("**" + user + "**" + " wandered off to look at a particular interesting bird. (Namechange during adventure)")
                     return (fumblelist, critlist, attack)
                 att_value = Userdata.users[str(member.id)]['att'] + Userdata.users[str(member.id)]['skill']['att'] + Userdata.users[str(member.id)]['buffs'].get('att', {'bonus':0})['bonus']
                 monster_string = ""
@@ -385,6 +385,9 @@ class Adventure:
         async def handle_pray(fumblelist, attack, diplomacy):
             for user in Adventure.userslist["pray"]:
                 member = discord.utils.find(lambda m: m.display_name == user, ctx.guild.members)
+                if member == None:
+                    await ctx.send("**" + user + "**" + " wandered off to look at a particular interesting bird. (Namechange during adventure)")
+                    return (fumblelist, critlist, attack)
                 if Userdata.users[str(member.id)]['class']['name']=="Cleric" and Userdata.users[str(member.id)]['class']['ability']:
                     roll = random.randint(1,20)
                     if len(Adventure.userslist["fight"]+Adventure.userslist["talk"]) == 0:
@@ -435,6 +438,9 @@ class Adventure:
             for user in Adventure.userslist["talk"]:
                 roll = random.randint(1,20)
                 member = discord.utils.find(lambda m: m.display_name == user, ctx.guild.members)
+                if member == None:
+                    await ctx.send("**" + user + "**" + " wandered off to look at a particular interesting bird. (Namechange during adventure)")
+                    return (fumblelist, critlist, attack)
                 dipl_value = Userdata.users[str(member.id)]['cha'] + Userdata.users[str(member.id)]['skill']['cha'] + Userdata.users[str(member.id)]['buffs'].get('cha', {'bonus':0})['bonus']
                 songbonus = 0
                 if Userdata.users[str(member.id)]['class']['name']=="Bard" and Userdata.users[str(member.id)]['class']['ability']:
@@ -485,6 +491,9 @@ class Adventure:
                 failed = True
                 for user in Adventure.userslist["fight"]+Adventure.userslist["talk"]+Adventure.userslist["pray"]: #check if any fighter has an equipped mirror shield to give them a chance.
                     member = discord.utils.find(lambda m: m.display_name == user, ctx.guild.members)
+                    if member == None:
+                        await ctx.send("**" + user + "**" + " wandered off to look at a particular interesting bird. (Namechange during adventure)")
+                        continue
                     if next(iter(Userdata.users[str(member.id)]['items']['left']))[0:14] == '.mirror_shield':
                         failed = False
                         break
@@ -544,6 +553,9 @@ class Adventure:
             checklist = Adventure.userslist["fight"]+Adventure.userslist["talk"]+Adventure.userslist["pray"]
             for user in checklist:
                 member = discord.utils.find(lambda m: m.display_name == user, ctx.guild.members)
+                if member == None:
+                    await ctx.send("**" + user + "**" + " wandered off to look at a particular interesting bird. (Namechange during adventure)")
+                    continue
                 lucky = Userdata.users[str(member.id)]['buffs'].get('luck')
                 if lucky != None:
                     roll = random.randint(1,50+Userdata.users[str(member.id)]['buffs']['luck']['bonus'])
@@ -710,6 +722,9 @@ class Adventure:
         for user in list:
             Adventure.rewards[user] = {}
             member = discord.utils.find(lambda m: m.display_name == user, ctx.guild.members)
+            if member == None:
+                await ctx.send("**" + user + "**" + " wandered off to look at a particular interesting bird. (Namechange during adventure)")
+                continue
             bxp = 0
             bcp = 0
             rroll = random.randint(1,50)
@@ -771,6 +786,8 @@ class Adventure:
         d_txt = ""
         for user in injured:
             member = discord.utils.find(lambda m: m.display_name == user, ctx.guild.members)
+            if member == None:
+                continue
             if Userdata.users[str(member.id)]['hp'] > base_dmg:
                 Userdata.users[str(member.id)]['hp'] -= base_dmg
             else:
