@@ -5,6 +5,7 @@ import discord
 import asyncio
 import time
 import copy
+import logging
 from redbot.core.utils.predicates import MessagePredicate
 from redbot.core.utils.menus import start_adding_reactions
 from redbot.core.utils.predicates import ReactionPredicate
@@ -1323,7 +1324,7 @@ class GobCog(BaseCog):
                     bal = await bank.transfer_credits(spender, to, asking)
                     currency = await bank.get_currency_name(ctx.guild)
                     if item in Consumables.consbles.keys():
-                        print("Trade Log: From: {}, To: {}, ToID: {}, Item: {}, Quantity: {}, Price: {}".format(buyer.display_name,user.display_name,str(user.id),item['itemname'],str(quant),str(asking)))
+                        logging.error("Trade Log: From: {}, To: {}, ToID: {}, Item: {}, Quantity: {}, Price: {}".format(buyer.display_name,user.display_name,str(user.id),item['itemname'],str(quant),str(asking)))
                         if Userdata.users[str(user.id)]['consumables'][item]['uses'] > quant:
                             Userdata.users[str(user.id)]['consumables'][item]['uses'] = Userdata.users[str(user.id)]['consumables'][item]['uses'] - quant
                             tradeitem = copy.deepcopy(Userdata.users[str(user.id)]['consumables'][item])
@@ -1339,6 +1340,7 @@ class GobCog(BaseCog):
                             else:
                                 Userdata.users[str(buyer.id)]['consumables'].update({item: tradeitem})
                     elif item in Userdata.users[str(user.id)]['ingredients'].keys():
+                        logging.error("Trade Log: From: {}, To: {}, ToID: {}, Item: {}, Quantity: {}, Price: {}".format(buyer.display_name,user.display_name,str(user.id),item['itemname'],str(quant),str(asking)))
                         if Userdata.users[str(user.id)]['ingredients'][item]['uses'] > quant:
                             Userdata.users[str(user.id)]['ingredients'][item]['uses'] = Userdata.users[str(user.id)]['ingredients'][item]['uses'] - quant
                             tradeitem = copy.deepcopy(Userdata.users[str(user.id)]['ingredients'][item])
