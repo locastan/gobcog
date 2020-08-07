@@ -1324,35 +1324,35 @@ class GobCog(BaseCog):
                     bal = await bank.transfer_credits(spender, to, asking)
                     currency = await bank.get_currency_name(ctx.guild)
                     if item in Consumables.consbles.keys():
-                        logging.error("Trade Log: From: {}, To: {}, ToID: {}, Item: {}, Quantity: {}, Price: {}".format(buyer.display_name,user.display_name,str(user.id),item['itemname'],str(quant),str(asking)))
+                        #logging.error("Trade Log: From: {}, To: {}, ToID: {}, Item: {}, Quantity: {}, Price: {}".format(buyer.display_name,user.display_name,str(user.id),item,str(quant),str(asking)))
                         if Userdata.users[str(user.id)]['consumables'][item]['uses'] > quant:
                             Userdata.users[str(user.id)]['consumables'][item]['uses'] = Userdata.users[str(user.id)]['consumables'][item]['uses'] - quant
                             tradeitem = copy.deepcopy(Userdata.users[str(user.id)]['consumables'][item])
                             tradeitem['uses'] = quant
                             if item in Userdata.users[str(buyer.id)]['consumables'].keys():
-                                Userdata.users[str(buyer.id)]['consumables'][item['itemname']]['uses'] = Userdata.users[str(buyer.id)]['consumables'][item['itemname']].get("uses", 0) + tradeitem['uses']
+                                Userdata.users[str(buyer.id)]['consumables'][item]['uses'] = Userdata.users[str(buyer.id)]['consumables'][item].get("uses", 0) + tradeitem['uses']
                             else:
                                 Userdata.users[str(buyer.id)]['consumables'].update({item: tradeitem})
                         else:
                             tradeitem = Userdata.users[str(user.id)]['consumables'].pop(item)
                             if item in Userdata.users[str(buyer.id)]['consumables'].keys():
-                                Userdata.users[str(buyer.id)]['consumables'][item['itemname']]['uses'] = Userdata.users[str(buyer.id)]['consumables'][item['itemname']].get("uses", 0) + tradeitem['uses']
+                                Userdata.users[str(buyer.id)]['consumables'][item]['uses'] = Userdata.users[str(buyer.id)]['consumables'][item].get("uses", 0) + tradeitem['uses']
                             else:
                                 Userdata.users[str(buyer.id)]['consumables'].update({item: tradeitem})
                     elif item in Userdata.users[str(user.id)]['ingredients'].keys():
-                        logging.error("Trade Log: From: {}, To: {}, ToID: {}, Item: {}, Quantity: {}, Price: {}".format(buyer.display_name,user.display_name,str(user.id),item['itemname'],str(quant),str(asking)))
+                        #logging.error("Trade Log: From: {}, To: {}, ToID: {}, Item: {}, Quantity: {}, Price: {}".format(buyer.display_name,user.display_name,str(user.id),item,str(quant),str(asking)))
                         if Userdata.users[str(user.id)]['ingredients'][item]['uses'] > quant:
                             Userdata.users[str(user.id)]['ingredients'][item]['uses'] = Userdata.users[str(user.id)]['ingredients'][item]['uses'] - quant
                             tradeitem = copy.deepcopy(Userdata.users[str(user.id)]['ingredients'][item])
                             tradeitem['uses'] = quant
                             if item in Userdata.users[str(buyer.id)]['ingredients'].keys():
-                                Userdata.users[str(buyer.id)]['ingredients'][item['itemname']]['uses'] = Userdata.users[str(buyer.id)]['ingredients'][item['itemname']].get("uses", 0) + tradeitem['uses']
+                                Userdata.users[str(buyer.id)]['ingredients'][item]['uses'] = Userdata.users[str(buyer.id)]['ingredients'][item].get("uses", 0) + tradeitem['uses']
                             else:
                                 Userdata.users[str(buyer.id)]['ingredients'].update({item: tradeitem})
                         else:
                             tradeitem = Userdata.users[str(user.id)]['ingredients'].pop(item)
                             if item in Userdata.users[str(buyer.id)]['ingredients'].keys():
-                                Userdata.users[str(buyer.id)]['ingredients'][item['itemname']]['uses'] = Userdata.users[str(buyer.id)]['ingredients'][item['itemname']].get("uses", 0) + tradeitem['uses']
+                                Userdata.users[str(buyer.id)]['ingredients'][item]['uses'] = Userdata.users[str(buyer.id)]['ingredients'][item].get("uses", 0) + tradeitem['uses']
                             else:
                                 Userdata.users[str(buyer.id)]['ingredients'].update({item: tradeitem})
                     else:
