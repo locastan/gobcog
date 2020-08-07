@@ -900,11 +900,11 @@ class GobCog(BaseCog):
             if you want to open multiple how many.)
         """
         global looting
-        if ctx.author.display_name in looting:
+        if ctx.author.id in looting:
             await ctx.send("**{}**, you are currently looting, please finish that session first.".format(ctx.author.display_name))
             return
         else:
-            looting.append(ctx.author.display_name)
+            looting.append(ctx.author.id)
         if type.isdigit():
             many = int(type)
             type = "normal"
@@ -918,16 +918,16 @@ class GobCog(BaseCog):
             redux = [0,0,0,1]
         else:
             await ctx.send("There is talk of a {} treasure chest but nobody ever saw one.".format(type))
-            if ctx.author.display_name in looting:
-                looting.remove(ctx.author.display_name)
+            if ctx.author.id in looting:
+                looting.remove(ctx.author.id)
             return
         if many > 1:
             await GobCog.autoloot(self,ctx,type,many)
             return
         elif many <= 0:
             await ctx.send("Maybe there are negative or zero space chests somewhere, but I am not having that here!".format(type))
-            if ctx.author.display_name in looting:
-                looting.remove(ctx.author.display_name)
+            if ctx.author.id in looting:
+                looting.remove(ctx.author.id)
             return
         user = ctx.author
         if not 'treasure' in Userdata.users[str(user.id)].keys():
@@ -935,8 +935,8 @@ class GobCog(BaseCog):
         treasure = Userdata.users[str(user.id)]['treasure'][redux.index(1)]
         if treasure <= 0:
             await ctx.send("You have no {} treasure chest to open.".format(type))
-            if user.display_name in looting:
-                looting.remove(user.display_name)
+            if user.id in looting:
+                looting.remove(user.id)
         else:
             item = await Treasure.open_chest(ctx, user, type)
             Userdata.users[str(user.id)]['treasure'] = [x-y for x,y in zip(Userdata.users[str(user.id)]['treasure'], redux)]
@@ -970,8 +970,8 @@ class GobCog(BaseCog):
                 str(Userdata.users[str(user.id)]['treasure'][0]),str(Userdata.users[str(user.id)]['treasure'][1]),str(Userdata.users[str(user.id)]['treasure'][2]),str(Userdata.users[str(user.id)]['treasure'][3])))
             if item['equip'] == "cancel":
                 await ctx.send("**{}** cancelled the looting session.".format(user.display_name))
-        if user.display_name in looting:
-            looting.remove(user.display_name)
+        if user.id in looting:
+            looting.remove(user.id)
         await Userdata.save()
 
     @staticmethod
@@ -987,8 +987,8 @@ class GobCog(BaseCog):
             redux = [0,0,0,many]
         else:
             await ctx.send("There is talk of a {} treasure chest but nobody ever saw one.".format(type))
-            if ctx.author.display_name in looting:
-                looting.remove(ctx.author.display_name)
+            if ctx.author.id in looting:
+                looting.remove(ctx.author.id)
             return
         user = ctx.author
         if not 'treasure' in Userdata.users[str(user.id)].keys():
@@ -1014,8 +1014,8 @@ class GobCog(BaseCog):
                         Userdata.users[str(user.id)]['items']['backpack'].update({item['itemname']: item['item']})
             await ctx.send("```css\n" + "You own {} normal, {} rare, {} epic and {} quest chests.```".format(
                 str(Userdata.users[str(user.id)]['treasure'][0]),str(Userdata.users[str(user.id)]['treasure'][1]),str(Userdata.users[str(user.id)]['treasure'][2]),str(Userdata.users[str(user.id)]['treasure'][3])))
-        if ctx.author.display_name in looting:
-            looting.remove(ctx.author.display_name)
+        if ctx.author.id in looting:
+            looting.remove(ctx.author.id)
         await Userdata.save()
 
 
