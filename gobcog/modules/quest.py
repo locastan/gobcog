@@ -25,17 +25,18 @@ class Quest:
                 " sick":[0.3,0.9],
                 " stupid":[1,0.5],
                 " cunning":[1.2,1.2],
-                " fat":[1.1,0.9],
+                " furious":[1.1,0.9],
                 " fairly intelligent":[1,1.2],
                 " dumb":[1,0.8],
                 "n old":[0.8,1.5],
                 "n ancient":[0.8,2],
                 " colossal":[2,1.1],
                 " miniature":[0.7,0.9],
-                " savage":[1.8,0.9],
+                " feral":[1.8,0.9],
                 " careless":[0.5,0.8],
                 " breathtaking":[1,1.9],
-                " brutal":[2,0.8]}
+                " brutal":[2,0.8],
+                "n overpowered":[3,3]}
     wood_monsters = {"Ogre":{"str":28,"dipl":18, "pronoun": "its"},
                 "Gnoll":{"str":20,"dipl":15, "pronoun": "its"},
                 "Cave Spider":{"str":60,"dipl":50, "pronoun": "its"},
@@ -775,10 +776,17 @@ class Quest:
                         treasure[1] += 1
                     elif roll <= 95: #5% epic
                         treasure[2] += 1
-                    elif roll == 100: #1% quest
+                    elif roll >= 100: #1% quest
                         treasure[3] += 1
+                    elif roll >= 120: # quest and an epic
+                        treasure[3] += 1
+                        treasure[2] += 1
+                    elif roll >= 140: #2 quest
+                        treasure[3] += 2
                     if roll >= 51:
-                        await ctx.send("**{}** was lucky to find everyone an extra chest!".format(user))
+                        await ctx.send("**{}** was lucky to dig up an extra chest for the party!".format(user))
+                    elif roll >= 120:
+                        await ctx.send("**{}** was lucky to dig up several extra chests for the party!".format(user))
             if treasure == [0,0,0,0]:
                 treasure = False
         if (Quest.challenge == "Basilisk" or Quest.challenge == "Medusa") and Quest.failed:

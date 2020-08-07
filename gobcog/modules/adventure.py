@@ -21,14 +21,15 @@ class Adventure:
                 " sick":[0.3,0.9],
                 " stupid":[1,0.5],
                 " cunning":[1.2,1.2],
-                " fat":[1.1,0.9],
+                " furious":[1.1,0.9],
                 " fairly intelligent":[1,1.2],
                 " dumb":[1,0.8],
                 "n old":[0.8,1.5],
                 "n ancient":[0.8,2],
                 " colossal":[2,1.1],
                 " miniature":[0.7,0.9],
-                " savage":[1.8,0.9]}
+                " feral":[1.8,0.9],
+                "n overpowered":[3,3]}
     monsters = {"Ogre":{"str":18,"dipl":10},
                 "Gnoll":{"str":12,"dipl":8},
                 "Wood Spider":{"str":20,"dipl":20},
@@ -554,10 +555,17 @@ class Adventure:
                         treasure[1] += 1
                     elif roll <= 95: #5% epic
                         treasure[2] += 1
-                    elif roll == 100: #1% quest
+                    elif roll >= 100: #1% quest
                         treasure[3] += 1
+                    elif roll >= 120: # quest and an epic
+                        treasure[3] += 1
+                        treasure[2] += 1
+                    elif roll >= 140: #2 quest
+                        treasure[3] += 2
                     if roll >= 51:
                         await ctx.send("**{}** was lucky to dig up an extra chest for the group!".format(user))
+                    elif roll >= 120:
+                        await ctx.send("**{}** was lucky to dig up several extra chests for the group!".format(user))
             if treasure == [0,0,0,0]:
                 treasure = False
         if (Adventure.challenge == "Basilisk" or Adventure.challenge == "Medusa") and failed:

@@ -1275,7 +1275,7 @@ class GobCog(BaseCog):
                 return
             if item in Consumables.consbles.keys():
                 if quant <= 0:
-                    await ctx.send("We don't deal with 0 or negative items, here.")
+                    await ctx.send("We don't deal with imaginary amounts of items, here.")
                     return
                 elif Userdata.users[str(user.id)]['consumables'].get(item)['uses'] >= quant:
                     await ctx.send("{} wants to sell {}x {}.".format(user.display_name,quant,item))
@@ -1284,7 +1284,7 @@ class GobCog(BaseCog):
                     return
             elif item in Userdata.users[str(user.id)]['ingredients'].keys():
                 if quant <= 0:
-                    await ctx.send("We don't deal with 0 or negative items, here.")
+                    await ctx.send("We don't deal with imaginary amounts of items, here.")
                     return
                 elif Userdata.users[str(user.id)]['ingredients'][item].get('uses', 0) >= quant:
                     await ctx.send("{} wants to sell {}x {}.".format(user.display_name,quant,item))
@@ -1323,18 +1323,19 @@ class GobCog(BaseCog):
                     bal = await bank.transfer_credits(spender, to, asking)
                     currency = await bank.get_currency_name(ctx.guild)
                     if item in Consumables.consbles.keys():
+                        print("Trade Log: From: {}, To: {}, ToID: {}, Item: {}, Quantity: {}, Price: {}".format(buyer.display_name,user.display_name,str(user.id),item['itemname'],str(quant),str(asking)))
                         if Userdata.users[str(user.id)]['consumables'][item]['uses'] > quant:
                             Userdata.users[str(user.id)]['consumables'][item]['uses'] = Userdata.users[str(user.id)]['consumables'][item]['uses'] - quant
                             tradeitem = copy.deepcopy(Userdata.users[str(user.id)]['consumables'][item])
                             tradeitem['uses'] = quant
                             if item in Userdata.users[str(buyer.id)]['consumables'].keys():
-                                Userdata.users[str(buyer.id)]['consumables'][item['itemname']]['uses'] = Userdata.users[str(buyer.id)]['consumables'][item['itemname']].get("uses", 0) + tradeitem['item']['uses']
+                                Userdata.users[str(buyer.id)]['consumables'][item['itemname']]['uses'] = Userdata.users[str(buyer.id)]['consumables'][item['itemname']].get("uses", 0) + tradeitem['uses']
                             else:
                                 Userdata.users[str(buyer.id)]['consumables'].update({item: tradeitem})
                         else:
                             tradeitem = Userdata.users[str(user.id)]['consumables'].pop(item)
                             if item in Userdata.users[str(buyer.id)]['consumables'].keys():
-                                Userdata.users[str(buyer.id)]['consumables'][item['itemname']]['uses'] = Userdata.users[str(buyer.id)]['consumables'][item['itemname']].get("uses", 0) + tradeitem['item']['uses']
+                                Userdata.users[str(buyer.id)]['consumables'][item['itemname']]['uses'] = Userdata.users[str(buyer.id)]['consumables'][item['itemname']].get("uses", 0) + tradeitem['uses']
                             else:
                                 Userdata.users[str(buyer.id)]['consumables'].update({item: tradeitem})
                     elif item in Userdata.users[str(user.id)]['ingredients'].keys():
@@ -1343,13 +1344,13 @@ class GobCog(BaseCog):
                             tradeitem = copy.deepcopy(Userdata.users[str(user.id)]['ingredients'][item])
                             tradeitem['uses'] = quant
                             if item in Userdata.users[str(buyer.id)]['ingredients'].keys():
-                                Userdata.users[str(buyer.id)]['ingredients'][item['itemname']]['uses'] = Userdata.users[str(buyer.id)]['ingredients'][item['itemname']].get("uses", 0) + tradeitem['item']['uses']
+                                Userdata.users[str(buyer.id)]['ingredients'][item['itemname']]['uses'] = Userdata.users[str(buyer.id)]['ingredients'][item['itemname']].get("uses", 0) + tradeitem['uses']
                             else:
                                 Userdata.users[str(buyer.id)]['ingredients'].update({item: tradeitem})
                         else:
                             tradeitem = Userdata.users[str(user.id)]['ingredients'].pop(item)
                             if item in Userdata.users[str(buyer.id)]['ingredients'].keys():
-                                Userdata.users[str(buyer.id)]['ingredients'][item['itemname']]['uses'] = Userdata.users[str(buyer.id)]['ingredients'][item['itemname']].get("uses", 0) + tradeitem['item']['uses']
+                                Userdata.users[str(buyer.id)]['ingredients'][item['itemname']]['uses'] = Userdata.users[str(buyer.id)]['ingredients'][item['itemname']].get("uses", 0) + tradeitem['uses']
                             else:
                                 Userdata.users[str(buyer.id)]['ingredients'].update({item: tradeitem})
                     else:
@@ -1811,7 +1812,7 @@ class GobCog(BaseCog):
                 except asyncio.TimeoutError:
                     await channel.send("I don't have all day, you know.")
                     return
-                if reply.content.isdigit() and int(reply.content) > 0:
+                if reply.content.isdigit() and int(reply.content) >= 0:
                     calcprice = int(titem['price'])*int(reply.content)
                 else:
                     await channel.send("Sorry, but that is not a proper number. Try again.")
