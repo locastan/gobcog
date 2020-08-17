@@ -569,7 +569,7 @@ class Quest:
                     if Userdata.users[str(member.id)]['class']['name']=="Berserker" and Userdata.users[str(member.id)]['class']['ability']:
                         ability = "🗯️"
                         bonus = random.randint(max(5,int(Userdata.users[str(member.id)]['lvl']/2)),max(15,int(Userdata.users[str(member.id)]['lvl'])))
-                    elif Userdata.users[str(member.id)]['class']['name']=="Ranger" and "bow" in list(Userdata.users[str(member.id)]['items']['right'].keys())[0]:
+                    elif Userdata.users[str(member.id)]['class']['name']=="Ranger" and "bow" in list(Userdata.users[str(member.id)]['items']['right'].keys()):
                         ability = "🏹"
                         bonus = random.randint(max(5,int(Userdata.users[str(member.id)]['lvl']/2)),max(15,int(Userdata.users[str(member.id)]['lvl'])))
                     else:
@@ -579,12 +579,12 @@ class Quest:
                     if Userdata.users[str(member.id)]['class']['name']=="Berserker" and len(Userdata.users[str(member.id)]['items']['right'][list(Userdata.users[str(member.id)]['items']['right'].keys())[0]]["slot"]) == 2 and "bow" not in list(Userdata.users[str(member.id)]['items']['right'].keys())[0]:
                         barb_bonus = Userdata.users[str(member.id)]['items']['right'][list(Userdata.users[str(member.id)]['items']['right'].keys())[0]]["att"]*2
                         attack += barb_bonus
-                        barb_bonus_str = " + {}🀄 ".format(bonus)
+                        barb_bonus_str = " + {}🀄 ".format(barb_bonus)
                         bonus_str += barb_bonus_str
                     report += "**" + user + "**: " +  "🎲({}) +".format(roll) + " {} + ".format(bonus_str) + "🗡" + str(att_value) + effect + monster_string + " |"
                 else:
                     bonus = 0
-                    if Userdata.users[str(member.id)]['class']['name']=="Ranger" and "bow" in list(Userdata.users[str(member.id)]['items']['right'].keys())[0]:
+                    if Userdata.users[str(member.id)]['class']['name']=="Ranger" and "bow" in list(Userdata.users[str(member.id)]['items']['right'].keys()):
                         bonus = int(Userdata.users[str(member.id)]['lvl']/10)*2
                         bow_bonus = " {}🏹 + ".format(bonus)
                     elif Userdata.users[str(member.id)]['class']['name']=="Berserker" and len(Userdata.users[str(member.id)]['items']['right'][list(Userdata.users[str(member.id)]['items']['right'].keys())[0]]["slot"]) == 2 and "bow" not in list(Userdata.users[str(member.id)]['items']['right'].keys())[0]:

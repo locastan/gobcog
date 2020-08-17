@@ -1201,7 +1201,7 @@ class GobCog(BaseCog):
                 return
             msg = await ctx.send("Do you want to sell these items {}?\n[If you are selling consumables and did not specify how many (eg. !b sell 'consumable' 3), all will be sold!]".format(str(lookup)))
             start_adding_reactions(msg, ReactionPredicate.YES_OR_NO_EMOJIS)
-            pred = ReactionPredicate.yes_or_no(msg, buyer)
+            pred = ReactionPredicate.yes_or_no(msg, ctx.author)
             await ctx.bot.wait_for("reaction_add", check=pred, timeout=30)
             try:
                 await msg.delete()
