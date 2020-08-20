@@ -486,7 +486,7 @@ class GobCog(BaseCog):
                                 Userdata.users[str(user)]['consumables'][item['itemname']]['uses'] = Userdata.users[str(user)]['consumables'][item['itemname']].get("uses", 0) + item['item']['uses']
                             else:
                                 Userdata.users[str(user)]['consumables'].update({item['itemname']:item['item']})
-                            await Consumables.use_con(ctx, user, item['itemname'])
+                            await Consumables.use_con(ctx, ctx.author, item['itemname'])
                         else:
                             equip = {"itemname": item['itemname'],"item": item['item']}
                             await self.equip_item(ctx, equip, False)
@@ -558,6 +558,9 @@ class GobCog(BaseCog):
         global users
         if user == None:
             user = ctx.author
+        if user.id not in Userdata.users.keys():
+            ctx.command.reset_cooldown(ctx)
+            return await ctx.send("That user does not play the game.")
         if 'name' in Userdata.users[str(ctx.author.id)]['class'] and Userdata.users[str(ctx.author.id)]['class']['name'] != "Cleric":
             ctx.command.reset_cooldown(ctx)
             return await ctx.send("You need to be a Cleric to do this.")

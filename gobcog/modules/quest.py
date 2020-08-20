@@ -152,7 +152,7 @@ class Quest:
             Quest.partyIDs.append(member.id)
         Quest.name = random.choice(["tomb", "wood", "arena"])
         Quest.endless = (Quest.name == "arena")
-        Quest.quest = getattr(Quest, Quest.name)
+        Quest.quest = copy.deepcopy(getattr(Quest, Quest.name)) #prevent changes done to the variable in endless arena
         Quest.monsters = getattr(Quest, Quest.name + "_monsters")
         Quest.bosses = getattr(Quest, Quest.name + "_bosses")
 
