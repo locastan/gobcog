@@ -4,5 +4,5 @@
     "name" : "LocaCogs",
     "short" : "Repo for just the GoblinsComic inspired RPG bot for now.",
     "description" : "Play a RPG character and get loot by killing monsters.",
-    "tags" : ["Games", "Economy", "Fun", "RPG"],
+    "tags" : ["Games", "Economy", "Fun", "RPG"]
 }
