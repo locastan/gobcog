@@ -558,7 +558,7 @@ class GobCog(BaseCog):
         global users
         if user == None:
             user = ctx.author
-        if user.id not in Userdata.users.keys():
+        if str(user.id) not in Userdata.users.keys():
             ctx.command.reset_cooldown(ctx)
             return await ctx.send("That user does not play the game.")
         if 'name' in Userdata.users[str(ctx.author.id)]['class'] and Userdata.users[str(ctx.author.id)]['class']['name'] != "Cleric":
