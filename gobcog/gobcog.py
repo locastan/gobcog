@@ -1534,22 +1534,26 @@ class GobCog(BaseCog):
                     Userdata.users[str(member.id)]['buffs'].pop(buff)
             await GobCog.save()
 
-    @commands.command(name="quest", aliases=['q'])
+    @commands.command()
     @charge(amount=500)
     @not_resting()
     @has_hp()
     @commands.guild_only()
     @commands.cooldown(rate=1, per=600, type=commands.BucketType.guild)
-    async def _quest(self, ctx):
+    async def quest(self, ctx):
         """This will send you on a mighty quest!
             You play by reacting with the offered emojis.
             Available once per 10 minutes and costing 500 cp.
         """
         global users
         party = []
-        msg = await ctx.send("**" + ctx.author.display_name + "** just spent 500 copperpieces in the inn, looking for a party to do a mighty quest. Do you accept (60s)?")
+        modRole = discord.utils.get(ctx.guild.roles, name='Goblin Adventurer!')
+        if modRole is not None:
+            msg = await ctx.send(modRole.mention + "\n" + "**" + ctx.author.display_name + "** just spent 500 copperpieces in the inn, looking for a party to do a mighty quest. Do you accept (2 mins)?", allowed_mentions=discord.AllowedMentions(roles=True))
+        else:
+            msg = await ctx.send("**" + ctx.author.display_name + "** just spent 500 copperpieces in the inn, looking for a party to do a mighty quest. Do you accept (2 mins)?")
         start_adding_reactions(msg, "✅")
-        await asyncio.sleep(60)
+        await asyncio.sleep(120)
         message = await ctx.message.channel.fetch_message(msg.id)
         try:
             reaction = next(filter(lambda x: x.emoji == "✅", message.reactions), None)
@@ -1887,7 +1891,7 @@ class GobCog(BaseCog):
             text = "```css\n [Alchemist Dodo is bringing the cart around!]```"
         if GobCog.last_trade == 0 or summoned:
             GobCog.last_trade = time.time()
-        elif GobCog.last_trade >= time.time()-10800: #trader can return after 3 hours have passed since last visit.
+        elif GobCog.last_trade >= time.time()-43200: #trader can return after 12 hours have passed since last visit.
             return #silent return.
         GobCog.last_trade = time.time()
         stock = await Treasure.trader_get_items()

@@ -112,7 +112,7 @@ class Adventure:
         await asyncio.sleep(0.2)
         locations = ["There is telling of a dangerous cave nearby, holding immense riches. ", "You found a small clearing. ", "A bridge crosses over a deep gorge. ", "This towns inn looks very inviting. "]
         raisins = [" is going to investigate,", " is curious to have a peek,", " would like to have a look,", " wants to go there,"]
-        advmsg = await ctx.send(text + random.choice(locations)+ "\n" + "**" + ctx.author.display_name + "**" + random.choice(raisins))
+        advmsg = await ctx.send(text + random.choice(locations)+ "\n" + "**" + ctx.author.display_name + "**" + random.choice(raisins), allowed_mentions=discord.AllowedMentions(roles=True))
         await Adventure.choice(ctx)
         advmsg.mentions.clear()
         text = advmsg.content.replace("@Goblin Adventurer!", "")
