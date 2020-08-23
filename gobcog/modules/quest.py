@@ -8,6 +8,7 @@ import discord
 import random
 import calendar
 import time
+import copy
 from .custompredicate import CustomPredicate
 from .userdata import Userdata
 import logging
