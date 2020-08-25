@@ -1920,7 +1920,7 @@ class GobCog(BaseCog):
         channel = ctx.bot.get_channel(522778389606825984) #restrict trader to loot-spam channel on live server
         #channel = ctx.bot.get_channel(504934418289262597) #restrict trader to general channel on test server
         if channel is not None:
-            msg = await channel.send(text)
+            msg = await channel.send(text, allowed_mentions=discord.AllowedMentions(roles=True))
         else:
             print("channel not found!")
             return
