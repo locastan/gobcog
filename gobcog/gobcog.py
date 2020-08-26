@@ -1814,21 +1814,22 @@ class GobCog(BaseCog):
             #print("copyitem: {}".format(item))
             spender = user
             react = None
+            reply = None
             channel = ctx.bot.get_channel(522778389606825984) #restrict trader to loot-spam channel on live server
             #channel = ctx.bot.get_channel(504934418289262597) #restrict trader to general channel on test server
             if channel is not None:
+                calcprice = 0
                 await channel.send("Tell me **{}**, how many {} do you want?".format(user.display_name, titem['itemname']))
                 try:
                     reply = await ctx.bot.wait_for("message", check=MessagePredicate.same_context(ctx,channel,user), timeout=30)
                 except asyncio.TimeoutError:
                     await channel.send("I don't have all day, you know.")
-                    return
-                if reply.content.isdigit() and int(reply.content) >= 0:
-                    calcprice = int(titem['price'])*int(reply.content)
-                else:
-                    await channel.send("Sorry, but that is not a proper number. Try again.")
-                    return
-                if await bank.can_spend(spender,calcprice):
+                if reply != None:
+                    if reply.content.isdigit() and int(reply.content) > 0:
+                        calcprice = int(titem['price'])*int(reply.content)
+                    else:
+                        await channel.send("Sorry, but that is not a proper number. Try again.")
+                if calcprice != 0 and await bank.can_spend(spender,calcprice):
                     await bank.withdraw_credits(spender, calcprice)
                     if 'chest' in titem['itemname']:
                         if titem['itemname'] == ".rare_chest":
@@ -1860,7 +1861,7 @@ class GobCog(BaseCog):
                         await channel.send("{} paid {} cp and put {}x {} into the backpack.".format(user.display_name,str(calcprice),int(reply.content),titem['itemname']))
                     else:
                         await channel.send("{} bought the {} for {} cp and put it into the backpack.".format(user.display_name,titem['itemname'],str(calcprice)))
-                else:
+                elif calcprice != 0 and not await bank.can_spend(spender,calcprice):
                     await channel.send("You do not have enough copperpieces.")
                 try:
                     timeout = GobCog.last_trade+1200-time.time()
