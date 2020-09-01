@@ -534,14 +534,14 @@ class Adventure:
 
         if slain or persuaded and not failed:
             treasure = [0,0,0,0]
-            if CR >= 80 or Adventure.challenge == "Basilisk" or Adventure.challenge == "Medusa": #rewards 50:50 rare:normal chest for killing something like the basilisk
-                treasure = random.choice([[0,1,0,0],[1,0,0,0]])
-            elif CR >= 180: #rewards 50:50 epic:rare chest for killing hard stuff.
-                treasure = random.choice([[0,0,1,0],[0,1,0,0]])
+            if CR >= 400:
+                treasure = random.choice([[1,2,3,0],[1,3,2,0],[4,2,1,0],[0,3,3,0],[0,0,4,0],[0,0,0,1]])
             elif CR >= 250:
                 treasure = random.choice([[0,1,2,0],[0,2,1,0],[3,1,0,0],[0,2,2,0],[0,0,3,0]])
-            elif CR >= 400:
-                treasure = random.choice([[1,2,3,0],[1,3,2,0],[4,2,1,0],[0,3,3,0],[0,0,4,0],[0,0,0,1]])
+            elif CR >= 180: #rewards 50:50 epic:rare chest for killing hard stuff.
+                treasure = random.choice([[0,0,1,0],[0,1,0,0]])
+            elif CR >= 80 or Adventure.challenge == "Basilisk" or Adventure.challenge == "Medusa": #rewards 50:50 rare:normal chest for killing something like the basilisk
+                treasure = random.choice([[0,1,0,0],[1,0,0,0]])
             if "Dragon" in Adventure.challenge: #always rewards an epic chest.
                 treasure[2] += 1
             elif "Tarrasque" in Adventure.challenge: #rewards up to 10 rare, 5 epic and 3 quest chests

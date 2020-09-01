@@ -772,10 +772,14 @@ class Quest:
 
         if slain or persuaded and not Quest.failed:
             treasure = [0,0,0,0]
-            if CR >= 80 or Quest.challenge == "Basilisk" or Quest.challenge == "Medusa": #rewards 50:50 rare:normal chest for killing something like the basilisk
-                treasure = random.choice([[0,1,0,0],[1,0,0,0]])
-            elif CR >= 180: #rewards 50:50 epic:rare chest for killing hard stuff.
+            if CR >= 400:
+                treasure = random.choice([[1,2,3,0],[1,3,2,0],[4,2,1,0],[0,3,3,0],[0,0,4,0],[0,0,0,1]])
+            elif CR >= 250:
+                treasure = random.choice([[0,1,2,0],[0,2,1,0],[3,1,0,0],[0,2,2,0],[0,0,3,0]])
+            elif CR >= 180: #rewards 50:50 epic:rare chest for killing harder stuff.
                 treasure = random.choice([[0,0,1,0],[0,1,0,0]])
+            elif CR >= 80 or Quest.challenge == "Basilisk" or Quest.challenge == "Medusa": #rewards 50:50 rare:normal chest for killing something like the basilisk
+                treasure = random.choice([[0,1,0,0],[1,0,0,0]])
             if "Dragon" in Quest.challenge: #always rewards an epic chest.
                 treasure[2] += 1
             if len(critlist) != 0:
