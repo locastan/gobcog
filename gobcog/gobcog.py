@@ -79,12 +79,14 @@ def has_hp():
                     msg = await ctx.send("```css\n You are currently resting ({} remaining). Do you want to break your rest and only regain {}% of your health? ```".format(out, r_perc))
                     start_adding_reactions(msg, ReactionPredicate.YES_OR_NO_EMOJIS)
                     pred = ReactionPredicate.yes_or_no(msg, ctx.author)
-                    await ctx.bot.wait_for("reaction_add", check=pred, timeout=30)
                     try:
-                        await msg.delete()
-                    except discord.Forbidden or asyncio.TimeoutError:  # cannot remove message try remove emojis
-                        for key in ReactionPredicate.YES_OR_NO_EMOJIS:
-                            await msg.remove_reaction(key, ctx.bot.user)
+                        await ctx.bot.wait_for("reaction_add", check=pred, timeout=30)
+                    except asyncio.TimeoutError:
+                        try:
+                            await msg.delete()
+                        except discord.Forbidden:  # cannot remove message try remove emojis
+                            for key in ReactionPredicate.YES_OR_NO_EMOJIS:
+                                await msg.remove_reaction(key, ctx.bot.user)
                     if pred.result: #user reacted with Yes.
                         Userdata.users[str(ctx.author.id)]['hp'] += int((Userdata.users[str(ctx.author.id)]['base_hp']-Userdata.users[str(ctx.author.id)]['hp'])*(r_perc/100))
                         Userdata.users[str(ctx.author.id)]['resting'] = {}
@@ -152,12 +154,14 @@ def not_resting():
                 msg = await ctx.send("```css\n You are currently resting ({} remaining). Do you want to break your rest and only regain {}% of your health? ```".format(out, r_perc))
                 start_adding_reactions(msg, ReactionPredicate.YES_OR_NO_EMOJIS)
                 pred = ReactionPredicate.yes_or_no(msg, ctx.author)
-                await ctx.bot.wait_for("reaction_add", check=pred, timeout=30)
                 try:
-                    await msg.delete()
-                except discord.Forbidden or asyncio.TimeoutError:  # cannot remove message try remove emojis
-                    for key in ReactionPredicate.YES_OR_NO_EMOJIS:
-                        await msg.remove_reaction(key, ctx.bot.user)
+                    await ctx.bot.wait_for("reaction_add", check=pred, timeout=30)
+                except asyncio.TimeoutError:
+                    try:
+                        await msg.delete()
+                    except discord.Forbidden:  # cannot remove message try remove emojis
+                        for key in ReactionPredicate.YES_OR_NO_EMOJIS:
+                            await msg.remove_reaction(key, ctx.bot.user)
                 if pred.result: #user reacted with Yes.
                     Userdata.users[str(ctx.author.id)]['hp'] += int((Userdata.users[str(ctx.author.id)]['base_hp']-Userdata.users[str(ctx.author.id)]['hp'])*(r_perc/100))
                     Userdata.users[str(ctx.author.id)]['resting'] = {}
@@ -301,12 +305,14 @@ class GobCog(BaseCog):
                 msg = await ctx.send("```css\n You are currently resting ({} remaining). Do you want to break your rest and only regain {}% of your health? ```".format(out, r_perc))
                 start_adding_reactions(msg, ReactionPredicate.YES_OR_NO_EMOJIS)
                 pred = ReactionPredicate.yes_or_no(msg, ctx.author)
-                await ctx.bot.wait_for("reaction_add", check=pred, timeout=30)
                 try:
-                    await msg.delete()
-                except discord.Forbidden or asyncio.TimeoutError:  # cannot remove message try remove emojis
-                    for key in ReactionPredicate.YES_OR_NO_EMOJIS:
-                        await msg.remove_reaction(key, ctx.bot.user)
+                    await ctx.bot.wait_for("reaction_add", check=pred, timeout=30)
+                except asyncio.TimeoutError:
+                    try:
+                        await msg.delete()
+                    except discord.Forbidden or asyncio.TimeoutError:  # cannot remove message try remove emojis
+                        for key in ReactionPredicate.YES_OR_NO_EMOJIS:
+                            await msg.remove_reaction(key, ctx.bot.user)
                 if pred.result: #user reacted with Yes.
                     Userdata.users[str(user.id)]['hp'] += int((Userdata.users[str(user.id)]['base_hp']-Userdata.users[str(user.id)]['hp'])*(r_perc/100))
                     Userdata.users[str(user.id)]['resting'] = {}
@@ -739,12 +745,14 @@ class GobCog(BaseCog):
                 msg = await ctx.send("```css\n You already have a device. Do you want to replace {}? ```".format(', '.join(lookup)))
                 start_adding_reactions(msg, ReactionPredicate.YES_OR_NO_EMOJIS)
                 pred = ReactionPredicate.yes_or_no(msg, ctx.author)
-                await ctx.bot.wait_for("reaction_add", check=pred, timeout=30)
                 try:
-                    await msg.delete()
-                except discord.Forbidden or asyncio.TimeoutError:  # cannot remove message try remove emojis
-                    for key in ReactionPredicate.YES_OR_NO_EMOJIS:
-                        await msg.remove_reaction(key, ctx.bot.user)
+                    await ctx.bot.wait_for("reaction_add", check=pred, timeout=30)
+                except asyncio.TimeoutError:
+                    try:
+                        await msg.delete()
+                    except discord.Forbidden:  # cannot remove message try remove emojis
+                        for key in ReactionPredicate.YES_OR_NO_EMOJIS:
+                            await msg.remove_reaction(key, ctx.bot.user)
                 if pred.result: #user reacted with Yes.
                     for item in lookup:
                         del Userdata.users[str(user)]['items']['backpack'][item]
@@ -799,12 +807,14 @@ class GobCog(BaseCog):
                                 msg = await ctx.send("```css\n You will loose your pet if you change your class.\nShall I proceed? ```")
                             start_adding_reactions(msg, ReactionPredicate.YES_OR_NO_EMOJIS)
                             pred = ReactionPredicate.yes_or_no(msg, ctx.author)
-                            await ctx.bot.wait_for("reaction_add", check=pred, timeout=30)
                             try:
-                                await msg.delete()
-                            except discord.Forbidden or asyncio.TimeoutError:  # cannot remove message try remove emojis
-                                for key in ReactionPredicate.YES_OR_NO_EMOJIS:
-                                    await msg.remove_reaction(key, ctx.bot.user)
+                                await ctx.bot.wait_for("reaction_add", check=pred, timeout=30)
+                            except asyncio.TimeoutError:
+                                try:
+                                    await msg.delete()
+                                except discord.Forbidden or asyncio.TimeoutError:  # cannot remove message try remove emojis
+                                    for key in ReactionPredicate.YES_OR_NO_EMOJIS:
+                                        await msg.remove_reaction(key, ctx.bot.user)
                             if pred.result: #user reacted with Yes.
                                 if curclass == 'Tinkerer':
                                     await GobCog.sub_unequip(ctx,"{.:'")
@@ -1205,12 +1215,14 @@ class GobCog(BaseCog):
             msg = await ctx.send("Do you want to sell these items {}?\n[If you are selling consumables and did not specify how many (eg. !b sell 'consumable' 3), all will be sold!]".format(str(lookup)))
             start_adding_reactions(msg, ReactionPredicate.YES_OR_NO_EMOJIS)
             pred = ReactionPredicate.yes_or_no(msg, ctx.author)
-            await ctx.bot.wait_for("reaction_add", check=pred, timeout=30)
             try:
-                await msg.delete()
-            except discord.Forbidden or asyncio.TimeoutError:  # cannot remove message try remove emojis
-                for key in ReactionPredicate.YES_OR_NO_EMOJIS:
-                    await msg.remove_reaction(key, ctx.bot.user)
+                await ctx.bot.wait_for("reaction_add", check=pred, timeout=30)
+            except asyncio.TimeoutError:
+                try:
+                    await msg.delete()
+                except discord.Forbidden:  # cannot remove message try remove emojis
+                    for key in ReactionPredicate.YES_OR_NO_EMOJIS:
+                        await msg.remove_reaction(key, ctx.bot.user)
             if pred.result: #user reacted with Yes.
                 moneypile = 0
                 if asking < 0:

@@ -236,7 +236,7 @@ class Quest:
                 else:
                     await Quest.menu(ctx, [(Quest.quest[Quest.idx][0]).format(Quest.attrib,Quest.challenge,Quest.bosses[Quest.challenge]["pronoun"],Quest.bosses[Quest.challenge]["pronoun"].lower())], {"🗡": Quest.fight, "🗨": Quest.talk, "🛐": Quest.pray, "❌": Quest.run})
 
-    async def handle_breakup(user):
+    async def handle_breakup(ctx,user):
         equipped = {}
         for slot in Userdata.users[str(user.id)]['items']:
             if Userdata.users[str(user.id)]['items'][slot] and slot != "backpack":
@@ -598,7 +598,7 @@ class Quest:
                     Quest.userslist["fight"].remove(user)
                     fumble = random.randint(1,100)
                     if fumble <= 5:
-                        await Quest.handle_breakup(member)
+                        await Quest.handle_breakup(ctx,member)
             if len(Quest.userslist["fight"]) > 0:
                 await ctx.send(report)
             return (fumblelist, critlist, attack)
