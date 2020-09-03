@@ -81,6 +81,11 @@ def has_hp():
                     pred = ReactionPredicate.yes_or_no(msg, ctx.author)
                     try:
                         await ctx.bot.wait_for("reaction_add", check=pred, timeout=30)
+                        try:
+                            await msg.delete()
+                        except discord.Forbidden:  # cannot remove message try remove emojis
+                            for key in ReactionPredicate.YES_OR_NO_EMOJIS:
+                                await msg.remove_reaction(key, ctx.bot.user)
                     except asyncio.TimeoutError:
                         try:
                             await msg.delete()
@@ -156,6 +161,11 @@ def not_resting():
                 pred = ReactionPredicate.yes_or_no(msg, ctx.author)
                 try:
                     await ctx.bot.wait_for("reaction_add", check=pred, timeout=30)
+                    try:
+                        await msg.delete()
+                    except discord.Forbidden:  # cannot remove message try remove emojis
+                        for key in ReactionPredicate.YES_OR_NO_EMOJIS:
+                            await msg.remove_reaction(key, ctx.bot.user)
                 except asyncio.TimeoutError:
                     try:
                         await msg.delete()
@@ -307,6 +317,11 @@ class GobCog(BaseCog):
                 pred = ReactionPredicate.yes_or_no(msg, ctx.author)
                 try:
                     await ctx.bot.wait_for("reaction_add", check=pred, timeout=30)
+                    try:
+                        await msg.delete()
+                    except discord.Forbidden:  # cannot remove message try remove emojis
+                        for key in ReactionPredicate.YES_OR_NO_EMOJIS:
+                            await msg.remove_reaction(key, ctx.bot.user)
                 except asyncio.TimeoutError:
                     try:
                         await msg.delete()
@@ -747,6 +762,11 @@ class GobCog(BaseCog):
                 pred = ReactionPredicate.yes_or_no(msg, ctx.author)
                 try:
                     await ctx.bot.wait_for("reaction_add", check=pred, timeout=30)
+                    try:
+                        await msg.delete()
+                    except discord.Forbidden:  # cannot remove message try remove emojis
+                        for key in ReactionPredicate.YES_OR_NO_EMOJIS:
+                            await msg.remove_reaction(key, ctx.bot.user)
                 except asyncio.TimeoutError:
                     try:
                         await msg.delete()
@@ -809,6 +829,11 @@ class GobCog(BaseCog):
                             pred = ReactionPredicate.yes_or_no(msg, ctx.author)
                             try:
                                 await ctx.bot.wait_for("reaction_add", check=pred, timeout=30)
+                                try:
+                                    await msg.delete()
+                                except discord.Forbidden or asyncio.TimeoutError:  # cannot remove message try remove emojis
+                                    for key in ReactionPredicate.YES_OR_NO_EMOJIS:
+                                        await msg.remove_reaction(key, ctx.bot.user)
                             except asyncio.TimeoutError:
                                 try:
                                     await msg.delete()
@@ -1217,6 +1242,11 @@ class GobCog(BaseCog):
             pred = ReactionPredicate.yes_or_no(msg, ctx.author)
             try:
                 await ctx.bot.wait_for("reaction_add", check=pred, timeout=30)
+                try:
+                    await msg.delete()
+                except discord.Forbidden:  # cannot remove message try remove emojis
+                    for key in ReactionPredicate.YES_OR_NO_EMOJIS:
+                        await msg.remove_reaction(key, ctx.bot.user)
             except asyncio.TimeoutError:
                 try:
                     await msg.delete()
