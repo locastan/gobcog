@@ -467,7 +467,8 @@ class Quest:
                         roll = random.randint(1,20) #50% chance to get hit.
                         if roll <= 10:
                             member = discord.utils.find(lambda m: m.id == ID, ctx.guild.members)
-                            Quest.affected.append(member.display_name)
+                            if member != None:
+                                Quest.affected.append(member.display_name)
                     if len(Quest.affected) > 0:
                         s_damage = random.randint(Quest.effects[Quest.effect][1],Quest.effects[Quest.effect][2])
                         affected = " and ".join([", ".join(Quest.affected[:-1]),Quest.affected[-1]] if len(Quest.affected) > 2 else Quest.affected)
@@ -498,14 +499,15 @@ class Quest:
                         att_value = Userdata.users[str(ID)]['att'] + Userdata.users[str(ID)]['skill']['att'] + roll
                         dipl_value = Userdata.users[str(ID)]['cha'] + Userdata.users[str(ID)]['skill']['cha'] + roll
                         member = discord.utils.find(lambda m: m.id == ID, ctx.guild.members)
-                        if saving_stat == "str":
-                            stat_txt = "ATT"
-                            if att_value < saving_throw:
-                                Quest.affected.append(member.display_name)
-                        elif saving_stat == "dipl":
-                            stat_txt = "DIPL"
-                            if dipl_value < saving_throw:
-                                Quest.affected.append(member.display_name)
+                        if member != None:
+                            if saving_stat == "str":
+                                stat_txt = "ATT"
+                                if att_value < saving_throw:
+                                    Quest.affected.append(member.display_name)
+                            elif saving_stat == "dipl":
+                                stat_txt = "DIPL"
+                                if dipl_value < saving_throw:
+                                    Quest.affected.append(member.display_name)
                     if len(Quest.affected) > 0:
                         affected = " and ".join([", ".join(Quest.affected[:-1]),Quest.affected[-1]] if len(Quest.affected) > 2 else Quest.affected)
                         await ctx.send("**" + affected + "**" + " missed the {} saving throw of {}.".format(stat_txt,saving_throw))
@@ -962,7 +964,8 @@ class Quest:
             phrase += "\n**{}** slept through the whole encounter.".format(slept)
             for name in Userdata.sleepers:
                 member = discord.utils.find(lambda m: m.display_name == name, ctx.guild.members)
-                phrase += " " + member.mention
+                if member != None:
+                    phrase += " " + member.mention
             Userdata.sleepers.clear()
         return phrase
 

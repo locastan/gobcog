@@ -1556,15 +1556,17 @@ class GobCog(BaseCog):
             print(reward, participants)
             for user in reward.keys():
                 member = discord.utils.find(lambda m: m.display_name == user, ctx.guild.members)
-                await self.add_rewards(ctx, member, reward[user]["xp"], reward[user]["cp"], reward[user]["special"])
+                if member != None:
+                    await self.add_rewards(ctx, member, reward[user]["xp"], reward[user]["cp"], reward[user]["special"])
             for user in participants: #reset activated abilities
                 member = discord.utils.find(lambda m: m.display_name == user, ctx.guild.members)
-                if 'name' in Userdata.users[str(member.id)]['class']:
-                    if Userdata.users[str(member.id)]['class']['name'] != "Ranger" and Userdata.users[str(member.id)]['class']['ability']:
-                        Userdata.users[str(member.id)]['class']['ability'] = False
-                    songbonus = Userdata.users[str(member.id)]['class'].get("basebonus", 0)
-                    if Userdata.users[str(member.id)]['class']['name'] == "Bard" and songbonus != 0:
-                        Userdata.users[str(member.id)]['class'].pop('basebonus')
+                if member != None:
+                    if 'name' in Userdata.users[str(member.id)]['class']:
+                        if Userdata.users[str(member.id)]['class']['name'] != "Ranger" and Userdata.users[str(member.id)]['class']['ability']:
+                            Userdata.users[str(member.id)]['class']['ability'] = False
+                        songbonus = Userdata.users[str(member.id)]['class'].get("basebonus", 0)
+                        if Userdata.users[str(member.id)]['class']['name'] == "Bard" and songbonus != 0:
+                            Userdata.users[str(member.id)]['class'].pop('basebonus')
                 expired = []
                 for buff in Userdata.users[str(member.id)]['buffs'].keys(): #reduce duration of active buffs
                     if buff != "rest":
@@ -1613,9 +1615,10 @@ class GobCog(BaseCog):
             await msg.remove_reaction("✅", ctx.bot.user)
         for user in party:
             member = discord.utils.find(lambda m: m.display_name == user, ctx.guild.members)
-            if Userdata.users[str(member.id)]['lvl'] < 15:
-                party.remove(user)
-                await ctx.send("Sorry **{}**. You need to be at least level 15 to go on a quest.".format(user))
+            if member != None:
+                if Userdata.users[str(member.id)]['lvl'] < 15:
+                    party.remove(user)
+                    await ctx.send("Sorry **{}**. You need to be at least level 15 to go on a quest.".format(user))
         if len(party) <= 1:
             ctx.command.reset_cooldown(ctx)
             return await ctx.send("Not enough heroes are willing or able to go on this quest. Try again later.")
@@ -1632,12 +1635,13 @@ class GobCog(BaseCog):
                     await ctx.send("There was a problem retrieving user information for **" + user + "**. Please tell locastan.")
             for user in participants: #reset activated abilities
                 member = discord.utils.find(lambda m: m.display_name == user, ctx.guild.members)
-                if 'name' in Userdata.users[str(member.id)]['class']:
-                    if Userdata.users[str(member.id)]['class']['name'] != "Ranger" and Userdata.users[str(member.id)]['class']['ability']:
-                        Userdata.users[str(member.id)]['class']['ability'] = False
-                    songbonus = Userdata.users[str(member.id)]['class'].get("basebonus", 0)
-                    if Userdata.users[str(member.id)]['class']['name'] == "Bard" and songbonus != 0:
-                        Userdata.users[str(member.id)]['class'].pop('basebonus')
+                if member != None:
+                    if 'name' in Userdata.users[str(member.id)]['class']:
+                        if Userdata.users[str(member.id)]['class']['name'] != "Ranger" and Userdata.users[str(member.id)]['class']['ability']:
+                            Userdata.users[str(member.id)]['class']['ability'] = False
+                        songbonus = Userdata.users[str(member.id)]['class'].get("basebonus", 0)
+                        if Userdata.users[str(member.id)]['class']['name'] == "Bard" and songbonus != 0:
+                            Userdata.users[str(member.id)]['class'].pop('basebonus')
                 expired = []
                 for buff in Userdata.users[str(member.id)]['buffs'].keys(): #reduce duration of active buffs
                     if buff != "rest":

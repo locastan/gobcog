@@ -771,7 +771,8 @@ class Adventure:
             phrase += "\n**{}** slept through the whole encounter.".format(slept)
             for name in Userdata.sleepers:
                 member = discord.utils.find(lambda m: m.display_name == name, ctx.guild.members)
-                phrase += " " + member.mention
+                if member != None:
+                    phrase += " " + member.mention
             Userdata.sleepers.clear()
         return phrase
 
