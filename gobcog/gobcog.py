@@ -1540,6 +1540,30 @@ class GobCog(BaseCog):
             await self.add_rewards(ctx, ctx.author, xp, cp, [normal,rare,epic,quest])
         await ctx.send("**" + user.display_name + "** was compensated with {} xp, {} cp and [{},{},{},{}] [normal, rare, epic, quest] chests.".format(xp,cp,normal,rare,epic,quest))
 
+    @commands.command()
+    @checks.admin_or_permissions(administrator=True)
+    async def additem(self, ctx, type: string=None, item: dict={}, user: discord.Member=None):
+        """[Admin] This will add/set a certain item, consumable or ingredient for a specified user.
+            !additem consumable {".dust_of_midas":{"slot":["consumable"],"uses":12}} @Elder_aramis
+            will give/set the users .dust_of_midas consumable to 12x.
+            !additem {"shiny sword":{"slot":["right"],"att":1,"cha":1}} @Elder_aramis
+            will give a shiny sword.
+            !additem ingredient {"Daisy":{'uses':6}} @Elder_aramis
+            will give/set the users Daisies to 6x.
+        """
+        global users
+        if user == None:
+            user = ctx.author
+        if type == None:
+            Userdata.users[str(user.id)]['items']['backpack'].update(item)
+        elif type == "consumable":
+            Userdata.users[str(user.id)]['consumables'].update(item)
+        elif type == "ingredient":
+            Userdata.users[str(user.id)]['ingredients'].update(item)
+        else:
+            Userdata.users[str(user.id)]['items']['backpack'].update(item)
+        await ctx.send("{} added/set for **" + user.display_name + "**".format(item) )
+
     @commands.command(name="adventure", aliases=['a'])
     @commands.guild_only()
     @not_resting()

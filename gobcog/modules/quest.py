@@ -242,10 +242,19 @@ class Quest:
             if Userdata.users[str(user.id)]['items'][slot] and slot != "backpack":
                 equipped.update(Userdata.users[str(user.id)]['items'][slot])
         item = random.choice(list(equipped.keys()))
-        for slot in equipped[item].get('slot'):
-            Userdata.users[str(user.id)]['items'][slot] = {}
-            Userdata.users[str(user.id)]['att'] -= int(equipped[item].get('att'))     # keep in mind that double handed items grant their bonus twice so they remove twice
-            Userdata.users[str(user.id)]['cha'] -= int(equipped[item].get('cha'))
+        if "{.:'" in item:
+            for slot in equipped[item].get('slot'):
+                Userdata.users[str(user.id)]['att'] -= int(equipped[item].get('att'))     # keep in mind that double handed items grant their bonus twice so they remove twice
+                Userdata.users[str(user.id)]['cha'] -= int(equipped[item].get('cha'))
+                Userdata.users[str(user.id)]['items'][slot][item]['att'] -= 1
+                Userdata.users[str(user.id)]['items'][slot][item]['cha'] -= 1
+            await Userdata.save()
+            await ctx.send("**{}** damaged his **{}** during the fumble (stats reduced).".format(user.display_name,item))
+        else:
+            for slot in equipped[item].get('slot'):
+                Userdata.users[str(user.id)]['items'][slot] = {}
+                Userdata.users[str(user.id)]['att'] -= int(equipped[item].get('att'))     # keep in mind that double handed items grant their bonus twice so they remove twice
+                Userdata.users[str(user.id)]['cha'] -= int(equipped[item].get('cha'))
             await Userdata.save()
             await ctx.send("**{}** broke his **{}** during the fumble.".format(user.display_name,item))
 
