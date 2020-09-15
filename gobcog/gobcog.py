@@ -1542,7 +1542,7 @@ class GobCog(BaseCog):
 
     @commands.command()
     @checks.admin_or_permissions(administrator=True)
-    async def additem(self, ctx, type: string=None, item: dict={}, user: discord.Member=None):
+    async def additem(self, ctx, type: str=None, item: dict={}, user: discord.Member=None):
         """[Admin] This will add/set a certain item, consumable or ingredient for a specified user.
             !additem consumable {".dust_of_midas":{"slot":["consumable"],"uses":12}} @Elder_aramis
             will give/set the users .dust_of_midas consumable to 12x.
