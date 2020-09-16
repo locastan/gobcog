@@ -1542,27 +1542,56 @@ class GobCog(BaseCog):
 
     @commands.command()
     @checks.admin_or_permissions(administrator=True)
-    async def additem(self, ctx, type: str=None, item: dict={}, user: discord.Member=None):
+    async def additem(self, ctx, type: str=None, item: str=None, user: discord.Member=None):
         """[Admin] This will add/set a certain item, consumable or ingredient for a specified user.
-            !additem consumable {".dust_of_midas":{"slot":["consumable"],"uses":12}} @Elder_aramis
-            will give/set the users .dust_of_midas consumable to 12x.
-            !additem {"shiny sword":{"slot":["right"],"att":1,"cha":1}} @Elder_aramis
-            will give a shiny sword.
-            !additem ingredient {"Daisy":{'uses':6}} @Elder_aramis
-            will give/set the users Daisies to 6x.
+            !additem consumable {'.dust_of_midas':{'slot':['consumable'],'uses':12}} @Elder_aramis
+            !additem item {'shiny sword':{'slot':['right'],'att':1,'cha':1}} @Elder_aramis
+            !additem ingredient {'Daisy':{'uses':6}} @Elder_aramis
         """
         global users
+        await ctx.send("{},{},{}".format(type,item,user))
+        if item == None:
+            return
+        else:
+            data = item.replace("'",'"')
+            itemdict = json.loads(data)
         if user == None:
             user = ctx.author
-        if type == None:
-            Userdata.users[str(user.id)]['items']['backpack'].update(item)
+        if type == "item":
+            Userdata.users[str(user.id)]['items']['backpack'].update(itemdict)
         elif type == "consumable":
-            Userdata.users[str(user.id)]['consumables'].update(item)
+            Userdata.users[str(user.id)]['consumables'].update(itemdict)
         elif type == "ingredient":
-            Userdata.users[str(user.id)]['ingredients'].update(item)
+            Userdata.users[str(user.id)]['ingredients'].update(itemdict)
         else:
-            Userdata.users[str(user.id)]['items']['backpack'].update(item)
-        await ctx.send("{} added/set for **" + user.display_name + "**".format(item) )
+            return
+        await ctx.send("{} added/set for **".format(list(itemdict.keys())[0]) + user.display_name + "**")
+        await Userdata.save()
+
+    @commands.command()
+    @checks.admin_or_permissions(administrator=True)
+    async def delitem(self, ctx, type: str=None, item: str=None, user: discord.Member=None):
+        """[Admin] This will remove a certain item, consumable or ingredient for a specified user.
+            !delitem consumable .dust_of_midas @Elder_aramis
+            !delitem item {'shiny sword':{'slot':['right'],'att':1,'cha':1}} @Elder_aramis
+            !delitem ingredient 'Daisy' @Elder_aramis
+        """
+        global users
+        await ctx.send("{},{},{}".format(type,item,user))
+        if item == None:
+            return
+        if user == None:
+            user = ctx.author
+        if type == "item":
+            Userdata.users[str(user.id)]['items']['backpack'].pop(item)
+        elif type == "consumable":
+            Userdata.users[str(user.id)]['consumables'].pop(item)
+        elif type == "ingredient":
+            Userdata.users[str(user.id)]['ingredients'].pop(item)
+        else:
+            return
+        await ctx.send("{} deleted for **".format(item) + user.display_name + "**")
+        await Userdata.save()
 
     @commands.command(name="adventure", aliases=['a'])
     @commands.guild_only()
