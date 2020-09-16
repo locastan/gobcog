@@ -1573,7 +1573,7 @@ class GobCog(BaseCog):
     async def delitem(self, ctx, type: str=None, item: str=None, user: discord.Member=None):
         """[Admin] This will remove a certain item, consumable or ingredient for a specified user.
             !delitem consumable .dust_of_midas @Elder_aramis
-            !delitem item {'shiny sword':{'slot':['right'],'att':1,'cha':1}} @Elder_aramis
+            !delitem item 'shiny sword' @Elder_aramis
             !delitem ingredient 'Daisy' @Elder_aramis
         """
         global users
