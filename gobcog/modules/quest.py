@@ -588,20 +588,22 @@ class Quest:
                         bonus = random.randint(5,15)
                     attack += roll + bonus + att_value + monster_value
                     bonus_str = str(bonus)+ ability
-                    if Userdata.users[str(member.id)]['class']['name']=="Berserker" and len(Userdata.users[str(member.id)]['items']['right'][list(Userdata.users[str(member.id)]['items']['right'].keys())[0]]["slot"]) == 2 and "bow" not in list(Userdata.users[str(member.id)]['items']['right'].keys())[0]:
-                        barb_bonus = Userdata.users[str(member.id)]['items']['right'][list(Userdata.users[str(member.id)]['items']['right'].keys())[0]]["att"]*2
-                        attack += barb_bonus
-                        barb_bonus_str = " + {}🀄 ".format(barb_bonus)
-                        bonus_str += barb_bonus_str
+                    if Userdata.users[str(member.id)]['class']['name']=="Berserker" and Userdata.users[str(member.id)]['items']['right'] != {}:
+                        if len(Userdata.users[str(member.id)]['items']['right'][list(Userdata.users[str(member.id)]['items']['right'].keys())[0]]["slot"]) == 2 and "bow" not in list(Userdata.users[str(member.id)]['items']['right'].keys())[0]:
+                            barb_bonus = Userdata.users[str(member.id)]['items']['right'][list(Userdata.users[str(member.id)]['items']['right'].keys())[0]]["att"]*2
+                            attack += barb_bonus
+                            barb_bonus_str = " + {}🀄 ".format(barb_bonus)
+                            bonus_str += barb_bonus_str
                     report += "**" + user + "**: " +  "🎲({}) +".format(roll) + " {} + ".format(bonus_str) + "🗡" + str(att_value) + effect + monster_string + " |"
                 else:
                     bonus = 0
                     if Userdata.users[str(member.id)]['class']['name']=="Ranger" and any("bow" in k for k in Userdata.users[str(member.id)]['items']['right'].keys()):
                         bonus = int(Userdata.users[str(member.id)]['lvl']/10)*2
                         bow_bonus = " {}🏹 + ".format(bonus)
-                    elif Userdata.users[str(member.id)]['class']['name']=="Berserker" and len(Userdata.users[str(member.id)]['items']['right'][list(Userdata.users[str(member.id)]['items']['right'].keys())[0]]["slot"]) == 2 and "bow" not in list(Userdata.users[str(member.id)]['items']['right'].keys())[0]:
-                        bonus = Userdata.users[str(member.id)]['items']['right'][list(Userdata.users[str(member.id)]['items']['right'].keys())[0]]["att"]*2
-                        bow_bonus = " {}🀄 + ".format(bonus)
+                    elif Userdata.users[str(member.id)]['class']['name']=="Berserker" and Userdata.users[str(member.id)]['items']['right'] != {}:
+                        if len(Userdata.users[str(member.id)]['items']['right'][list(Userdata.users[str(member.id)]['items']['right'].keys())[0]]["slot"]) == 2 and "bow" not in list(Userdata.users[str(member.id)]['items']['right'].keys())[0]:
+                            bonus = Userdata.users[str(member.id)]['items']['right'][list(Userdata.users[str(member.id)]['items']['right'].keys())[0]]["att"]*2
+                            bow_bonus = " {}🀄 + ".format(bonus)
                     attack += roll + bonus + att_value + monster_value
                     report += "**" + user + "**: " +  "🎲({}) +".format(roll) + bow_bonus + "🗡" + str(att_value) + monster_string + " |"
             for user in fumblelist:
@@ -740,7 +742,7 @@ class Quest:
                     member = discord.utils.find(lambda m: m.display_name == user, ctx.guild.members)
                     if member == None:
                         continue
-                    if next(iter(Userdata.users[str(member.id)]['items']['left']))[0:14] == '.mirror_shield':
+                    if next((iter(Userdata.users[str(member.id)]['items']['left'])), "Empty_slot")[0:14] == '.mirror_shield':
                         failed = False
                         break
             else:
