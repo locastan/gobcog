@@ -97,7 +97,9 @@ class Classes:
             return
         if len(args) == 0: #user did not pass a song
             Userdata.users[str(user)]['class']['ability'] = True
-            await ctx.send('♪♫♬ **{}** is whipping up a performance. ♬♫♪'.format(ctx.author.display_name))
+            basebonus = random.randint(1,Userdata.users[str(user)]['lvl'])
+            Userdata.users[str(user)]['class'].update({"basebonus": basebonus})
+            await ctx.send('♪♫♬ **{}** is whipping up a random performance. ♬♫♪'.format(ctx.author.display_name))
             return
         else:
             argstring = ''.join(map(str, args))

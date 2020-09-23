@@ -37,6 +37,8 @@ class Alchemy:
                 "Cyanka LillyMushroomRaging Frills": {"yields":".potion_of_strength", "uses": (8,14)},
                 "Cyanka LillyRaging FrillsRaging Frills": {"yields":"[brutal philtre]", "uses": (2,3)},
                 "Raging FrillsRaging FrillsRaging Frills": {"yields":"[brutal philtre]", "uses": (4,6)},
+                "MoneypennyMoneypennyRaging Frills": {"yields":"[foliant of greed]", "uses": (1,2)},
+                "MoneypennyNa-PalmRaging Frills": {"yields":"[foliant of greed]", "uses": (3,5)},
                 "DaisyMoneypennyMushroom": {"yields":".dust_of_midas", "uses": (2,4)},
                 "DaisyMoneypennyOilflower": {"yields":".dust_of_midas", "uses": (2,4)},
                 "DaisyMushroomRose": {"yields":".scroll_of_learning", "uses": (1,2)},

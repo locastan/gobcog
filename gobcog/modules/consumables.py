@@ -17,6 +17,7 @@ class Consumables:
                     "[luckworth essence]":{'type':"buff", 'attrib':"luck", 'min':15, 'max':50, 'duration':5, 'desc':"This will bestow good luck during 5 fights or opening 5 chests."},
                     "[bottled fortune]":{'type':"buff", 'attrib':"luck", 'min':50, 'max':100, 'duration':1, 'desc':"This will bestow exceptional luck during the next fight or chest opening."},
                     ".dust_of_midas":{'type':"buff", 'attrib':"money", 'min':10, 'max':100, 'duration':1, 'desc':"Increases amount of cp gained for one fight."},
+                    "[foliant of greed]":{'type':"buff", 'attrib':"money", 'min':50, 'max':100, 'duration':10, 'desc':"Substancially increases amount of cp gained for 10 fights."},
                     ".scroll_of_learning":{'type':"buff", 'attrib':"xp", 'min':10, 'max':100, 'duration':1, 'desc':"Increases amount of xp gained for one fight."},
                     "[foliant of wisdom]":{'type':"buff", 'attrib':"xp", 'min':10, 'max':100, 'duration':10, 'desc':"Increases amount of xp gained for 10 fights."},
                     "[chaos egg]":{'type':"summon", 'attrib':"monster", 'min':10, 'max':100, 'duration':1, 'desc':"Summons a random allied monster for the next fight."},
