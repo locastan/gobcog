@@ -664,7 +664,7 @@ class GobCog(BaseCog):
                     await ctx.send("I don't have all day, you know.")
                     ctx.command.reset_cooldown(ctx)
                     return
-                if reply.content.isdigit() and (int(reply.content)-1) < len(lookup):
+                if reply.content.isdigit() and (int(reply.content)-1) < len(lookup) and int(reply.content) > 0:
                     idx = int(reply.content)-1
                     if  "{.:'" not in lookup[idx]:
                         item1 = Userdata.users[str(user)]['items']['backpack'].get(lookup[idx])
@@ -726,7 +726,7 @@ class GobCog(BaseCog):
                     await ctx.send("I don't have all day, you know.")
                     ctx.command.reset_cooldown(ctx)
                     return
-                if reply.content.isdigit() and (int(reply.content)-1) < len(lookup):
+                if reply.content.isdigit() and (int(reply.content)-1) < len(lookup) and int(reply.content) > 0:
                     idx = int(reply.content)-1
                     if  "{.:'" not in lookup[idx]:
                         item2 = Userdata.users[str(user)]['items']['backpack'].get(lookup[idx])
@@ -1211,7 +1211,7 @@ class GobCog(BaseCog):
                 except asyncio.TimeoutError:
                     await ctx.send("I don't have all day, you know.")
                     return
-                if reply.content.isdigit() and (int(reply.content)-1) < len(lookup):
+                if reply.content.isdigit() and (int(reply.content)-1) < len(lookup) and int(reply.content) > 0:
                     idx = int(reply.content)-1
                     equip = {"itemname": lookup[idx],"item": Userdata.users[str(user.id)]['items']['backpack'][lookup[idx]]}
                     await self.equip_item(ctx, equip, True)
@@ -1310,7 +1310,7 @@ class GobCog(BaseCog):
                 except asyncio.TimeoutError:
                     await ctx.send("I don't have all day, you know.")
                     return
-                if reply.content.isdigit() and (int(reply.content)-1) < len(lookup):
+                if reply.content.isdigit() and (int(reply.content)-1) < len(lookup) and int(reply.content) > 0:
                     idx = int(reply.content)-1
                     item = lookup[idx]
                 else:

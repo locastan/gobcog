@@ -113,7 +113,7 @@ class Alchemy:
                     return (False,[])
                 if reply.content == "0":
                     return (False,[])
-                elif reply.content.isdigit() and (int(reply.content)-1) < len(lookup):
+                elif reply.content.isdigit() and (int(reply.content)-1) < len(lookup) and int(reply.content) > 0:
                     idx = int(reply.content)-1
                     inbrew.append(lookup[idx])
                     i += 1

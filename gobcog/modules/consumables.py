@@ -111,7 +111,7 @@ class Consumables:
                 except asyncio.TimeoutError:
                     await ctx.send("I don't have all day, you know.")
                     return False
-                if reply.content.isdigit() and (int(reply.content)-1) < len(lookup):
+                if reply.content.isdigit() and (int(reply.content)-1) < len(lookup) and int(reply.content) > 0:
                     idx = int(reply.content)-1
                     if  "{.:'" not in lookup[idx] and ")*" not in lookup[idx]:
                         item1 = Userdata.users[str(user.id)]['items']['backpack'].get(lookup[idx])
