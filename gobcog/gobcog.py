@@ -1091,15 +1091,15 @@ class GobCog(BaseCog):
                 if key == "luck":
                     buffs += " 🍀 (+{}%/{}⏳) ".format(Userdata.users[str(user.id)]['buffs'][key]['bonus'],Userdata.users[str(user.id)]['buffs'][key]['duration'])
                 elif key == "att":
-                    buffs += " 🗡 (+{}/{}⏳) ".format(Userdata.users[str(user.id)]['buffs'][key]['bonus'],Userdata.users[str(user.id)]['buffs'][key]['duration'])
+                    buffs += " ⚔ (+{}/{}⏳) ".format(Userdata.users[str(user.id)]['buffs'][key]['bonus'],Userdata.users[str(user.id)]['buffs'][key]['duration'])
                 elif key == "cha":
-                    buffs += " 🗨 (+{}/{}⏳) ".format(Userdata.users[str(user.id)]['buffs'][key]['bonus'],Userdata.users[str(user.id)]['buffs'][key]['duration'])
+                    buffs += " ℚ (+{}/{}⏳) ".format(Userdata.users[str(user.id)]['buffs'][key]['bonus'],Userdata.users[str(user.id)]['buffs'][key]['duration'])
                 elif key == "money":
                     buffs += " 💰 (+{}%/{}⏳) ".format(Userdata.users[str(user.id)]['buffs'][key]['bonus'],Userdata.users[str(user.id)]['buffs'][key]['duration'])
                 elif key == "xp":
                     buffs += " 📚 (+{}%/{}⏳) ".format(Userdata.users[str(user.id)]['buffs'][key]['bonus'],Userdata.users[str(user.id)]['buffs'][key]['duration'])
                 elif key == "monster":
-                    buffs += " 🦖 (🗡{}|🗨{}/{}⏳) ".format(Userdata.users[str(user.id)]['buffs'][key]['bonus']['att'],Userdata.users[str(user.id)]['buffs'][key]['bonus']['cha'],Userdata.users[str(user.id)]['buffs'][key]['duration'])
+                    buffs += " ☣ (🗡{}|🗨{}/{}⏳) ".format(Userdata.users[str(user.id)]['buffs'][key]['bonus']['att'],Userdata.users[str(user.id)]['buffs'][key]['bonus']['cha'],Userdata.users[str(user.id)]['buffs'][key]['duration'])
                 elif key == "rest":
                     buffs += " 💤 ({}x/{}⏳) ".format(Userdata.users[str(user.id)]['buffs'][key]['bonus'],Userdata.users[str(user.id)]['buffs'][key]['duration'])
             buffs += " -"
@@ -1119,7 +1119,7 @@ class GobCog(BaseCog):
             if Userdata.users[str(user.id)]['class']['name'] == "Ranger" and type(Userdata.users[str(user.id)]['class']['ability']) != bool:
                 if 'pet' in Userdata.users[str(user.id)]['class']['ability']:
                     bonus = int(Userdata.users[str(user.id)]['lvl']/10)*2
-                    bow_bonus = "{}🏹".format(bonus)
+                    bow_bonus = "{}↢☾".format(bonus)
                     clazz += "\n- Current pet: {}".format(Userdata.users[str(user.id)]['class']['ability']['pet']['name'])
                     clazz += "\n\nYou get a +{} bonus to attacks when using a bow.".format(bow_bonus)
             elif Userdata.users[str(user.id)]['class']['name']=="Berserker" and len(Userdata.users[str(user.id)]['items']['right'][list(Userdata.users[str(user.id)]['items']['right'].keys())[0]]["slot"]) == 2:
