@@ -238,25 +238,29 @@ class Quest:
 
     async def handle_breakup(ctx,user):
         equipped = {}
-        for slot in Userdata.users[str(user.id)]['items']:
-            if Userdata.users[str(user.id)]['items'][slot] and slot != "backpack":
-                equipped.update(Userdata.users[str(user.id)]['items'][slot])
-        item = random.choice(list(equipped.keys()))
-        if "{.:'" in item:
-            for slot in equipped[item].get('slot'):
-                Userdata.users[str(user.id)]['att'] -= int(equipped[item].get('att'))     # keep in mind that double handed items grant their bonus twice so they remove twice
-                Userdata.users[str(user.id)]['cha'] -= int(equipped[item].get('cha'))
-                Userdata.users[str(user.id)]['items'][slot][item]['att'] -= 1
-                Userdata.users[str(user.id)]['items'][slot][item]['cha'] -= 1
-            await Userdata.save()
-            await ctx.send("**{}** damaged his **{}** during the fumble (stats reduced).".format(user.display_name,item))
+        clumsy = discord.utils.find(lambda m: m.display_name == user, ctx.guild.members)
+        if clumsy == None:
+            for slot in Userdata.users[str(clumsy.id)]['items']:
+                if Userdata.users[str(clumsy.id)]['items'][slot] and slot != "backpack":
+                    equipped.update(Userdata.users[str(clumsy.id)]['items'][slot])
+            item = random.choice(list(equipped.keys()))
+            if "{.:'" in item:
+                for slot in equipped[item].get('slot'):
+                    Userdata.users[str(clumsy.id)]['att'] -= int(equipped[item].get('att'))     # keep in mind that double handed items grant their bonus twice so they remove twice
+                    Userdata.users[str(clumsy.id)]['cha'] -= int(equipped[item].get('cha'))
+                    Userdata.users[str(clumsy.id)]['items'][slot][item]['att'] -= 1
+                    Userdata.users[str(clumsy.id)]['items'][slot][item]['cha'] -= 1
+                await Userdata.save()
+                await ctx.send("**{}** damaged his **{}** during the fumble (stats reduced).".format(clumsy.display_name,item))
+            else:
+                for slot in equipped[item].get('slot'):
+                    Userdata.users[str(clumsy.id)]['items'][slot] = {}
+                    Userdata.users[str(clumsy.id)]['att'] -= int(equipped[item].get('att'))     # keep in mind that double handed items grant their bonus twice so they remove twice
+                    Userdata.users[str(clumsy.id)]['cha'] -= int(equipped[item].get('cha'))
+                await Userdata.save()
+                await ctx.send("**{}** broke his **{}** during the fumble.".format(clumsy.display_name,item))
         else:
-            for slot in equipped[item].get('slot'):
-                Userdata.users[str(user.id)]['items'][slot] = {}
-                Userdata.users[str(user.id)]['att'] -= int(equipped[item].get('att'))     # keep in mind that double handed items grant their bonus twice so they remove twice
-                Userdata.users[str(user.id)]['cha'] -= int(equipped[item].get('cha'))
-            await Userdata.save()
-            await ctx.send("**{}** broke his **{}** during the fumble.".format(user.display_name,item))
+            await ctx.send("**{}** almost broke something during the fumble, but due to divine intervention it prevailed.".format(user))
 
     async def menu(
         ctx: commands.Context,
@@ -611,7 +615,7 @@ class Quest:
                     Quest.userslist["fight"].remove(user)
                     fumble = random.randint(1,100)
                     if fumble <= 5:
-                        await Quest.handle_breakup(ctx,member)
+                        await Quest.handle_breakup(ctx,user)
             if len(Quest.userslist["fight"]) > 0:
                 await ctx.send(report)
             return (fumblelist, critlist, attack)
