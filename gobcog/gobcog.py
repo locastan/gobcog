@@ -1099,7 +1099,7 @@ class GobCog(BaseCog):
                 elif key == "xp":
                     buffs += " 📚 (+{}%/{}⏳) ".format(Userdata.users[str(user.id)]['buffs'][key]['bonus'],Userdata.users[str(user.id)]['buffs'][key]['duration'])
                 elif key == "monster":
-                    buffs += " ☣ (🗡{}|🗨{}/{}⏳) ".format(Userdata.users[str(user.id)]['buffs'][key]['bonus']['att'],Userdata.users[str(user.id)]['buffs'][key]['bonus']['cha'],Userdata.users[str(user.id)]['buffs'][key]['duration'])
+                    buffs += " ☣ (⚔{}|ℚ{}/{}⏳) ".format(Userdata.users[str(user.id)]['buffs'][key]['bonus']['att'],Userdata.users[str(user.id)]['buffs'][key]['bonus']['cha'],Userdata.users[str(user.id)]['buffs'][key]['duration'])
                 elif key == "rest":
                     buffs += " 💤 ({}x/{}⏳) ".format(Userdata.users[str(user.id)]['buffs'][key]['bonus'],Userdata.users[str(user.id)]['buffs'][key]['duration'])
             buffs += " -"
