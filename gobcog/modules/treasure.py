@@ -98,7 +98,7 @@ class Treasure:
         if hasattr(user, "display_name"):
             await ctx.send("{} is opening a treasure chest. What riches lay inside?".format(user.display_name))
         else: #this is when a pet is foraging.
-            await ctx.send("{} is foraging for treasure. What will it find?".format(user[:1].upper() + user[1:]))
+            await ctx.send("Your {} is foraging for treasure. What will it find?".format(user[:1].upper() + user[1:]))
             await asyncio.sleep(2)
         if hasattr(user, "display_name"):
             luckbonus = Userdata.users[str(user.id)]['buffs'].get('luck', {'bonus':0})['bonus']
@@ -108,7 +108,7 @@ class Treasure:
             roll = random.randint(1,100)
         if type == "pet":
             if roll <= 1:
-                await ctx.send("{} found something precious!".format(user[:1].upper() + user[1:]))
+                await ctx.send("Your {} found something precious!".format(user[:1].upper() + user[1:]))
                 chance = Treasure.quest
             elif roll <= 11:
                 chance = Treasure.unique
@@ -117,7 +117,7 @@ class Treasure:
             elif roll > 50 and roll <= 75:
                 chance = Treasure.common
             else:
-                await ctx.send("{} found nothing of value.".format(user[:1].upper() + user[1:]))
+                await ctx.send("Your {} found nothing of value.".format(user[:1].upper() + user[1:]))
                 return None
         elif type == "normal":
             if roll <= 5:
@@ -151,7 +151,7 @@ class Treasure:
         if item['slot'] == ['consumable']:
             item['uses'] = random.randint(1,item['uses'])
             if hasattr(user, "display_name"):
-                await ctx.send("```css\n{} found {} ({}x).```".format(user.display_name,itemname,item['uses']))
+                await ctx.send("```css\nYour {} found {} ({}x).```".format(user.display_name,itemname,item['uses']))
             else:
                 await ctx.send("```css\nYour {} found {} ({}x).```".format(user,itemname,item['uses']))
             msg = await ctx.send("Do you want to use, put in backpack or sell this item?")
@@ -194,7 +194,7 @@ class Treasure:
                 att = item["att"]
                 cha = item["cha"]
             if hasattr(user, "display_name"):
-                await ctx.send("```css\n{} found a {}. (Attack: {}, Charisma: {} [{}])```".format(user.display_name,itemname,str(att),str(cha),hand))
+                await ctx.send("```css\nYour {} found a {}. (Attack: {}, Charisma: {} [{}])```".format(user.display_name,itemname,str(att),str(cha),hand))
             else:
                 await ctx.send("```css\nYour {} found a {}. (Attack: {}, Charisma: {} [{}])```".format(user,itemname,str(att),str(cha),hand))
             msg = await ctx.send("Do you want to equip, put in backpack or sell this item?")

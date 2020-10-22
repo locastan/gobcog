@@ -531,7 +531,7 @@ class GobCog(BaseCog):
                 await GobCog.save()
             else:
                 ctx.command.reset_cooldown(ctx)
-                return await ctx.send("Check your spelling son.")
+                return await ctx.send("Check your spelling.")
 
     @commands.command()
     @commands.guild_only()
@@ -1367,6 +1367,7 @@ class GobCog(BaseCog):
             if pred.result: #buyer reacted with Yes.
                 spender = buyer
                 to = user
+                tradeitem = {}
                 if await bank.can_spend(spender,asking):
                     bal = await bank.transfer_credits(spender, to, asking)
                     currency = await bank.get_currency_name(ctx.guild)
@@ -1377,13 +1378,13 @@ class GobCog(BaseCog):
                             tradeitem = copy.deepcopy(Userdata.users[str(user.id)]['consumables'][item])
                             tradeitem['uses'] = quant
                             if item in Userdata.users[str(buyer.id)]['consumables'].keys():
-                                Userdata.users[str(buyer.id)]['consumables'][item]['uses'] = Userdata.users[str(buyer.id)]['consumables'][item].get("uses", 0) + tradeitem['uses']
+                                Userdata.users[str(buyer.id)]['consumables'][item]['uses'] = Userdata.users[str(buyer.id)]['consumables'][item].get("uses", 0) + int(tradeitem['uses'])
                             else:
                                 Userdata.users[str(buyer.id)]['consumables'].update({item: tradeitem})
                         else:
                             tradeitem = Userdata.users[str(user.id)]['consumables'].pop(item)
                             if item in Userdata.users[str(buyer.id)]['consumables'].keys():
-                                Userdata.users[str(buyer.id)]['consumables'][item]['uses'] = Userdata.users[str(buyer.id)]['consumables'][item].get("uses", 0) + tradeitem['uses']
+                                Userdata.users[str(buyer.id)]['consumables'][item]['uses'] = Userdata.users[str(buyer.id)]['consumables'][item].get("uses", 0) + int(tradeitem['uses'])
                             else:
                                 Userdata.users[str(buyer.id)]['consumables'].update({item: tradeitem})
                     elif item in Userdata.users[str(user.id)]['ingredients'].keys():
@@ -1393,13 +1394,13 @@ class GobCog(BaseCog):
                             tradeitem = copy.deepcopy(Userdata.users[str(user.id)]['ingredients'][item])
                             tradeitem['uses'] = quant
                             if item in Userdata.users[str(buyer.id)]['ingredients'].keys():
-                                Userdata.users[str(buyer.id)]['ingredients'][item]['uses'] = Userdata.users[str(buyer.id)]['ingredients'][item].get("uses", 0) + tradeitem['uses']
+                                Userdata.users[str(buyer.id)]['ingredients'][item]['uses'] = Userdata.users[str(buyer.id)]['ingredients'][item].get("uses", 0) + int(tradeitem['uses'])
                             else:
                                 Userdata.users[str(buyer.id)]['ingredients'].update({item: tradeitem})
                         else:
                             tradeitem = Userdata.users[str(user.id)]['ingredients'].pop(item)
                             if item in Userdata.users[str(buyer.id)]['ingredients'].keys():
-                                Userdata.users[str(buyer.id)]['ingredients'][item]['uses'] = Userdata.users[str(buyer.id)]['ingredients'][item].get("uses", 0) + tradeitem['uses']
+                                Userdata.users[str(buyer.id)]['ingredients'][item]['uses'] = Userdata.users[str(buyer.id)]['ingredients'][item].get("uses", 0) + int(tradeitem['uses'])
                             else:
                                 Userdata.users[str(buyer.id)]['ingredients'].update({item: tradeitem})
                     else:
@@ -1539,6 +1540,15 @@ class GobCog(BaseCog):
             user = ctx.author
             await self.add_rewards(ctx, ctx.author, xp, cp, [normal,rare,epic,quest])
         await ctx.send("**" + user.display_name + "** was compensated with {} xp, {} cp and [{},{},{},{}] [normal, rare, epic, quest] chests.".format(xp,cp,normal,rare,epic,quest))
+
+    @commands.command()
+    @checks.admin_or_permissions(administrator=True)
+    async def saveandreload(self, ctx):
+        """[Admin]
+            This will save and reinitialize userdata.
+        """
+        await await Userdata.saveandreload()
+        await ctx.send('Userdata saved to and reloaded from text based database.')
 
     @commands.command()
     @checks.admin_or_permissions(administrator=True)
