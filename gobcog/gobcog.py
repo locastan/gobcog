@@ -1547,7 +1547,7 @@ class GobCog(BaseCog):
         """[Admin]
             This will save and reinitialize userdata.
         """
-        await await Userdata.saveandreload()
+        await Userdata.saveandreload()
         await ctx.send('Userdata saved to and reloaded from text based database.')
 
     @commands.command()
