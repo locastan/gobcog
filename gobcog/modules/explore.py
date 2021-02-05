@@ -2,6 +2,7 @@ import random
 import asyncio
 import discord
 import contextlib
+import logging
 from typing import Union, Iterable, Optional
 from redbot.core import commands
 from redbot.core.utils.predicates import MessagePredicate
@@ -39,15 +40,19 @@ class Explore:
             "Flyleaf":{"tile": "🍃", "desc":"Very light and aromatic leafs. Good booster to alchemy."},
             "Mushroom":{"tile": "🍄", "desc":"Redcap mushrooms have powerful potency."},
             "Chestnut":{"tile": "🌰", "desc":"Some chestnuts. Good for eating and brewing."},
-            "Fog":{"tile": "⬜", "desc":"Step in to find out."},
-            "Rock":{"tile": "🌑", "desc":"A big rock. You cannot move here."},
+            "Fog":{"tile": "🌫️", "desc":"Step in to find out."},
+            "Rock":{"tile": "⛰️", "desc":"A big rock. You cannot move here."},
             #"Grass":{"tile": "<:Grassland:593422372468686859>", "desc":"Just grassland."}, #use this for beta server
             "Grass":{"tile": "<:Grassland:593755278328201226>", "desc":"Just grassland."}, #use this for Goblinscomic Discord
             "Player":{"tile": "🗿", "desc":"Player"},
             "Chest":{"tile": "💼", "desc":"A forgotten treasure chest!"},
             "Fountain":{"tile": "⛲", "desc":"A refreshing fountain!"},
             "Crystal Ball":{"tile": "🔮", "desc":"A ball of crystal on a pedestal..."},
-            "Scroll":{"tile": "📜", "desc":"An old scroll of parchment."}
+            "Scroll":{"tile": "📜", "desc":"An old scroll of parchment."},
+            "Sand":{"tile": "🟨", "desc":"Hot desert sand."},
+            "Ice":{"tile": "🟦", "desc":"The frozen surface of a lake."},
+            "Volcano":{"tile": "🌋", "desc":"A magma spewing volcano."},
+            "Campsite":{"tile": "🏕️", "desc":"A nice little campsite."}
             }
 
     tile_lookup = {"🥑":"Ooze",
@@ -73,21 +78,26 @@ class Explore:
             "🍃": "Flyleaf",
             "🍄": "Mushroom",
             "🌰": "Chestnut",
-            "⬜": "Fog",
-            "🌑": "Rock",
+            "🌫️": "Fog",
+            "⛰️": "Rock",
             #"<:Grassland:593422372468686859>": "Grass", #use this on testserver
             "<:Grassland:593755278328201226>": "Grass", #use this on Goblins Discord server
             "🗿": "Player",
             "💼": "Chest",
             "⛲": "Fountain",
             "🔮": "Crystal Ball",
-            "📜": "Scroll"
+            "📜": "Scroll",
+            "🟨": "Sand",
+            "🟦": "Ice",
+            "🌋": "Volcano",
+            "🏕️": "Campsite"
             }
 
     #biomes carry rarities and what can be found in the tileset.
-    biomes = {"Enchanted Forest": {"legendary":["Ooze","Sageworth","Whipweed","Conifer","Cyanka Lilly","Flyleaf"],"epic":["Chestnut","Whipweed","Maple","Oak"],"rare":["Maple","Rock"],"common":["Mushroom","Oak","Oak","Grass"]},
-            "Lush Grasslands": {"legendary":["Twolip","Moneypenny","Raging Frills","Rose","Oak"],"epic":["Mourning Star","Honeytail","Clover","Rock"],"rare":["Oilflower","Grass","Grass"],"common":["Daisy","Grass","Grass"]},
-            "Drygrass Steppes":{"legendary":["Na-palm","Fleshthorn","Rock"],"epic":["Tongue Sprout","Grass","Flyleaf"],"rare":["Rust Leafs","Grass","Grass"],"common":["Rock","Grass","Grass"]}
+    biomes = {"Enchanted Forest": {"legendary":["Ooze","Sageworth","Whipweed","Conifer","Cyanka Lilly","Flyleaf","Campsite"],"epic":["Chestnut","Whipweed","Maple","Oak"],"rare":["Maple","Rock"],"common":["Mushroom","Oak","Oak","Grass"]},
+            "Lush Grasslands": {"legendary":["Twolip","Moneypenny","Raging Frills","Rose","Campsite"],"epic":["Mourning Star","Honeytail","Clover","Rock"],"rare":["Oilflower","Grass","Grass"],"common":["Daisy","Grass","Grass","Grass","Grass"]},
+            "Drygrass Steppes":{"legendary":["Na-palm","Fleshthorn","Rock"],"epic":["Tongue Sprout","Grass","Flyleaf"],"rare":["Rust Leafs","Grass","Grass"],"common":["Rock","Grass","Grass","Grass"]},
+            "Desert of Desolation":{"legendary":["Na-palm","Volcano","Fountain"],"epic":["Rust Leafs","Sand","Moneypenny","Fountain","Flyleaf","Sand","Sand","Sand","Sand"],"rare":["Fleshthorn","Sand","Sand","Rock"],"common":["Rock","Sand","Sand","Sand","Sand"]}
             }
 
     mapsize = [21,21]
@@ -249,18 +259,20 @@ class Explore:
                 await Explore.statusmsg.edit(content=current_page)
 
         try:
-            done, Explore.pending = await asyncio.wait([ctx.bot.wait_for(
-                "reaction_add",
-                check=CustomPredicate.with_emojis(tuple(controls.keys()), Explore.statusmsg, [ctx.author.id]),
+            r_add = asyncio.create_task(ctx.bot.wait_for(
+                "raw_reaction_add",
+                check=lambda r_add: str(r_add.emoji) in controls.keys() and r_add.user_id == ctx.author.id and Userdata.users[str(r_add.user_id)]['resting'] == {} and Userdata.users[str(r_add.user_id)]['hp'] > 0,
                 timeout=Explore.timeout
-            ),
-            ctx.bot.wait_for(
-                "reaction_remove",
-                check=CustomPredicate.with_emojis(tuple(controls.keys()), Explore.statusmsg, [ctx.author.id]),
+                ))
+            r_del = asyncio.create_task(ctx.bot.wait_for(
+                "raw_reaction_remove",
+                check=lambda r_del: str(r_del.emoji) in controls.keys() and r_del.user_id == ctx.author.id and Userdata.users[str(r_del.user_id)]['resting'] == {} and Userdata.users[str(r_del.user_id)]['hp'] > 0,
                 timeout=Explore.timeout
-            )], return_when=asyncio.FIRST_COMPLETED, timeout=Explore.timeout)
+                ))
+            done, Explore.pending = await asyncio.wait([r_del,r_add], return_when=asyncio.FIRST_COMPLETED, timeout=Explore.timeout)
             for task in done:
-                react, user = task.result()
+                react = str(task.result().emoji)
+                #user = discord.utils.find(lambda m: m.id == int(task.result().user_id), ctx.guild.members)
         except asyncio.TimeoutError:  #the timeout only applies if no reactions are made!
             try:
                 await Explore.statusmsg.clear_reactions()
@@ -274,7 +286,7 @@ class Explore:
             return
         for future in Explore.pending:
             future.cancel()
-        await controls[react.emoji](ctx, pages, controls, Explore.statusmsg, page, Explore.timeout, react.emoji, user)
+        await controls[react](ctx, pages, controls, Explore.statusmsg, page, Explore.timeout, react, ctx.author)
 
     async def left(
         ctx: commands.Context,
@@ -385,7 +397,6 @@ class Explore:
     ):
         tilename = Explore.tile_lookup.get(Explore.map[Explore.player_pos[0]][Explore.player_pos[1]],"Unknown Tile")
         text = "**" + tilename + ": " + Explore.tiles[tilename].get("desc","Error") + "**"
-        #Explore.moves -= 1 #inspection should be a free action.
         await Explore.movesmsg.edit(content="{} moves remaining.".format(Explore.moves))
         await Explore.statusmsg.edit(content=text)
         await Explore.check(ctx, pages, controls, message, page, Explore.timeout, emoji, user)
@@ -400,7 +411,7 @@ class Explore:
         emoji: str,
         user: discord.User,
     ):
-        unpickable = ["Fog","Rock","Oak","Conifer","Grass"]
+        unpickable = ["Fog","Rock","Oak","Conifer","Grass","Sand","Ice"]
         tilename = Explore.tile_lookup.get(Explore.map[Explore.player_pos[0]][Explore.player_pos[1]])
         if tilename not in unpickable:
             if tilename == "Na-palm":
@@ -435,17 +446,41 @@ class Explore:
             elif tilename == "Fountain":
                 Explore.moves += 20
                 text = "Movement **stamina increased by 20!**"
+            elif tilename == "Campsite":
+                Explore.moves += 10
+                text = "You took a quick nap. Movement **stamina increased by 10.**"
             elif tilename == "Crystal Ball":
                 await Explore.unveil_fow()
                 output = await Explore.mapdrawer(list(Explore.fowmap))
                 await Explore.mapmsg.edit(content=output)
                 text = "The fog has lifted before your eyes...you see all of creation!"
             elif tilename == "Scroll":
-                text= "You found an old scroll of parchment"
-                if 'alchemy scroll' in Userdata.users[str(user.id)]['consumables'].keys():
-                    Userdata.users[str(user.id)]['consumables']['alchemy scroll']['uses'] = Userdata.users[str(user.id)]['consumables']['alchemy scroll'].get("uses", 0) + 1
+                sc_roll = random.choice(['alchemy scroll','alchemy scroll','.scroll_of_learning','.scroll_of_learning','.scroll_of_learning','.scroll_of_learning','[foliant of wisdom]','[foliant of greed]'])
+                text= "You found a scroll container. 1x {} was added to your inventory.".format(sc_roll)
+                if sc_roll in Userdata.users[str(user.id)]['consumables'].keys():
+                    Userdata.users[str(user.id)]['consumables'][sc_roll]['uses'] = Userdata.users[str(user.id)]['consumables'][sc_roll].get("uses", 0) + 1
                 else:
-                    Userdata.users[str(user.id)]['consumables'].update({'alchemy scroll':{"slot":["consumable"],"uses":1}})
+                    Userdata.users[str(user.id)]['consumables'].update({sc_roll:{"slot":["consumable"],"uses":1}})
+            elif tilename == "Volcano":
+                roll = random.randint(1,10)
+                if roll <= 6:
+                    damage = random.randint(5,25)
+                    if Userdata.users[str(user.id)]['hp'] > damage:
+                        Userdata.users[str(user.id)]['hp'] -= damage
+                        text = "** You touched the lava! You took {} damage and need to return home.**".format(damage)
+                    else:
+                        Userdata.users[str(user.id)]['hp'] = 0
+                        text = "** You fell into the lava! You took {} damage and need to rest now.**".format(damage)
+                    await Explore.statusmsg.edit(content=text)
+                    await Userdata.save()
+                    await asyncio.sleep(2)
+                    return await Explore.result(ctx, pages, controls, message, page, Explore.timeout, user)
+                else:
+                    text= "You found a chaos egg!"
+                    if '[chaos egg]' in Userdata.users[str(user.id)]['consumables'].keys():
+                        Userdata.users[str(user.id)]['consumables']['[chaos egg]']['uses'] = Userdata.users[str(user.id)]['consumables']['[chaos egg]'].get("uses", 0) + 1
+                    else:
+                        Userdata.users[str(user.id)]['consumables'].update({'[chaos egg]':{"slot":["consumable"],"uses":1}})
             else:
                 text = "** You picked up: " + tilename + "**"
             Explore.moves -= 1
@@ -457,11 +492,14 @@ class Explore:
                         Userdata.users[str(user.id)]['treasure'] = [0,0,0,0]
                     Userdata.users[str(user.id)]['treasure'] = [sum(x) for x in zip(Userdata.users[str(user.id)]['treasure'], treasure)]
                     await Userdata.save()
-            elif tilename == "Fountain" or tilename == "Crystal Ball" or tilename == "Scroll":
+            elif tilename == "Fountain" or tilename == "Crystal Ball" or tilename == "Scroll" or tilename == "Campsite" or tilename == "Volcano":
                 pass #nothing to do here
             else:
                 Explore.loot.update({tilename:(Explore.loot.get(tilename,0)+1)})
-            Explore.map[Explore.player_pos[0]][Explore.player_pos[1]] = Explore.tiles["Grass"]["tile"]
+            if Explore.biome == "Desert of Desolation":
+                Explore.map[Explore.player_pos[0]][Explore.player_pos[1]] = Explore.tiles["Sand"]["tile"]
+            else:
+                Explore.map[Explore.player_pos[0]][Explore.player_pos[1]] = Explore.tiles["Grass"]["tile"]
             await Explore.check(ctx, pages, controls, message, page, Explore.timeout, emoji, user)
         else:
             text = "** This cannot be picked. " + tilename + "**"
@@ -473,18 +511,19 @@ class Explore:
             return await Explore.result(ctx, pages, controls, message, page, Explore.timeout, user)
         try:
             r_add = asyncio.create_task(ctx.bot.wait_for(
-                "reaction_add",
-                check=CustomPredicate.with_emojis(tuple(controls.keys()), message, [user.id]),
+                "raw_reaction_add",
+                check=lambda r_add: str(r_add.emoji) in controls.keys() and r_add.user_id == user.id and Userdata.users[str(r_add.user_id)]['resting'] == {} and Userdata.users[str(r_add.user_id)]['hp'] > 0,
                 timeout=Explore.timeout
                 ))
             r_del = asyncio.create_task(ctx.bot.wait_for(
-                "reaction_remove",
-                check=CustomPredicate.with_emojis(tuple(controls.keys()), message, [user.id]),
+                "raw_reaction_remove",
+                check=lambda r_del: str(r_del.emoji) in controls.keys() and r_del.user_id == user.id and Userdata.users[str(r_del.user_id)]['resting'] == {} and Userdata.users[str(r_del.user_id)]['hp'] > 0,
                 timeout=Explore.timeout
                 ))
-            done, Explore.pending = await asyncio.wait([r_add,r_del], return_when=asyncio.FIRST_COMPLETED, timeout=Explore.timeout)
+            done, Explore.pending = await asyncio.wait([r_del,r_add], return_when=asyncio.FIRST_COMPLETED, timeout=Explore.timeout)
             for task in done:
-                react, user = task.result()
+                react = str(task.result().emoji)
+                #user = discord.utils.find(lambda m: m.id == int(task.result().user_id), ctx.guild.members)
         except asyncio.TimeoutError:
             for future in Explore.pending:
                 future.cancel()
@@ -492,7 +531,7 @@ class Explore:
         for future in Explore.pending:
             future.cancel()
         try:
-            return await controls[react.emoji](ctx, pages, controls, message, page, Explore.timeout, react.emoji, user)
+            return await controls[react](ctx, pages, controls, message, page, Explore.timeout, react, user)
         except NameError:
             return await controls["\U000023CF"](ctx, pages, controls, message, page, Explore.timeout, "\U000023CF", user)
 

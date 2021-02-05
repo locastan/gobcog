@@ -822,9 +822,9 @@ class GobCog(BaseCog):
                         if Userdata.users[str(user.id)]['class']['name'] == 'Tinkerer' or Userdata.users[str(user.id)]['class']['name'] == 'Ranger':
                             curclass = Userdata.users[str(user.id)]['class']['name']
                             if curclass == 'Tinkerer':
-                                msg = await ctx.send("```css\n You will loose your forged device if you change your class.\nShall I proceed? ```")
+                                msg = await ctx.send("```css\n You will lose your forged device if you change your class.\nShall I proceed? ```")
                             else:
-                                msg = await ctx.send("```css\n You will loose your pet if you change your class.\nShall I proceed? ```")
+                                msg = await ctx.send("```css\n You will lose your pet if you change your class.\nShall I proceed? ```")
                             start_adding_reactions(msg, ReactionPredicate.YES_OR_NO_EMOJIS)
                             pred = ReactionPredicate.yes_or_no(msg, ctx.author)
                             try:
@@ -1631,15 +1631,15 @@ class GobCog(BaseCog):
                         songbonus = Userdata.users[str(member.id)]['class'].get("basebonus", 0)
                         if Userdata.users[str(member.id)]['class']['name'] == "Bard" and songbonus != 0:
                             Userdata.users[str(member.id)]['class'].pop('basebonus')
-                expired = []
-                for buff in Userdata.users[str(member.id)]['buffs'].keys(): #reduce duration of active buffs
-                    if buff != "rest":
-                        if Userdata.users[str(member.id)]['buffs'][buff]['duration'] <= 1:
-                            expired.append(buff)
-                        else:
-                            Userdata.users[str(member.id)]['buffs'][buff]['duration'] = Userdata.users[str(member.id)]['buffs'][buff]['duration'] - 1
-                for buff in expired: #remove buffs outside loop not to change size during iteration
-                    Userdata.users[str(member.id)]['buffs'].pop(buff)
+                    expired = []
+                    for buff in Userdata.users[str(member.id)]['buffs'].keys(): #reduce duration of active buffs
+                        if buff != "rest":
+                            if Userdata.users[str(member.id)]['buffs'][buff]['duration'] <= 1:
+                                expired.append(buff)
+                            else:
+                                Userdata.users[str(member.id)]['buffs'][buff]['duration'] = Userdata.users[str(member.id)]['buffs'][buff]['duration'] - 1
+                    for buff in expired: #remove buffs outside loop not to change size during iteration
+                        Userdata.users[str(member.id)]['buffs'].pop(buff)
             await GobCog.save()
 
     @commands.command()

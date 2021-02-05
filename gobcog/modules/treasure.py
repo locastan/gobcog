@@ -151,7 +151,7 @@ class Treasure:
         if item['slot'] == ['consumable']:
             item['uses'] = random.randint(1,item['uses'])
             if hasattr(user, "display_name"):
-                await ctx.send("```css\nYour {} found {} ({}x).```".format(user.display_name,itemname,item['uses']))
+                await ctx.send("```css\n{} found {} ({}x).```".format(user.display_name,itemname,item['uses']))
             else:
                 await ctx.send("```css\nYour {} found {} ({}x).```".format(user,itemname,item['uses']))
             msg = await ctx.send("Do you want to use, put in backpack or sell this item?")
@@ -194,7 +194,7 @@ class Treasure:
                 att = item["att"]
                 cha = item["cha"]
             if hasattr(user, "display_name"):
-                await ctx.send("```css\nYour {} found a {}. (Attack: {}, Charisma: {} [{}])```".format(user.display_name,itemname,str(att),str(cha),hand))
+                await ctx.send("```css\n{} found a {}. (Attack: {}, Charisma: {} [{}])```".format(user.display_name,itemname,str(att),str(cha),hand))
             else:
                 await ctx.send("```css\nYour {} found a {}. (Attack: {}, Charisma: {} [{}])```".format(user,itemname,str(att),str(cha),hand))
             msg = await ctx.send("Do you want to equip, put in backpack or sell this item?")

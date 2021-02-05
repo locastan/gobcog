@@ -389,7 +389,7 @@ class Adventure:
                 member = discord.utils.find(lambda m: m.display_name == user, ctx.guild.members)
                 if member == None:
                     await ctx.send("**" + user + "**" + " wandered off to look at a particular interesting bird. (Namechange during adventure)")
-                    return (fumblelist, critlist, attack)
+                    return (fumblelist, attack, diplomacy)
                 if Userdata.users[str(member.id)]['class']['name']=="Cleric" and Userdata.users[str(member.id)]['class']['ability']:
                     roll = random.randint(1,20)
                     if len(Adventure.userslist["fight"]+Adventure.userslist["talk"]) == 0:
@@ -442,7 +442,7 @@ class Adventure:
                 member = discord.utils.find(lambda m: m.display_name == user, ctx.guild.members)
                 if member == None:
                     await ctx.send("**" + user + "**" + " wandered off to look at a particular interesting bird. (Namechange during adventure)")
-                    return (fumblelist, critlist, attack)
+                    return (fumblelist, critlist, diplomacy)
                 dipl_value = Userdata.users[str(member.id)]['cha'] + Userdata.users[str(member.id)]['skill']['cha'] + Userdata.users[str(member.id)]['buffs'].get('cha', {'bonus':0})['bonus']
                 songbonus = 0
                 if Userdata.users[str(member.id)]['class']['name']=="Bard" and Userdata.users[str(member.id)]['class']['ability']:
