@@ -242,6 +242,21 @@ class GobCog(BaseCog):
         else:
             ctx.command.reset_cooldown(ctx)
 
+    @commands.command()
+    @commands.guild_only()
+    @not_resting()
+    @has_hp()
+    async def distill(self, ctx):
+        """This allows you to distill ingredients into concentrated forms for exchange trade with the alchemists guild.
+            !distill
+            will bring up the destillation dialogue.
+        """
+        Done = await Alchemy.distill(ctx, ctx.author)
+        if Done:
+            await Userdata.save()
+        else:
+            ctx.command.reset_cooldown(ctx)
+
     @commands.command(name="rest", aliases=['re'])
     @commands.guild_only()
     async def _rest(self, ctx):

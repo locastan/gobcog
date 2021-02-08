@@ -75,6 +75,15 @@ class Alchemy:
                 "FleshthornMourning StarNa-palm": {"yields":"[potion of rejuvenation]", "uses": (3,5)}
                 }
 
+    raritydict = {"legendary":["Ooze","Raging Frills","Cyanka Lilly","Sageworth","Twolip","Rose","Na-palm"],
+                        "epic":["Moneypenny","Whipweed","Mourning Star","Honeytail","Clover","Chestnut","Tongue Sprout"],
+                        "rare":["Flyleaf","Rust Leafs","Fleshthorn"],
+                        "common":["Maple","Mushroom","Oilflower","Daisy"]}
+
+    raritylookup = ["common","rare","epic","legendary"]
+    needed = {"common":50,"rare":30,"epic":20,"legendary":10}
+    getting = {"rare":(10,20),"epic":(5,10),"legendary":(1,3)}
+
     async def brew(ctx, user):
         uses_total = 0
         inbrew = []
@@ -150,3 +159,67 @@ class Alchemy:
         elif len(lookup) == 0:
             await ctx.send("You do not own any ingredients, try to !explore a bit.")
             return (False,[])
+
+    async def distill(ctx, user):
+        uses_total = 0
+        lookup = []
+        instill = None
+        introtxt = "⚗️ **{}** set up the still.\n".format(user.display_name)
+        di_msg = await ctx.send(introtxt + "Select rarity of ingredients to use for distillation:\n[1] Common ({})\n[2] Rare ({})\n[3] Epic ({})\n[4] Legendary ({})\n\n Please choose with a number from the list. (Cancel with 0)".format(Alchemy.raritydict["common"],Alchemy.raritydict["rare"],Alchemy.raritydict["epic"],Alchemy.raritydict["legendary"]))
+        try:
+            reply = await ctx.bot.wait_for("message", check=MessagePredicate.same_context(ctx), timeout=30)
+        except asyncio.TimeoutError:
+            await ctx.send("I don't have all day, you know.")
+            return (False)
+        if reply.content == "0":
+            return (False)
+        elif reply.content.isdigit() and (int(reply.content)-1) < len(Alchemy.raritylookup) and int(reply.content) > 0:
+            irarity = Alchemy.raritylookup[int(reply.content)-1]
+            ineed = Alchemy.needed[irarity]
+        else:
+            await ctx.send("Sorry, but there was something wrong with that reply.")
+            return (False)
+        for ingredient in Alchemy.raritydict[irarity]:
+            if ingredient in Userdata.users[str(user.id)]['ingredients']:
+                uses_total = Userdata.users[str(user.id)]['ingredients'][ingredient].get('uses', 0)
+                if uses_total >= ineed and ingredient in Alchemy.raritydict[irarity]:
+                        lookup.append(ingredient)
+                        lookup.sort()
+        if len(lookup) == 0:
+            await ctx.send("You need at least {}x of a {} ingredient to distill, try to !explore a bit more.".format(ineed, irarity))
+            return (False)
+        text = "```css\n"
+        for num, name in enumerate(lookup, start=1):
+            text += ("[{}]: {} ({}x)\n".format(num, name, Userdata.users[str(user.id)]['ingredients'][name].get('uses', 0)))
+        text += "```"
+        await di_msg.edit(content=introtxt + "You own these {} ingredients:\n{}Please choose ingredient with a number from the list. (Cancel with 0)".format(irarity, text))
+        try:
+            reply = await ctx.bot.wait_for("message", check=MessagePredicate.same_context(ctx), timeout=30)
+        except asyncio.TimeoutError:
+            await ctx.send("I don't have all day, you know.")
+            return (False)
+        if reply.content == "0":
+            return (False)
+        elif reply.content.isdigit() and (int(reply.content)-1) < len(lookup) and int(reply.content) > 0:
+            idx = int(reply.content)-1
+            instill = lookup[idx]
+        else:
+            await ctx.send("Sorry, but there was something wrong with that reply.")
+            return (False)
+        if Alchemy.raritylookup.index(irarity)+1 <= 3:
+            nextbest = Alchemy.raritylookup[Alchemy.raritylookup.index(irarity)+1]
+        else:
+            nextbest = "legendary"
+        d_name = random.choice(Alchemy.raritydict[nextbest])
+        d_uses = random.randint(Alchemy.getting[nextbest][0],Alchemy.getting[nextbest][1])
+        if d_name in Userdata.users[str(user.id)]['consumables'].keys():
+            Userdata.users[str(user.id)]['consumables'][d_name]['uses'] = Userdata.users[str(user.id)]['consumables'][d_name].get("uses", 0) + d_uses
+        else:
+            Userdata.users[str(user.id)]['consumables'].update({d_name:{"slot":["consumable"],"uses":d_uses}})
+        amount = int(Userdata.users[str(user.id)]['ingredients'][instill].get('uses'))
+        if amount <= ineed:
+            del Userdata.users[str(user.id)]['ingredients'][instill]
+        else:
+            Userdata.users[str(user.id)]['ingredients'][instill]['uses'] = Userdata.users[str(user.id)]['ingredients'][instill]['uses'] - ineed
+        await ctx.send("You distilled concentrated {}, which you traded in for {}x {}.".format(instill,d_uses,d_name))
+        return (True)
