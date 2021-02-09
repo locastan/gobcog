@@ -165,7 +165,7 @@ class Alchemy:
         lookup = []
         instill = None
         introtxt = "⚗️ **{}** set up the still.\n".format(user.display_name)
-        di_msg = await ctx.send(introtxt + "Select rarity of ingredients to use for distillation:\n[1] Common ({})\n[2] Rare ({})\n[3] Epic ({})\n[4] Legendary ({})\n\n Please choose with a number from the list. (Cancel with 0)".format(Alchemy.raritydict["common"],Alchemy.raritydict["rare"],Alchemy.raritydict["epic"],Alchemy.raritydict["legendary"]))
+        di_msg = await ctx.send(introtxt + "Select category to distill:\n[1] 50x Common ({})\n[2] 30x Rare ({})\n[3] 20x Epic ({})\n[4] 10x Legendary ({})\n\n Please choose with a number from the list. (Cancel with 0)".format(", ".join(Alchemy.raritydict["common"]),", ".join(Alchemy.raritydict["rare"]),", ".join(Alchemy.raritydict["epic"]),", ".join(Alchemy.raritydict["legendary"])))
         try:
             reply = await ctx.bot.wait_for("message", check=MessagePredicate.same_context(ctx), timeout=30)
         except asyncio.TimeoutError:
@@ -212,14 +212,14 @@ class Alchemy:
             nextbest = "legendary"
         d_name = random.choice(Alchemy.raritydict[nextbest])
         d_uses = random.randint(Alchemy.getting[nextbest][0],Alchemy.getting[nextbest][1])
-        if d_name in Userdata.users[str(user.id)]['consumables'].keys():
-            Userdata.users[str(user.id)]['consumables'][d_name]['uses'] = Userdata.users[str(user.id)]['consumables'][d_name].get("uses", 0) + d_uses
+        if d_name in Userdata.users[str(user.id)]['ingredients'].keys():
+            Userdata.users[str(user.id)]['ingredients'][d_name]['uses'] = Userdata.users[str(user.id)]['ingredients'][d_name].get("uses", 0) + d_uses
         else:
-            Userdata.users[str(user.id)]['consumables'].update({d_name:{"slot":["consumable"],"uses":d_uses}})
+            Userdata.users[str(user.id)]['ingredients'].update({d_name:{"slot":['ingredients'],"uses":d_uses}})
         amount = int(Userdata.users[str(user.id)]['ingredients'][instill].get('uses'))
         if amount <= ineed:
             del Userdata.users[str(user.id)]['ingredients'][instill]
         else:
             Userdata.users[str(user.id)]['ingredients'][instill]['uses'] = Userdata.users[str(user.id)]['ingredients'][instill]['uses'] - ineed
-        await ctx.send("You distilled concentrated {}, which you traded in for {}x {}.".format(instill,d_uses,d_name))
+        await ctx.send("You distilled {}x {}, which you traded in for {}x {}.".format(ineed,instill,d_uses,d_name))
         return (True)
