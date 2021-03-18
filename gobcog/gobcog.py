@@ -600,11 +600,8 @@ class GobCog(BaseCog):
         if 'name' in Userdata.users[str(ctx.author.id)]['class'] and Userdata.users[str(ctx.author.id)]['class']['name'] != "Cleric":
             ctx.command.reset_cooldown(ctx)
             return await ctx.send("You need to be a Cleric to do this.")
-        if int(Userdata.users[str(user.id)]['hp']) = int(Userdata.users[str(user.id)]['base_hp']):
-            ctx.command.reset_cooldown(ctx)
-            return await ctx.send("Target is already at full health.")
         else:
-            if Userdata.users[str(user.id)]['hp'] == Userdata.users[str(user.id)]['base_hp']:
+            if int(Userdata.users[str(user.id)]['hp']) == int(Userdata.users[str(user.id)]['base_hp']):
                 ctx.command.reset_cooldown(ctx)
                 return await ctx.send("**{}** is already at full health.".format(user.display_name))
             else:
