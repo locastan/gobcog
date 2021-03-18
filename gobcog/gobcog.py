@@ -1168,11 +1168,11 @@ class GobCog(BaseCog):
         if user.bot:
             return
         global users
-        bkpk = "Items in Backpack: \n"
+        bkpk = "Items in Backpack \n"
         bkpklist = []
         cspouch = "Consumables: \n"
         conslist = []
-        inpouch = "⚗️ Ingredients: \n"
+        inpouch = "⚗️ Ingredients \n"
         inslist = []
         if Userdata.users[str(user.id)]['consumables'] == {}:
             cspouch = "No Consumables owned."
@@ -1189,7 +1189,7 @@ class GobCog(BaseCog):
             conslist.sort()
             bkpklist.sort()
             inslist.sort()
-            textline = "[{}´s baggage] \n\n".format(user.display_name) + "\n" + bkpk + "".join(bkpklist) + "\n (Reply with the name of an item or use !backpack equip \"name of item\" to equip it.)\n\n"
+            textline = "[{}´s baggage] \n\n".format(user.display_name) + bkpk + "".join(bkpklist) + "\n (Reply with the name of an item or use !backpack equip \"name of item\" to equip it.)\n\n"
             if len(textline) > 1900: #split dangerously long texts into chunks.
                 chunks = [textline[i:i+1900] for i in range(0, len(textline), 1900)]
                 for chunk in chunks:
@@ -1197,7 +1197,7 @@ class GobCog(BaseCog):
                     await asyncio.sleep(0.3)
             else:
                 await ctx.send("```css\n"+ textline +"```")
-            await ctx.send("```css\n" + cspouch + "".join(conslist) + "\n```")
+            await ctx.send(cspouch + "\n" + "```css\n" + "".join(conslist) + "\n```")
             await ctx.send("```css\n" + inpouch + "".join(inslist) + "\n```")
             try:
                 reply = await ctx.bot.wait_for("message", check=MessagePredicate.same_context(ctx), timeout=30)
