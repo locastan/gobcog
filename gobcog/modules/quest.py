@@ -543,7 +543,7 @@ class Quest:
         async def handle_fight(fumblelist, critlist, attack):
             if len(Quest.userslist["fight"]) == 0:
                 return (fumblelist, critlist, attack)
-            report = "Attack Party: |"
+            report = "Attack Party: | "
             for user in Quest.userslist["fight"]:
                 roll = random.randint(1,20)
                 member = discord.utils.find(lambda m: m.display_name == user, ctx.guild.members)
@@ -568,14 +568,14 @@ class Quest:
                     if Userdata.users[str(member.id)]['class']['name']=="Berserker" and Userdata.users[str(member.id)]['class']['ability']:
                         bonus = random.randint(max(5,int(Userdata.users[str(member.id)]['lvl']/2)),max(15,int(Userdata.users[str(member.id)]['lvl'])))
                         attack += -roll - bonus - att_value + monster_value
-                        report += "**" + user + "**: " +  "- 🎲({}) -".format(roll) + "💥{} + ".format(bonus) + "- 🗡" + str(att_value) + monster_string + " |"
+                        report += "**" + user + "**: " +  "- 🎲({}) -".format(roll) + " 💥{} ".format(bonus) + "- 🗡" + str(att_value) + monster_string + " | "
                 elif user in Quest.affected and Quest.effect == "Fumble" and 1 < roll <= 5:
                     await ctx.send("**" + user + "**" + " has been fumbled.")
                     fumblelist.append(user)
                     if Userdata.users[str(member.id)]['class']['name']=="Berserker" and Userdata.users[str(member.id)]['class']['ability']:
                         bonus = random.randint(max(5,int(Userdata.users[str(member.id)]['lvl']/2)),max(15,int(Userdata.users[str(member.id)]['lvl'])))
                         attack += -roll - bonus - att_value + monster_value
-                        report += "**" + user + "**: " +  "- 🎲({}) -".format(roll) + " 💥{} - ".format(bonus) + "🗡" + str(att_value) + effect + monster_string + " |"
+                        report += "**" + user + "**: " +  "- 🎲({}) -".format(roll) + " 💥{} - ".format(bonus) + "🗡" + str(att_value) + effect + monster_string + " | "
                 elif roll == 20 or (Userdata.users[str(member.id)]['class']['name']=="Berserker" and Userdata.users[str(member.id)]['class']['ability']):
                     ability = ""
                     bonus = 0
@@ -591,25 +591,25 @@ class Quest:
                     else:
                         bonus = random.randint(5,15)
                     attack += roll + bonus + att_value + monster_value
-                    bonus_str = str(bonus)+ ability
+                    bonus_str = ability + str(bonus)
                     if Userdata.users[str(member.id)]['class']['name']=="Berserker" and Userdata.users[str(member.id)]['items']['right'] != {}:
                         if len(Userdata.users[str(member.id)]['items']['right'][list(Userdata.users[str(member.id)]['items']['right'].keys())[0]]["slot"]) == 2 and "bow" not in list(Userdata.users[str(member.id)]['items']['right'].keys())[0]:
                             barb_bonus = Userdata.users[str(member.id)]['items']['right'][list(Userdata.users[str(member.id)]['items']['right'].keys())[0]]["att"]*2
                             attack += barb_bonus
-                            barb_bonus_str = " + {}🀄 ".format(barb_bonus)
+                            barb_bonus_str = " 🀄{} ".format(barb_bonus)
                             bonus_str += barb_bonus_str
-                    report += "**" + user + "**: " +  "🎲({}) +".format(roll) + " {} + ".format(bonus_str) + "🗡" + str(att_value) + effect + monster_string + " |"
+                    report += "**" + user + "**: " +  "🎲({}) +".format(roll) + " {} + ".format(bonus_str) + "🗡" + str(att_value) + effect + monster_string + " | "
                 else:
                     bonus = 0
                     if Userdata.users[str(member.id)]['class']['name']=="Ranger" and any("bow" in k for k in Userdata.users[str(member.id)]['items']['right'].keys()):
                         bonus = int(Userdata.users[str(member.id)]['lvl']/10)*2
-                        bow_bonus = " {}🏹 + ".format(bonus)
+                        bow_bonus = " 🏹{} + ".format(bonus)
                     elif Userdata.users[str(member.id)]['class']['name']=="Berserker" and Userdata.users[str(member.id)]['items']['right'] != {}:
                         if len(Userdata.users[str(member.id)]['items']['right'][list(Userdata.users[str(member.id)]['items']['right'].keys())[0]]["slot"]) == 2 and "bow" not in list(Userdata.users[str(member.id)]['items']['right'].keys())[0]:
                             bonus = Userdata.users[str(member.id)]['items']['right'][list(Userdata.users[str(member.id)]['items']['right'].keys())[0]]["att"]*2
-                            bow_bonus = " {}🀄 + ".format(bonus)
+                            bow_bonus = " 🀄{} + ".format(bonus)
                     attack += roll + bonus + att_value + monster_value
-                    report += "**" + user + "**: " +  "🎲({}) +".format(roll) + bow_bonus + "🗡" + str(att_value) + monster_string + " |"
+                    report += "**" + user + "**: " +  "🎲({}) +".format(roll) + bow_bonus + "🗡" + str(att_value) + monster_string + " | "
             for user in fumblelist:
                 if user in Quest.userslist["fight"]:
                     Quest.userslist["fight"].remove(user)
@@ -629,7 +629,7 @@ class Quest:
                 if Userdata.users[str(member.id)]['class']['name']=="Cleric" and Userdata.users[str(member.id)]['class']['ability']:
                     roll = random.randint(1,20)
                     if len(Quest.userslist["fight"]+Quest.userslist["talk"]) == 0:
-                        await ctx.send("**" + user + "**" + " blessed like a madman but nobody was there to receive it.")
+                        await ctx.send("**" + user + "**" + " blessed like mad but nobody was there to receive it.")
                         return (fumblelist, attack, diplomacy)
                     if roll == 1:
                         attack -= 5 * len(Quest.userslist["fight"])
@@ -655,7 +655,7 @@ class Quest:
                 else:
                     roll = random.randint(1,4)
                     if len(Quest.userslist["fight"]+Quest.userslist["talk"]) == 0:
-                        await ctx.send("**" + user + "**" + " prayed like a madman but nobody else helped him.")
+                        await ctx.send("**" + user + "**" + " prayed like mad but nobody else was there to help.")
                         return (fumblelist, attack, diplomacy)
                     if roll == 4:
                         attack += 10 * len(Quest.userslist["fight"])
@@ -672,7 +672,7 @@ class Quest:
         async def handle_talk(fumblelist, critlist, diplomacy):
             if len(Quest.userslist["talk"]) == 0:
                 return (fumblelist, critlist, diplomacy)
-            report = "Talking Party: |"
+            report = "Talking Party: | "
             for user in Quest.userslist["talk"]:
                 roll = random.randint(1,20)
                 member = discord.utils.find(lambda m: m.display_name == user, ctx.guild.members)
@@ -702,7 +702,7 @@ class Quest:
                             low = max(5,int(Userdata.users[str(member.id)]['lvl']/4))
                             bonus = random.randint(low, max(low, songbonus))
                         diplomacy += -roll - bonus - dipl_value + monster_value
-                        report += "**" + user + "**: " +  "- 🎲({})-".format(roll) + " 💥{} - ".format(bonus) + "🗨" + str(dipl_value) + effect + monster_string + " |"
+                        report += "**" + user + "**: " +  "- 🎲({}) -".format(roll) + " 💥{} - ".format(bonus) + "🗨" + str(dipl_value) + effect + monster_string + " | "
                 elif user in Quest.affected and Quest.effect == "Fumble" and 1 < roll <= 5:
                     await ctx.send("**" + user + "**" + (" got fumbled by the {}.").format(Quest.challenge))
                     fumblelist.append(user)
@@ -712,7 +712,7 @@ class Quest:
                             low = max(5,int(Userdata.users[str(member.id)]['lvl']/4))
                             bonus = random.randint(low, max(low, songbonus))
                         diplomacy += -roll - bonus - dipl_value + monster_value
-                        report += "**" + user + "**: " +  "- 🎲({})-".format(roll) + " 💥{} - ".format(bonus) + "🗨" + str(dipl_value) + effect + monster_string + " |"
+                        report += "**" + user + "**: " +  "- 🎲({}) -".format(roll) + " 💥{} - ".format(bonus) + "🗨" + str(dipl_value) + effect + monster_string + " | "
                 elif roll == 20 or (Userdata.users[str(member.id)]['class']['name']=="Bard" and Userdata.users[str(member.id)]['class']['ability']):
                     ability = ""
                     bonus = 0
@@ -728,10 +728,10 @@ class Quest:
                         bonus = random.randint(low, max(low, songbonus))
                     diplomacy += roll + bonus + dipl_value + monster_value
                     bonus_str = ability + str(bonus+critbonus)
-                    report += "**" + user + "**: " +  "🎲({})+".format(roll) + " {} + ".format(bonus_str) + "🗨" +str(dipl_value) + effect + monster_string + " |"
+                    report += "**" + user + "**: " +  "🎲({}) + ".format(roll) + "{} + ".format(bonus_str) + "🗨" +str(dipl_value) + effect + monster_string + " | "
                 else:
                     diplomacy += roll + dipl_value + monster_value
-                    report += "**" + user + "**: " +  "🎲({})+".format(roll) + "🗨" + str(dipl_value) + effect + monster_string + " |"
+                    report += "**" + user + "**: " +  "🎲({}) + ".format(roll) + "🗨" + str(dipl_value) + effect + monster_string + " | "
             for user in fumblelist:
                 if user in Quest.userslist["talk"]:
                     Quest.userslist["talk"].remove(user)

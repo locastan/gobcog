@@ -92,9 +92,6 @@ class Classes:
 
     async def sing(ctx, *args):
         user = ctx.author.id
-        if Userdata.users[str(user)]['class']['ability'] == True:
-            await ctx.send("Ability already in use.")
-            return
         if len(args) == 0: #user did not pass a song
             Userdata.users[str(user)]['class']['ability'] = True
             basebonus = random.randint(1,(Userdata.users[str(user)]['lvl']/2))

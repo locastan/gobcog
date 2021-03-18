@@ -600,6 +600,9 @@ class GobCog(BaseCog):
         if 'name' in Userdata.users[str(ctx.author.id)]['class'] and Userdata.users[str(ctx.author.id)]['class']['name'] != "Cleric":
             ctx.command.reset_cooldown(ctx)
             return await ctx.send("You need to be a Cleric to do this.")
+        if int(Userdata.users[str(user.id)]['hp']) = int(Userdata.users[str(user.id)]['base_hp']):
+            ctx.command.reset_cooldown(ctx)
+            return await ctx.send("Target is already at full health.")
         else:
             if Userdata.users[str(user.id)]['hp'] == Userdata.users[str(user.id)]['base_hp']:
                 ctx.command.reset_cooldown(ctx)
@@ -622,7 +625,11 @@ class GobCog(BaseCog):
             ctx.command.reset_cooldown(ctx)
             return await ctx.send("You need to be a Bard to do this.")
         else:
-            await Classes.sing(ctx, *args)
+            if Userdata.users[str(user)]['class']['ability'] == True:
+                ctx.command.reset_cooldown(ctx)
+                return await ctx.send("Ability already in use.")
+            else:
+                await Classes.sing(ctx, *args)
 
     @commands.command()
     @commands.guild_only()
@@ -649,7 +656,7 @@ class GobCog(BaseCog):
                     if len(Userdata.users[str(user)]['items']['backpack'][item]['slot']) == 1:
                         bkpk.append(item + " - (ATT: "+ str(Userdata.users[str(user)]['items']['backpack'][item]['att']) + " | DPL: "+ str(Userdata.users[str(user)]['items']['backpack'][item]['cha']) +" ["+ Userdata.users[str(user)]['items']['backpack'][item]['slot'][0] + " slot])")
                     else:
-                        bkpk.append(item + " -(ATT: "+ str(Userdata.users[str(user)]['items']['backpack'][item]['att']*2) + " | DPL: "+ str(Userdata.users[str(user)]['items']['backpack'][item]['cha']*2) +" [two handed])")
+                        bkpk.append(item + " - (ATT: "+ str(Userdata.users[str(user)]['items']['backpack'][item]['att']*2) + " | DPL: "+ str(Userdata.users[str(user)]['items']['backpack'][item]['cha']*2) +" [two handed])")
             pile = " - " + "\n - ".join(bkpk)
             if len(pile) > 1900: #split dangerously long texts into chunks.
                 chunks = [pile[i:i+1900] for i in range(0, len(pile), 1900)]
@@ -710,7 +717,7 @@ class GobCog(BaseCog):
                     if len(Userdata.users[str(user)]['items']['backpack'][item]['slot']) == 1:
                         bkpk.append(item + " - (ATT: "+ str(Userdata.users[str(user)]['items']['backpack'][item]['att']) + " | DPL: "+ str(Userdata.users[str(user)]['items']['backpack'][item]['cha']) +" ["+ Userdata.users[str(user)]['items']['backpack'][item]['slot'][0] + " slot])")
                     else:
-                        bkpk.append(item + " -(ATT: "+ str(Userdata.users[str(user)]['items']['backpack'][item]['att']*2) + " | DPL: "+ str(Userdata.users[str(user)]['items']['backpack'][item]['cha']*2) +" [two handed])")
+                        bkpk.append(item + " - (ATT: "+ str(Userdata.users[str(user)]['items']['backpack'][item]['att']*2) + " | DPL: "+ str(Userdata.users[str(user)]['items']['backpack'][item]['cha']*2) +" [two handed])")
             pile = " - " + "\n - ".join(bkpk)
             if len(pile) > 1900: #split dangerously long texts into chunks.
                 chunks = [pile[i:i+1900] for i in range(0, len(pile), 1900)]
@@ -1747,10 +1754,12 @@ class GobCog(BaseCog):
         """
         spender = ctx.message.author
         if amount == None:
+            ctx.command.reset_cooldown(ctx)
             return await ctx.send("You need to specify some cp to convert into energy before entering.")
         if await bank.can_spend(spender,amount):
             await bank.withdraw_credits(spender, amount)
         else:
+            ctx.command.reset_cooldown(ctx)
             return await ctx.send("You don't have enough copperpieces.")
         negachar = "**Nega-" + random.choice(ctx.message.guild.members).name + "**"
         await ctx.send("You enter the negaverse and meet " + negachar + ".")
