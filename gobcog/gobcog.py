@@ -1128,9 +1128,9 @@ class GobCog(BaseCog):
             if Userdata.users[str(user.id)]['items'][slot] and slot != "backpack":
                 item = list(Userdata.users[str(user.id)]['items'][slot].keys())[0]
                 if len(Userdata.users[str(user.id)]['items'][slot][item]['slot']) == 1:
-                    equip += " - " + item + " - (ATT: "+ str(Userdata.users[str(user.id)]['items'][slot][item]['att']) + " | CHA: "+ str(Userdata.users[str(user.id)]['items'][slot][item]['cha']) +" ["+ Userdata.users[str(user.id)]['items'][slot][item]['slot'][0] + " slot])\n"
+                    equip += item + " - (ATT: "+ str(Userdata.users[str(user.id)]['items'][slot][item]['att']) + " | CHA: "+ str(Userdata.users[str(user.id)]['items'][slot][item]['cha']) +" ["+ Userdata.users[str(user.id)]['items'][slot][item]['slot'][0] + " slot])\n"
                 else:
-                    equip += " - " + item + " -(ATT: "+ str(Userdata.users[str(user.id)]['items'][slot][item]['att']*2) + " | CHA: "+ str(Userdata.users[str(user.id)]['items'][slot][item]['cha']*2) +" [two handed])\n"
+                    equip += item + " - (ATT: "+ str(Userdata.users[str(user.id)]['items'][slot][item]['att']*2) + " | CHA: "+ str(Userdata.users[str(user.id)]['items'][slot][item]['cha']*2) +" [two handed])\n"
                     next(i, None)
         next_lvl = int((lvl+1) ** 4)
         if Userdata.users[str(user.id)]['class'] != {} and 'name' in Userdata.users[str(user.id)]['class']:
@@ -1179,9 +1179,9 @@ class GobCog(BaseCog):
         if switch == "None":
             for item in Userdata.users[str(user.id)]['items']['backpack']: # added second if level for two handed weapons so their slots show properly.
                 if len(Userdata.users[str(user.id)]['items']['backpack'][item]['slot']) == 1:
-                    bkpklist.append(" - " + item + " - (ATT: "+ str(Userdata.users[str(user.id)]['items']['backpack'][item]['att']) + " | DPL: "+ str(Userdata.users[str(user.id)]['items']['backpack'][item]['cha']) +" ["+ Userdata.users[str(user.id)]['items']['backpack'][item]['slot'][0] + " slot])\n")
+                    bkpklist.append(item + " - (ATT: "+ str(Userdata.users[str(user.id)]['items']['backpack'][item]['att']) + " | DPL: "+ str(Userdata.users[str(user.id)]['items']['backpack'][item]['cha']) +" ["+ Userdata.users[str(user.id)]['items']['backpack'][item]['slot'][0] + " slot])\n")
                 else:
-                    bkpklist.append(" - " + item + " -(ATT: "+ str(Userdata.users[str(user.id)]['items']['backpack'][item]['att']*2) + " | DPL: "+ str(Userdata.users[str(user.id)]['items']['backpack'][item]['cha']*2) +" [two handed])\n")
+                    bkpklist.append(item + " - (ATT: "+ str(Userdata.users[str(user.id)]['items']['backpack'][item]['att']*2) + " | DPL: "+ str(Userdata.users[str(user.id)]['items']['backpack'][item]['cha']*2) +" [two handed])\n")
             for item in Userdata.users[str(user.id)]['consumables']: # added second if level for two handed weapons so their slots show properly.
                     conslist.append(" - " + item + " ({}x)\n".format(Userdata.users[str(user.id)]['consumables'][item]['uses']))
             for item in Userdata.users[str(user.id)]['ingredients']:
