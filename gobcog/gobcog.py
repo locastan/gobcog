@@ -1170,7 +1170,7 @@ class GobCog(BaseCog):
         global users
         bkpk = "Items in Backpack \n"
         bkpklist = []
-        cspouch = "Consumables: \n"
+        cspouch = "Consumables \n"
         conslist = []
         inpouch = "⚗️ Ingredients \n"
         inslist = []
