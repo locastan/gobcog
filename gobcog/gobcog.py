@@ -1102,7 +1102,7 @@ class GobCog(BaseCog):
         scha = Userdata.users[str(user.id)]['skill']['cha'] + Userdata.users[str(user.id)]['buffs'].get('cha', {'bonus':0})['bonus']
         pool = Userdata.users[str(user.id)]['skill']['pool']
         hp_perc = round((Userdata.users[str(user.id)]['hp']/Userdata.users[str(user.id)]['base_hp'])*100)
-        hitpoints = "HP: {}/{} ({}%)".format(Userdata.users[str(user.id)]['hp'],Userdata.users[str(user.id)]['base_hp'],hp_perc)
+        hitpoints = "HP {}/{} ({}%)".format(Userdata.users[str(user.id)]['hp'],Userdata.users[str(user.id)]['base_hp'],hp_perc)
         buffs = ""
         if Userdata.users[str(user.id)]['buffs'] != {}:
             buffs = "\n- Active Buffs:"
@@ -1148,7 +1148,7 @@ class GobCog(BaseCog):
         else:
             clazz = "Hero."
         await ctx.send(
-            "```css\n[{}´s Character Sheet] \n\n```".format(user.display_name) + "```css\nA level {} {} \n\n- ATTACK: {} [+{}] - DIPLOMACY: {} [+{}] - {} -{}\n\n- Credits: {} {} \n- Experience: {}/{} \n- Unspent skillpoints: {} \n```".format(
+            "```css\n[{}´s Character Sheet] \n\n```".format(user.display_name) + "```css\nA level {} {} \n\n- ATTACK {} [+{}] - DIPLOMACY {} [+{}] - {} -{}\n\n- Credits: {} {} \n- Experience: {}/{} \n- Unspent skillpoints: {} \n```".format(
                 lvl, clazz, att, satt, cha, scha, hitpoints, buffs, bal, currency, xp, next_lvl, pool
             ) + "```css\n" + equip + "```" +
             "```css\n" + "You own {} normal, {} rare, {} epic and {} quest chests.```".format(
