@@ -1122,7 +1122,7 @@ class GobCog(BaseCog):
                 elif key == "rest":
                     buffs += " 💤 ({}x/{}⏳) ".format(Userdata.users[str(user.id)]['buffs'][key]['bonus'],Userdata.users[str(user.id)]['buffs'][key]['duration'])
             buffs += " -"
-        equip = "Equipped Items: \n"
+        equip = "Equipped Items \n"
         i = iter(Userdata.users[str(user.id)]['items'])
         for slot in i:
             if Userdata.users[str(user.id)]['items'][slot] and slot != "backpack":
