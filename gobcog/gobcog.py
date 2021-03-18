@@ -651,9 +651,9 @@ class GobCog(BaseCog):
             for item in Userdata.users[str(user)]['items']['backpack'].keys():
                 if "{.:'" not in item:
                     if len(Userdata.users[str(user)]['items']['backpack'][item]['slot']) == 1:
-                        bkpk.append(item + " - (ATT: "+ str(Userdata.users[str(user)]['items']['backpack'][item]['att']) + " | DPL: "+ str(Userdata.users[str(user)]['items']['backpack'][item]['cha']) +" ["+ Userdata.users[str(user)]['items']['backpack'][item]['slot'][0] + " slot])")
+                        bkpk.append(item + " (ATT: "+ str(Userdata.users[str(user)]['items']['backpack'][item]['att']) + " | DPL: "+ str(Userdata.users[str(user)]['items']['backpack'][item]['cha']) +" ["+ Userdata.users[str(user)]['items']['backpack'][item]['slot'][0] + " slot])")
                     else:
-                        bkpk.append(item + " - (ATT: "+ str(Userdata.users[str(user)]['items']['backpack'][item]['att']*2) + " | DPL: "+ str(Userdata.users[str(user)]['items']['backpack'][item]['cha']*2) +" [two handed])")
+                        bkpk.append(item + " (ATT: "+ str(Userdata.users[str(user)]['items']['backpack'][item]['att']*2) + " | DPL: "+ str(Userdata.users[str(user)]['items']['backpack'][item]['cha']*2) +" [two handed])")
             pile = " - " + "\n - ".join(bkpk)
             if len(pile) > 1900: #split dangerously long texts into chunks.
                 chunks = [pile[i:i+1900] for i in range(0, len(pile), 1900)]
@@ -712,9 +712,9 @@ class GobCog(BaseCog):
             for item in Userdata.users[str(user)]['items']['backpack'].keys():
                 if item not in consumed and "{.:'" not in item:
                     if len(Userdata.users[str(user)]['items']['backpack'][item]['slot']) == 1:
-                        bkpk.append(item + " - (ATT: "+ str(Userdata.users[str(user)]['items']['backpack'][item]['att']) + " | DPL: "+ str(Userdata.users[str(user)]['items']['backpack'][item]['cha']) +" ["+ Userdata.users[str(user)]['items']['backpack'][item]['slot'][0] + " slot])")
+                        bkpk.append(item + " (ATT: "+ str(Userdata.users[str(user)]['items']['backpack'][item]['att']) + " | DPL: "+ str(Userdata.users[str(user)]['items']['backpack'][item]['cha']) +" ["+ Userdata.users[str(user)]['items']['backpack'][item]['slot'][0] + " slot])")
                     else:
-                        bkpk.append(item + " - (ATT: "+ str(Userdata.users[str(user)]['items']['backpack'][item]['att']*2) + " | DPL: "+ str(Userdata.users[str(user)]['items']['backpack'][item]['cha']*2) +" [two handed])")
+                        bkpk.append(item + " (ATT: "+ str(Userdata.users[str(user)]['items']['backpack'][item]['att']*2) + " | DPL: "+ str(Userdata.users[str(user)]['items']['backpack'][item]['cha']*2) +" [two handed])")
             pile = " - " + "\n - ".join(bkpk)
             if len(pile) > 1900: #split dangerously long texts into chunks.
                 chunks = [pile[i:i+1900] for i in range(0, len(pile), 1900)]
@@ -1179,9 +1179,9 @@ class GobCog(BaseCog):
         if switch == "None":
             for item in Userdata.users[str(user.id)]['items']['backpack']: # added second if level for two handed weapons so their slots show properly.
                 if len(Userdata.users[str(user.id)]['items']['backpack'][item]['slot']) == 1:
-                    bkpklist.append(item + " - (ATT: "+ str(Userdata.users[str(user.id)]['items']['backpack'][item]['att']) + " | DPL: "+ str(Userdata.users[str(user.id)]['items']['backpack'][item]['cha']) +" ["+ Userdata.users[str(user.id)]['items']['backpack'][item]['slot'][0] + " slot])\n")
+                    bkpklist.append(item + " (ATT: "+ str(Userdata.users[str(user.id)]['items']['backpack'][item]['att']) + " | DPL: "+ str(Userdata.users[str(user.id)]['items']['backpack'][item]['cha']) +" ["+ Userdata.users[str(user.id)]['items']['backpack'][item]['slot'][0] + " slot])\n")
                 else:
-                    bkpklist.append(item + " - (ATT: "+ str(Userdata.users[str(user.id)]['items']['backpack'][item]['att']*2) + " | DPL: "+ str(Userdata.users[str(user.id)]['items']['backpack'][item]['cha']*2) +" [two handed])\n")
+                    bkpklist.append(item + " (ATT: "+ str(Userdata.users[str(user.id)]['items']['backpack'][item]['att']*2) + " | DPL: "+ str(Userdata.users[str(user.id)]['items']['backpack'][item]['cha']*2) +" [two handed])\n")
             for item in Userdata.users[str(user.id)]['consumables']: # added second if level for two handed weapons so their slots show properly.
                     conslist.append(" - " + item + " ({}x)\n".format(Userdata.users[str(user.id)]['consumables'][item]['uses']))
             for item in Userdata.users[str(user.id)]['ingredients']:
@@ -1198,7 +1198,7 @@ class GobCog(BaseCog):
             else:
                 await ctx.send("```css\n"+ textline +"```")
             await ctx.send(cspouch + "\n" + "```css\n" + "".join(conslist) + "\n```")
-            await ctx.send("```css\n" + inpouch + "".join(inslist) + "\n```")
+            await ctx.send(inpouch + "\n" + "```css\n" + "".join(inslist) + "\n```")
             try:
                 reply = await ctx.bot.wait_for("message", check=MessagePredicate.same_context(ctx), timeout=30)
             except asyncio.TimeoutError:
