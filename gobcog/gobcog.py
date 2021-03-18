@@ -1189,7 +1189,7 @@ class GobCog(BaseCog):
             conslist.sort()
             bkpklist.sort()
             inslist.sort()
-            textline = "[{}´s baggage] \n\n```".format(user.display_name) + "```css\n" + bkpk + "".join(bkpklist) + "\n (Reply with the name of an item or use !backpack equip \"name of item\" to equip it.)\n\n"
+            textline = "[{}´s baggage] \n\n".format(user.display_name) + "\n" + bkpk + "".join(bkpklist) + "\n (Reply with the name of an item or use !backpack equip \"name of item\" to equip it.)\n\n"
             if len(textline) > 1900: #split dangerously long texts into chunks.
                 chunks = [textline[i:i+1900] for i in range(0, len(textline), 1900)]
                 for chunk in chunks:
