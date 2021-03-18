@@ -80,10 +80,10 @@ class Consumables:
             for item in Userdata.users[str(user.id)]['items']['backpack']:
                 if "{.:'" not in item:
                     if len(Userdata.users[str(user.id)]['items']['backpack'][item]['slot']) == 1:
-                        bkpk.append(item + " - (ATT: "+ str(Userdata.users[str(user.id)]['items']['backpack'][item]['att']) + " | DPL: "+ str(Userdata.users[str(user.id)]['items']['backpack'][item]['cha']) +" ["+ Userdata.users[str(user.id)]['items']['backpack'][item]['slot'][0] + " slot])")
+                        bkpk.append(item + " (ATT "+ str(Userdata.users[str(user.id)]['items']['backpack'][item]['att']) + " / DPL "+ str(Userdata.users[str(user.id)]['items']['backpack'][item]['cha']) +") ["+ Userdata.users[str(user.id)]['items']['backpack'][item]['slot'][0] + " slot]")
                     else:
-                        bkpk.append(item + " -(ATT: "+ str(Userdata.users[str(user.id)]['items']['backpack'][item]['att']*2) + " | DPL: "+ str(Userdata.users[str(user.id)]['items']['backpack'][item]['cha']*2) +" [two handed])")
-            pile = " - " + "\n - ".join(bkpk)
+                        bkpk.append(item + " (ATT "+ str(Userdata.users[str(user.id)]['items']['backpack'][item]['att']*2) + " / DPL "+ str(Userdata.users[str(user.id)]['items']['backpack'][item]['cha']*2) +") [two handed]")
+            pile = " " + "\n ".join(bkpk)
             if len(pile) > 1900: #split dangerously long texts into chunks.
                 chunks = [pile[i:i+1900] for i in range(0, len(pile), 1900)]
                 await ctx.send("```css\n[{}´s augmentables] \n\n```".format(ctx.author.display_name))
@@ -154,7 +154,7 @@ class Consumables:
                 await ctx.send('Your augment roll was 🎲({}).\nYour {} augmented to {}{} and will have {}🗡 and {}🗨.'.format(roll,consumed,prefix,modifier,newatt*2,newdip*2))
             else:
                 await ctx.send('Your augment roll was 🎲({}).\nYour {} augmented to {}{} and will have {}🗡 and {}🗨.'.format(roll,consumed,prefix,modifier,newatt,newdip))
-            name = consumed + ":({}{})*".format(prefix,modifier)
+            name = consumed + "({}{})*".format(prefix,modifier)
             newitem = {"itemname": name,"item": {"slot":item1['slot'],"att":newatt,"cha":newdip}}
             Userdata.users[str(user.id)]['items']['backpack'].pop(consumed)
             if newitem['itemname'] in Userdata.users[str(user.id)]['items']['backpack'].keys():
