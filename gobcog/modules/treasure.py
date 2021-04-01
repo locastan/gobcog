@@ -91,7 +91,8 @@ class Treasure:
             "[dragon scales]":{"slot":["charm"],"att":4,"cha":5},
             "[mace of many]":{"slot":["right"],"att":6,"cha":1},
             "[mesmer ring]":{"slot":["ring"],"att":1,"cha":6},
-            "[crumhorn]":{"slot":["right", "left"],"att":3,"cha":5}
+            "[crumhorn]":{"slot":["right", "left"],"att":3,"cha":5},
+            "[hydra fang]":{"slot":["charm"],"att":6,"cha":2}
             }
 
     async def open_chest(ctx, user, type):
