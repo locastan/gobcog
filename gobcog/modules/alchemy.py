@@ -210,7 +210,9 @@ class Alchemy:
             nextbest = Alchemy.raritylookup[Alchemy.raritylookup.index(irarity)+1]
         else:
             nextbest = "legendary"
-        d_name = random.choice(Alchemy.raritydict[nextbest])
+        d_name = instill
+        while d_name == instill:
+            d_name = random.choice(Alchemy.raritydict[nextbest])
         d_uses = random.randint(Alchemy.getting[nextbest][0],Alchemy.getting[nextbest][1])
         if d_name in Userdata.users[str(user.id)]['ingredients'].keys():
             Userdata.users[str(user.id)]['ingredients'][d_name]['uses'] = Userdata.users[str(user.id)]['ingredients'][d_name].get("uses", 0) + d_uses
