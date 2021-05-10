@@ -1470,6 +1470,8 @@ class GobCog(BaseCog):
             if Userdata.users[str(user.id)]["lootfilter"] != []:
                 Userdata.users[str(user.id)]['lootfilter'].sort()
                 return await ctx.send("```css\n" + "[" + ctx.author.display_name + "s lootfilter]\n\n" + ",\n".join(Userdata.users[str(user.id)]['lootfilter']) + "\n```")
+            else:
+                return await ctx.send("```css\n" + "[" + ctx.author.display_name + "s lootfilter is currently empty.]" + "\n```")
         else:
             if comm == "add":
                 lookup = list(x for x in Userdata.users[str(user.id)]['items']['backpack'] if filteritem.lower() in x.lower())
