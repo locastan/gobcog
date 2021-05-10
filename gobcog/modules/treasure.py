@@ -289,7 +289,7 @@ class Treasure:
                     else:
                         Userdata.users[str(user.id)]['buffs']['luck']['duration'] = Userdata.users[str(user.id)]['buffs']['luck']['duration'] - 1
                 await Userdata.save()
-                if itemname in lootpile.keys() or itemname in Userdata.users[str(user.id)]['items']['backpack'].keys():
+                if itemname in lootpile.keys() or itemname in Userdata.users[str(user.id)]['items']['backpack'].keys() or itemname in Userdata.users[str(user.id)]['lootfilter']:
                     moneypile += await Treasure.t_sell(user, {"itemname": itemname,"item":item})
                 else:
                     lootpile.update({itemname: {"itemname": itemname,"item":item}})
@@ -328,7 +328,7 @@ class Treasure:
         else:
             await ctx.send("```css\n The following items were added to your backpack:\n" + pilereport + "```")
         await ctx.send("```css\n Added consumables:\n" + consreport)
-        await ctx.send("```css\n You also received {} copperpieces from selling duplicate items.```".format(moneypile))
+        await ctx.send("```css\n You also received {} copperpieces from selling items.```".format(moneypile))
         return lootpile
 
     async def one_from(ctx,user,list): #user needs to be a discord.member object. list is a namestring of a droplist of items here.
@@ -536,12 +536,24 @@ class Treasure:
         if "[" in item['itemname']:
             base = (500,1000)
         elif "." in item['itemname']:
-            base = (100,500)
+            base = (200,500)
         else :
             base = (10,200)
+        if "(+1)*" in item['itemname']:
+            magicmod = 1.5
+        elif "(+2)*" in item['itemname']:
+            magicmod = 2
+        elif "(+3)*" in item['itemname']:
+            magicmod = 3
+        elif "(+4)*" in item['itemname']:
+            magicmod = 5
+        elif "(+5)*" in item['itemname']:
+            magicmod = 10
+        else:
+            magicmod = 1
         if item['item']['slot'] == ['consumable']:
             price = random.randint(base[0],base[1])*max(item['item']['uses'],1)
         else:
-            price = random.randint(base[0],base[1])*max(item['item']['att']+item['item']['cha'],1)
+            price = random.randint(base[0],base[1])*max(item['item']['att']+item['item']['cha'],1)*magicmod
         await bank.deposit_credits(user, price)
         return(price)

@@ -466,6 +466,8 @@ class GobCog(BaseCog):
             Userdata.users[str(user)]['name'] = {}
             Userdata.users[str(user)]['resting'] = {}
             Userdata.users[str(user)]['name'] = member.display_name
+            if 'lootfilter' not in Userdata.users[str(user)]['items']:
+                Userdata.users[str(user)]['lootfilter'] = []
             if 'ingredients' not in Userdata.users[str(user)]:
                 Userdata.users[str(user)]['ingredients'] = {}
             if 'consumables' not in Userdata.users[str(user)]:
@@ -534,9 +536,9 @@ class GobCog(BaseCog):
                                 Userdata.users[str(user)]['consumables'].update({item['itemname']:item['item']})
                             await ctx.send("{} put the {} into the backpack.".format(ctx.author.display_name,item['itemname']))
                         else:
-                            if item['itemname'] in Userdata.users[str(user)]['items']['backpack'].keys():
+                            if item['itemname'] in Userdata.users[str(user)]['items']['backpack'].keys() or item['itemname'] in Userdata.users[str(user)]['lootfilter']:
                                 price = await GobCog.sell(ctx.author,item)
-                                await ctx.send("**{}** already had this item: Sold {} for {} copperpieces.".format(ctx.author.display_name,item['itemname'],price))
+                                await ctx.send("**{}** sold {} for {} copperpieces.".format(ctx.author.display_name,item['itemname'],price))
                             else:
                                 Userdata.users[str(user)]['items']['backpack'].update({item['itemname']: item['item']})
                                 await ctx.send("{} put the {} into the backpack.".format(ctx.author.display_name,item['itemname']))
@@ -1018,9 +1020,9 @@ class GobCog(BaseCog):
                     else:
                         Userdata.users[str(user.id)]['consumables'].update({item['itemname']:item['item']})
                 else:
-                    if item['itemname'] in Userdata.users[str(user.id)]['items']['backpack'].keys():
+                    if item['itemname'] in Userdata.users[str(user.id)]['items']['backpack'].keys() or item['itemname'] in Userdata.users[str(user)]['lootfilter']:
                         price = await GobCog.sell(user,item)
-                        await ctx.send("**{}** already had this item: Sold {} for {} copperpieces.".format(user.display_name,item['itemname'],price))
+                        await ctx.send("**{}** sold {} for {} copperpieces.".format(user.display_name,item['itemname'],price))
                     else:
                         Userdata.users[str(user.id)]['items']['backpack'].update({item['itemname']: item['item']})
                         await ctx.send("**{}** put the {} into the backpack.".format(user.display_name,item['itemname']))
@@ -1065,9 +1067,9 @@ class GobCog(BaseCog):
                     else:
                         Userdata.users[str(user.id)]['consumables'].update({item['itemname']:item['item']})
                 else:
-                    if item['itemname'] in Userdata.users[str(user.id)]['items']['backpack'].keys():
+                    if item['itemname'] in Userdata.users[str(user.id)]['items']['backpack'].keys() or item['itemname'] in Userdata.users[str(user.id)]['lootfilter']:
                         price = await GobCog.sell(user,item)
-                        await ctx.send("**{}** already had this item: Sold {} for {} copperpieces.".format(user.display_name,item['itemname'],price))
+                        await ctx.send("**{}** sold {} for {} copperpieces.".format(user.display_name,item['itemname'],price))
                     else:
                         Userdata.users[str(user.id)]['items']['backpack'].update({item['itemname']: item['item']})
             await ctx.send("```css\n" + "You own {} normal, {} rare, {} epic and {} quest chests.```".format(
@@ -1455,6 +1457,72 @@ class GobCog(BaseCog):
                 to.display_name, bal, currency, amount
             )
         )
+
+    @commands.command()
+    @commands.guild_only()
+    async def lootfilter(self, ctx, comm: str="add", filteritem: str=None):
+        """This will set up a lootfilter autoselling undesired items.
+            !lootfilter add/remove dagger
+            will add/remove "dagger" to/from the filter list. Use "!lootfilter clear" to empty filter.
+        """
+        user = ctx.author
+        if filteritem is None:
+            if Userdata.users[str(user.id)]["lootfilter"] != []:
+                Userdata.users[str(user.id)]['lootfilter'].sort()
+                return await ctx.send("```css\n" + "[" + ctx.author.display_name + "s lootfilter]\n\n" + ",\n".join(Userdata.users[str(user.id)]['lootfilter']) + "\n```")
+        else:
+            if comm == "add":
+                lookup = list(x for x in Userdata.users[str(user.id)]['items']['backpack'] if filteritem.lower() in x.lower())
+            elif comm == "remove":
+                lookup = list(x for x in Userdata.users[str(user.id)]['lootfilter'] if filteritem.lower() in x.lower())
+            if len(lookup) > 1:
+                text = "```css\n"
+                for num, name in enumerate(lookup, start=1):
+                    text += ("[{}]: {}\n".format(num, name))
+                text += "```"
+                await ctx.send("I found these items matching that name:\n{}Please reply with a number from the list.".format(text))
+                try:
+                    reply = await ctx.bot.wait_for("message", check=MessagePredicate.same_context(ctx), timeout=30)
+                except asyncio.TimeoutError:
+                    await ctx.send("I don't have all day, you know.")
+                    ctx.command.reset_cooldown(ctx)
+                    return
+                if reply.content.isdigit() and (int(reply.content)-1) < len(lookup) and int(reply.content) > 0:
+                    idx = int(reply.content)-1
+                    if  "{.:'" not in lookup[idx]:
+                        filteritem = lookup[idx]
+                    else:
+                        await ctx.send("Tinkered devices cannot be on the filter.")
+                        return
+                else:
+                    await ctx.send("Sorry, but there was something wrong with that reply.")
+                    return
+            elif len(lookup) == 0:
+                lookup.append(filteritem)
+            else: #len(lookup) equals 1 item
+                if  "{.:'" not in lookup[0]:
+                    filteritem = lookup[0]
+                else:
+                    await ctx.send("Tinkered devices cannot be on the filter.")
+                    return
+            if comm == "add":
+                Userdata.users[str(user.id)]['lootfilter'].append(filteritem)
+                await ctx.send(filteritem + " successfully added to lootfilter.")
+                if filteritem in Userdata.users[str(user.id)]['items']['backpack'].keys():
+                    litem = Userdata.users[str(user.id)]['items']['backpack'].get(filteritem)
+                    price = await GobCog.sell(user, {"itemname": filteritem,"item":litem})
+                    await ctx.send("**{}** autosold {} for {} copperpieces.".format(user.display_name,filteritem,price))
+                    del Userdata.users[str(user.id)]['items']['backpack'][filteritem]
+                return
+            elif comm == "remove":
+                if filteritem in Userdata.users[str(user.id)]['lootfilter']:
+                    Userdata.users[str(user.id)]['lootfilter'].remove(filteritem)
+                    return await ctx.send(filteritem + " removed from lootfilter.")
+                else:
+                    return await ctx.send(filteritem + " was never on your list. Maybe check your spelling.")
+            elif comm == "clear":
+                Userdata.users[str(user.id)]['lootfilter'] = []
+                return await ctx.send("Lootfilter cleared.")
 
     @commands.command()
     @checks.admin_or_permissions(administrator=True)
@@ -1876,6 +1944,7 @@ class GobCog(BaseCog):
             Userdata.users[str(user.id)]['att'] = 0
             Userdata.users[str(user.id)]['cha'] = 0
             Userdata.users[str(user.id)]['treasure'] = [0,0,0,0]
+            Userdata.users[str(user.id)]['lootfilter'] = []
             Userdata.users[str(user.id)]['items'] = {"left":{},"right":{},"ring":{},"charm":{},"backpack": {}}
             Userdata.users[str(user.id)]['consumables'] = {}
             Userdata.users[str(user.id)]['ingredients'] = {}
@@ -1924,15 +1993,27 @@ class GobCog(BaseCog):
         if "[" in item['itemname']:
             base = (500,1000)
         elif "." in item['itemname']:
-            base = (100,500)
+            base = (200,500)
         else:
             base = (10,200)
+        if "(+1)*" in item['itemname']:
+            magicmod = 1.5
+        elif "(+2)*" in item['itemname']:
+            magicmod = 2
+        elif "(+3)*" in item['itemname']:
+            magicmod = 3
+        elif "(+4)*" in item['itemname']:
+            magicmod = 5
+        elif "(+5)*" in item['itemname']:
+            magicmod = 10
+        else:
+            magicmod = 1
         if 'slot' not in item['item']:
             price = random.randint(base[0]*2,base[1]*2)*max(item['item']['uses'],1)
         elif item['item']['slot'] == ['consumable']:
             price = random.randint(base[0],base[1])*max(item['item']['uses'],1)
         else:
-            price = random.randint(base[0],base[1])*max(item['item']['att']+item['item']['cha'],1)
+            price = random.randint(base[0],base[1])*max(item['item']['att']+item['item']['cha'],1)*magicmod
         await bank.deposit_credits(user, price)
         return(price)
 
@@ -1978,10 +2059,10 @@ class GobCog(BaseCog):
                                 titem['item']['uses'] = int(reply.content)
                                 Userdata.users[str(user.id)]['consumables'].update(copy.deepcopy({titem['itemname']:titem['item']}))
                     else:
-                        if titem['itemname'] in Userdata.users[str(user.id)]['items']['backpack'].keys():
+                        if titem['itemname'] in Userdata.users[str(user.id)]['items']['backpack'].keys() or titem['itemname'] in Userdata.users[str(user.id)]['lootfilter']:
                             price = await GobCog.sell(user,titem)
                             price = price * int(reply.content)
-                            await channel.send("**{}** was already in your backpack: Sold for {} copperpieces.".format(titem['itemname'],price))
+                            await channel.send("**{}** sold for {} copperpieces.".format(titem['itemname'],price))
                         else:
                             Userdata.users[str(user.id)]['items']['backpack'].update(copy.deepcopy({titem['itemname']:titem['item']}))
                             price = await GobCog.sell(user,titem)
