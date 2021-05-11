@@ -157,9 +157,9 @@ class Consumables:
             name = consumed + "({}{})*".format(prefix,modifier)
             newitem = {"itemname": name,"item": {"slot":item1['slot'],"att":newatt,"cha":newdip}}
             Userdata.users[str(user.id)]['items']['backpack'].pop(consumed)
-            if newitem['itemname'] in Userdata.users[str(user.id)]['items']['backpack'].keys():
+            if newitem['itemname'] in Userdata.users[str(user.id)]['items']['backpack'].keys() or newitem['itemname'] in Userdata.users[str(user.id)]['lootfilter']:
                 price = await Treasure.t_sell(user,newitem)
-                await ctx.send("**{}** already had this item: Sold {} for {} copperpieces.".format(user.display_name,newitem['itemname'],price))
+                await ctx.send("**{}** sold {} for {} copperpieces.".format(user.display_name,newitem['itemname'],price))
             else:
                 Userdata.users[str(user.id)]['items']['backpack'].update({newitem['itemname']: newitem['item']})
             await Userdata.save()
