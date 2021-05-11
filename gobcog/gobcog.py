@@ -1020,7 +1020,7 @@ class GobCog(BaseCog):
                     else:
                         Userdata.users[str(user.id)]['consumables'].update({item['itemname']:item['item']})
                 else:
-                    if item['itemname'] in Userdata.users[str(user.id)]['items']['backpack'].keys() or item['itemname'] in Userdata.users[str(user)]['lootfilter']:
+                    if item['itemname'] in Userdata.users[str(user.id)]['items']['backpack'].keys() or item['itemname'] in Userdata.users[str(user.id)]['lootfilter']:
                         price = await GobCog.sell(user,item)
                         await ctx.send("**{}** sold {} for {} copperpieces.".format(user.display_name,item['itemname'],price))
                     else:
@@ -1999,13 +1999,13 @@ class GobCog(BaseCog):
         else:
             base = (10,200)
         if "(+1)*" in item['itemname']:
-            magicmod = 1.5
-        elif "(+2)*" in item['itemname']:
             magicmod = 2
-        elif "(+3)*" in item['itemname']:
+        elif "(+2)*" in item['itemname']:
             magicmod = 3
+        elif "(+3)*" in item['itemname']:
+            magicmod = 4
         elif "(+4)*" in item['itemname']:
-            magicmod = 5
+            magicmod = 6
         elif "(+5)*" in item['itemname']:
             magicmod = 10
         else:
