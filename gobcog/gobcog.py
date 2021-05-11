@@ -1640,7 +1640,6 @@ class GobCog(BaseCog):
         await ctx.send('Userdata saved to and reloaded from text based database.')
 
     @commands.command()
-    @checks.admin_or_permissions(administrator=True)
     @checks.mod_or_permissions(manage_messages=True)
     async def purgelooting(self, ctx):
         """[Admin/Moderator]
