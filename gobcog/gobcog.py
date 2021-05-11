@@ -1641,6 +1641,17 @@ class GobCog(BaseCog):
 
     @commands.command()
     @checks.admin_or_permissions(administrator=True)
+    @checks.mod_or_permissions(manage_messages=True)
+    async def purgelooting(self, ctx):
+        """[Admin/Moderator]
+            This will clear the loot session list.
+        """
+        global looting
+        looting.clear()
+        await ctx.send('The active loot session list has been cleared.')
+
+    @commands.command()
+    @checks.admin_or_permissions(administrator=True)
     async def additem(self, ctx, type: str=None, item: str=None, user: discord.Member=None):
         """[Admin] This will add/set a certain item, consumable or ingredient for a specified user.
             !additem consumable {'.dust_of_midas':{'slot':['consumable'],'uses':12}} @Elder_aramis
