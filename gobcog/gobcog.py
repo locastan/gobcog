@@ -1469,7 +1469,15 @@ class GobCog(BaseCog):
         if filteritem is None:
             if Userdata.users[str(user.id)]["lootfilter"] != []:
                 Userdata.users[str(user.id)]['lootfilter'].sort()
-                return await ctx.send("```css\n" + "[" + ctx.author.display_name + "s lootfilter]\n\n" + ",\n".join(Userdata.users[str(user.id)]['lootfilter']) + "\n```")
+                textline = "```css\n" + "[" + ctx.author.display_name + "s lootfilter]\n\n" + ",\n".join(Userdata.users[str(user.id)]['lootfilter']) + "\n```"
+                if len(textline) > 1900: #split dangerously long texts into chunks.
+                    chunks = [textline[i:i+1900] for i in range(0, len(textline), 1900)]
+                    for chunk in chunks:
+                        await ctx.send("```css\n" + chunk + "```")
+                        await asyncio.sleep(0.3)
+                    return
+                else:
+                    return await ctx.send("```css\n" + "[" + ctx.author.display_name + "s lootfilter]\n\n" + ",\n".join(Userdata.users[str(user.id)]['lootfilter']) + "\n```")
             else:
                 return await ctx.send("```css\n" + "[" + ctx.author.display_name + "s lootfilter is currently empty.]" + "\n```")
         else:
