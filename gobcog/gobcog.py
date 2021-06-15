@@ -914,11 +914,11 @@ class GobCog(BaseCog):
     @commands.command()
     @commands.guild_only()
     @not_resting()
-    async def use(self, ctx, consumable:str="None", switch:str=None):
+    async def use(self, ctx, *consgreed: str):
         """This allows you to use consumables.
-            !use "partial name of consumable"
+            !use "partial name(s) of consumable(s)"
             Get a description of the consumable with:
-            !use "partial name of consumable" info
+            !use "partial name(s) of consumable(s)" info
         """
         global users
         user = ctx.author
@@ -927,27 +927,35 @@ class GobCog(BaseCog):
             gotcons = True
         if gotcons == False:
             return await ctx.send("You do not have any consumables.")
-        if consumable == "None" or not any([x for x in Userdata.users[str(user.id)]['consumables'] if consumable.lower() in x.lower()]):
-            await ctx.send("You have to specify a consumable you own.")
-            return
-        lookup = list(x for x in Userdata.users[str(user.id)]['consumables'] if consumable.lower() in x.lower())
-        if len(lookup) > 1:
-            await ctx.send("I found multiple consumables ({}) matching that name.\nPlease be more specific.".format(" and ".join([", ".join(lookup[:-1]),lookup[-1]] if len(lookup) > 2 else lookup)))
-            return
-        else:
-            cons = lookup[0]
-            if switch != None:
-                return await ctx.send("{}".format(Consumables.consbles[cons]['desc']))
-            if Consumables.consbles[cons]['attrib'] in Userdata.users[str(user.id)]['buffs'].keys():
-                await ctx.send("You already have this buff in effect.")
-                return
-            Done = await Consumables.use_con(ctx, user, cons)
-            if Done:
-                amount = int(Userdata.users[str(user.id)]['consumables'][cons].get('uses'))
-                if amount <= 1:
-                    del Userdata.users[str(user.id)]['consumables'][cons]
-                else:
-                    Userdata.users[str(user.id)]['consumables'][cons]['uses'] = Userdata.users[str(user.id)]['consumables'][cons]['uses'] - 1
+        if len(consgreed) == 0:
+            return await ctx.send("You did not mention what to use.")
+        for consumable in consgreed:
+            if not any([x for x in Userdata.users[str(user.id)]['consumables'] if consumable.lower() in x.lower()]):
+                await ctx.send("You do not own {}.".format(consumable))
+                continue
+            lookup = list(x for x in Userdata.users[str(user.id)]['consumables'] if consumable.lower() in x.lower())
+            if len(lookup) > 1:
+                await ctx.send("I found multiple consumables ({}) matching that name.\nPlease be more specific.".format(" and ".join([", ".join(lookup[:-1]),lookup[-1]] if len(lookup) > 2 else lookup)))
+                continue
+            else:
+                cons = lookup[0]
+                if "info" in consgreed:
+                    consgreed = consgreed[:-1] #remove info as last parameter from tuple
+                    for consi in consgreed:
+                        lookup = list(x for x in Userdata.users[str(user.id)]['consumables'] if consi.lower() in x.lower())
+                        consi = lookup[0]
+                        await ctx.send("{}: {}".format(consi,Consumables.consbles[consi]['desc']))
+                    return
+                if Consumables.consbles[cons]['attrib'] in Userdata.users[str(user.id)]['buffs'].keys():
+                    await ctx.send("You already have the buff of {} in effect.".format(cons))
+                    continue
+                Done = await Consumables.use_con(ctx, user, cons)
+                if Done:
+                    amount = int(Userdata.users[str(user.id)]['consumables'][cons].get('uses'))
+                    if amount <= 1:
+                        del Userdata.users[str(user.id)]['consumables'][cons]
+                    else:
+                        Userdata.users[str(user.id)]['consumables'][cons]['uses'] = Userdata.users[str(user.id)]['consumables'][cons]['uses'] - 1
         await GobCog.save()
 
     @commands.command()
