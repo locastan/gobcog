@@ -942,6 +942,9 @@ class GobCog(BaseCog):
                 if "info" in consgreed:
                     consgreed = consgreed[:-1] #remove info as last parameter from tuple
                     for consi in consgreed:
+                        if not any([x for x in Userdata.users[str(user.id)]['consumables'] if consi.lower() in x.lower()]):
+                            await ctx.send("You do not own {}.".format(consumable))
+                            continue
                         lookup = list(x for x in Userdata.users[str(user.id)]['consumables'] if consi.lower() in x.lower())
                         consi = lookup[0]
                         await ctx.send("{}: {}".format(consi,Consumables.consbles[consi]['desc']))
