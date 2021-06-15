@@ -929,6 +929,16 @@ class GobCog(BaseCog):
             return await ctx.send("You do not have any consumables.")
         if len(consgreed) == 0:
             return await ctx.send("You did not mention what to use.")
+        if "info" in consgreed:
+            consgreed = consgreed[:-1] #remove info as last parameter from tuple
+            for consi in consgreed:
+                if not any([x for x in Userdata.users[str(user.id)]['consumables'] if consi.lower() in x.lower()]):
+                    await ctx.send("You do not own {}.".format(consumable))
+                    continue
+                lookup = list(x for x in Userdata.users[str(user.id)]['consumables'] if consi.lower() in x.lower())
+                consi = lookup[0]
+                await ctx.send("{}: {}".format(consi,Consumables.consbles[consi]['desc']))
+            return
         for consumable in consgreed:
             if not any([x for x in Userdata.users[str(user.id)]['consumables'] if consumable.lower() in x.lower()]):
                 await ctx.send("You do not own {}.".format(consumable))
@@ -939,16 +949,6 @@ class GobCog(BaseCog):
                 continue
             else:
                 cons = lookup[0]
-                if "info" in consgreed:
-                    consgreed = consgreed[:-1] #remove info as last parameter from tuple
-                    for consi in consgreed:
-                        if not any([x for x in Userdata.users[str(user.id)]['consumables'] if consi.lower() in x.lower()]):
-                            await ctx.send("You do not own {}.".format(consumable))
-                            continue
-                        lookup = list(x for x in Userdata.users[str(user.id)]['consumables'] if consi.lower() in x.lower())
-                        consi = lookup[0]
-                        await ctx.send("{}: {}".format(consi,Consumables.consbles[consi]['desc']))
-                    return
                 if Consumables.consbles[cons]['attrib'] in Userdata.users[str(user.id)]['buffs'].keys():
                     await ctx.send("You already have the buff of {} in effect.".format(cons))
                     continue
