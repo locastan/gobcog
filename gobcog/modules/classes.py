@@ -87,7 +87,9 @@ class Classes:
         if healer == user:
             await ctx.send("**{}** selfhealed for {} hitpoints ({}/{} {}%).".format(healer.display_name,bonus,Userdata.users[str(user.id)]['hp'],Userdata.users[str(user.id)]['base_hp'],hp_pcnt))
         else:
-            await ctx.send("**{}** healed **{}** for {} hitpoints ({}/{} {}%).".format(healer.display_name,user.display_name,bonus,Userdata.users[str(user.id)]['hp'],Userdata.users[str(user.id)]['base_hp'],hp_pcnt))
+            healxp = bonus * int(round(Userdata.users[str(healer.id)]['lvl']/4))
+            Userdata.users[str(healer.id)]['exp'] += healxp
+            await ctx.send("**{}** healed **{}** for {} hitpoints ({}/{} {}%) and gained {}xp.".format(healer.display_name,user.display_name,bonus,Userdata.users[str(user.id)]['hp'],Userdata.users[str(user.id)]['base_hp'],hp_pcnt,healxp))
         return
 
     async def sing(ctx, *args):

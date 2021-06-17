@@ -608,6 +608,7 @@ class GobCog(BaseCog):
                 return await ctx.send("**{}** is already at full health.".format(user.display_name))
             else:
                 await Classes.heal(ctx,ctx.author,user)
+                await GobCog.save()
 
     @commands.command()
     @commands.guild_only()
@@ -1173,7 +1174,7 @@ class GobCog(BaseCog):
     async def _backpack(self, ctx, switch: str="None", item: str="None", asking: int=0, buyer: discord.Member=None, quant: int=1):
         """This draws up the contents of your backpack.
             Selling: !backpack sell "(partial) name of item"
-            Trading: !backpack trade "name of item" cp @buyer
+            Trading: !backpack trade "name of item" cp @buyer amount
             Equip:   !backpack equip "(partial) name of item"
             or respond with "name of item" to backpack.
         """
