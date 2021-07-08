@@ -96,7 +96,7 @@ class Classes:
         user = ctx.author.id
         if len(args) == 0: #user did not pass a song
             Userdata.users[str(user)]['class']['ability'] = True
-            basebonus = random.randint(1,(Userdata.users[str(user)]['lvl']/2))
+            basebonus = random.randint(1,(Userdata.users[str(user)]['lvl']//2))
             Userdata.users[str(user)]['class'].update({"basebonus": basebonus})
             await ctx.send('♪♫♬ **{}** is whipping up a random performance. ♬♫♪'.format(ctx.author.display_name))
             return
