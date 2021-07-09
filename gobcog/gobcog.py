@@ -1750,6 +1750,7 @@ class GobCog(BaseCog):
                         songbonus = Userdata.users[str(member.id)]['class'].get("basebonus", 0)
                         if Userdata.users[str(member.id)]['class']['name'] == "Bard" and songbonus != 0:
                             Userdata.users[str(member.id)]['class'].pop('basebonus')
+                            Userdata.users[str(member.id)]['class']['ability'] = False
                     expired = []
                     for buff in Userdata.users[str(member.id)]['buffs'].keys(): #reduce duration of active buffs
                         if buff != "rest":
@@ -1825,6 +1826,7 @@ class GobCog(BaseCog):
                         songbonus = Userdata.users[str(member.id)]['class'].get("basebonus", 0)
                         if Userdata.users[str(member.id)]['class']['name'] == "Bard" and songbonus != 0:
                             Userdata.users[str(member.id)]['class'].pop('basebonus')
+                            Userdata.users[str(member.id)]['class']['ability'] = False
                 expired = []
                 for buff in Userdata.users[str(member.id)]['buffs'].keys(): #reduce duration of active buffs
                     if buff != "rest":
