@@ -2061,7 +2061,7 @@ class GobCog(BaseCog):
             spender = user
             react = None
             reply = None
-            channel = ctx.bot.get_channel(522778389606825984) #restrict trader to loot-spam channel on live server
+            channel = ctx.bot.get_channel(865203053777780766) #restrict trader to dodo channel on live server
             #channel = ctx.bot.get_channel(504934418289262597) #restrict trader to general channel on test server
             if channel is not None:
                 calcprice = 0
@@ -2138,7 +2138,7 @@ class GobCog(BaseCog):
             text = "```css\n [Alchemist Dodo is bringing the cart around!]```"
         if GobCog.last_trade == 0 or summoned:
             GobCog.last_trade = time.time()
-        elif GobCog.last_trade >= time.time()-43200: #trader can return after 12 hours have passed since last visit.
+        elif GobCog.last_trade >= time.time()-21600: #trader can return after 6 hours have passed since last visit.
             return #silent return.
         GobCog.last_trade = time.time()
         stock = await Treasure.trader_get_items()
@@ -2164,7 +2164,7 @@ class GobCog(BaseCog):
             else:
                 text += "```css\n" + "[{}] {} for {} cp.".format(str(index+1),sitem['itemname'],sitem['price'])+ " ```"
         text += "Do you want to buy any of these fine items? Tell me which one below:"
-        channel = ctx.bot.get_channel(522778389606825984) #restrict trader to loot-spam channel on live server
+        channel = ctx.bot.get_channel(865203053777780766) #restrict trader to loot-spam channel on live server
         #channel = ctx.bot.get_channel(504934418289262597) #restrict trader to general channel on test server
         if channel is not None:
             msg = await channel.send(text, allowed_mentions=discord.AllowedMentions(roles=True))
