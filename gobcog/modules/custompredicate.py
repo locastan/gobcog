@@ -148,6 +148,8 @@ class CustomPredicate(Callable[[discord.Reaction, discord.abc.User], bool]):
         def predicate(self: CustomPredicate, r: discord.Reaction, u: discord.abc.User):
             if u.bot:
                 return False
+            if message is None or r.message.id != message.id:
+                return False
             if Userdata.users[str(u.id)]['resting'] != {}:
                 Userdata.sleepers.add(u.display_name)
                 return False
@@ -194,6 +196,8 @@ class CustomPredicate(Callable[[discord.Reaction, discord.abc.User], bool]):
         """
         def predicate(self: CustomPredicate, r: discord.Reaction, u: discord.abc.User) -> bool:
             if u.bot:
+                return False
+            if message is None or r.message.id != message.id:
                 return False
             try:
                 self.result = not bool(self.YES_OR_NO_EMOJIS.index(r.emoji))
