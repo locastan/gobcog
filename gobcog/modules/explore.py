@@ -554,8 +554,9 @@ class Explore:
         if Explore.movesmsg:
             await Explore.movesmsg.delete()
         if Explore.intro:
-            text = "{} went exploring the {} and found:\n".format(user.display_name, Explore.biome)
+            text = "{} went exploring the {} and ".format(user.display_name, Explore.biome)
             if Explore.loot != {}:
+                text += "found:\n"
                 for key in Explore.loot.keys():
                     text += "{}x {} \n".format(Explore.loot.get(key),key)
                     if key in Userdata.users[str(user.id)]['ingredients'].keys():
@@ -564,7 +565,7 @@ class Explore:
                         Userdata.users[str(user.id)]['ingredients'].update({key:{'uses':Explore.loot.get(key)}})
                 await Userdata.save()
             else:
-                text += "Nothing."
+                text += "returned empty handed."
             await Explore.intro.edit(content=text)
         for future in Explore.pending:
             future.cancel()
