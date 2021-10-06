@@ -1479,6 +1479,9 @@ class GobCog(BaseCog):
         """
         user = ctx.author
         if filteritem is None:
+            if comm == "clear":
+                Userdata.users[str(user.id)]['lootfilter'] = []
+                return await ctx.send("Lootfilter cleared.")
             if Userdata.users[str(user.id)]["lootfilter"] != []:
                 Userdata.users[str(user.id)]['lootfilter'].sort()
                 textline = "```css\n" + "[" + ctx.author.display_name + "s lootfilter]\n\n" + ",\n".join(Userdata.users[str(user.id)]['lootfilter']) + "\n```"
