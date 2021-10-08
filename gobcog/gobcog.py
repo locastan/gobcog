@@ -1676,9 +1676,9 @@ class GobCog(BaseCog):
     @checks.admin_or_permissions(administrator=True)
     async def additem(self, ctx, type: str=None, item: str=None, user: discord.Member=None):
         """[Admin] This will add/set a certain item, consumable or ingredient for a specified user.
-            !additem consumable {'.dust_of_midas':{'slot':['consumable'],'uses':12}} @Elder_aramis
+            !additem consumable "{'.dust_of_midas':{'slot':['consumable'],'uses':12}}" @Elder_aramis
             !additem item "{'shiny sword':{'slot':['right'],'att':1,'cha':1}}" @Elder_aramis
-            !additem ingredient {'Daisy':{'uses':6}} @Elder_aramis
+            !additem ingredient "{'Daisy':{'uses':6}}" @Elder_aramis
         """
         # Note that only with items and ingredients with spaces in the name, the json bit ({}) needs to be wrapped as "{}".
         global users

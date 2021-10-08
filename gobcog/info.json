@@ -1,5 +1,5 @@
 {
-    "author" : "locastan",
+    "author" : ["locastan"],
     "install_msg" : "Thank you for installing the GoblinsComic Adventure Party cog.",
     "name" : "GobCog",
     "short" : "GoblinsComic inspired RPG bot.",
