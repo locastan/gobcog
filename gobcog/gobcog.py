@@ -1730,7 +1730,7 @@ class GobCog(BaseCog):
     @commands.guild_only()
     @not_resting()
     @has_hp()
-    @commands.cooldown(rate=1, per=120, type=commands.BucketType.guild)
+    @commands.cooldown(rate=1, per=125, type=commands.BucketType.guild)
     async def _adventure(self, ctx):
         """This will send you on an adventure!
             You play by reacting with the offered emojis.
