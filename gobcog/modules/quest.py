@@ -972,7 +972,7 @@ class Quest:
             for i,c in enumerate(Quest.sumtreasure):
                 if c >= 1:
                     chesttext.append(ctypes[i].format(c))
-            phrase += "\nBase rewards: {} xp and {} copperpieces. You also secured **{} treasure chests**!".format(xp,cp, " and ".join([", ".join(chesttext[:-1]),chesttext[-1]] if len(chesttext) > 2 else chesttext))
+            phrase += "\nBase rewards: {} xp and {} copperpieces so far. You also secured **{} treasure chests**!".format(xp,cp, " and ".join([", ".join(chesttext[:-1]),chesttext[-1]] if len(chesttext) > 2 else chesttext))
         else:
             phrase += "\nYou have {} xp and found {} copperpieces so far.".format(Quest.sumxp,Quest.sumcp)
         if len(Userdata.sleepers) != 0:

@@ -647,12 +647,12 @@ class GobCog(BaseCog):
         else:
             bkpk = []
             consumed = []
-            forgeables = len(Userdata.users[str(user)]['items']['backpack']) - sum("{.:'" in x for x in Userdata.users[str(user)]['items']['backpack'])
+            forgeables = len(Userdata.users[str(user)]['items']['backpack']) - sum("{.:'" in x for x in Userdata.users[str(user)]['items']['backpack'])- sum("[wanderring]" in x for x in Userdata.users[str(user)]['items']['backpack'])
             if forgeables <= 1:
                 ctx.command.reset_cooldown(ctx)
                 return await ctx.send("You need at least two forgeable items in your backpack to forge.")
             for item in Userdata.users[str(user)]['items']['backpack'].keys():
-                if "{.:'" not in item:
+                if "{.:'" not in item and "[wanderring]" not in item:
                     if len(Userdata.users[str(user)]['items']['backpack'][item]['slot']) == 1:
                         bkpk.append(item + " (ATT "+ str(Userdata.users[str(user)]['items']['backpack'][item]['att']) + " / DPL "+ str(Userdata.users[str(user)]['items']['backpack'][item]['cha']) +") ["+ Userdata.users[str(user)]['items']['backpack'][item]['slot'][0] + " slot]")
                     else:
@@ -688,11 +688,11 @@ class GobCog(BaseCog):
                     return
                 if reply.content.isdigit() and (int(reply.content)-1) < len(lookup) and int(reply.content) > 0:
                     idx = int(reply.content)-1
-                    if  "{.:'" not in lookup[idx]:
+                    if  "{.:'" not in lookup[idx] and "[wanderring]" not in lookup[idx]:
                         item1 = Userdata.users[str(user)]['items']['backpack'].get(lookup[idx])
                         consumed.append(lookup[idx])
                     else:
-                        await ctx.send("Tinkered devices cannot be forged.")
+                        await ctx.send("That item cannot be forged.")
                         ctx.command.reset_cooldown(ctx)
                         return
                 else:
@@ -704,16 +704,16 @@ class GobCog(BaseCog):
                 ctx.command.reset_cooldown(ctx)
                 return
             else: #len(lookup) equals 1 item
-                if  "{.:'" not in lookup[0]:
+                if  "{.:'" not in lookup[0] and "[wanderring]" not in lookup[0]:
                     item1 = Userdata.users[str(user)]['items']['backpack'].get(lookup[0])
                     consumed.append(lookup[0])
                 else:
-                    await ctx.send("Tinkered devices cannot be forged.")
+                    await ctx.send("That item cannot be forged.")
                     ctx.command.reset_cooldown(ctx)
                     return
             bkpk = []
             for item in Userdata.users[str(user)]['items']['backpack'].keys():
-                if item not in consumed and "{.:'" not in item:
+                if item not in consumed and "{.:'" not in item and "[wanderring]" not in item:
                     if len(Userdata.users[str(user)]['items']['backpack'][item]['slot']) == 1:
                         bkpk.append(item + " (ATT "+ str(Userdata.users[str(user)]['items']['backpack'][item]['att']) + " / DPL "+ str(Userdata.users[str(user)]['items']['backpack'][item]['cha']) +") ["+ Userdata.users[str(user)]['items']['backpack'][item]['slot'][0] + " slot]")
                     else:
@@ -750,11 +750,11 @@ class GobCog(BaseCog):
                     return
                 if reply.content.isdigit() and (int(reply.content)-1) < len(lookup) and int(reply.content) > 0:
                     idx = int(reply.content)-1
-                    if  "{.:'" not in lookup[idx]:
+                    if  "{.:'" not in lookup[idx] and "[wanderring]" not in lookup[idx]:
                         item2 = Userdata.users[str(user)]['items']['backpack'].get(lookup[idx])
                         consumed.append(lookup[idx])
                     else:
-                        await ctx.send("Tinkered devices cannot be forged.")
+                        await ctx.send("That item cannot be forged.")
                         ctx.command.reset_cooldown(ctx)
                         return
                 else:
@@ -766,11 +766,11 @@ class GobCog(BaseCog):
                 ctx.command.reset_cooldown(ctx)
                 return
             else: #len(lookup) equals 1 item
-                if  "{.:'" not in lookup[0]:
+                if  "{.:'" not in lookup[0] and "[wanderring]" not in lookup[0]:
                     item2 = Userdata.users[str(user)]['items']['backpack'].get(lookup[0])
                     consumed.append(lookup[0])
                 else:
-                    await ctx.send("Tinkered devices cannot be forged.")
+                    await ctx.send("That item cannot be forged.")
                     ctx.command.reset_cooldown(ctx)
                     return
             newitem = await Classes.forge(ctx, item1, item2)
@@ -1012,7 +1012,9 @@ class GobCog(BaseCog):
         else:
             item = await Treasure.open_chest(ctx, user, type)
             Userdata.users[str(user.id)]['treasure'] = [x-y for x,y in zip(Userdata.users[str(user.id)]['treasure'], redux)]
-            if item['equip'] == "sell":
+            if item['itemname'] == "[wanderring]":
+                await GobCog.move_wanderring(ctx,user.id)
+            elif item['equip'] == "sell":
                 price = await GobCog.sell(user,item)
                 await ctx.send("**{}** sold the {} for {} copperpieces.".format(user.display_name,item['itemname'],price))
             elif item['equip'] == "equip":
@@ -1078,6 +1080,8 @@ class GobCog(BaseCog):
                         Userdata.users[str(user.id)]['consumables'][thing]['uses'] = Userdata.users[str(user.id)]['consumables'][thing].get("uses", 0) + item['item']['uses']
                     else:
                         Userdata.users[str(user.id)]['consumables'].update({item['itemname']:item['item']})
+                elif item['itemname'] == "[wanderring]":
+                            await GobCog.move_wanderring(ctx,user.id)
                 else:
                     if item['itemname'] in Userdata.users[str(user.id)]['items']['backpack'].keys() or item['itemname'] in Userdata.users[str(user.id)]['lootfilter']:
                         price = await GobCog.sell(user,item)
@@ -1090,6 +1094,30 @@ class GobCog(BaseCog):
             looting.remove(ctx.author.id)
         await Userdata.save()
 
+    @staticmethod
+    async def move_wanderring(ctx, new_holder_id):
+        found = False
+        for id in Userdata.users:
+            if id == new_holder_id:
+                continue
+            if next(iter(Userdata.users[str(id)]['items'].get('ring', "Empty_slot"))) == '[wanderring]':
+                moveitem = Userdata.users[str(id)]['items']['ring'].pop('[wanderring]')
+                Userdata.users[str(id)]['att'] -= 20
+                Userdata.users[str(id)]['cha'] -= 20
+                Userdata.users[str(new_holder_id)]['items']['backpack'].update({"[wanderring]": moveitem})
+                found = True
+                await ctx.send("The wanderring slipped from {}s finger into {}s backpack.".format(Userdata.users[str(id)]['name'],Userdata.users[str(new_holder_id)]['name']))
+                return
+            elif Userdata.users[str(id)]['items']['backpack'].get('[wanderring]', "Empty_slot") != "Empty_slot":
+                moveitem = Userdata.users[str(id)]['items']['backpack'].pop('[wanderring]')
+                Userdata.users[str(new_holder_id)]['items']['backpack'].update({"[wanderring]": moveitem})
+                found = True
+                await ctx.send("The wanderring found its way from {} to {}s backpack.".format(Userdata.users[str(id)]['name'],Userdata.users[str(new_holder_id)]['name']))
+                return
+        if not found:
+            Userdata.users[str(new_holder_id)]['items']['backpack'].update({"[wanderring]":{"slot":["ring"],"att":+20,"cha":+20}})
+            await ctx.send("{} found the wanderring!".format(Userdata.users[str(id)]['name']))
+            return
 
     @commands.command(name="stats", aliases=['s'])
     @commands.guild_only()
@@ -1124,15 +1152,15 @@ class GobCog(BaseCog):
                 if key == "luck":
                     buffs += " 🍀 (+{}%/{}⏳) ".format(Userdata.users[str(user.id)]['buffs'][key]['bonus'],Userdata.users[str(user.id)]['buffs'][key]['duration'])
                 elif key == "att":
-                    buffs += " ⚔ (+{}/{}⏳) ".format(Userdata.users[str(user.id)]['buffs'][key]['bonus'],Userdata.users[str(user.id)]['buffs'][key]['duration'])
+                    buffs += " 🗡️ (+{}/{}⏳) ".format(Userdata.users[str(user.id)]['buffs'][key]['bonus'],Userdata.users[str(user.id)]['buffs'][key]['duration'])
                 elif key == "cha":
-                    buffs += " ℚ (+{}/{}⏳) ".format(Userdata.users[str(user.id)]['buffs'][key]['bonus'],Userdata.users[str(user.id)]['buffs'][key]['duration'])
+                    buffs += " 🗬 (+{}/{}⏳) ".format(Userdata.users[str(user.id)]['buffs'][key]['bonus'],Userdata.users[str(user.id)]['buffs'][key]['duration'])
                 elif key == "money":
                     buffs += " 💰 (+{}%/{}⏳) ".format(Userdata.users[str(user.id)]['buffs'][key]['bonus'],Userdata.users[str(user.id)]['buffs'][key]['duration'])
                 elif key == "xp":
                     buffs += " 📚 (+{}%/{}⏳) ".format(Userdata.users[str(user.id)]['buffs'][key]['bonus'],Userdata.users[str(user.id)]['buffs'][key]['duration'])
                 elif key == "monster":
-                    buffs += " ☣ (⚔{}|ℚ{}/{}⏳) ".format(Userdata.users[str(user.id)]['buffs'][key]['bonus']['att'],Userdata.users[str(user.id)]['buffs'][key]['bonus']['cha'],Userdata.users[str(user.id)]['buffs'][key]['duration'])
+                    buffs += " 🦖 (🗡️{}|🗬{}/{}⏳) ".format(Userdata.users[str(user.id)]['buffs'][key]['bonus']['att'],Userdata.users[str(user.id)]['buffs'][key]['bonus']['cha'],Userdata.users[str(user.id)]['buffs'][key]['duration'])
                 elif key == "rest":
                     buffs += " 💤 ({}x/{}⏳) ".format(Userdata.users[str(user.id)]['buffs'][key]['bonus'],Userdata.users[str(user.id)]['buffs'][key]['duration'])
             buffs += " -"

@@ -65,6 +65,7 @@ class Treasure:
     unique = {"[troll banhammer]":{"slot":["right","left"],"att":2,"cha":2},
             "[scythe of death]":{"slot":["right","left"],"att":3,"cha":-2},
             "[maul of efrin]":{"slot":["right"],"att":5,"cha":0},
+            "[longer sword]":{"slot":["right"],"att":4,"cha":1},
             "[star of ishtar]":{"slot":["charm"],"att":1,"cha":5},
             "[booklet of jokes]":{"slot":["charm"],"att":0,"cha":5},
             "[chain of command]":{"slot":["charm"],"att":4,"cha":2},
@@ -92,7 +93,10 @@ class Treasure:
             "[mace of many]":{"slot":["right"],"att":6,"cha":1},
             "[mesmer ring]":{"slot":["ring"],"att":1,"cha":6},
             "[crumhorn]":{"slot":["right", "left"],"att":3,"cha":5},
-            "[hydra fang]":{"slot":["charm"],"att":6,"cha":2}
+            "[hydra fang]":{"slot":["charm"],"att":6,"cha":2},
+            "[mithril tongue]":{"slot":["charm"],"att":-5,"cha":+8},
+            "[some ring on a chain]":{"slot":["charm"],"att":+8,"cha":-5},
+            "[wanderring]":{"slot":["ring"],"att":+20,"cha":+20}
             }
 
     async def open_chest(ctx, user, type):

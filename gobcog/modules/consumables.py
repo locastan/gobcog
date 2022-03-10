@@ -73,12 +73,12 @@ class Consumables:
         elif cons['type']== "augment":
             bkpk = []
             consumed = ""
-            forgeables = len(Userdata.users[str(user.id)]['items']['backpack']) - sum("{.:'" in x for x in Userdata.users[str(user.id)]['items']['backpack'])
+            forgeables = len(Userdata.users[str(user.id)]['items']['backpack']) - sum("{.:'" in x for x in Userdata.users[str(user.id)]['items']['backpack'])- sum("[wanderring]" in x for x in Userdata.users[str(user.id)]['items']['backpack'])
             if forgeables < 1:
                 await ctx.send("You need at least one augmentable item in your backpack.")
                 return False
             for item in Userdata.users[str(user.id)]['items']['backpack']:
-                if "{.:'" not in item:
+                if "{.:'" not in item and "[wanderring]" not in item:
                     if len(Userdata.users[str(user.id)]['items']['backpack'][item]['slot']) == 1:
                         bkpk.append(item + " (ATT "+ str(Userdata.users[str(user.id)]['items']['backpack'][item]['att']) + " / DPL "+ str(Userdata.users[str(user.id)]['items']['backpack'][item]['cha']) +") ["+ Userdata.users[str(user.id)]['items']['backpack'][item]['slot'][0] + " slot]")
                     else:
@@ -113,11 +113,11 @@ class Consumables:
                     return False
                 if reply.content.isdigit() and (int(reply.content)-1) < len(lookup) and int(reply.content) > 0:
                     idx = int(reply.content)-1
-                    if  "{.:'" not in lookup[idx] and ")*" not in lookup[idx]:
+                    if  "{.:'" not in lookup[idx] and ")*" not in lookup[idx] and "[wanderring]" not in lookup[idx]:
                         item1 = Userdata.users[str(user.id)]['items']['backpack'].get(lookup[idx])
                         consumed = lookup[idx]
                     else:
-                        await ctx.send("Devices and already augmented items cannot be augmented.")
+                        await ctx.send("This item cannot be augmented.")
                         return False
                 else:
                     await ctx.send("Sorry, but there was something wrong with that reply.")
@@ -126,11 +126,11 @@ class Consumables:
                 await ctx.send("I could not find that item, check your spelling.")
                 return False
             else: #len(lookup) equals 1 item
-                if  "{.:'" not in lookup[0] and ")*" not in lookup[0]:
+                if  "{.:'" not in lookup[0] and ")*" not in lookup[0] and "[wanderring]" not in lookup[0]:
                     item1 = Userdata.users[str(user.id)]['items']['backpack'].get(lookup[0])
                     consumed = lookup[0]
                 else:
-                    await ctx.send("Devices and already augmented items cannot be augmented.")
+                    await ctx.send("This item cannot be augmented.")
                     return False
             roll = random.randint(1,20)
             if roll == 1:
