@@ -1100,7 +1100,7 @@ class GobCog(BaseCog):
         for id in Userdata.users:
             if id == new_holder_id:
                 continue
-            if next(iter(Userdata.users[str(id)]['items'].get('ring', "Empty_slot"))) == '[wanderring]':
+            if "[wanderring]" in list(Userdata.users[str(id)]['items'].get('ring', "Empty_slot")):
                 moveitem = Userdata.users[str(id)]['items']['ring'].pop('[wanderring]')
                 Userdata.users[str(id)]['att'] -= 20
                 Userdata.users[str(id)]['cha'] -= 20
