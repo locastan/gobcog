@@ -1,5 +1,6 @@
 import random
 import asyncio
+import copy
 from redbot.core.utils.predicates import MessagePredicate
 from .userdata import Userdata
 from .adventure import Adventure
@@ -9,67 +10,72 @@ from .alchemy import Alchemy
 class Consumables:
     #Name table to assign effects to consumables. Consumable items themselfes are defined in treasure.py
     # need to figure out durations, if only for number of fights or opened chests for example.
-    consbles = {".potion_of_strength":{'type':"buff", 'attrib':"att", 'min':1, 'max':4, 'duration':1, 'desc':"Increases your attack bonus for one fight."},
-                    ".vial_of_aggression":{'type':"buff", 'attrib':"att", 'min':1, 'max':2, 'duration':1, 'desc':"Small increase of your attack bonus for one fight."},
-                    ".potion_of_eloquence":{'type':"buff", 'attrib':"cha", 'min':1, 'max':4, 'duration':1, 'desc':"Increases your diplomacy bonus for one fight."},
-                    ".vial_of_wit":{'type':"buff", 'attrib':"cha", 'min':1, 'max':2, 'duration':1, 'desc':"Small increase of your diplomanc bonus for one fight."},
-                    "four leaf clover":{'type':"buff", 'attrib':"luck", 'min':5, 'max':15, 'duration':1, 'desc':"This will bestow good luck during the next fight or chest opening."},
-                    "[luckworth essence]":{'type':"buff", 'attrib':"luck", 'min':15, 'max':50, 'duration':5, 'desc':"This will bestow good luck during 5 fights or opening 5 chests."},
-                    "[bottled fortune]":{'type':"buff", 'attrib':"luck", 'min':50, 'max':100, 'duration':1, 'desc':"This will bestow exceptional luck during the next fight or chest opening."},
-                    ".dust_of_midas":{'type':"buff", 'attrib':"money", 'min':10, 'max':100, 'duration':1, 'desc':"Increases amount of cp gained for one fight."},
-                    "[foliant of greed]":{'type':"buff", 'attrib':"money", 'min':50, 'max':100, 'duration':10, 'desc':"Substantially increases amount of cp gained for 10 fights."},
-                    ".scroll_of_learning":{'type':"buff", 'attrib':"xp", 'min':10, 'max':100, 'duration':1, 'desc':"Increases amount of xp gained for one fight."},
-                    "[foliant of wisdom]":{'type':"buff", 'attrib':"xp", 'min':10, 'max':100, 'duration':10, 'desc':"Increases amount of xp gained for 10 fights."},
-                    "[chaos egg]":{'type':"summon", 'attrib':"monster", 'min':10, 'max':100, 'duration':1, 'desc':"Summons a random allied monster for the next fight."},
-                    "[soul essence]":{'type':"augment", 'attrib':"item", 'min':1, 'max':5, 'duration':10, 'desc':"This can be used to improve items."},
-                    "[distilled charisma]":{'type':"buff", 'attrib':"cha", 'min':5, 'max':20, 'duration':1, 'desc':"Strong buff to your diplomacy bonus for one fight."},
-                    "[brutal philtre]":{'type':"buff", 'attrib':"att", 'min':5, 'max':20, 'duration':1, 'desc':"Strong buff to your attack bonus for one fight."},
-                    "bitter stew":{'type':"buff", 'attrib':"rest", 'min':1, 'max':2, 'duration':1, 'desc':"Nourishing gruel. Horrible taste."},
-                    ".sweet_stew":{'type':"buff", 'attrib':"rest", 'min':2, 'max':5, 'duration':1, 'desc':"A sweet meal. Dental care not included."},
-                    ".hearty_stew":{'type':"buff", 'attrib':"rest", 'min':3, 'max':4, 'duration':1, 'desc':"Nourishing and artery hardening soup."},
-                    "[sweetbread]":{'type':"buff", 'attrib':"rest", 'min':4, 'max':6, 'duration':1, 'desc':"Delicious bread, provides a good meal."},
-                    "bandaid":{'type':"medicine", 'attrib':"hp", 'min':1, 'max':4, 'duration':1, 'desc':"Small bandaid to mend little scratches."},
-                    "bandages":{'type':"medicine", 'attrib':"hp", 'min':2, 'max':6, 'duration':1, 'desc':"Bandages to mend wounds and set broken bones."},
-                    ".potion_of_healing":{'type':"medicine", 'attrib':"hp", 'min':4, 'max':10, 'duration':1, 'desc':"Standard 2d4+2 healing potion."},
-                    "[potion of rejuvenation]":{'type':"medicine", 'attrib':"hp", 'min':50, 'max':100, 'duration':1, 'desc':"Restores a % of your HP (min 50%)."},
-                    "alchemy scroll":{'type':"read", 'attrib':"recipe", 'min':1, 'max':1, 'duration':1, 'desc':"Studying the blurred scribbles might reveal an alchemical recipe."}
+    consbles = {".potion_of_strength":{'type':"buff", 'attrib':["att"], 'min':1, 'max':4, 'duration':1, 'desc':"Increases your attack bonus for one fight."},
+                    ".vial_of_aggression":{'type':"buff", 'attrib':["att"], 'min':1, 'max':2, 'duration':1, 'desc':"Small increase of your attack bonus for one fight."},
+                    ".potion_of_eloquence":{'type':"buff", 'attrib':["cha"], 'min':1, 'max':4, 'duration':1, 'desc':"Increases your diplomacy bonus for one fight."},
+                    ".vial_of_wit":{'type':"buff", 'attrib':["cha"], 'min':1, 'max':2, 'duration':1, 'desc':"Small increase of your diplomacy bonus for one fight."},
+                    "[phenomenal phial]":{'type':"buff", 'attrib':["att","cha"], 'min':1, 'max':3, 'duration':2, 'desc':"Small increase of oth attack and diplomacy bonus for 2 fights."},
+                    "[jacks pot]":{'type':"buff", 'attrib':["xp","money"], 'min':20, 'max':200, 'duration':1, 'desc':"Increase of both xp and cp bonus for the next fight."},
+                    "[edible chance]":{'type':"buffchance", 'attrib':["xp","money"], 'min':10, 'max':100, 'duration':1, 'desc':"Chance of either a xp or cp gain bonus next fight."},
+                    "four leaf clover":{'type':"buff", 'attrib':["luck"], 'min':5, 'max':15, 'duration':1, 'desc':"This will bestow good luck during the next fight or chest opening."},
+                    "[luckworth essence]":{'type':"buff", 'attrib':["luck"], 'min':15, 'max':50, 'duration':5, 'desc':"This will bestow good luck during 5 fights or opening 5 chests."},
+                    "[bottled fortune]":{'type':"buff", 'attrib':["luck"], 'min':50, 'max':100, 'duration':1, 'desc':"This will bestow exceptional luck during the next fight or chest opening."},
+                    ".dust_of_midas":{'type':"buff", 'attrib':["money"], 'min':10, 'max':100, 'duration':1, 'desc':"Increases amount of cp gained for one fight."},
+                    "[foliant of greed]":{'type':"buff", 'attrib':["money"], 'min':50, 'max':100, 'duration':10, 'desc':"Substantially increases amount of cp gained for 10 fights."},
+                    ".scroll_of_learning":{'type':"buff", 'attrib':["xp"], 'min':10, 'max':100, 'duration':1, 'desc':"Increases amount of xp gained for one fight."},
+                    "[foliant of wisdom]":{'type':"buff", 'attrib':["xp"], 'min':10, 'max':100, 'duration':10, 'desc':"Increases amount of xp gained for 10 fights."},
+                    "[chaos egg]":{'type':"summon", 'attrib':["monster"], 'min':10, 'max':100, 'duration':1, 'desc':"Summons a random allied monster for the next fight."},
+                    "[soul essence]":{'type':"augment", 'attrib':["item"], 'min':1, 'max':5, 'duration':10, 'desc':"This can be used to improve items."},
+                    "[distilled charisma]":{'type':"buff", 'attrib':["cha"], 'min':5, 'max':20, 'duration':1, 'desc':"Strong buff to your diplomacy bonus for one fight."},
+                    "[brutal philtre]":{'type':"buff", 'attrib':["att"], 'min':5, 'max':20, 'duration':1, 'desc':"Strong buff to your attack bonus for one fight."},
+                    "bitter stew":{'type':"buff", 'attrib':["rest"], 'min':1, 'max':2, 'duration':1, 'desc':"Nourishing gruel. Horrible taste."},
+                    ".sweet_stew":{'type':"buff", 'attrib':["rest"], 'min':2, 'max':5, 'duration':1, 'desc':"A sweet meal. Dental care not included."},
+                    ".hearty_stew":{'type':"buff", 'attrib':["rest"], 'min':3, 'max':4, 'duration':1, 'desc':"Nourishing and artery hardening soup."},
+                    ".salty_stew":{'type':"buff", 'attrib':["rest"], 'min':3, 'max':5, 'duration':2, 'desc':"A spicy soup. Toughening your sea legs, while raising blood pressARRRe."},
+                    "[sweetbread]":{'type':"buff", 'attrib':["rest"], 'min':4, 'max':6, 'duration':1, 'desc':"Delicious bread, provides a good meal."},
+                    "bandaid":{'type':"medicine", 'attrib':["hp"], 'min':1, 'max':4, 'duration':1, 'desc':"Small bandaid to mend little scratches."},
+                    "bandages":{'type':"medicine", 'attrib':["hp"], 'min':2, 'max':6, 'duration':1, 'desc':"Bandages to mend wounds and set broken bones."},
+                    ".potion_of_healing":{'type':["medicine"], 'attrib':"hp", 'min':4, 'max':10, 'duration':1, 'desc':"Standard 2d4+2 healing potion."},
+                    "[potion of rejuvenation]":{'type':["medicine"], 'attrib':"hp", 'min':50, 'max':100, 'duration':1, 'desc':"Restores a % of your HP (min 50%)."},
+                    "alchemy scroll":{'type':"read", 'attrib':["recipe"], 'min':1, 'max':1, 'duration':1, 'desc':"Studying the blurred scribbles might reveal an alchemical recipe."}
                 }
 
     async def use_con(ctx, user, con):
-        cons = Consumables.consbles.get(con)
+        cons = copy.deepcopy(Consumables.consbles.get(con)) #deepcopy needed to not modify the original dict on buffchance
+        if cons['type'] == "buffchance":
+            cons['attrib'] = [random.choice(cons['attrib'])]
+            cons['type'] = "buff"
         if cons['type'] == "buff":
-            if cons['attrib'] == 'att' or cons['attrib'] == 'cha':
-                bonus = random.randint(cons['min'],cons['max'])
-                Userdata.users[str(user.id)]['buffs'].update({cons['attrib']:{'bonus':bonus, 'duration':cons['duration']}})
-                attb = int(Userdata.users[str(user.id)]['skill']['att'])+ int(Userdata.users[str(user.id)]['buffs'].get('att', {'bonus':0})['bonus'])
-                chab = int(Userdata.users[str(user.id)]['skill']['cha'])+ int(Userdata.users[str(user.id)]['buffs'].get('cha', {'bonus':0})['bonus'])
-                await ctx.send("Your {} gives you +{} {} for the next fight.".format(con,bonus,cons['attrib'].upper()))
-                await ctx.send("Your new stats: **Attack**: {} [+{}], **Diplomacy**: {} [+{}].".format(Userdata.users[str(user.id)]['att'],attb,Userdata.users[str(user.id)]['cha'],chab))
-                return True
-            elif cons['attrib'] == 'luck':
-                bonus = random.randint(cons['min'],cons['max'])
-                Userdata.users[str(user.id)]['buffs'].update({cons['attrib']:{'bonus':bonus, 'duration':cons['duration']}})
-                if cons['duration'] == 1:
-                    await ctx.send("Your {} yielded {}% increased luck during the next fight or chest opening.".format(con,bonus))
-                else:
-                    await ctx.send("Your {} yielded {}% increased luck during {} fights or chest openings.".format(con,bonus,cons['duration']))
-                return True
-            elif cons['attrib'] == 'rest':
-                bonus = random.randint(cons['min'],cons['max'])
-                Userdata.users[str(user.id)]['buffs'].update({cons['attrib']:{'bonus':bonus, 'duration':cons['duration']}})
-                if cons['duration'] == 1:
-                    await ctx.send("Your {} yielded {}x faster recovery during the next rest.".format(con,bonus))
-                else:
-                    await ctx.send("Your {} yielded {}x faster recovery during {} rests.".format(con,bonus,cons['duration']))
-                return True
-            elif cons['attrib'] == 'xp' or cons['attrib'] == 'money':
-                bonus = random.randint(cons['min'],cons['max'])
-                Userdata.users[str(user.id)]['buffs'].update({cons['attrib']:{'bonus':bonus, 'duration':cons['duration']}})
-                if cons['duration'] == 1:
-                    await ctx.send("Your {} gives you {}% more {} for the next fight.".format(con,bonus,cons['attrib']))
-                else:
-                    await ctx.send("Your {} gives you {}% more {} for the next {} fights.".format(con,bonus,cons['attrib'],cons['duration']))
-                return True
+            for a in cons['attrib']:
+                if a == 'att' or a == 'cha':
+                    bonus = random.randint(cons['min'],cons['max'])
+                    Userdata.users[str(user.id)]['buffs'].update({a:{'bonus':bonus, 'duration':cons['duration']}})
+                    attb = int(Userdata.users[str(user.id)]['skill']['att'])+ int(Userdata.users[str(user.id)]['buffs'].get('att', {'bonus':0})['bonus'])
+                    chab = int(Userdata.users[str(user.id)]['skill']['cha'])+ int(Userdata.users[str(user.id)]['buffs'].get('cha', {'bonus':0})['bonus'])
+                    await ctx.send("Your {} gives you +{} {} for the next fight.".format(con,bonus,a.upper()))
+                    await ctx.send("Your new stats: **Attack**: {} [+{}], **Diplomacy**: {} [+{}].".format(Userdata.users[str(user.id)]['att'],attb,Userdata.users[str(user.id)]['cha'],chab))
+                elif a == 'luck':
+                    bonus = random.randint(cons['min'],cons['max'])
+                    Userdata.users[str(user.id)]['buffs'].update({a:{'bonus':bonus, 'duration':cons['duration']}})
+                    if cons['duration'] == 1:
+                        await ctx.send("Your {} yielded {}% increased luck during the next fight or chest opening.".format(con,bonus))
+                    else:
+                        await ctx.send("Your {} yielded {}% increased luck during {} fights or chest openings.".format(con,bonus,cons['duration']))
+                elif a == 'rest':
+                    bonus = random.randint(cons['min'],cons['max'])
+                    Userdata.users[str(user.id)]['buffs'].update({a:{'bonus':bonus, 'duration':cons['duration']}})
+                    if cons['duration'] == 1:
+                        await ctx.send("Your {} yielded {}x faster recovery during the next rest.".format(con,bonus))
+                    else:
+                        await ctx.send("Your {} yielded {}x faster recovery during {} rests.".format(con,bonus,cons['duration']))
+                elif a == 'xp' or a == 'money':
+                    bonus = random.randint(cons['min'],cons['max'])
+                    Userdata.users[str(user.id)]['buffs'].update({a:{'bonus':bonus, 'duration':cons['duration']}})
+                    if cons['duration'] == 1:
+                        await ctx.send("Your {} gives you {}% more {} for the next fight.".format(con,bonus,a))
+                    else:
+                        await ctx.send("Your {} gives you {}% more {} for the next {} fights.".format(con,bonus,a,cons['duration']))
+            return True
         elif cons['type']== "augment":
             bkpk = []
             consumed = ""
@@ -169,7 +175,7 @@ class Consumables:
             monster = random.choice(list(Adventure.monsters.keys()))
             att = int(Adventure.monsters[monster]["str"]*Adventure.attribs[attrib][0])
             cha = int(Adventure.monsters[monster]["dipl"]*Adventure.attribs[attrib][1])
-            Userdata.users[str(user.id)]['buffs'].update({cons['attrib']:{'bonus':{'att':att,'cha':cha}, 'duration':cons['duration']}})
+            Userdata.users[str(user.id)]['buffs'].update({cons['attrib'][0]:{'bonus':{'att':att,'cha':cha}, 'duration':cons['duration']}})
             await ctx.send("**{}** summoned a{} {} (🗡 {} | 🗨 {}).".format(user.display_name,attrib,monster,att,cha))
             return True
         elif cons['type'] == "medicine":
@@ -225,7 +231,6 @@ class Consumables:
             charlist = list(word)
             random.shuffle(charlist)
             wordlist[idx] = ''.join(charlist)
-            print(word)
         return ' '.join(wordlist)
 
     async def scramble(recipe):
@@ -234,5 +239,4 @@ class Consumables:
             charlist = list(word[1:-1])
             random.shuffle(charlist)
             wordlist[idx] = word[0] + ''.join(charlist) + word[-1]
-            print(word)
         return ' '.join(wordlist)

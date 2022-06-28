@@ -414,6 +414,18 @@ class GobCog(BaseCog):
 
     @commands.command()
     @checks.admin_or_permissions(administrator=True)
+    async def adminexplore(self, ctx, type: str="Ocean of Opportunity"):
+        """This sends you on an exploration trip
+            on a graphical map. Move with the arrow buttons.
+        """
+        if Explore.mapmsg != None:
+            ctx.command.reset_cooldown(ctx)
+            await ctx.send("Sorry somebody is exploring at the moment.")
+        else:
+            await Explore.adminexplore(ctx,ctx.author, type)
+
+    @commands.command()
+    @checks.admin_or_permissions(administrator=True)
     async def give_loot(self, ctx, type: str="normal", user: discord.Member=None, amount: int=1):
         """[Admin] This rewards a treasure chest to a specified member.
             !give_loot normal @locastan
@@ -950,8 +962,11 @@ class GobCog(BaseCog):
                 continue
             else:
                 cons = lookup[0]
-                if Consumables.consbles[cons]['attrib'] in Userdata.users[str(user.id)]['buffs'].keys():
+                if len(Consumables.consbles[cons]['attrib']) < 2 and Consumables.consbles[cons]['attrib'][0] in Userdata.users[str(user.id)]['buffs'].keys():
                     await ctx.send("You already have the buff of {} in effect.".format(cons))
+                    continue
+                if len(Consumables.consbles[cons]['attrib']) == 2 and Consumables.consbles[cons]['attrib'][0] in Userdata.users[str(user.id)]['buffs'].keys() and Consumables.consbles[cons]['attrib'][1] in Userdata.users[str(user.id)]['buffs'].keys():
+                    await ctx.send("You already have both buffs of {} in effect.".format(cons))
                     continue
                 Done = await Consumables.use_con(ctx, user, cons)
                 if Done:
@@ -1098,7 +1113,7 @@ class GobCog(BaseCog):
     async def move_wanderring(ctx, new_holder_id):
         found = False
         for id in Userdata.users:
-            if id == new_holder_id:
+            if id == new_holder_id:  # this check doesn't work because numbers vs strings, users owever prefer the ring to have a mind of its own. :)
                 continue
             if "[wanderring]" in list(Userdata.users[str(id)]['items'].get('ring', "Empty_slot")):
                 moveitem = Userdata.users[str(id)]['items']['ring'].pop('[wanderring]')
@@ -1485,7 +1500,7 @@ class GobCog(BaseCog):
             will transfer 10 cp to Elder Aramis.
         """
         if to is None:
-            await ctx.send("You need to specify who you want me to give your money to, " + ctx.author.name + ".")
+            await ctx.send("You need to specify who you want me to give your money to, " + ctx.author.display_name + ".")
         spender = ctx.author
         if await bank.can_spend(spender,amount):
             bal = await bank.transfer_credits(spender, to, amount)
@@ -1585,7 +1600,7 @@ class GobCog(BaseCog):
             will create 10 cp and add to Elder Aramis.
         """
         if to is None:
-            return await ctx.send("You need to specify a receiving member, " + ctx.author.name + ".")
+            return await ctx.send("You need to specify a receiving member, " + ctx.author.display_name + ".")
         bal = await bank.deposit_credits(to, amount)
         currency = await bank.get_currency_name(ctx.guild)
         await ctx.send(
@@ -1602,7 +1617,7 @@ class GobCog(BaseCog):
             will set balance at 10 cp for Elder Aramis.
         """
         if to is None:
-            return await ctx.send("You need to specify a receiving member, " + ctx.author.name + ".")
+            return await ctx.send("You need to specify a receiving member, " + ctx.author.display_name + ".")
         bal = await bank.set_balance(to, amount)
         currency = await bank.get_currency_name(ctx.guild)
         await ctx.send(
@@ -1896,17 +1911,17 @@ class GobCog(BaseCog):
         roll = random.randint(1,20)
         versus = random.randint(1,20)
         if roll== 1:
-            await ctx.send("**" + ctx.author.name + "**" + " fumbled and died to " + negachar + "'s savagery.")
+            await ctx.send("**" + ctx.author.display_name + "**" + " fumbled and died to " + negachar + "'s savagery.")
         elif roll == 20:
-            await ctx.send("**" + ctx.author.name + "**" + " decapitated " + negachar + ". You gain {} xp and {} cp.".format(amount*2, amount))
+            await ctx.send("**" + ctx.author.display_name + "**" + " decapitated " + negachar + ". You gain {} xp and {} cp.".format(amount*2, amount))
             await self.add_rewards(ctx, ctx.message.author, amount*2, amount, False)
         elif roll > versus:
-            await ctx.send("**" + ctx.author.name + "** 🎲({})".format(roll) + " bravely defeated " + negachar + " 🎲({}). You gain {} xp.".format(versus, amount))
+            await ctx.send("**" + ctx.author.display_name + "** 🎲({})".format(roll) + " bravely defeated " + negachar + " 🎲({}). You gain {} xp.".format(versus, amount))
             await self.add_rewards(ctx, ctx.message.author, amount, 0, False)
         elif roll == versus:
-            await ctx.send("**" + ctx.author.name + "** 🎲({})".format(roll) + " almost killed " + negachar + " 🎲({}).".format(versus))
+            await ctx.send("**" + ctx.author.display_name + "** 🎲({})".format(roll) + " almost killed " + negachar + " 🎲({}).".format(versus))
         else:
-            await ctx.send("**" + ctx.author.name + "** 🎲({})".format(roll) + " was killed by " + negachar + " 🎲({}).".format(versus))
+            await ctx.send("**" + ctx.author.display_name + "** 🎲({})".format(roll) + " was killed by " + negachar + " 🎲({}).".format(versus))
 
     '''  #uncomment once the custom error handler has been released.
     @commands.error

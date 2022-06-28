@@ -30,6 +30,10 @@ class Adventure:
                 " colossal":[2,1.1],
                 " miniature":[0.7,0.9],
                 " feral":[1.8,0.9],
+                " battered":[0.5,0.5],
+                " mesmerizing":[0.9,2.5],
+                " menacing":[2.5,0.9],
+                " palatine":[2,2],
                 "n overpowered":[3,3]}
     monsters = {"Ogre":{"str":18,"dipl":10},
                 "Gnoll":{"str":12,"dipl":8},
@@ -42,10 +46,13 @@ class Adventure:
                 "Shrieker":{"str":11,"dipl":12},
                 "Zombie":{"str":15,"dipl":12},
                 "Skeleton":{"str":13,"dipl":16},
+                "Sahuagin":{"str":15,"dipl":15},
+                "Swarm of Quipper":{"str":25,"dipl":12},
                 "Slaad":{"str":12,"dipl":15},
                 "Gelatinous Cube":{"str":12,"dipl":30},
                 "Green Ooze":{"str":10,"dipl":30},
                 "Black Ooze":{"str":30,"dipl":40},
+                "Marid":{"str":32,"dipl":48},
                 "Golem":{"str":40,"dipl":20},
                 "Wizard":{"str":8,"dipl":15},
                 "Demon":{"str":30,"dipl":17},
@@ -75,6 +82,7 @@ class Adventure:
                 "Blue Dragon":{"str":110,"dipl":100},
                 "Black Dragon":{"str":130,"dipl":120},
                 "White Dragon":{"str":200,"dipl":220},
+                "Leviathan":{"str":320,"dipl":320},
                 "Tarrasque":{"str":400,"dipl":400}}
 
     challenge = ""
@@ -330,7 +338,7 @@ class Adventure:
                 roll = random.randint(1,20)
                 member = discord.utils.find(lambda m: m.display_name == user, ctx.guild.members)
                 if member == None:
-                    await ctx.send("**" + user + "**" + " wandered off to look at a particular interesting bird. (Namechange during adventure)")
+                    await ctx.send("**" + user + "**" + " wandered off to look at a particular interesting bird. (1)")
                     return (fumblelist, critlist, attack)
                 att_value = Userdata.users[str(member.id)]['att'] + Userdata.users[str(member.id)]['skill']['att'] + Userdata.users[str(member.id)]['buffs'].get('att', {'bonus':0})['bonus']
                 monster_string = ""
@@ -391,7 +399,7 @@ class Adventure:
             for user in Adventure.userslist["pray"]:
                 member = discord.utils.find(lambda m: m.display_name == user, ctx.guild.members)
                 if member == None:
-                    await ctx.send("**" + user + "**" + " wandered off to look at a particular interesting bird. (Namechange during adventure)")
+                    await ctx.send("**" + user + "**" + " wandered off to look at a particular interesting bird. (2)")
                     return (fumblelist, attack, diplomacy)
                 if Userdata.users[str(member.id)]['class']['name']=="Cleric" and Userdata.users[str(member.id)]['class']['ability']:
                     roll = random.randint(1,20)
@@ -444,7 +452,7 @@ class Adventure:
                 roll = random.randint(1,20)
                 member = discord.utils.find(lambda m: m.display_name == user, ctx.guild.members)
                 if member == None:
-                    await ctx.send("**" + user + "**" + " wandered off to look at a particular interesting bird. (Namechange during adventure)")
+                    await ctx.send("**" + user + "**" + " wandered off to look at a particular interesting bird. (3)")
                     return (fumblelist, critlist, diplomacy)
                 dipl_value = Userdata.users[str(member.id)]['cha'] + Userdata.users[str(member.id)]['skill']['cha'] + Userdata.users[str(member.id)]['buffs'].get('cha', {'bonus':0})['bonus']
                 songbonus = 0
@@ -497,7 +505,7 @@ class Adventure:
                 for user in Adventure.userslist["fight"]+Adventure.userslist["talk"]+Adventure.userslist["pray"]: #check if any fighter has an equipped mirror shield to give them a chance.
                     member = discord.utils.find(lambda m: m.display_name == user, ctx.guild.members)
                     if member == None:
-                        await ctx.send("**" + user + "**" + " wandered off to look at a particular interesting bird. (Namechange during adventure)")
+                        await ctx.send("**" + user + "**" + " wandered off to look at a particular interesting bird. (4)")
                         continue
                     if next((iter(Userdata.users[str(member.id)]['items']['left'])), "Empty_slot")[0:14] == '.mirror_shield':
                         failed = False
@@ -559,7 +567,7 @@ class Adventure:
             for user in checklist:
                 member = discord.utils.find(lambda m: m.display_name == user, ctx.guild.members)
                 if member == None:
-                    await ctx.send("**" + user + "**" + " wandered off to look at a particular interesting bird. (Namechange during adventure)")
+                    await ctx.send("**" + user + "**" + " wandered off to look at a particular interesting bird. (5)")
                     continue
                 lucky = Userdata.users[str(member.id)]['buffs'].get('luck')
                 if lucky != None:
@@ -728,7 +736,7 @@ class Adventure:
             Adventure.rewards[user] = {}
             member = discord.utils.find(lambda m: m.display_name == user, ctx.guild.members)
             if member == None:
-                await ctx.send("**" + user + "**" + " wandered off to look at a particular interesting bird. (Namechange during adventure)")
+                await ctx.send("**" + user + "**" + " wandered off to look at a particular interesting bird. (6)")
                 continue
             bxp = 0
             bcp = 0

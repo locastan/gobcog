@@ -40,17 +40,24 @@ class Explore:
             "Flyleaf":{"tile": "🍃", "desc":"Very light and aromatic leafs. Good booster to alchemy."},
             "Mushroom":{"tile": "🍄", "desc":"Redcap mushrooms have powerful potency."},
             "Chestnut":{"tile": "🌰", "desc":"Some chestnuts. Good for eating and brewing."},
+            "Reeds":{"tile": "🎍", "desc":"Tall sturdy reeds. Contains some sweet sap."},
+            "Brineapple":{"tile": "🍍", "desc":"An excessively salty fruit. It is covered with sharp spikes of salt crystals."},
+            "Chondrus":{"tile": "🎋", "desc":"A gooey and surprisingly sturdy algae."},
+            "Grufferfish":{"tile": "🐡", "desc":"A hopelessly agressive type of small pufferfish."},
+            "Ancient Conch":{"tile": "🐚", "desc":"The fossil shell of some long forgotten sea creature."},
             "Fog":{"tile": "🌫️", "desc":"Step in to find out."},
             "Rock":{"tile": "⛰️", "desc":"A big rock. You cannot move here."},
             #"Grass":{"tile": "<:Grassland:593422372468686859>", "desc":"Just grassland."}, #use this for beta server
             "Grass":{"tile": "<:Grassland:593755278328201226>", "desc":"Just grassland."}, #use this for Goblinscomic Discord
             "Player":{"tile": "🗿", "desc":"Player"},
+            "Boat":{"tile": "⛵", "desc":"Boat"},
             "Chest":{"tile": "💼", "desc":"A forgotten treasure chest!"},
             "Fountain":{"tile": "⛲", "desc":"A refreshing fountain!"},
             "Crystal Ball":{"tile": "🔮", "desc":"A ball of crystal on a pedestal..."},
             "Scroll":{"tile": "📜", "desc":"An old scroll of parchment."},
             "Sand":{"tile": "🟨", "desc":"Hot desert sand."},
-            "Ice":{"tile": "🟦", "desc":"The frozen surface of a lake."},
+            "Ocean":{"tile": "🟦", "desc":"Deep waters of the open sea."},
+            "Shallows":{"tile": "⬜", "desc":"Shallow waters of the coast."},
             "Volcano":{"tile": "🌋", "desc":"A magma spewing volcano."},
             "Campsite":{"tile": "🏕️", "desc":"A nice little campsite."}
             }
@@ -78,17 +85,24 @@ class Explore:
             "🍃": "Flyleaf",
             "🍄": "Mushroom",
             "🌰": "Chestnut",
+            "🎍": "Reeds",
+            "🍍": "Brineapple",
+            "🎋": "Chondrus",
+            "🐡": "Grufferfish",
+            "🐚": "Ancient Conch",
             "🌫️": "Fog",
             "⛰️": "Rock",
             #"<:Grassland:593422372468686859>": "Grass", #use this on testserver
             "<:Grassland:593755278328201226>": "Grass", #use this on Goblins Discord server
             "🗿": "Player",
+            "⛵": "Boat",
             "💼": "Chest",
             "⛲": "Fountain",
             "🔮": "Crystal Ball",
             "📜": "Scroll",
             "🟨": "Sand",
-            "🟦": "Ice",
+            "🟦": "Ocean",
+            "⬜": "Shallows",
             "🌋": "Volcano",
             "🏕️": "Campsite"
             }
@@ -97,8 +111,10 @@ class Explore:
     biomes = {"Enchanted Forest": {"legendary":["Ooze","Sageworth","Whipweed","Conifer","Cyanka Lilly","Flyleaf","Campsite"],"epic":["Chestnut","Whipweed","Maple","Oak"],"rare":["Maple","Rock"],"common":["Mushroom","Oak","Oak","Grass"]},
             "Lush Grasslands": {"legendary":["Twolip","Moneypenny","Raging Frills","Rose","Campsite"],"epic":["Mourning Star","Honeytail","Clover","Rock"],"rare":["Oilflower","Grass","Grass"],"common":["Daisy","Grass","Grass","Grass","Grass"]},
             "Drygrass Steppes":{"legendary":["Na-palm","Fleshthorn","Rock"],"epic":["Tongue Sprout","Grass","Flyleaf"],"rare":["Rust Leafs","Grass","Grass"],"common":["Rock","Grass","Grass","Grass"]},
-            "Desert of Desolation":{"legendary":["Na-palm","Volcano","Fountain"],"epic":["Rust Leafs","Sand","Moneypenny","Fountain","Flyleaf","Sand","Sand","Sand","Sand"],"rare":["Fleshthorn","Sand","Sand","Rock"],"common":["Rock","Sand","Sand","Sand","Sand"]}
+            "Desert of Desolation":{"legendary":["Na-palm","Volcano","Fountain"],"epic":["Rust Leafs","Sand","Moneypenny","Fountain","Flyleaf","Sand","Sand","Sand","Sand"],"rare":["Fleshthorn","Sand","Sand","Rock"],"common":["Rock","Sand","Sand","Sand","Sand"]},
+            "Ocean of Opportunity":{"legendary":["Ocean","Rock"],"epic":["Ocean"],"rare":["Ocean"],"common":["Ocean"]}
             }
+
 
     mapsize = [21,21]
     timeout = 300
@@ -118,6 +134,25 @@ class Explore:
         Explore.pending = []
         Explore.loot = {}
         Explore.mapmsg = None
+        Explore.mapsize = [21,21]
+        Explore.player_pos = [11,11]
+        Explore.moves = 10 + int(Userdata.users[str(user.id)]['lvl']/2)
+        Explore.movesmsg = await ctx.send("{} moves remaining.".format(Explore.moves))
+        Explore.map, Explore.fowmap = await Explore.generate(Explore.biome,Explore.mapsize)
+        await Explore.update_fow()
+        output = await Explore.mapdrawer(list(Explore.fowmap)) #passing just a copy of the original tile list so original does not get changed.
+        Explore.mapmsg = await ctx.send(output)
+        await Explore.menu(ctx, ["Move with these controls:"], {"\U00002B05": Explore.left, "\U00002B06" : Explore.up, "\U00002B07" : Explore.down, "\U000027A1" : Explore.right, "\U00002139": Explore.inspect, "\U0001F44A" : Explore.pick, "\U000023CF": Explore.exit}, Explore.statusmsg)
+        return Explore.loot
+
+    async def adminexplore(ctx,user,bio):
+        Explore.biome = bio
+        Explore.intro = await ctx.send("{} is exploring the {}:".format(user.display_name, Explore.biome))
+        Explore.statusmsg = None
+        Explore.pending = []
+        Explore.loot = {}
+        Explore.mapmsg = None
+        Explore.mapsize = [21,21]
         Explore.player_pos = [11,11]
         Explore.moves = 10 + int(Userdata.users[str(user.id)]['lvl']/2)
         Explore.movesmsg = await ctx.send("{} moves remaining.".format(Explore.moves))
@@ -150,32 +185,116 @@ class Explore:
         for r in visible_x:
             for t in visible_y:
                 if r == Explore.player_pos[0] and t == Explore.player_pos[1]:
-                    text += Explore.tiles["Player"]["tile"] + " "
+                    if Explore.biome == "Ocean of Opportunity":
+                        templookup = Explore.tile_lookup.get(Explore.map[Explore.player_pos[0]][Explore.player_pos[1]],"Unknown Tile")
+                        if templookup == "Ocean" or templookup == "Shallows" or templookup == "Grufferfish":
+                            text += Explore.tiles["Boat"]["tile"] + " "
+                        else:
+                            text += Explore.tiles["Player"]["tile"] + " "
+                    else:
+                        text += Explore.tiles["Player"]["tile"] + " "
                 else:
                     text += map[r][t] + " "
             text += "\n"
         return text
 
+    async def get_adjacent_coords(map,x_coord,y_coord):
+        adjacient = []
+        for x,y in [(x_coord+i,y_coord+j) for i in (-1,0,1) for j in (-1,0,1) if i != 0 or j != 0]:
+            if 0 <= x < Explore.mapsize[0] and 0 <= y < Explore.mapsize[1]:
+                adjacient.append((x,y))
+        return(adjacient)
+
     async def generate(biome,size):
-        map = [[0] * size[0] for i in range(size[1])]
-        fowmap = [[Explore.tiles["Fog"]["tile"]] * size[0] for i in range(size[1])]
-        for r in range(len(map)):
-            for t in range(len(map[r])):
-                roll = random.randint(1,100)
-                if roll <= 3:
-                    map[r][t] = Explore.tiles[random.choice(Explore.biomes[biome].get("legendary"))]["tile"]
-                elif roll <= 10:
-                    map[r][t] = Explore.tiles[random.choice(Explore.biomes[biome].get("epic"))]["tile"]
-                elif roll <= 15:
-                    map[r][t] = Explore.tiles[random.choice(Explore.biomes[biome].get("rare"))]["tile"]
-                elif roll <= 99:
-                    map[r][t] = Explore.tiles[random.choice(Explore.biomes[biome].get("common"))]["tile"]
-                elif roll == 100:
-                    special = [Explore.tiles["Chest"]["tile"],Explore.tiles["Scroll"]["tile"],Explore.tiles["Crystal Ball"]["tile"],Explore.tiles["Fountain"]["tile"]]
-                    spec_tile = random.choice(special)
-                    map[r][t] = spec_tile
-        #make sure player always starts on a rock to enable movement when stranded surrounded by rocks.
-        map[Explore.player_pos[0]][Explore.player_pos[1]] = Explore.tiles["Rock"]["tile"]
+        if Explore.biome == "Ocean of Opportunity":
+            Explore.mapsize = size = [31,31]
+            Explore.player_pos = [16,16]
+            map = [[0] * size[0] for i in range(size[1])]
+            fowmap = [[Explore.tiles["Fog"]["tile"]] * size[0] for i in range(size[1])]
+            for r in range(len(map)):
+                for t in range(len(map[r])):
+                    roll = random.randint(1,100)
+                    if roll <= 3:
+                        map[r][t] = Explore.tiles[random.choice(Explore.biomes[biome].get("legendary"))]["tile"]
+                    elif roll <= 10:
+                        map[r][t] = Explore.tiles[random.choice(Explore.biomes[biome].get("epic"))]["tile"]
+                    elif roll <= 15:
+                        map[r][t] = Explore.tiles[random.choice(Explore.biomes[biome].get("rare"))]["tile"]
+                    elif roll <= 100:
+                        map[r][t] = Explore.tiles[random.choice(Explore.biomes[biome].get("common"))]["tile"]
+            #make sure player always starts on a rock to enable movement when stranded surrounded by rocks.
+            map[Explore.player_pos[0]][Explore.player_pos[1]] = Explore.tiles["Rock"]["tile"]
+            for r in range(len(map)): #iterate to create sand beaches
+                for t in range(len(map[r])):
+                    tlookup = Explore.tile_lookup.get(map[r][t],"Unknown Tile")
+                    if tlookup == "Rock":
+                        adj = await Explore.get_adjacent_coords(map,r,t)
+                        for s in adj:
+                            tlookup = Explore.tile_lookup.get(map[s[0]][s[1]],"Unknown Tile")
+                            if tlookup == "Ocean":
+                                roll = random.randint(1,100)
+                                if roll <= 3:
+                                    map[s[0]][s[1]] = random.choice([Explore.tiles["Sand"]["tile"],Explore.tiles["Sand"]["tile"],Explore.tiles["Sand"]["tile"],Explore.tiles["Ancient Conch"]["tile"]])
+                                elif roll <= 10:
+                                    map[s[0]][s[1]] = random.choice([Explore.tiles["Sand"]["tile"],Explore.tiles["Sand"]["tile"],Explore.tiles["Chondrus"]["tile"]])
+                                elif roll <= 15:
+                                    map[s[0]][s[1]] = random.choice([Explore.tiles["Sand"]["tile"]])
+                                elif roll <= 99:
+                                    map[s[0]][s[1]] = random.choice([Explore.tiles["Sand"]["tile"],Explore.tiles["Sand"]["tile"],Explore.tiles["Sand"]["tile"],Explore.tiles["Sand"]["tile"],Explore.tiles["Reeds"]["tile"]])
+                                elif roll == 100:
+                                    special = [Explore.tiles["Sand"]["tile"],Explore.tiles["Sand"]["tile"],Explore.tiles["Sand"]["tile"],Explore.tiles["Chest"]["tile"],Explore.tiles["Scroll"]["tile"],Explore.tiles["Crystal Ball"]["tile"],Explore.tiles["Fountain"]["tile"]]
+                                    spec_tile = random.choice(special)
+                                    map[s[0]][s[1]] = spec_tile
+            for r in range(len(map)): #re-iterate to create shallows next to sand beaches in the ocean.
+                for t in range(len(map[r])):
+                    tlookup = Explore.tile_lookup.get(map[r][t],"Unknown Tile")
+                    if tlookup == "Sand":
+                        adj = await Explore.get_adjacent_coords(map,r,t)
+                        for s in adj:
+                            tlookup = Explore.tile_lookup.get(map[s[0]][s[1]],"Unknown Tile")
+                            if tlookup == "Ocean":
+                                roll = random.randint(1,100)
+                                if roll <= 3:
+                                    map[s[0]][s[1]] = random.choice([Explore.tiles["Shallows"]["tile"],Explore.tiles["Ancient Conch"]["tile"]])
+                                elif roll <= 10:
+                                    map[s[0]][s[1]] = random.choice([Explore.tiles["Shallows"]["tile"],Explore.tiles["Shallows"]["tile"],Explore.tiles["Chondrus"]["tile"]])
+                                elif roll <= 15:
+                                    map[s[0]][s[1]] = random.choice([Explore.tiles["Shallows"]["tile"],Explore.tiles["Shallows"]["tile"],Explore.tiles["Shallows"]["tile"],Explore.tiles["Shallows"]["tile"],Explore.tiles["Brineapple"]["tile"]])
+                                elif roll <= 99:
+                                    map[s[0]][s[1]] = random.choice([Explore.tiles["Shallows"]["tile"],Explore.tiles["Shallows"]["tile"],Explore.tiles["Shallows"]["tile"],Explore.tiles["Shallows"]["tile"],Explore.tiles["Reeds"]["tile"]])
+                                elif roll == 100:
+                                    special = [Explore.tiles["Shallows"]["tile"],Explore.tiles["Shallows"]["tile"],Explore.tiles["Chest"]["tile"],Explore.tiles["Scroll"]["tile"],Explore.tiles["Crystal Ball"]["tile"],Explore.tiles["Fountain"]["tile"]]
+                                    spec_tile = random.choice(special)
+                                    map[s[0]][s[1]] = spec_tile
+                    elif tlookup == "Ocean":
+                        roll = random.randint(1,100)
+                        if roll <= 10:
+                            map[r][t] = random.choice([Explore.tiles["Ocean"]["tile"],Explore.tiles["Grufferfish"]["tile"]])
+                        elif roll == 100:
+                            special = [Explore.tiles["Ocean"]["tile"],Explore.tiles["Ocean"]["tile"],Explore.tiles["Ocean"]["tile"],Explore.tiles["Chest"]["tile"],Explore.tiles["Scroll"]["tile"],Explore.tiles["Crystal Ball"]["tile"],Explore.tiles["Fountain"]["tile"]]
+                            spec_tile = random.choice(special)
+                            map[r][t] = spec_tile
+
+        else:
+            map = [[0] * size[0] for i in range(size[1])]
+            fowmap = [[Explore.tiles["Fog"]["tile"]] * size[0] for i in range(size[1])]
+            for r in range(len(map)):
+                for t in range(len(map[r])):
+                    roll = random.randint(1,100)
+                    if roll <= 3:
+                        map[r][t] = Explore.tiles[random.choice(Explore.biomes[biome].get("legendary"))]["tile"]
+                    elif roll <= 10:
+                        map[r][t] = Explore.tiles[random.choice(Explore.biomes[biome].get("epic"))]["tile"]
+                    elif roll <= 15:
+                        map[r][t] = Explore.tiles[random.choice(Explore.biomes[biome].get("rare"))]["tile"]
+                    elif roll <= 99:
+                        map[r][t] = Explore.tiles[random.choice(Explore.biomes[biome].get("common"))]["tile"]
+                    elif roll == 100:
+                        special = [Explore.tiles["Chest"]["tile"],Explore.tiles["Scroll"]["tile"],Explore.tiles["Crystal Ball"]["tile"],Explore.tiles["Fountain"]["tile"]]
+                        spec_tile = random.choice(special)
+                        map[r][t] = spec_tile
+            #make sure player always starts on a rock to enable movement when stranded surrounded by rocks.
+            map[Explore.player_pos[0]][Explore.player_pos[1]] = Explore.tiles["Rock"]["tile"]
         return map, fowmap
 
     async def update_fow(): #this unveils the Fog of war in directly adjacient tiles.
@@ -411,7 +530,7 @@ class Explore:
         emoji: str,
         user: discord.User,
     ):
-        unpickable = ["Fog","Rock","Oak","Conifer","Grass","Sand","Ice"]
+        unpickable = ["Fog","Rock","Oak","Conifer","Grass","Sand","Ocean","Shallows"]
         tilename = Explore.tile_lookup.get(Explore.map[Explore.player_pos[0]][Explore.player_pos[1]])
         if tilename not in unpickable:
             if tilename == "Na-palm":
@@ -498,6 +617,11 @@ class Explore:
                 Explore.loot.update({tilename:(Explore.loot.get(tilename,0)+1)})
             if Explore.biome == "Desert of Desolation":
                 Explore.map[Explore.player_pos[0]][Explore.player_pos[1]] = Explore.tiles["Sand"]["tile"]
+            elif Explore.biome == "Ocean of Opportunity":
+                if tilename == "Grufferfish":
+                    Explore.map[Explore.player_pos[0]][Explore.player_pos[1]] = Explore.tiles["Ocean"]["tile"]
+                else:
+                    Explore.map[Explore.player_pos[0]][Explore.player_pos[1]] = Explore.tiles["Shallows"]["tile"]
             else:
                 Explore.map[Explore.player_pos[0]][Explore.player_pos[1]] = Explore.tiles["Grass"]["tile"]
             await Explore.check(ctx, pages, controls, message, page, Explore.timeout, emoji, user)

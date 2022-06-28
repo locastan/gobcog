@@ -26,22 +26,33 @@ class Alchemy:
 
     recipes = {"DaisyDaisyTongue Sprout": {"yields":".vial_of_wit", "uses": (1,6)},
                 "DaisyTongue SproutTongue Sprout": {"yields":".vial_of_wit", "uses": (3,4)},
+                "DaisyReedsReeds": {"yields":".vial_of_wit", "uses": (2,4)},
+                "DaisyDaisyReeds": {"yields":".vial_of_wit", "uses": (1,2)},
                 "DaisyMushroomOilflower": {"yields":".vial_of_aggression", "uses": (1,6)},
                 "MushroomMushroomOilflower": {"yields":".vial_of_aggression", "uses": (5,10)},
+                "DaisyGrufferfishTongue Sprout": {"yields":"[phenomenal phial]", "uses": (1,3)},
+                "FlyleafGrufferfishTongue Sprout": {"yields":"[phenomenal phial]", "uses": (3,5)},
+                "BrineappleCyanka LillyTwolip": {"yields":"[phenomenal phial]", "uses": (5,8)},
                 "DaisyFlyleafTongue Sprout": {"yields":".potion_of_eloquence", "uses": (1,5)},
                 "FlyleafMushroomOilflower": {"yields":".potion_of_strength", "uses": (1,5)},
+                "GrufferfishMushroomOilflower": {"yields":".potion_of_strength", "uses": (5,8)},
                 "DaisyTongue SproutTwolip": {"yields":".potion_of_eloquence", "uses": (4,8)},
                 "Tongue SproutTongue SproutTongue Sprout": {"yields":".potion_of_eloquence", "uses": (1,5)},
                 "Tongue SproutTwolipTwolip": {"yields":"[distilled charisma]", "uses": (2,3)},
                 "TwolipTwolipTwolip": {"yields":"[distilled charisma]", "uses": (4,6)},
                 "Cyanka LillyMushroomRaging Frills": {"yields":".potion_of_strength", "uses": (8,14)},
+                "GrufferfishRaging FrillsRaging Frills": {"yields":"[brutal philtre]", "uses": (1,2)},
                 "Cyanka LillyRaging FrillsRaging Frills": {"yields":"[brutal philtre]", "uses": (2,3)},
                 "Raging FrillsRaging FrillsRaging Frills": {"yields":"[brutal philtre]", "uses": (4,6)},
                 "MoneypennyNa-palmRaging Frills": {"yields":"[foliant of greed]", "uses": (1,2)},
                 "Na-palmOozeRaging Frills": {"yields":"[foliant of greed]", "uses": (3,5)},
+                "BrineappleCloverMoneypenny": {"yields":"[edible chance]", "uses": (4,6)},
+                "Ancient ConchCloverOoze": {"yields":"[jacks pot]", "uses": (1,2)},
                 "DaisyMoneypennyMushroom": {"yields":".dust_of_midas", "uses": (2,4)},
                 "DaisyMoneypennyOilflower": {"yields":".dust_of_midas", "uses": (2,4)},
                 "DaisyMushroomRose": {"yields":".scroll_of_learning", "uses": (1,2)},
+                "DaisyReedsRose": {"yields":".scroll_of_learning", "uses": (3,5)},
+                "ReedsRoseSageworth": {"yields":".scroll_of_learning", "uses": (8,16)},
                 "DaisyRoseSageworth": {"yields":".scroll_of_learning", "uses": (10,20)},
                 "FlyleafRoseSageworth": {"yields":"[foliant of wisdom]", "uses": (2,6)},
                 "Mourning StarNa-palmOoze": {"yields":"[chaos egg]", "uses": (2,5)},
@@ -56,17 +67,24 @@ class Alchemy:
                 "DaisyDaisyDaisy": {"yields":".sweet_stew", "uses": (1,1)},
                 "ChestnutChestnutChestnut": {"yields":".hearty_stew", "uses": (3,5)},
                 "ChestnutChestnutDaisy": {"yields":".hearty_stew", "uses": (1,3)},
+                "BrineappleDaisyDaisy": {"yields":".salty_stew", "uses": (1,1)},
+                "BrineappleDaisyOilflower": {"yields":".salty_stew", "uses": (2,2)},
+                "BrineappleBrineappleDaisy": {"yields":".salty_stew", "uses": (2,4)},
+                "BrineappleBrineappleBrineapple": {"yields":".salty_stew", "uses": (3,5)},
                 "ChestnutDaisyDaisy": {"yields":".hearty_stew", "uses": (1,1)},
                 "DaisyDaisyMaple": {"yields":".hearty_stew", "uses": (1,1)},
                 "CloverCloverMoneypenny": {"yields":"four leaf clover", "uses": (6,10)},
                 "CloverCloverClover": {"yields":"four leaf clover", "uses": (2,5)},
                 "CloverMoneypennyMoneypenny": {"yields":"[luckworth essence]", "uses": (1,3)},
+                "BrineappleMoneypennyMoneypenny": {"yields":"[luckworth essence]", "uses": (1,1)},
                 "MoneypennyMoneypennyMoneypenny": {"yields":"[bottled fortune]", "uses": (2,5)},
                 "MapleMapleWhipweed": {"yields":"bandaid", "uses": (1,2)},
                 "MapleWhipweedWhipweed": {"yields":"bandaid", "uses": (2,4)},
                 "WhipweedWhipweedWhipweed": {"yields":"bandaid", "uses": (3,6)},
                 "MapleRust LeafsWhipweed": {"yields":"bandages", "uses": (2,4)},
                 "Rust LeafsWhipweedWhipweed": {"yields":"bandages", "uses": (3,6)},
+                "ChondrusMapleRust Leafs": {"yields":"bandages", "uses": (2,4)},
+                "ChondrusChondrusRust Leafs": {"yields":"bandages", "uses": (3,7)},
                 "Rust LeafsRust LeafsRust Leafs": {"yields":"bandages", "uses": (1,1)},
                 "Mourning StarRoseWhipweed": {"yields":".potion_of_healing", "uses": (2,4)},
                 "DaisyMourning StarRose": {"yields":".potion_of_healing", "uses": (1,2)},
@@ -119,8 +137,10 @@ class Alchemy:
                     reply = await ctx.bot.wait_for("message", check=MessagePredicate.same_context(ctx), timeout=30)
                 except asyncio.TimeoutError:
                     await ctx.send("I don't have all day, you know.")
+                    await al_msg.delete()
                     return (False,[])
                 if reply.content == "0":
+                    await al_msg.delete()
                     return (False,[])
                 elif reply.content.isdigit() and (int(reply.content)-1) < len(lookup) and int(reply.content) > 0:
                     idx = int(reply.content)-1
@@ -128,6 +148,7 @@ class Alchemy:
                     i += 1
                 else:
                     await ctx.send("Sorry, but there was something wrong with that reply.")
+                    await al_msg.delete()
                     return (False,[])
             brewing = "".join(sorted(inbrew))
             if brewing in Alchemy.recipes:
@@ -138,6 +159,7 @@ class Alchemy:
                 else:
                     Userdata.users[str(user.id)]['consumables'].update({a_name:{"slot":["consumable"],"uses":a_uses}})
                 await ctx.send("Your brew yielded {}x {}.".format(a_uses,a_name))
+                await al_msg.delete()
                 return (True,inbrew)
             else:
                 roll = random.randint(1,20)
@@ -149,9 +171,11 @@ class Alchemy:
                     else:
                         Userdata.users[str(user.id)]['consumables'].update({a_name:{"slot":["consumable"],"uses":a_uses}})
                     await ctx.send("Your brew did not quite work out right, but can at least be used as {}.".format(a_name))
+                    await al_msg.delete()
                     return (True,inbrew)
                 else:
                     await ctx.send("These ingredients really do not go well together. You have to toss this useless concoction.")
+            await al_msg.delete()
             return (True, inbrew)
         elif uses_total < 3:
             await ctx.send("You need at least 3 ingredients to brew, try to !explore a bit more.")
