@@ -93,10 +93,10 @@ class Alchemy:
                 "FleshthornMourning StarNa-palm": {"yields":"[potion of rejuvenation]", "uses": (3,5)}
                 }
 
-    raritydict = {"legendary":["Ooze","Raging Frills","Cyanka Lilly","Sageworth","Twolip","Rose","Na-palm"],
-                        "epic":["Moneypenny","Whipweed","Mourning Star","Honeytail","Clover","Chestnut","Tongue Sprout"],
-                        "rare":["Flyleaf","Rust Leafs","Fleshthorn"],
-                        "common":["Maple","Mushroom","Oilflower","Daisy"]}
+    raritydict = {"legendary":["Ancient Conch","Ooze","Raging Frills","Cyanka Lilly","Sageworth","Twolip","Rose","Na-palm"],
+                        "epic":["Chondrus","Grufferfish","Moneypenny","Whipweed","Mourning Star","Honeytail","Clover","Chestnut","Tongue Sprout"],
+                        "rare":["Brineapple","Flyleaf","Rust Leafs","Fleshthorn"],
+                        "common":["Reeds","Maple","Mushroom","Oilflower","Daisy"]}
 
     raritylookup = ["common","rare","epic","legendary"]
     needed = {"common":50,"rare":30,"epic":20,"legendary":10}
