@@ -52,7 +52,10 @@ class Consumables:
                     Userdata.users[str(user.id)]['buffs'].update({a:{'bonus':bonus, 'duration':cons['duration']}})
                     attb = int(Userdata.users[str(user.id)]['skill']['att'])+ int(Userdata.users[str(user.id)]['buffs'].get('att', {'bonus':0})['bonus'])
                     chab = int(Userdata.users[str(user.id)]['skill']['cha'])+ int(Userdata.users[str(user.id)]['buffs'].get('cha', {'bonus':0})['bonus'])
-                    await ctx.send("Your {} gives you +{} {} for the next fight.".format(con,bonus,a.upper()))
+                    if cons['duration'] == 1:
+                        await ctx.send("Your {} gives you +{} {} for the next fight.".format(con,bonus,a.upper()))
+                    else:
+                        await ctx.send("Your {} gives you +{} {} for the next {} fights.".format(con,bonus,a.upper(),cons['duration']))
                     await ctx.send("Your new stats: **Attack**: {} [+{}], **Diplomacy**: {} [+{}].".format(Userdata.users[str(user.id)]['att'],attb,Userdata.users[str(user.id)]['cha'],chab))
                 elif a == 'luck':
                     bonus = random.randint(cons['min'],cons['max'])
