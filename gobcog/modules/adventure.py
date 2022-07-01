@@ -106,7 +106,7 @@ class Adventure:
         Adventure.dmgred = 1
         Adventure.participants = []
         Adventure.started = time.time()
-        if "Dragon" in Adventure.challenge or "Tarrasque" in Adventure.challenge:
+        if "Dragon" in Adventure.challenge or "Tarrasque" in Adventure.challenge or "Leviathan" in Adventure.challenge:
             Adventure.timeout = 120
             modRole = discord.utils.get(ctx.guild.roles, name='Goblin Adventurer!')
             if modRole is not None:
