@@ -1,6 +1,7 @@
 import random
 import asyncio
 import hashlib
+import math
 from redbot.core.utils.predicates import MessagePredicate
 from .treasure import Treasure
 from .userdata import Userdata
@@ -57,6 +58,41 @@ class Classes:
         item = {"itemname": name,"item": {"slot":newslot,"att":newatt,"cha":newdip}}
         return item
 
+    async def meditate(ctx):
+        user = ctx.author.id
+        if Userdata.users[str(user)]['class']['ability'] == True:
+            await ctx.send("Ability already in use.")
+            return
+        Userdata.users[str(user)]['class']['ability'] = True
+        await ctx.send('**{}** is becoming one with the situation at hand...🖖'.format(ctx.author.display_name))
+        return
+
+    async def calc_monkbonus(ctx, id):
+        mbonus=[0,0]
+        lvl = Userdata.users[str(id)]['lvl']
+        if Userdata.users[str(id)]['items']['left'] == {} and Userdata.users[str(id)]['items']['right'] == {}:
+            att1 = att2 = dipl1 = dipl2 = 0
+        if Userdata.users[str(id)]['items']['right'] != {}:
+            if len(Userdata.users[str(id)]['items']['right'][list(Userdata.users[str(id)]['items']['right'].keys())[0]]["slot"]) == 2:
+                att1 = att2 = dipl1 = dipl2 = 0
+        try:
+            weapon1 = list(Userdata.users[str(id)]['items']['left'].keys())[0]
+        except IndexError:
+            #fill with non-existing name, so the default value will be returned by the following .get(weapon...)
+            weapon1 = "empty"
+        try:
+            weapon2 = list(Userdata.users[str(id)]['items']['right'].keys())[0]
+        except IndexError:
+            weapon2 = "empty"
+        att1 = Userdata.users[str(id)]['items']['left'].get(weapon1, {'att':0})['att']
+        dipl1 = Userdata.users[str(id)]['items']['left'].get(weapon1, {'cha':0})['cha']
+        att2 = Userdata.users[str(id)]['items']['right'].get(weapon2, {'att':0})['att']
+        dipl2 = Userdata.users[str(id)]['items']['right'].get(weapon2, {'cha':0})['cha']
+        overall_balance = (1/math.cosh((att1+dipl1)-(att2+dipl2)))*1.2
+        mbonus[0] = int(round(lvl*(-math.sinh((float(att1+att2)/10))+overall_balance)))
+        mbonus[1] = int(round(lvl*(-math.sinh((float(dipl1+dipl2)/10))+overall_balance)))
+        print(att1,dipl1,att2,dipl2,overall_balance,-math.sinh((float(att1+att2)/10)),-math.sinh((float(dipl1+dipl2)/10)))
+        return mbonus
 
     async def rage(ctx):
         user = ctx.author.id
@@ -94,11 +130,31 @@ class Classes:
 
     async def sing(ctx, *args):
         user = ctx.author.id
+        #counting instruments Equipped and calculating instrument bonus
+        i_count = 0
+        if list(Userdata.users[str(id)]['items'].get('left', "Empty_slot")) in Treasure.instrument:
+            i_count += 1
+        if list(Userdata.users[str(id)]['items'].get('right', "Empty_slot")) == list(Userdata.users[str(id)]['items'].get('left', "Empty_slot")):
+            pass
+        elif list(Userdata.users[str(id)]['items'].get('right', "Empty_slot")) in Treasure.instrument:
+            i_count += 1
+        bonus_list = []
+        if i_count == 1:
+            bonus_list = [1.5,2]
+        elif i_count == 2:
+            bonus_list = [1.5,2,2.5,3]
+        else:
+            bonus_list = [1]
+        bonus_modifier = random.choice(bonus_list)
+        if bonus_modifer > 1:
+            bonus_percent = "(+" + str((bonus_modifier-1)*100) + "% intrument bonus.)"
+        else:
+            bonus_modifier = ""
         if len(args) == 0: #user did not pass a song
             Userdata.users[str(user)]['class']['ability'] = True
-            basebonus = random.randint(1,(Userdata.users[str(user)]['lvl']//2))
+            basebonus = random.randint(1,(Userdata.users[str(user)]['lvl']//2))*bonus_modifier
             Userdata.users[str(user)]['class'].update({"basebonus": basebonus})
-            await ctx.send('♪♫♬ **{}** is whipping up a random performance. ♬♫♪'.format(ctx.author.display_name))
+            await ctx.send('♪♫♬ **{}** is whipping up a random performance. {} ♬♫♪'.format(ctx.author.display_name, bonus_modifier))
             return
         else:
             argstring = ''.join(map(str, args))
@@ -109,13 +165,14 @@ class Classes:
             Userdata.users[str(user)]['class']['ability'] = True
             Userdata.users[str(user)]['class'].update({"basebonus": basebonus})
             rating = round(basebonus/Userdata.users[str(user)]['lvl']*10)
+            basebonus = basebonus*bonus_modifier #apply instrument bonus after song rating
             stars = ""
             for i in range(1, rating+1):
                 stars += "★"
             for i in range(1, 10-rating+1):
                 stars += "☆"
             #await ctx.send('♪♫♬ **{}** is singing \"{}\" [{}]. ♬♫♪ (Hash:{}; Bonus:{}; Optimum: {})'.format(ctx.author.display_name, " ".join(args), stars, n, basebonus, optimal))
-            await ctx.send('♪♫♬ **{}** is singing \"{}\" [{}]. ♬♫♪'.format(ctx.author.display_name, " ".join(args), stars))
+            await ctx.send('♪♫♬ **{}** is singing \"{}\" [{}]. {} ♬♫♪'.format(ctx.author.display_name, " ".join(args), stars, bonus_modifier))
             if optimal == 0:
                 return
             elif optimal-level <= 5:

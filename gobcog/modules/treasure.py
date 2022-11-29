@@ -17,6 +17,7 @@ class Treasure:
     common = {"rusty sword":{"slot":["right"],"att":1,"cha":-1},
             "shiny sword":{"slot":["right"],"att":1,"cha":1},
             "wooden club":{"slot":["right"],"att":1,"cha":0},
+            "ostrich feather":{"slot":["right"],"att":-1,"cha":1},
             "hornpipe":{"slot":["right"],"att":0,"cha":3},
             "moldy old shield":{"slot":["left"],"att":1,"cha":-1},
             "longsword":{"slot":["right"],"att":2,"cha":0},
@@ -24,6 +25,9 @@ class Treasure:
             "quarterstaff":{"slot":["right","left"],"att":1,"cha":1},
             "greatsword":{"slot":["right","left"],"att":1,"cha":1},
             "wooden shield":{"slot":["left"],"att":1,"cha":0},
+            "pretty flower":{"slot":["left"],"att":-1,"cha":1},
+            "alms box":{"slot":["right"],"att":-1,"cha":2},
+            "duelist cape":{"slot":["left"],"att":-1,"cha":2},
             "steel shield":{"slot":["left"],"att":2,"cha":0},
             "ringlet of strength":{"slot":["ring"],"att":1,"cha":0},
             "ringlet of charisma":{"slot":["ring"],"att":0,"cha":1},
@@ -37,11 +41,13 @@ class Treasure:
             "four leaf clover":{"slot":["consumable"],"uses":3},
             }
     rare = {".ceremonial_dagger":{"slot":["right"],"att":2,"cha":2},
+            ".receptacle":{"slot":["left"],"att":2,"cha":2},
             ".tower_shield":{"slot":["left"],"att":3,"cha":1},
             ".mirror_shield":{"slot":["left"],"att":2,"cha":3},
             ".bagpipes":{"slot":["right","left"],"att":1,"cha":2},
             ".warpike":{"slot":["right"],"att":3,"cha":0},
             ".panflute":{"slot":["right"],"att":0,"cha":3},
+            ".tinfoil_foil":{"slot":["right"],"att":-2,"cha":3},
             ".ring_of_strength":{"slot":["ring"],"att":2,"cha":0},
             ".ring_of_charisma":{"slot":["ring"],"att":0,"cha":2},
             ".ring_of_ambivalence":{"slot":["ring"],"att":1,"cha":1},
@@ -50,8 +56,13 @@ class Treasure:
             ".silver_tongued_ring":{"slot":["ring"],"att":-1,"cha":3},
             ".silver_tongued_chain":{"slot":["charm"],"att":-1,"cha":3},
             ".greataxe":{"slot":["right","left"],"att":2,"cha":1},
+            ".holy_pamphlet":{"slot":["left"],"att":0,"cha":3},
             ".spiked_mace":{"slot":["right"],"att":3,"cha":-1},
+            ".spiked_shield":{"slot":["left"],"att":3,"cha":-1},
             ".buckler":{"slot":["left"],"att":3,"cha":0},
+            ".rain_stick":{"slot":["right"],"att":-1,"cha":3},
+            ".censer":{"slot":["left"],"att":-1,"cha":3},
+            ".rubber_duck":{"slot":["left"],"att":-2,"cha":3},
             ".tuba":{"slot":["right","left"],"att":2,"cha":1},
             ".pistol_crossbow":{"slot":["right"],"att":2,"cha":1},
             ".ring_of_balance":{"slot":["ring"],"att":2,"cha":2},
@@ -71,6 +82,7 @@ class Treasure:
             "[chain of command]":{"slot":["charm"],"att":4,"cha":2},
             "[balance scales]":{"slot":["charm"],"att":3,"cha":3},
             "[great bulwark]":{"slot":["left"],"att":5,"cha":0},
+            "[taller shield]":{"slot":["left"],"att":4,"cha":1},
             "[dragon ring]":{"slot":["ring"],"att":4,"cha":3},
             "[mandachord]":{"slot":["right", "left"],"att":1,"cha":4},
             "[repeater crossbow]":{"slot":["right","left"],"att":3,"cha":1},
@@ -98,6 +110,8 @@ class Treasure:
             "[some ring on a chain]":{"slot":["charm"],"att":+8,"cha":-5},
             "[wanderring]":{"slot":["ring"],"att":+20,"cha":+20}
             }
+
+    instrument = ["hornpipe","tambourine",".bagpipes",".panflute",".tuba","[mandachord]","[crumhorn]"]
 
     async def open_chest(ctx, user, type):
         if hasattr(user, "display_name"):

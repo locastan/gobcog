@@ -10,6 +10,7 @@ import calendar
 import time
 from .custompredicate import CustomPredicate
 from .userdata import Userdata
+from .classes import Classes
 
 _ReactableEmoji = Union[str, discord.Emoji]
 
@@ -347,11 +348,14 @@ class Adventure:
                 if "monster" in Userdata.users[str(member.id)]['buffs']:
                     monster_value = Userdata.users[str(member.id)]['buffs'].get('monster', {'bonus':{'att':0}})['bonus']['att']
                     monster_string = " + 🦖{}".format(monster_value)
-                if roll == 1:
+                if roll == 1 and not (Userdata.users[str(member.id)]['class']['name']=="Monk" and Userdata.users[str(member.id)]['class']['ability']):
                     await ctx.send("**" + user + "**" + " fumbled the attack.")
                     fumblelist.append(user)
                     if Userdata.users[str(member.id)]['class']['name']=="Berserker" and Userdata.users[str(member.id)]['class']['ability']:
                         bonus = random.randint(max(5,int(Userdata.users[str(member.id)]['lvl']/2)),max(15,int(Userdata.users[str(member.id)]['lvl'])))
+                        r_penalty = random.randint(5,int(bonus/2))
+                        duration = int(max(10,bonus/4))
+                        await Userdata.debuff(ctx,str(member.id),"Your Rage",r_penalty,duration,'cha')
                         attack += -roll -bonus -att_value + monster_value
                         report += "**" + user + "**: " +  "- 🎲({}) -".format(roll) + " 💥{} ".format(bonus) + "- 🗡" + str(att_value) + monster_string + " | "
                 elif roll == 20 or (Userdata.users[str(member.id)]['class']['name']=="Berserker" and Userdata.users[str(member.id)]['class']['ability']):
@@ -363,6 +367,9 @@ class Adventure:
                     if Userdata.users[str(member.id)]['class']['name']=="Berserker" and Userdata.users[str(member.id)]['class']['ability']:
                         ability = "🗯️"
                         bonus = random.randint(max(5,int(Userdata.users[str(member.id)]['lvl']/2)),max(15,int(Userdata.users[str(member.id)]['lvl'])))
+                        r_penalty = random.randint(5,int(bonus/2))
+                        duration = int(max(10,bonus/4))
+                        await Userdata.debuff(ctx,str(member.id),"Your Rage",r_penalty,duration,'cha')
                     elif Userdata.users[str(member.id)]['class']['name']=="Ranger" and any("bow" in k for k in Userdata.users[str(member.id)]['items']['right'].keys()):
                         ability = "🏹"
                         bonus = random.randint(max(5,int(Userdata.users[str(member.id)]['lvl']/2)),max(15,int(Userdata.users[str(member.id)]['lvl'])))
@@ -376,6 +383,12 @@ class Adventure:
                             attack += barb_bonus
                             barb_bonus_str = " 🀄{} ".format(barb_bonus)
                             bonus_str += barb_bonus_str
+                    elif Userdata.users[str(member.id)]['class']['name']=="Monk":
+                        monkbonus = await Classes.calc_monkbonus(ctx, member.id)
+                        bonus_roll = random.randrange(min(1,monkbonus[0]),max(1,monkbonus[0]))
+                        attack += bonus_roll
+                        monk_bonus_str = " ⚖️{} + ".format(bonus_roll)
+                        bonus_str += monk_bonus_str
                     report += "**" + user + "**: " +  "🎲({}) +".format(roll) + " {} + ".format(bonus_str) + "🗡" + str(att_value) + monster_string + " | "
                 else:
                     bonus = 0
@@ -386,6 +399,13 @@ class Adventure:
                         if len(Userdata.users[str(member.id)]['items']['right'][list(Userdata.users[str(member.id)]['items']['right'].keys())[0]]["slot"]) == 2 and "bow" not in list(Userdata.users[str(member.id)]['items']['right'].keys())[0]:
                             bonus = Userdata.users[str(member.id)]['items']['right'][list(Userdata.users[str(member.id)]['items']['right'].keys())[0]]["att"]*2
                             bow_bonus = " 🀄{} + ".format(bonus)
+                    elif Userdata.users[str(member.id)]['class']['name']=="Monk":
+                        if roll == 1 and Userdata.users[str(member.id)]['class']['ability']:
+                            await ctx.send("A steady resolve prevented **" + user + "**" + "from a fumble.")
+                        monkbonus = await Classes.calc_monkbonus(ctx, member.id)
+                        bonus_roll = random.randrange(min(1,monkbonus[0]),max(1,monkbonus[0]))
+                        attack += bonus_roll
+                        bow_bonus = " ⚖️{} + ".format(bonus_roll)
                     attack += roll + bonus + att_value + monster_value
                     report += "**" + user + "**: " +  "🎲({}) +".format(roll) + bow_bonus + "🗡" + str(att_value) + monster_string + " | "
             for user in fumblelist:
@@ -463,7 +483,7 @@ class Adventure:
                 if "monster" in Userdata.users[str(member.id)]['buffs']:
                     monster_value = Userdata.users[str(member.id)]['buffs'].get('monster', {'bonus':{'cha':0}})['bonus']['cha']
                     monster_string = " + 🦖{}".format(monster_value)
-                if roll== 1:
+                if roll== 1 and not (Userdata.users[str(member.id)]['class']['name']=="Monk" and Userdata.users[str(member.id)]['class']['ability']):
                     await ctx.send("**" + user + "**" + (" accidentally offended the {}.").format(Adventure.challenge))
                     fumblelist.append(user)
                     if Userdata.users[str(member.id)]['class']['name']=="Bard" and Userdata.users[str(member.id)]['class']['ability']:
@@ -488,6 +508,15 @@ class Adventure:
                         bonus = random.randint(low, max(low, songbonus))
                     diplomacy += roll + bonus + critbonus + dipl_value + monster_value
                     bonus_str = ability + str(bonus+critbonus)
+                    report += "**" + user + "**: " +  "🎲({}) + ".format(roll) + "{} + ".format(bonus_str) + "🗨" +str(dipl_value) + monster_string + " | "
+                elif Userdata.users[str(member.id)]['class']['name']=="Monk":
+                    if roll == 1 and Userdata.users[str(member.id)]['class']['ability']:
+                        await ctx.send("A steady resolve prevented **" + user + "**" + "from a fumble.")
+                    monkbonus = await Classes.calc_monkbonus(ctx, member.id)
+                    bonus_roll = random.randrange(min(1,monkbonus[1]),max(1,monkbonus[1]))
+                    attack += bonus_roll
+                    monk_bonus_str = " ⚖️{} + ".format(bonus_roll)
+                    bonus_str = monk_bonus_str
                     report += "**" + user + "**: " +  "🎲({}) + ".format(roll) + "{} + ".format(bonus_str) + "🗨" +str(dipl_value) + monster_string + " | "
                 else:
                     diplomacy += roll + dipl_value + monster_value

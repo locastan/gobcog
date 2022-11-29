@@ -139,7 +139,7 @@ class Explore:
         Explore.moves = 10 + int(Userdata.users[str(user.id)]['lvl']/2)
         Explore.movesmsg = await ctx.send("{} moves remaining.".format(Explore.moves))
         Explore.map, Explore.fowmap = await Explore.generate(Explore.biome,Explore.mapsize)
-        await Explore.update_fow()
+        await Explore.starting_fow()
         output = await Explore.mapdrawer(list(Explore.fowmap)) #passing just a copy of the original tile list so original does not get changed.
         Explore.mapmsg = await ctx.send(output)
         await Explore.menu(ctx, ["Move with these controls:"], {"\U00002B05": Explore.left, "\U00002B06" : Explore.up, "\U00002B07" : Explore.down, "\U000027A1" : Explore.right, "\U00002139": Explore.inspect, "\U0001F44A" : Explore.pick, "\U000023CF": Explore.exit}, Explore.statusmsg)
@@ -157,7 +157,7 @@ class Explore:
         Explore.moves = 10 + int(Userdata.users[str(user.id)]['lvl']/2)
         Explore.movesmsg = await ctx.send("{} moves remaining.".format(Explore.moves))
         Explore.map, Explore.fowmap = await Explore.generate(Explore.biome,Explore.mapsize)
-        await Explore.update_fow()
+        await Explore.starting_fow()
         output = await Explore.mapdrawer(list(Explore.fowmap)) #passing just a copy of the original tile list so original does not get changed.
         Explore.mapmsg = await ctx.send(output)
         await Explore.menu(ctx, ["Move with these controls:"], {"\U00002B05": Explore.left, "\U00002B06" : Explore.up, "\U00002B07" : Explore.down, "\U000027A1" : Explore.right, "\U00002139": Explore.inspect, "\U0001F44A" : Explore.pick, "\U000023CF": Explore.exit}, Explore.statusmsg)
@@ -307,6 +307,16 @@ class Explore:
             else:
                 continue
 
+    async def starting_fow(): #this unveils the Fog of war in 3x3 adjacient tiles.
+        adjacient = [(0,-1),(1,0),(-1,0),(0,1),(1,-1),(1,1),(-1,1),(-1,-1)]
+        for x in adjacient:
+            pos_x = Explore.player_pos[0]+x[0]
+            pos_y = Explore.player_pos[1]+x[1]
+            if 0 <= pos_x < Explore.mapsize[0] and 0 <= pos_y < Explore.mapsize[1]:
+                Explore.fowmap[pos_x][pos_y] = Explore.map[pos_x][pos_y]
+            else:
+                continue
+
     async def unveil_fow(): #this lifts the entire FoW
         for r in range(len(Explore.map)):
             for t in range(len(Explore.map[r])):
@@ -405,7 +415,11 @@ class Explore:
             return
         for future in Explore.pending:
             future.cancel()
-        await controls[react](ctx, pages, controls, Explore.statusmsg, page, Explore.timeout, react, ctx.author)
+        try:
+            await controls[react](ctx, pages, controls, Explore.statusmsg, page, Explore.timeout, react, ctx.author)
+        except discord.HTTPException as e:
+            await ctx.send("Something went wrong. I am trying to salvage what I can. The discord gods gave me this message to read to you: {}".format(e.status))
+            return await Explore.result(ctx, pages, controls, message, page, Explore.timeout, user)
 
     async def left(
         ctx: commands.Context,
@@ -417,19 +431,25 @@ class Explore:
         emoji: str,
         user: discord.User,
     ):
-        if (int(Explore.player_pos[1]) - 1 >= 0 and Explore.tile_lookup.get(Explore.map[Explore.player_pos[0]][Explore.player_pos[1]-1]) != "Rock") or Explore.tile_lookup.get(Explore.map[Explore.player_pos[0]][Explore.player_pos[1]]) == "Rock":
-            Explore.player_pos[1] = int(Explore.player_pos[1]) - 1
-            await Explore.update_fow()
-            Explore.moves -= 1
-            await Explore.movesmsg.edit(content="{} moves remaining.".format(Explore.moves))
-            output = await Explore.mapdrawer(list(Explore.fowmap))
-            await Explore.mapmsg.edit(content=output)
-            await Explore.statusmsg.edit(content="Moved Left")
-            await Explore.check(ctx, pages, controls, message, page, Explore.timeout, emoji, user)
-        else:
-            text = "** You cannot move there. **"
-            await Explore.statusmsg.edit(content=text)
-            await Explore.check(ctx, pages, controls, message, page, Explore.timeout, emoji, user)
+        try:
+            if (int(Explore.player_pos[1]) - 1 >= 0 and Explore.tile_lookup.get(Explore.map[Explore.player_pos[0]][Explore.player_pos[1]-1]) != "Rock") or Explore.tile_lookup.get(Explore.map[Explore.player_pos[0]][Explore.player_pos[1]]) == "Rock":
+                Explore.player_pos[1] = int(Explore.player_pos[1]) - 1
+                await Explore.update_fow()
+                Explore.moves -= 1
+                await Explore.movesmsg.edit(content="{} moves remaining.".format(Explore.moves))
+                output = await Explore.mapdrawer(list(Explore.fowmap))
+                await Explore.mapmsg.edit(content=output)
+                await Explore.statusmsg.edit(content="Moved Left")
+                await Explore.check(ctx, pages, controls, message, page, Explore.timeout, emoji, user)
+            else:
+                text = "** You cannot move there. **"
+                await Explore.statusmsg.edit(content=text)
+                await Explore.check(ctx, pages, controls, message, page, Explore.timeout, emoji, user)
+        except discord.HTTPException as e:
+            await ctx.send("Something went wrong. I am trying to salvage what I can. The discord gods gave me this message to read to you: {}".format(e.status))
+            for future in Explore.pending:
+                future.cancel()
+            return await Explore.result(ctx, pages, controls, message, page, Explore.timeout, user)
 
 
     async def up(
@@ -442,19 +462,25 @@ class Explore:
         emoji: str,
         user: discord.User,
     ):
-        if (int(Explore.player_pos[0]) - 1 >= 0 and Explore.tile_lookup.get(Explore.map[Explore.player_pos[0]-1][Explore.player_pos[1]]) != "Rock") or Explore.tile_lookup.get(Explore.map[Explore.player_pos[0]][Explore.player_pos[1]]) == "Rock":
-            Explore.player_pos[0] = int(Explore.player_pos[0]) - 1
-            await Explore.update_fow()
-            Explore.moves -= 1
-            await Explore.movesmsg.edit(content="{} moves remaining.".format(Explore.moves))
-            output = await Explore.mapdrawer(list(Explore.fowmap))
-            await Explore.mapmsg.edit(content=output)
-            await Explore.statusmsg.edit(content="Moved Up")
-            await Explore.check(ctx, pages, controls, message, page, Explore.timeout, emoji, user)
-        else:
-            text = "** You cannot move there. **"
-            await Explore.statusmsg.edit(content=text)
-            await Explore.check(ctx, pages, controls, message, page, Explore.timeout, emoji, user)
+        try:
+            if (int(Explore.player_pos[0]) - 1 >= 0 and Explore.tile_lookup.get(Explore.map[Explore.player_pos[0]-1][Explore.player_pos[1]]) != "Rock") or Explore.tile_lookup.get(Explore.map[Explore.player_pos[0]][Explore.player_pos[1]]) == "Rock":
+                Explore.player_pos[0] = int(Explore.player_pos[0]) - 1
+                await Explore.update_fow()
+                Explore.moves -= 1
+                await Explore.movesmsg.edit(content="{} moves remaining.".format(Explore.moves))
+                output = await Explore.mapdrawer(list(Explore.fowmap))
+                await Explore.mapmsg.edit(content=output)
+                await Explore.statusmsg.edit(content="Moved Up")
+                await Explore.check(ctx, pages, controls, message, page, Explore.timeout, emoji, user)
+            else:
+                text = "** You cannot move there. **"
+                await Explore.statusmsg.edit(content=text)
+                await Explore.check(ctx, pages, controls, message, page, Explore.timeout, emoji, user)
+        except discord.HTTPException as e:
+            await ctx.send("Something went wrong. I am trying to salvage what I can. The discord gods gave me this message to read to you: {}".format(e.status))
+            for future in Explore.pending:
+                future.cancel()
+            return await Explore.result(ctx, pages, controls, message, page, Explore.timeout, user)
 
     async def down(
         ctx: commands.Context,
@@ -466,19 +492,25 @@ class Explore:
         emoji: str,
         user: discord.User,
     ):
-        if (int(Explore.player_pos[0]) + 1 < Explore.mapsize[0] and Explore.tile_lookup.get(Explore.map[Explore.player_pos[0]+1][Explore.player_pos[1]]) != "Rock") or Explore.tile_lookup.get(Explore.map[Explore.player_pos[0]][Explore.player_pos[1]]) == "Rock":
-            Explore.player_pos[0] = int(Explore.player_pos[0]) + 1
-            await Explore.update_fow()
-            Explore.moves -= 1
-            await Explore.movesmsg.edit(content="{} moves remaining.".format(Explore.moves))
-            output = await Explore.mapdrawer(list(Explore.fowmap))
-            await Explore.mapmsg.edit(content=output)
-            await Explore.statusmsg.edit(content="Moved Down")
-            await Explore.check(ctx, pages, controls, message, page, Explore.timeout, emoji, user)
-        else:
-            text = "** You cannot move there. **"
-            await Explore.statusmsg.edit(content=text)
-            await Explore.check(ctx, pages, controls, message, page, Explore.timeout, emoji, user)
+        try:
+            if (int(Explore.player_pos[0]) + 1 < Explore.mapsize[0] and Explore.tile_lookup.get(Explore.map[Explore.player_pos[0]+1][Explore.player_pos[1]]) != "Rock") or Explore.tile_lookup.get(Explore.map[Explore.player_pos[0]][Explore.player_pos[1]]) == "Rock":
+                Explore.player_pos[0] = int(Explore.player_pos[0]) + 1
+                await Explore.update_fow()
+                Explore.moves -= 1
+                await Explore.movesmsg.edit(content="{} moves remaining.".format(Explore.moves))
+                output = await Explore.mapdrawer(list(Explore.fowmap))
+                await Explore.mapmsg.edit(content=output)
+                await Explore.statusmsg.edit(content="Moved Down")
+                await Explore.check(ctx, pages, controls, message, page, Explore.timeout, emoji, user)
+            else:
+                text = "** You cannot move there. **"
+                await Explore.statusmsg.edit(content=text)
+                await Explore.check(ctx, pages, controls, message, page, Explore.timeout, emoji, user)
+        except discord.HTTPException as e:
+            await ctx.send("Something went wrong. I am trying to salvage what I can. The discord gods gave me this message to read to you: {}".format(e.status))
+            for future in Explore.pending:
+                future.cancel()
+            return await Explore.result(ctx, pages, controls, message, page, Explore.timeout, user)
 
     async def right(
         ctx: commands.Context,
@@ -490,19 +522,25 @@ class Explore:
         emoji: str,
         user: discord.User,
     ):
-        if (int(Explore.player_pos[1]) + 1 < Explore.mapsize[1] and Explore.tile_lookup.get(Explore.map[Explore.player_pos[0]][Explore.player_pos[1]+1]) != "Rock") or Explore.tile_lookup.get(Explore.map[Explore.player_pos[0]][Explore.player_pos[1]]) == "Rock":
-            Explore.player_pos[1] = int(Explore.player_pos[1]) + 1
-            await Explore.update_fow()
-            Explore.moves -= 1
-            await Explore.movesmsg.edit(content="{} moves remaining.".format(Explore.moves))
-            output = await Explore.mapdrawer(list(Explore.fowmap))
-            await Explore.mapmsg.edit(content=output)
-            await Explore.statusmsg.edit(content="Moved Right")
-            await Explore.check(ctx, pages, controls, message, page, Explore.timeout, emoji, user)
-        else:
-            text = "** You cannot move there. **"
-            await Explore.statusmsg.edit(content=text)
-            await Explore.check(ctx, pages, controls, message, page, Explore.timeout, emoji, user)
+        try:
+            if (int(Explore.player_pos[1]) + 1 < Explore.mapsize[1] and Explore.tile_lookup.get(Explore.map[Explore.player_pos[0]][Explore.player_pos[1]+1]) != "Rock") or Explore.tile_lookup.get(Explore.map[Explore.player_pos[0]][Explore.player_pos[1]]) == "Rock":
+                Explore.player_pos[1] = int(Explore.player_pos[1]) + 1
+                await Explore.update_fow()
+                Explore.moves -= 1
+                await Explore.movesmsg.edit(content="{} moves remaining.".format(Explore.moves))
+                output = await Explore.mapdrawer(list(Explore.fowmap))
+                await Explore.mapmsg.edit(content=output)
+                await Explore.statusmsg.edit(content="Moved Right")
+                await Explore.check(ctx, pages, controls, message, page, Explore.timeout, emoji, user)
+            else:
+                text = "** You cannot move there. **"
+                await Explore.statusmsg.edit(content=text)
+                await Explore.check(ctx, pages, controls, message, page, Explore.timeout, emoji, user)
+        except discord.HTTPException as e:
+            await ctx.send("Something went wrong. I am trying to salvage what I can. The discord gods gave me this message to read to you: {}".format(e.status))
+            for future in Explore.pending:
+                future.cancel()
+            return await Explore.result(ctx, pages, controls, message, page, Explore.timeout, user)
 
     async def inspect(
         ctx: commands.Context,
@@ -514,11 +552,17 @@ class Explore:
         emoji: str,
         user: discord.User,
     ):
-        tilename = Explore.tile_lookup.get(Explore.map[Explore.player_pos[0]][Explore.player_pos[1]],"Unknown Tile")
-        text = "**" + tilename + ": " + Explore.tiles[tilename].get("desc","Error") + "**"
-        await Explore.movesmsg.edit(content="{} moves remaining.".format(Explore.moves))
-        await Explore.statusmsg.edit(content=text)
-        await Explore.check(ctx, pages, controls, message, page, Explore.timeout, emoji, user)
+        try:
+            tilename = Explore.tile_lookup.get(Explore.map[Explore.player_pos[0]][Explore.player_pos[1]],"Unknown Tile")
+            text = "**" + tilename + ": " + Explore.tiles[tilename].get("desc","Error") + "**"
+            await Explore.movesmsg.edit(content="{} moves remaining.".format(Explore.moves))
+            await Explore.statusmsg.edit(content=text)
+            await Explore.check(ctx, pages, controls, message, page, Explore.timeout, emoji, user)
+        except discord.HTTPException as e:
+            await ctx.send("Something went wrong. I am trying to salvage what I can. The discord gods gave me this message to read to you: {}".format(e.status))
+            for future in Explore.pending:
+                future.cancel()
+            return await Explore.result(ctx, pages, controls, message, page, Explore.timeout, user)
 
     async def pick(
         ctx: commands.Context,
@@ -530,105 +574,111 @@ class Explore:
         emoji: str,
         user: discord.User,
     ):
-        unpickable = ["Fog","Rock","Oak","Conifer","Grass","Sand","Ocean","Shallows"]
-        tilename = Explore.tile_lookup.get(Explore.map[Explore.player_pos[0]][Explore.player_pos[1]])
-        if tilename not in unpickable:
-            if tilename == "Na-palm":
-                roll = random.randint(1,10)
-                if roll <= 5:
-                    damage = random.randint(1,12)
-                    if Userdata.users[str(user.id)]['hp'] > damage:
-                        Userdata.users[str(user.id)]['hp'] -= damage
-                        text = "** The Na-palm exploded! You took {} damage and need to return home.**".format(damage)
+        try:
+            unpickable = ["Fog","Rock","Oak","Conifer","Grass","Sand","Ocean","Shallows"]
+            tilename = Explore.tile_lookup.get(Explore.map[Explore.player_pos[0]][Explore.player_pos[1]])
+            if tilename not in unpickable:
+                if tilename == "Na-palm":
+                    roll = random.randint(1,10)
+                    if roll <= 5:
+                        damage = random.randint(1,12)
+                        if Userdata.users[str(user.id)]['hp'] > damage:
+                            Userdata.users[str(user.id)]['hp'] -= damage
+                            text = "** The Na-palm exploded! You took {} damage and need to return home.**".format(damage)
+                        else:
+                            Userdata.users[str(user.id)]['hp'] = 0
+                            text = "** The Na-palm exploded! You took {} damage and need to rest now.**".format(damage)
+                        await Explore.statusmsg.edit(content=text)
+                        await Userdata.save()
+                        await asyncio.sleep(2)
+                        return await Explore.result(ctx, pages, controls, message, page, Explore.timeout, user)
                     else:
-                        Userdata.users[str(user.id)]['hp'] = 0
-                        text = "** The Na-palm exploded! You took {} damage and need to rest now.**".format(damage)
-                    await Explore.statusmsg.edit(content=text)
-                    await Userdata.save()
-                    await asyncio.sleep(2)
-                    return await Explore.result(ctx, pages, controls, message, page, Explore.timeout, user)
+                        text = "** You picked up: " + tilename + "**"
+                elif tilename == "Chest":
+                    croll = random.randint(1,100)
+                    if croll <= 50: #rewards 50:50 rare:normal chest for killing something like the basilisk
+                        treasure = random.choice([[0,1,0,0],[1,0,0,0]])
+                    elif croll <= 75:
+                        treasure = random.choice([[1,0,0,0],[0,0,1,0],[0,1,0,0]])
+                    elif croll <= 95:
+                        treasure = random.choice([[0,1,0,0],[0,0,1,0],[1,0,0,0]])
+                    elif croll >= 96:
+                        treasure = random.choice([[1,0,0,0],[0,1,0,0],[0,0,1,0],[0,0,0,1]])
+                    types = [" normal"," rare","n epic", " quest"]
+                    type = types[treasure.index(1)]
+                    text = "You found **a{} treasure chest**!".format(type)
+                elif tilename == "Fountain":
+                    Explore.moves += 20
+                    text = "Movement **stamina increased by 20!**"
+                elif tilename == "Campsite":
+                    Explore.moves += 10
+                    text = "You took a quick nap. Movement **stamina increased by 10.**"
+                elif tilename == "Crystal Ball":
+                    await Explore.unveil_fow()
+                    output = await Explore.mapdrawer(list(Explore.fowmap))
+                    await Explore.mapmsg.edit(content=output)
+                    text = "The fog has lifted before your eyes...you see all of creation!"
+                elif tilename == "Scroll":
+                    sc_roll = random.choice(['alchemy scroll','alchemy scroll','.scroll_of_learning','.scroll_of_learning','.scroll_of_learning','.scroll_of_learning','[foliant of wisdom]','[foliant of greed]'])
+                    text= "You found a scroll container. 1x {} was added to your inventory.".format(sc_roll)
+                    if sc_roll in Userdata.users[str(user.id)]['consumables'].keys():
+                        Userdata.users[str(user.id)]['consumables'][sc_roll]['uses'] = Userdata.users[str(user.id)]['consumables'][sc_roll].get("uses", 0) + 1
+                    else:
+                        Userdata.users[str(user.id)]['consumables'].update({sc_roll:{"slot":["consumable"],"uses":1}})
+                elif tilename == "Volcano":
+                    roll = random.randint(1,10)
+                    if roll <= 6:
+                        damage = random.randint(5,25)
+                        if Userdata.users[str(user.id)]['hp'] > damage:
+                            Userdata.users[str(user.id)]['hp'] -= damage
+                            text = "** You touched the lava! You took {} damage and need to return home.**".format(damage)
+                        else:
+                            Userdata.users[str(user.id)]['hp'] = 0
+                            text = "** You fell into the lava! You took {} damage and need to rest now.**".format(damage)
+                        await Explore.statusmsg.edit(content=text)
+                        await Userdata.save()
+                        await asyncio.sleep(2)
+                        return await Explore.result(ctx, pages, controls, message, page, Explore.timeout, user)
+                    else:
+                        text= "You found a chaos egg!"
+                        if '[chaos egg]' in Userdata.users[str(user.id)]['consumables'].keys():
+                            Userdata.users[str(user.id)]['consumables']['[chaos egg]']['uses'] = Userdata.users[str(user.id)]['consumables']['[chaos egg]'].get("uses", 0) + 1
+                        else:
+                            Userdata.users[str(user.id)]['consumables'].update({'[chaos egg]':{"slot":["consumable"],"uses":1}})
                 else:
                     text = "** You picked up: " + tilename + "**"
-            elif tilename == "Chest":
-                croll = random.randint(1,100)
-                if croll <= 50: #rewards 50:50 rare:normal chest for killing something like the basilisk
-                    treasure = random.choice([[0,1,0,0],[1,0,0,0]])
-                elif croll <= 75:
-                    treasure = random.choice([[1,0,0,0],[0,0,1,0],[0,1,0,0]])
-                elif croll <= 95:
-                    treasure = random.choice([[0,1,0,0],[0,0,1,0],[1,0,0,0]])
-                elif croll >= 96:
-                    treasure = random.choice([[1,0,0,0],[0,1,0,0],[0,0,1,0],[0,0,0,1]])
-                types = [" normal"," rare","n epic", " quest"]
-                type = types[treasure.index(1)]
-                text = "You found **a{} treasure chest**!".format(type)
-            elif tilename == "Fountain":
-                Explore.moves += 20
-                text = "Movement **stamina increased by 20!**"
-            elif tilename == "Campsite":
-                Explore.moves += 10
-                text = "You took a quick nap. Movement **stamina increased by 10.**"
-            elif tilename == "Crystal Ball":
-                await Explore.unveil_fow()
-                output = await Explore.mapdrawer(list(Explore.fowmap))
-                await Explore.mapmsg.edit(content=output)
-                text = "The fog has lifted before your eyes...you see all of creation!"
-            elif tilename == "Scroll":
-                sc_roll = random.choice(['alchemy scroll','alchemy scroll','.scroll_of_learning','.scroll_of_learning','.scroll_of_learning','.scroll_of_learning','[foliant of wisdom]','[foliant of greed]'])
-                text= "You found a scroll container. 1x {} was added to your inventory.".format(sc_roll)
-                if sc_roll in Userdata.users[str(user.id)]['consumables'].keys():
-                    Userdata.users[str(user.id)]['consumables'][sc_roll]['uses'] = Userdata.users[str(user.id)]['consumables'][sc_roll].get("uses", 0) + 1
+                Explore.moves -= 1
+                await Explore.movesmsg.edit(content="{} moves remaining.".format(Explore.moves))
+                await Explore.statusmsg.edit(content=text)
+                if tilename == "Chest":
+                    if treasure != [0,0,0,0]:
+                        if not 'treasure' in Userdata.users[str(user.id)].keys():
+                            Userdata.users[str(user.id)]['treasure'] = [0,0,0,0]
+                        Userdata.users[str(user.id)]['treasure'] = [sum(x) for x in zip(Userdata.users[str(user.id)]['treasure'], treasure)]
+                        await Userdata.save()
+                elif tilename == "Fountain" or tilename == "Crystal Ball" or tilename == "Scroll" or tilename == "Campsite" or tilename == "Volcano":
+                    pass #nothing to do here
                 else:
-                    Userdata.users[str(user.id)]['consumables'].update({sc_roll:{"slot":["consumable"],"uses":1}})
-            elif tilename == "Volcano":
-                roll = random.randint(1,10)
-                if roll <= 6:
-                    damage = random.randint(5,25)
-                    if Userdata.users[str(user.id)]['hp'] > damage:
-                        Userdata.users[str(user.id)]['hp'] -= damage
-                        text = "** You touched the lava! You took {} damage and need to return home.**".format(damage)
+                    Explore.loot.update({tilename:(Explore.loot.get(tilename,0)+1)})
+                if Explore.biome == "Desert of Desolation":
+                    Explore.map[Explore.player_pos[0]][Explore.player_pos[1]] = Explore.tiles["Sand"]["tile"]
+                elif Explore.biome == "Ocean of Opportunity":
+                    if tilename == "Grufferfish":
+                        Explore.map[Explore.player_pos[0]][Explore.player_pos[1]] = Explore.tiles["Ocean"]["tile"]
                     else:
-                        Userdata.users[str(user.id)]['hp'] = 0
-                        text = "** You fell into the lava! You took {} damage and need to rest now.**".format(damage)
-                    await Explore.statusmsg.edit(content=text)
-                    await Userdata.save()
-                    await asyncio.sleep(2)
-                    return await Explore.result(ctx, pages, controls, message, page, Explore.timeout, user)
+                        Explore.map[Explore.player_pos[0]][Explore.player_pos[1]] = Explore.tiles["Shallows"]["tile"]
                 else:
-                    text= "You found a chaos egg!"
-                    if '[chaos egg]' in Userdata.users[str(user.id)]['consumables'].keys():
-                        Userdata.users[str(user.id)]['consumables']['[chaos egg]']['uses'] = Userdata.users[str(user.id)]['consumables']['[chaos egg]'].get("uses", 0) + 1
-                    else:
-                        Userdata.users[str(user.id)]['consumables'].update({'[chaos egg]':{"slot":["consumable"],"uses":1}})
+                    Explore.map[Explore.player_pos[0]][Explore.player_pos[1]] = Explore.tiles["Grass"]["tile"]
+                await Explore.check(ctx, pages, controls, message, page, Explore.timeout, emoji, user)
             else:
-                text = "** You picked up: " + tilename + "**"
-            Explore.moves -= 1
-            await Explore.movesmsg.edit(content="{} moves remaining.".format(Explore.moves))
-            await Explore.statusmsg.edit(content=text)
-            if tilename == "Chest":
-                if treasure != [0,0,0,0]:
-                    if not 'treasure' in Userdata.users[str(user.id)].keys():
-                        Userdata.users[str(user.id)]['treasure'] = [0,0,0,0]
-                    Userdata.users[str(user.id)]['treasure'] = [sum(x) for x in zip(Userdata.users[str(user.id)]['treasure'], treasure)]
-                    await Userdata.save()
-            elif tilename == "Fountain" or tilename == "Crystal Ball" or tilename == "Scroll" or tilename == "Campsite" or tilename == "Volcano":
-                pass #nothing to do here
-            else:
-                Explore.loot.update({tilename:(Explore.loot.get(tilename,0)+1)})
-            if Explore.biome == "Desert of Desolation":
-                Explore.map[Explore.player_pos[0]][Explore.player_pos[1]] = Explore.tiles["Sand"]["tile"]
-            elif Explore.biome == "Ocean of Opportunity":
-                if tilename == "Grufferfish":
-                    Explore.map[Explore.player_pos[0]][Explore.player_pos[1]] = Explore.tiles["Ocean"]["tile"]
-                else:
-                    Explore.map[Explore.player_pos[0]][Explore.player_pos[1]] = Explore.tiles["Shallows"]["tile"]
-            else:
-                Explore.map[Explore.player_pos[0]][Explore.player_pos[1]] = Explore.tiles["Grass"]["tile"]
-            await Explore.check(ctx, pages, controls, message, page, Explore.timeout, emoji, user)
-        else:
-            text = "** This cannot be picked. " + tilename + "**"
-            await Explore.statusmsg.edit(content=text)
-            await Explore.check(ctx, pages, controls, message, page, Explore.timeout, emoji, user)
+                text = "** This cannot be picked. " + tilename + "**"
+                await Explore.statusmsg.edit(content=text)
+                await Explore.check(ctx, pages, controls, message, page, Explore.timeout, emoji, user)
+        except discord.HTTPException as e:
+            await ctx.send("Something went wrong. I am trying to salvage what I can. The discord gods gave me this message to read to you: {}".format(e.status))
+            for future in Explore.pending:
+                future.cancel()
+            return await Explore.result(ctx, pages, controls, message, page, Explore.timeout, user)
 
     async def check(ctx, pages, controls, message, page, timeout, emoji, user):
         if Explore.moves <= 0:
@@ -652,6 +702,11 @@ class Explore:
             for future in Explore.pending:
                 future.cancel()
             return await Explore.result(ctx, pages, controls, message, page, Explore.timeout, user)
+        except discord.HTTPException as e:
+            await ctx.send("Something went wrong. I am trying to salvage what I can. The discord gods gave me this message to read to you: {}".format(e.status))
+            for future in Explore.pending:
+                future.cancel()
+            return await Explore.result(ctx, pages, controls, message, page, Explore.timeout, user)
         for future in Explore.pending:
             future.cancel()
         try:
@@ -670,30 +725,36 @@ class Explore:
         emoji: str,
         user: discord.User,
     ):
-        if Explore.mapmsg:
-            await Explore.mapmsg.delete()
-            Explore.mapmsg = None
-        if Explore.statusmsg:
-            await Explore.statusmsg.delete()
-        if Explore.movesmsg:
-            await Explore.movesmsg.delete()
-        if Explore.intro:
-            text = "{} went exploring the {} and ".format(user.display_name, Explore.biome)
-            if Explore.loot != {}:
-                text += "found:\n"
-                for key in Explore.loot.keys():
-                    text += "{}x {} \n".format(Explore.loot.get(key),key)
-                    if key in Userdata.users[str(user.id)]['ingredients'].keys():
-                        Userdata.users[str(user.id)]['ingredients'][key]['uses'] = Userdata.users[str(user.id)]['ingredients'][key].get("uses", 0) + Explore.loot.get(key)
-                    else:
-                        Userdata.users[str(user.id)]['ingredients'].update({key:{'uses':Explore.loot.get(key)}})
-                await Userdata.save()
-            else:
-                text += "returned empty handed."
-            await Explore.intro.edit(content=text)
-        for future in Explore.pending:
-            future.cancel()
-        return None
+        try:
+            if Explore.mapmsg:
+                await Explore.mapmsg.delete()
+                Explore.mapmsg = None
+            if Explore.statusmsg:
+                await Explore.statusmsg.delete()
+            if Explore.movesmsg:
+                await Explore.movesmsg.delete()
+            if Explore.intro:
+                text = "{} went exploring the {} and ".format(user.display_name, Explore.biome)
+                if Explore.loot != {}:
+                    text += "found:\n"
+                    for key in Explore.loot.keys():
+                        text += "{}x {} \n".format(Explore.loot.get(key),key)
+                        if key in Userdata.users[str(user.id)]['ingredients'].keys():
+                            Userdata.users[str(user.id)]['ingredients'][key]['uses'] = Userdata.users[str(user.id)]['ingredients'][key].get("uses", 0) + Explore.loot.get(key)
+                        else:
+                            Userdata.users[str(user.id)]['ingredients'].update({key:{'uses':Explore.loot.get(key)}})
+                    await Userdata.save()
+                else:
+                    text += "returned empty handed."
+                await Explore.intro.edit(content=text)
+            for future in Explore.pending:
+                future.cancel()
+            return None
+        except discord.HTTPException as e:
+            await ctx.send("Something went wrong. I am trying to salvage what I can. The discord gods gave me this message to read to you: {}".format(e.status))
+            for future in Explore.pending:
+                future.cancel()
+            return await Explore.result(ctx, pages, controls, message, page, Explore.timeout, user)
 
     async def result(
         ctx: commands.Context,
