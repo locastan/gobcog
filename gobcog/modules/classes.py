@@ -146,7 +146,7 @@ class Classes:
         else:
             bonus_list = [1]
         bonus_modifier = random.choice(bonus_list)
-        if bonus_modifer > 1:
+        if bonus_modifier > 1:
             bonus_percent = "(+" + str((bonus_modifier-1)*100) + "% intrument bonus.)"
         else:
             bonus_modifier = ""
