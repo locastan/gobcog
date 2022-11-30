@@ -132,11 +132,11 @@ class Classes:
         user = ctx.author.id
         #counting instruments Equipped and calculating instrument bonus
         i_count = 0
-        if list(Userdata.users[str(id)]['items'].get('left', "Empty_slot")) in Treasure.instrument:
+        if list(Userdata.users[str(user)]['items'].get('left', "Empty_slot")) in Treasure.instrument:
             i_count += 1
-        if list(Userdata.users[str(id)]['items'].get('right', "Empty_slot")) == list(Userdata.users[str(id)]['items'].get('left', "Empty_slot")):
+        if list(Userdata.users[str(user)]['items'].get('right', "Empty_slot")) == list(Userdata.users[str(user)]['items'].get('left', "Empty_slot")):
             pass
-        elif list(Userdata.users[str(id)]['items'].get('right', "Empty_slot")) in Treasure.instrument:
+        elif list(Userdata.users[str(user)]['items'].get('right', "Empty_slot")) in Treasure.instrument:
             i_count += 1
         bonus_list = []
         if i_count == 1:

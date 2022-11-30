@@ -30,14 +30,14 @@ class Userdata:
         await Userdata.load()
 
     async def debuff(ctx, userID, debuff_name, penalty, duration, type):
-        a = type
+        a = type #debuff routine
         if a == 'att' or a == 'cha':
             bonus = penalty
-            users[userID]['buffs'].update({a:{'bonus':bonus, 'duration':duration}})
-            attb = int(users[userID]['skill']['att'])- int(users[userID]['buffs'].get('att', {'bonus':0})['bonus'])
-            chab = int(users[userID]['skill']['cha'])- int(users[userID]['buffs'].get('cha', {'bonus':0})['bonus'])
+            Userdata.users[userID]['buffs'].update({a:{'bonus':bonus, 'duration':duration}})
+            attb = int(Userdata.users[userID]['skill']['att'])- int(Userdata.users[userID]['buffs'].get('att', {'bonus':0})['bonus'])
+            chab = int(Userdata.users[userID]['skill']['cha'])- int(Userdata.users[userID]['buffs'].get('cha', {'bonus':0})['bonus'])
             if duration == 1:
                 await ctx.send("{} causes -{} {} for the next fight.".format(debuff_name,bonus,a.upper()))
             else:
                 await ctx.send("{} causes -{} {} for the next {} fights.".format(debuff_name,bonus,a.upper(),duration))
-            await ctx.send("Your new stats: **Attack**: {} [+{}], **Diplomacy**: {} [+{}].".format(users[userID]['att'],attb,users[userID]['cha'],chab))
+            await ctx.send("Your new stats: **Attack**: {} [+{}], **Diplomacy**: {} [+{}].".format(Userdata.users[userID]['att'],attb,Userdata.users[userID]['cha'],chab))
