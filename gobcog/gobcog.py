@@ -1177,8 +1177,8 @@ class GobCog(BaseCog):
         hp_perc = round((Userdata.users[str(user.id)]['hp']/Userdata.users[str(user.id)]['base_hp'])*100)
         hitpoints = "HP {}/{} ({}%)".format(Userdata.users[str(user.id)]['hp'],Userdata.users[str(user.id)]['base_hp'],hp_perc)
         buffs = ""
-        signa = "+" if satt > 0 else "-"
-        signc = "+" if scha > 0 else "-"
+        signa = "+" if satt > 0 else ""
+        signc = "+" if scha > 0 else ""
         if Userdata.users[str(user.id)]['buffs'] != {}:
             buffs = "\n- Active Buffs:"
             for key in Userdata.users[str(user.id)]['buffs'].keys():
@@ -1228,8 +1228,8 @@ class GobCog(BaseCog):
         else:
             clazz = "Hero."
         await ctx.send(
-            "```css\n[{}´s Character Sheet] \n\n```".format(user.display_name) + "```css\nA level {} {} \n\n- ATTACK {} [+{}] - DIPLOMACY {} [+{}] - {} -{}\n\n- Credits: {} {} \n- Experience: {}/{} \n- Unspent skillpoints: {} \n```".format(
-                lvl, clazz, att, satt, cha, scha, hitpoints, buffs, bal, currency, xp, next_lvl, pool
+            "```css\n[{}´s Character Sheet] \n\n```".format(user.display_name) + "```css\nA level {} {} \n\n- ATTACK {} [{}{}] - DIPLOMACY {} [{}{}] - {} -{}\n\n- Credits: {} {} \n- Experience: {}/{} \n- Unspent skillpoints: {} \n```".format(
+                lvl, clazz, att, signa, satt, cha, signc, scha, hitpoints, buffs, bal, currency, xp, next_lvl, pool
             ) + "```css\n" + equip + "```" +
             "```css\n" + "You own {} normal, {} rare, {} epic and {} quest chests.```".format(
                 str(Userdata.users[str(user.id)]['treasure'][0]),str(Userdata.users[str(user.id)]['treasure'][1]),str(Userdata.users[str(user.id)]['treasure'][2]),str(Userdata.users[str(user.id)]['treasure'][3]))
@@ -2039,8 +2039,8 @@ class GobCog(BaseCog):
         userID = str(userID)
         attb = int(Userdata.users[userID]['skill']['att']) + int(Userdata.users[userID]['buffs'].get('att', {'bonus':0})['bonus'])
         chab = int(Userdata.users[userID]['skill']['cha']) + int(Userdata.users[userID]['buffs'].get('cha', {'bonus':0})['bonus'])
-        signa = "+" if attb > 0 else "-"
-        signc = "+" if chab > 0 else "-"
+        signa = "+" if attb > 0 else ""
+        signc = "+" if chab > 0 else ""
         if Userdata.users[str(userID)]['class']['name']=="Monk":
             # calculate monk passive bonus
             monkbonus = [0,0]
