@@ -395,13 +395,7 @@ class GobCog(BaseCog):
                 else:
                     Userdata.users[str(user.id)]['items']['backpack'].update({olditem: equipped[olditem]}) # TODO: Change data structure of items dict so you can have duplicate items because of key duplicate overwrite in dicts.
                     await ctx.send("You removed {} and put it into your backpack.".format(olditem))
-        if Userdata.users[str(user.id)]['class']['name']=="Monk":
-            # calculate monk passive bonus
-            monkbonus = [0,0]
-            monkbonus = await Classes.calc_monkbonus(ctx,user.id)
-            await ctx.send("Your new stats: **Attack**: {} [+{}], **Diplomacy**: {} [+{}]{}.".format(Userdata.users[str(user.id)]['att'],(Userdata.users[str(user.id)]['skill']['att']+ Userdata.users[str(user.id)]['buffs'].get('att', {'bonus':0})['bonus']),Userdata.users[str(user.id)]['cha'],(Userdata.users[str(user.id)]['skill']['cha']+ Userdata.users[str(user.id)]['buffs'].get('cha', {'bonus':0})['bonus'])," Max. Monkbonus: ({}ATT/{}DIPL)".format(str(monkbonus[0]),str(monkbonus[1]))))
-        else:
-            await ctx.send("Your new stats: **Attack**: {} [+{}], **Diplomacy**: {} [+{}].".format(Userdata.users[str(user.id)]['att'],(Userdata.users[str(user.id)]['skill']['att']+ Userdata.users[str(user.id)]['buffs'].get('att', {'bonus':0})['bonus']),Userdata.users[str(user.id)]['cha'],(Userdata.users[str(user.id)]['skill']['cha']+ Userdata.users[str(user.id)]['buffs'].get('cha', {'bonus':0})['bonus'])))
+        await GobCog.calcstats(ctx,user.id)
 
     @commands.command()
     @commands.guild_only()
@@ -496,12 +490,12 @@ class GobCog(BaseCog):
             if 'skill' not in Userdata.users[str(user)]:
                 Userdata.users[str(user)]['skill'] = {}
                 Userdata.users[str(user)]['skill'] = {'pool': 0, 'att': 0, 'cha': 0}
-            print(Userdata.users[str(user)]['name']+": "+str(int(Userdata.users[str(user)]['lvl'] / 5)) + "-" + str(Userdata.users[str(user)]['skill']['att']+Userdata.users[str(user)]['skill']['cha']))
+            #print(Userdata.users[str(user)]['name']+": "+str(int(Userdata.users[str(user)]['lvl'] / 5)) + "-" + str(Userdata.users[str(user)]['skill']['att']+Userdata.users[str(user)]['skill']['cha']))
             Userdata.users[str(user)]['skill']['pool'] = int(Userdata.users[str(user)]['lvl'] / 5) - (Userdata.users[str(user)]['skill']['att']+Userdata.users[str(user)]['skill']['cha'])
         for userID in deadsies:
             users.pop(userID)
         await GobCog.save()
-        await ctx.send("Command run successful.")
+        await ctx.send("Command run successful. {} inactive users removed.".format(str(len(deadsies))))
 
 
     @commands.command()
@@ -1183,15 +1177,17 @@ class GobCog(BaseCog):
         hp_perc = round((Userdata.users[str(user.id)]['hp']/Userdata.users[str(user.id)]['base_hp'])*100)
         hitpoints = "HP {}/{} ({}%)".format(Userdata.users[str(user.id)]['hp'],Userdata.users[str(user.id)]['base_hp'],hp_perc)
         buffs = ""
+        signa = "+" if satt > 0 else "-"
+        signc = "+" if scha > 0 else "-"
         if Userdata.users[str(user.id)]['buffs'] != {}:
             buffs = "\n- Active Buffs:"
             for key in Userdata.users[str(user.id)]['buffs'].keys():
                 if key == "luck":
                     buffs += " 🍀 (+{}%/{}⏳) ".format(Userdata.users[str(user.id)]['buffs'][key]['bonus'],Userdata.users[str(user.id)]['buffs'][key]['duration'])
                 elif key == "att":
-                    buffs += " 🗡️ (+{}/{}⏳) ".format(Userdata.users[str(user.id)]['buffs'][key]['bonus'],Userdata.users[str(user.id)]['buffs'][key]['duration'])
+                    buffs += " 🗡️ ({}{}/{}⏳) ".format(signa,Userdata.users[str(user.id)]['buffs'][key]['bonus'],Userdata.users[str(user.id)]['buffs'][key]['duration'])
                 elif key == "cha":
-                    buffs += " 🗨️ (+{}/{}⏳) ".format(Userdata.users[str(user.id)]['buffs'][key]['bonus'],Userdata.users[str(user.id)]['buffs'][key]['duration'])
+                    buffs += " 🗨️ ({}{}/{}⏳) ".format(signc,Userdata.users[str(user.id)]['buffs'][key]['bonus'],Userdata.users[str(user.id)]['buffs'][key]['duration'])
                 elif key == "money":
                     buffs += " 💰 (+{}%/{}⏳) ".format(Userdata.users[str(user.id)]['buffs'][key]['bonus'],Userdata.users[str(user.id)]['buffs'][key]['duration'])
                 elif key == "xp":
@@ -1220,10 +1216,11 @@ class GobCog(BaseCog):
                     bow_bonus = "{}🏹".format(bonus)
                     clazz += "\n- Current pet: {}".format(Userdata.users[str(user.id)]['class']['ability']['pet']['name'])
                     clazz += "\n\nYou get a +{} bonus to attacks when using a bow.".format(bow_bonus)
-            elif Userdata.users[str(user.id)]['class']['name']=="Berserker" and len(Userdata.users[str(user.id)]['items']['right'][list(Userdata.users[str(user.id)]['items']['right'].keys())[0]]["slot"]) == 2:
-                bonus = Userdata.users[str(user.id)]['items']['right'][list(Userdata.users[str(user.id)]['items']['right'].keys())[0]]["att"]*2
-                bow_bonus = " {}🀄".format(bonus)
-                clazz += "\n\nYou currently get a +{} bonus to attacks for using a two handed item.".format(bow_bonus)
+            elif Userdata.users[str(user.id)]['class']['name']=="Berserker" and Userdata.users[str(user.id)]['items']['right'] != {}:
+                if len(Userdata.users[str(user.id)]['items']['right'][list(Userdata.users[str(user.id)]['items']['right'].keys())[0]]["slot"]) == 2 and "bow" not in list(Userdata.users[str(member.id)]['items']['right'].keys())[0]:
+                    bonus = Userdata.users[str(user.id)]['items']['right'][list(Userdata.users[str(user.id)]['items']['right'].keys())[0]]["att"]*2
+                    bow_bonus = " {}🀄".format(bonus)
+                    clazz += "\n\nYou currently get a +{} bonus to attacks for using a two handed item.".format(bow_bonus)
             elif Userdata.users[str(user.id)]['class']['name']=="Monk":
                 bonus = await Classes.calc_monkbonus(ctx,user.id)
                 bow_bonus = "⚖️(🗡️{}/🗨️{})".format(bonus[0],bonus[1])
@@ -2034,14 +2031,23 @@ class GobCog(BaseCog):
                     await ctx.send("You equipped {} and put {} into your backpack.".format(item['itemname'],list(olditem.keys())[0]))
         if from_backpack:
             del Userdata.users[str(user.id)]['items']['backpack'][item['itemname']]
-        if Userdata.users[str(user.id)]['class']['name']=="Monk":
+        await GobCog.calcstats(ctx,user.id)
+        await GobCog.save()
+
+    @staticmethod
+    async def calcstats(ctx,userID):
+        userID = str(userID)
+        attb = int(Userdata.users[userID]['skill']['att']) + int(Userdata.users[userID]['buffs'].get('att', {'bonus':0})['bonus'])
+        chab = int(Userdata.users[userID]['skill']['cha']) + int(Userdata.users[userID]['buffs'].get('cha', {'bonus':0})['bonus'])
+        signa = "+" if attb > 0 else "-"
+        signc = "+" if chab > 0 else "-"
+        if Userdata.users[str(userID)]['class']['name']=="Monk":
             # calculate monk passive bonus
             monkbonus = [0,0]
-            monkbonus = await Classes.calc_monkbonus(ctx,user.id)
-            await ctx.send("Your new stats: **Attack**: {} [+{}], **Diplomacy**: {} [+{}]{}.".format(Userdata.users[str(user.id)]['att'],(Userdata.users[str(user.id)]['skill']['att']+ Userdata.users[str(user.id)]['buffs'].get('att', {'bonus':0})['bonus']),Userdata.users[str(user.id)]['cha'],(Userdata.users[str(user.id)]['skill']['cha']+ Userdata.users[str(user.id)]['buffs'].get('cha', {'bonus':0})['bonus'])," Max. Monkbonus: ({}ATT/{}DIPL)".format(str(monkbonus[0]),str(monkbonus[1]))))
+            monkbonus = await Classes.calc_monkbonus(ctx,userID)
+            await ctx.send("Your new stats: **Attack**: {} [{}{}], **Diplomacy**: {} [{}{}]{}.".format(Userdata.users[userID]['att'],signa,attb,Userdata.users[userID]['cha'],signc,chab," Max. Monkbonus: ({}ATT/{}DIPL)".format(str(monkbonus[0]),str(monkbonus[1]))))
         else:
-            await ctx.send("Your new stats: **Attack**: {} [+{}], **Diplomacy**: {} [+{}].".format(Userdata.users[str(user.id)]['att'],(Userdata.users[str(user.id)]['skill']['att']+ Userdata.users[str(user.id)]['buffs'].get('att', {'bonus':0})['bonus']),Userdata.users[str(user.id)]['cha'],(Userdata.users[str(user.id)]['skill']['cha']+ Userdata.users[str(user.id)]['buffs'].get('cha', {'bonus':0})['bonus'])))
-        await GobCog.save()
+            await ctx.send("Your new stats: **Attack**: {} [{}{}], **Diplomacy**: {} [{}{}].".format(Userdata.users[userID]['att'],signa,attb,Userdata.users[userID]['cha'],signc,chab))
 
     @staticmethod
     async def update_data(users, user):

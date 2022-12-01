@@ -91,7 +91,7 @@ class Classes:
         overall_balance = (1/math.cosh((att1+dipl1)-(att2+dipl2)))*1.2
         mbonus[0] = int(round(lvl*(-math.sinh((float(att1+att2)/10))+overall_balance)))
         mbonus[1] = int(round(lvl*(-math.sinh((float(dipl1+dipl2)/10))+overall_balance)))
-        print(att1,dipl1,att2,dipl2,overall_balance,-math.sinh((float(att1+att2)/10)),-math.sinh((float(dipl1+dipl2)/10)))
+        #print(att1,dipl1,att2,dipl2,overall_balance,-math.sinh((float(att1+att2)/10)),-math.sinh((float(dipl1+dipl2)/10)))
         return mbonus
 
     async def rage(ctx):

@@ -570,9 +570,9 @@ class Quest:
                         bonus = random.randint(max(5,int(Userdata.users[str(member.id)]['lvl']/2)),max(15,int(Userdata.users[str(member.id)]['lvl'])))
                         r_penalty = random.randint(5,int(bonus/2))
                         duration = int(max(10,bonus/4))
-                        await Userdata.debuff(ctx,str(member.id),"Your Rage",r_penalty,duration,'cha')
                         attack += -roll - bonus - att_value + monster_value
                         report += "**" + user + "**: " +  "- 🎲({}) -".format(roll) + " 💥{} ".format(bonus) + "- 🗡" + str(att_value) + monster_string + " | "
+                        await Userdata.debuff(ctx,str(member.id),"Your Rage",r_penalty,duration,'att')
                 elif user in Quest.affected and Quest.effect == "Fumble" and 1 < roll <= 5  and not (Userdata.users[str(member.id)]['class']['name']=="Monk" and Userdata.users[str(member.id)]['class']['ability']):
                     await ctx.send("**" + user + "**" + " has been fumbled.")
                     fumblelist.append(user)
@@ -580,9 +580,9 @@ class Quest:
                         bonus = random.randint(max(5,int(Userdata.users[str(member.id)]['lvl']/2)),max(15,int(Userdata.users[str(member.id)]['lvl'])))
                         r_penalty = random.randint(5,int(bonus/2))
                         duration = int(max(10,bonus/4))
-                        await Userdata.debuff(ctx,str(member.id),"Your Rage",r_penalty,duration,'cha')
                         attack += -roll - bonus - att_value + monster_value
                         report += "**" + user + "**: " +  "- 🎲({}) -".format(roll) + " 💥{} - ".format(bonus) + "🗡" + str(att_value) + effect + monster_string + " | "
+                        await Userdata.debuff(ctx,str(member.id),"Your Rage",r_penalty,duration,'att')
                 elif roll == 20 or (Userdata.users[str(member.id)]['class']['name']=="Berserker" and Userdata.users[str(member.id)]['class']['ability']):
                     ability = ""
                     bonus = 0
@@ -594,7 +594,7 @@ class Quest:
                         bonus = random.randint(max(5,int(Userdata.users[str(member.id)]['lvl']/2)),max(15,int(Userdata.users[str(member.id)]['lvl'])))
                         r_penalty = random.randint(5,int(bonus/2))
                         duration = int(max(10,bonus/4))
-                        await Userdata.debuff(ctx,str(member.id),"Your Rage",r_penalty,duration,'cha')
+                        await Userdata.debuff(ctx,str(member.id),"Your Rage",r_penalty,duration,'att')
                     elif Userdata.users[str(member.id)]['class']['name']=="Ranger" and any("bow" in k for k in Userdata.users[str(member.id)]['items']['right'].keys()):
                         ability = "🏹"
                         bonus = random.randint(max(5,int(Userdata.users[str(member.id)]['lvl']/2)),max(15,int(Userdata.users[str(member.id)]['lvl'])))
