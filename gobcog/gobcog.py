@@ -1217,7 +1217,7 @@ class GobCog(BaseCog):
                     clazz += "\n- Current pet: {}".format(Userdata.users[str(user.id)]['class']['ability']['pet']['name'])
                     clazz += "\n\nYou get a +{} bonus to attacks when using a bow.".format(bow_bonus)
             elif Userdata.users[str(user.id)]['class']['name']=="Berserker" and Userdata.users[str(user.id)]['items']['right'] != {}:
-                if len(Userdata.users[str(user.id)]['items']['right'][list(Userdata.users[str(user.id)]['items']['right'].keys())[0]]["slot"]) == 2 and "bow" not in list(Userdata.users[str(member.id)]['items']['right'].keys())[0]:
+                if len(Userdata.users[str(user.id)]['items']['right'][list(Userdata.users[str(user.id)]['items']['right'].keys())[0]]["slot"]) == 2 and "bow" not in list(Userdata.users[str(user.id)]['items']['right'].keys())[0]:
                     bonus = Userdata.users[str(user.id)]['items']['right'][list(Userdata.users[str(user.id)]['items']['right'].keys())[0]]["att"]*2
                     bow_bonus = " {}🀄".format(bonus)
                     clazz += "\n\nYou currently get a +{} bonus to attacks for using a two handed item.".format(bow_bonus)
