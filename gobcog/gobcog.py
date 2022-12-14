@@ -478,7 +478,7 @@ class GobCog(BaseCog):
             Userdata.users[str(user)]['name'] = {}
             Userdata.users[str(user)]['resting'] = {}
             Userdata.users[str(user)]['name'] = member.display_name
-            if 'lootfilter' not in Userdata.users[str(user)]['items']:
+            if 'lootfilter' not in Userdata.users[str(user)]:
                 Userdata.users[str(user)]['lootfilter'] = []
             if 'ingredients' not in Userdata.users[str(user)]:
                 Userdata.users[str(user)]['ingredients'] = {}
@@ -1737,6 +1737,20 @@ class GobCog(BaseCog):
         global looting
         looting.clear()
         await ctx.send('The active loot session list has been cleared.')
+
+    @commands.command(require_var_positional=True)
+    @checks.mod_or_permissions(manage_messages=True)
+    async def mod_reload(self, ctx: commands.Context):
+        """Reloads goblinscomic cog.
+        This will unload and then load the goblinscomic bot cog.
+        """
+        name = "gobcog"
+        if name in ctx.bot.extensions:
+                ctx.bot.unload_extension(name)
+                await ctx.bot.remove_loaded_package(name)
+                spec = await ctx.bot._cog_mgr.find_cog(name)
+                await ctx.bot.load_extension(spec)
+                await ctx.send('Bot module has been reloaded.')
 
     @commands.command()
     @checks.admin_or_permissions(administrator=True)
