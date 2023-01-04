@@ -418,7 +418,7 @@ class Explore:
         try:
             await controls[react](ctx, pages, controls, Explore.statusmsg, page, Explore.timeout, react, ctx.author)
         except discord.HTTPException as e:
-            await ctx.send("Something went wrong. I am trying to salvage what I can. The discord gods gave me this message to read to you: {}".format(e.status))
+            await ctx.send("Something went wrong (menu). Error code {}.".format(e.status))
             return await Explore.result(ctx, pages, controls, message, page, Explore.timeout, user)
 
     async def left(
@@ -438,7 +438,9 @@ class Explore:
                 Explore.moves -= 1
                 await Explore.movesmsg.edit(content="{} moves remaining.".format(Explore.moves))
                 output = await Explore.mapdrawer(list(Explore.fowmap))
+                await asyncio.sleep(0.2)
                 await Explore.mapmsg.edit(content=output)
+                await asyncio.sleep(0.2)
                 await Explore.statusmsg.edit(content="Moved Left")
                 await Explore.check(ctx, pages, controls, message, page, Explore.timeout, emoji, user)
             else:
@@ -446,7 +448,7 @@ class Explore:
                 await Explore.statusmsg.edit(content=text)
                 await Explore.check(ctx, pages, controls, message, page, Explore.timeout, emoji, user)
         except discord.HTTPException as e:
-            await ctx.send("Something went wrong. I am trying to salvage what I can. The discord gods gave me this message to read to you: {}".format(e.status))
+            await ctx.send("Something went wrong (left). Error code {}.".format(e.status))
             for future in Explore.pending:
                 future.cancel()
             return await Explore.result(ctx, pages, controls, message, page, Explore.timeout, user)
@@ -469,7 +471,9 @@ class Explore:
                 Explore.moves -= 1
                 await Explore.movesmsg.edit(content="{} moves remaining.".format(Explore.moves))
                 output = await Explore.mapdrawer(list(Explore.fowmap))
+                await asyncio.sleep(0.2)
                 await Explore.mapmsg.edit(content=output)
+                await asyncio.sleep(0.2)
                 await Explore.statusmsg.edit(content="Moved Up")
                 await Explore.check(ctx, pages, controls, message, page, Explore.timeout, emoji, user)
             else:
@@ -477,7 +481,7 @@ class Explore:
                 await Explore.statusmsg.edit(content=text)
                 await Explore.check(ctx, pages, controls, message, page, Explore.timeout, emoji, user)
         except discord.HTTPException as e:
-            await ctx.send("Something went wrong. I am trying to salvage what I can. The discord gods gave me this message to read to you: {}".format(e.status))
+            await ctx.send("Something went wrong (up). Error code {}.".format(e.status))
             for future in Explore.pending:
                 future.cancel()
             return await Explore.result(ctx, pages, controls, message, page, Explore.timeout, user)
@@ -498,8 +502,10 @@ class Explore:
                 await Explore.update_fow()
                 Explore.moves -= 1
                 await Explore.movesmsg.edit(content="{} moves remaining.".format(Explore.moves))
+                await asyncio.sleep(0.2)
                 output = await Explore.mapdrawer(list(Explore.fowmap))
                 await Explore.mapmsg.edit(content=output)
+                await asyncio.sleep(0.2)
                 await Explore.statusmsg.edit(content="Moved Down")
                 await Explore.check(ctx, pages, controls, message, page, Explore.timeout, emoji, user)
             else:
@@ -507,7 +513,7 @@ class Explore:
                 await Explore.statusmsg.edit(content=text)
                 await Explore.check(ctx, pages, controls, message, page, Explore.timeout, emoji, user)
         except discord.HTTPException as e:
-            await ctx.send("Something went wrong. I am trying to salvage what I can. The discord gods gave me this message to read to you: {}".format(e.status))
+            await ctx.send("Something went wrong (down). Error code {}.".format(e.status))
             for future in Explore.pending:
                 future.cancel()
             return await Explore.result(ctx, pages, controls, message, page, Explore.timeout, user)
@@ -529,7 +535,9 @@ class Explore:
                 Explore.moves -= 1
                 await Explore.movesmsg.edit(content="{} moves remaining.".format(Explore.moves))
                 output = await Explore.mapdrawer(list(Explore.fowmap))
+                await asyncio.sleep(0.2)
                 await Explore.mapmsg.edit(content=output)
+                await asyncio.sleep(0.2)
                 await Explore.statusmsg.edit(content="Moved Right")
                 await Explore.check(ctx, pages, controls, message, page, Explore.timeout, emoji, user)
             else:
@@ -537,7 +545,7 @@ class Explore:
                 await Explore.statusmsg.edit(content=text)
                 await Explore.check(ctx, pages, controls, message, page, Explore.timeout, emoji, user)
         except discord.HTTPException as e:
-            await ctx.send("Something went wrong. I am trying to salvage what I can. The discord gods gave me this message to read to you: {}".format(e.status))
+            await ctx.send("Something went wrong (right). Error code {}.".format(e.status))
             for future in Explore.pending:
                 future.cancel()
             return await Explore.result(ctx, pages, controls, message, page, Explore.timeout, user)
@@ -556,10 +564,11 @@ class Explore:
             tilename = Explore.tile_lookup.get(Explore.map[Explore.player_pos[0]][Explore.player_pos[1]],"Unknown Tile")
             text = "**" + tilename + ": " + Explore.tiles[tilename].get("desc","Error") + "**"
             await Explore.movesmsg.edit(content="{} moves remaining.".format(Explore.moves))
+            await asyncio.sleep(0.2)
             await Explore.statusmsg.edit(content=text)
             await Explore.check(ctx, pages, controls, message, page, Explore.timeout, emoji, user)
         except discord.HTTPException as e:
-            await ctx.send("Something went wrong. I am trying to salvage what I can. The discord gods gave me this message to read to you: {}".format(e.status))
+            await ctx.send("Something went wrong (inspect). Error code {}.".format(e.status))
             for future in Explore.pending:
                 future.cancel()
             return await Explore.result(ctx, pages, controls, message, page, Explore.timeout, user)
@@ -590,7 +599,7 @@ class Explore:
                             text = "** The Na-palm exploded! You took {} damage and need to rest now.**".format(damage)
                         await Explore.statusmsg.edit(content=text)
                         await Userdata.save()
-                        await asyncio.sleep(2)
+                        await asyncio.sleep(0.2)
                         return await Explore.result(ctx, pages, controls, message, page, Explore.timeout, user)
                     else:
                         text = "** You picked up: " + tilename + "**"
@@ -637,7 +646,7 @@ class Explore:
                             text = "** You fell into the lava! You took {} damage and need to rest now.**".format(damage)
                         await Explore.statusmsg.edit(content=text)
                         await Userdata.save()
-                        await asyncio.sleep(2)
+                        await asyncio.sleep(0.2)
                         return await Explore.result(ctx, pages, controls, message, page, Explore.timeout, user)
                     else:
                         text= "You found a chaos egg!"
@@ -649,6 +658,7 @@ class Explore:
                     text = "** You picked up: " + tilename + "**"
                 Explore.moves -= 1
                 await Explore.movesmsg.edit(content="{} moves remaining.".format(Explore.moves))
+                await asyncio.sleep(0.2)
                 await Explore.statusmsg.edit(content=text)
                 if tilename == "Chest":
                     if treasure != [0,0,0,0]:
@@ -673,9 +683,10 @@ class Explore:
             else:
                 text = "** This cannot be picked. " + tilename + "**"
                 await Explore.statusmsg.edit(content=text)
+                await asyncio.sleep(0.2)
                 await Explore.check(ctx, pages, controls, message, page, Explore.timeout, emoji, user)
         except discord.HTTPException as e:
-            await ctx.send("Something went wrong. I am trying to salvage what I can. The discord gods gave me this message to read to you: {}".format(e.status))
+            await ctx.send("Something went wrong (pick). Error code {}.".format(e.status))
             for future in Explore.pending:
                 future.cancel()
             return await Explore.result(ctx, pages, controls, message, page, Explore.timeout, user)
@@ -703,7 +714,7 @@ class Explore:
                 future.cancel()
             return await Explore.result(ctx, pages, controls, message, page, Explore.timeout, user)
         except discord.HTTPException as e:
-            await ctx.send("Something went wrong. I am trying to salvage what I can. The discord gods gave me this message to read to you: {}".format(e.status))
+            await ctx.send("Something went wrong (check). Error code {}.".format(e.status))
             for future in Explore.pending:
                 future.cancel()
             return await Explore.result(ctx, pages, controls, message, page, Explore.timeout, user)
@@ -729,10 +740,13 @@ class Explore:
             if Explore.mapmsg:
                 await Explore.mapmsg.delete()
                 Explore.mapmsg = None
+                await asyncio.sleep(0.2)
             if Explore.statusmsg:
                 await Explore.statusmsg.delete()
+                await asyncio.sleep(0.2)
             if Explore.movesmsg:
                 await Explore.movesmsg.delete()
+                await asyncio.sleep(0.2)
             if Explore.intro:
                 text = "{} went exploring the {} and ".format(user.display_name, Explore.biome)
                 if Explore.loot != {}:
@@ -751,7 +765,7 @@ class Explore:
                 future.cancel()
             return None
         except discord.HTTPException as e:
-            await ctx.send("Something went wrong. I am trying to salvage what I can. The discord gods gave me this message to read to you: {}".format(e.status))
+            await ctx.send("Something went wrong (exit). Error code {}.".format(e.status))
             for future in Explore.pending:
                 future.cancel()
             return await Explore.result(ctx, pages, controls, message, page, Explore.timeout, user)
@@ -768,10 +782,13 @@ class Explore:
         if Explore.mapmsg:
             await Explore.mapmsg.delete()
             Explore.mapmsg = None
+            await asyncio.sleep(0.2)
         if Explore.statusmsg:
             await Explore.statusmsg.delete()
+            await asyncio.sleep(0.2)
         if Explore.movesmsg:
             await Explore.movesmsg.delete()
+            await asyncio.sleep(0.2)
         if Explore.intro:
             text = "{} went exploring the {} and ".format(user.display_name, Explore.biome)
             if Explore.loot != {}:

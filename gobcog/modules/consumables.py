@@ -87,7 +87,7 @@ class Consumables:
                 await ctx.send("You need at least one augmentable item in your backpack.")
                 return False
             for item in Userdata.users[str(user.id)]['items']['backpack']:
-                if "{.:'" not in item and "[wanderring]" not in item:
+                if "{.:'" not in item and ")*" not in item and "[wanderring]" not in item:
                     if len(Userdata.users[str(user.id)]['items']['backpack'][item]['slot']) == 1:
                         bkpk.append(item + " (ATT "+ str(Userdata.users[str(user.id)]['items']['backpack'][item]['att']) + " / DPL "+ str(Userdata.users[str(user.id)]['items']['backpack'][item]['cha']) +") ["+ Userdata.users[str(user.id)]['items']['backpack'][item]['slot'][0] + " slot]")
                     else:
@@ -108,7 +108,7 @@ class Consumables:
                 await ctx.send("I don't have all day, you know.")
                 return False
             item1 = {}
-            lookup = list(x for x in Userdata.users[str(user.id)]['items']['backpack'] if reply.content.lower() in x.lower())
+            lookup = list(x for x in Userdata.users[str(user.id)]['items']['backpack'] if reply.content.lower() in x.lower() and "{.:'" not in x and ")*" not in x and "[wanderring]" not in x)
             if len(lookup) > 1:
                 text = "```css\n"
                 for num, name in enumerate(lookup, start=1):
