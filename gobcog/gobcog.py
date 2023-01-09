@@ -487,6 +487,8 @@ class GobCog(BaseCog):
                 Userdata.users[str(user)]['buffs'] = {}
             if Userdata.users[str(user)]['class'] == {}:
                 Userdata.users[str(user)]['class'] = {'name': "Hero", 'ability': False, 'desc': "Your basic adventuring hero."}
+            if Userdata.users[str(user)]['class']['name']=="Berserker":
+                Userdata.users[str(user)]['class']['desc'] = "Berserkers have the option to rage and add big bonuses to attacks, but fumbles hurt and follwing attacks are clouded by rage for a certain time.\n Use !rage when attacking in an adventure.\n They also receive a bonus when using two handed weapons."
             if 'skill' not in Userdata.users[str(user)]:
                 Userdata.users[str(user)]['skill'] = {}
                 Userdata.users[str(user)]['skill'] = {'pool': 0, 'att': 0, 'cha': 0}
@@ -855,7 +857,7 @@ class GobCog(BaseCog):
         """
         global users
         classes = {'Tinkerer': {'name': "Tinkerer", 'ability': False, 'desc': "Tinkerers can forge two different items into a device bound to their very soul.\nThey also have a chance to reclaim soul essence from dismantling devices.\n Use !forge."},
-                    'Berserker':{'name': "Berserker", 'ability': False, 'desc': "Berserkers have the option to rage and add big bonuses to attacks, but fumbles hurt and follwing attempts at diplomacy are clouded by rage for a certain time.\n Use !rage when attacking in an adventure.\n They also receive a bonus when using two handed weapons."},
+                    'Berserker':{'name': "Berserker", 'ability': False, 'desc': "Berserkers have the option to rage and add big bonuses to attacks, but fumbles hurt and follwing attacks are clouded by rage for a certain time.\n Use !rage when attacking in an adventure.\n They also receive a bonus when using two handed weapons."},
                     'Cleric': {'name': "Cleric", 'ability': False, 'desc': "Clerics can bless the entire group when praying and have the power to !heal.\n Use !bless when fighting in an adventure."},
                     'Ranger': {'name': "Ranger", 'ability': False, 'desc': "Rangers can gain a special pet, which can find items and give reward bonuses.\n Use !pet.\n They also receive a bonus when using bows."},
                     'Bard': {'name': "Bard", 'ability': False, 'desc': "Bards can perform to aid their comrades in diplomacy.\n Use !sing and maybe add a song when being diplomatic in an adventure."},
