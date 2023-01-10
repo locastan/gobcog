@@ -8,6 +8,7 @@ from redbot.core.utils.predicates import MessagePredicate
 from .treasure import Treasure
 from .custompredicate import CustomPredicate
 from .userdata import Userdata
+from .color import Color
 
 class Alchemy:
 
@@ -158,7 +159,7 @@ class Alchemy:
                     Userdata.users[str(user.id)]['consumables'][a_name]['uses'] = Userdata.users[str(user.id)]['consumables'][a_name].get("uses", 0) + a_uses
                 else:
                     Userdata.users[str(user.id)]['consumables'].update({a_name:{"slot":["consumable"],"uses":a_uses}})
-                await ctx.send("Your brew yielded {}x {}.".format(a_uses,a_name))
+                await ctx.send("```ansi\n Your brew yielded {}x {}.```".format(a_uses,Color.get_color(a_name)))
                 await al_msg.delete()
                 return (True,inbrew)
             else:

@@ -115,7 +115,7 @@ class Adventure:
                     namedesc = Adventure.attrib.split(" ")[1].capitalize()
                 else:
                     namedesc = Adventure.attrib.split(" ")[1].capitalize() + " " + Adventure.attrib.split(" ")[2].capitalize()
-                text = modRole.mention + "\n" + "```css\n [{} {} Alarm!]```".format(namedesc,Adventure.challenge)
+                text = modRole.mention + "\n" + "```ansi\n [2;31m[{} {} Alarm!][0m```".format(namedesc,Adventure.challenge)
         elif (Adventure.str + Adventure.dipl) > 100:
             Adventure.timeout = 60
         else:

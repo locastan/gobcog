@@ -20,6 +20,7 @@ from .modules.userdata import Userdata
 from .modules.consumables import Consumables
 from .modules.explore import Explore
 from .modules.alchemy import Alchemy
+from .modules.color import Color
 
 BaseCog = getattr(commands, "Cog", object)
 client = discord.Client()
@@ -683,19 +684,34 @@ class GobCog(BaseCog):
             for item in Userdata.users[str(user)]['items']['backpack'].keys():
                 if "{.:'" not in item and "[wanderring]" not in item:
                     if len(Userdata.users[str(user)]['items']['backpack'][item]['slot']) == 1:
-                        bkpk.append(item + " (ATT "+ str(Userdata.users[str(user)]['items']['backpack'][item]['att']) + " / DPL "+ str(Userdata.users[str(user)]['items']['backpack'][item]['cha']) +") ["+ Userdata.users[str(user)]['items']['backpack'][item]['slot'][0] + " slot]")
+                        bkpk.append(Color.get_color(item) + " (" + Color.red + "ATT " + Color.green + str(Userdata.users[str(user)]['items']['backpack'][item]['att']) + Color.none + " /" + Color.blue + " DPL "+ Color.green + str(Userdata.users[str(user)]['items']['backpack'][item]['cha']) + Color.none +")"+ Color.yellow + " ["+ Userdata.users[str(user)]['items']['backpack'][item]['slot'][0] + " slot]\n")
                     else:
-                        bkpk.append(item + " (ATT "+ str(Userdata.users[str(user)]['items']['backpack'][item]['att']*2) + " / DPL "+ str(Userdata.users[str(user)]['items']['backpack'][item]['cha']*2) +") [two handed]")
-            pile = " - " + "\n - ".join(bkpk)
+                        bkpk.append(Color.get_color(item) + " (" + Color.red + "ATT " + Color.green + str(Userdata.users[str(user)]['items']['backpack'][item]['att']*2) + Color.none + " /" + Color.blue + " DPL "+ Color.green + str(Userdata.users[str(user)]['items']['backpack'][item]['cha']*2) + Color.none +")"+ Color.yellow + " [two handed]\n")
+            pile = " - " + " - ".join(bkpk)
             if len(pile) > 1900: #split dangerously long texts into chunks.
-                chunks = [pile[i:i+1900] for i in range(0, len(pile), 1900)]
-                await ctx.send("```css\n[{}´s forgeables] \n\n```".format(ctx.author.display_name))
+                chunks = []
+                while pile:
+                    if len(pile) <= 1900:
+                        chunks.append(pile)
+                        break
+                    split_index = pile.rfind("\n", 0, 1900)
+                    if split_index == -1:
+                        # The chunk is too big, so everything until the next newline is deleted
+                        try:
+                            pile = pile.split("\n", 1)[1]
+                        except IndexError:
+                            # No "\n" in textline, i.e. the end of the input text was reached
+                            break
+                    else:
+                        chunks.append(pile[:split_index+1])
+                        pile = pile[split_index+1:]
+                await ctx.send("```ansi\n"+Color.blue+"[{}´s forgeables] \n\n```".format(ctx.author.display_name))
                 for chunk in chunks:
-                    await ctx.send("```css\n" + chunk + "```")
+                    await ctx.send("```ansi\n" + chunk + "```")
                     await asyncio.sleep(0.3)
             else:
-                await ctx.send("```css\n[{}´s forgeables] \n\n".format(ctx.author.display_name) + pile + " \n\n```")
-            await ctx.send("```css\n\n (Reply with the full or partial name of item 1 to select for forging. Try to be specific.)```")
+                await ctx.send("```ansi\n"+Color.blue+"[{}´s forgeables] \n\n".format(ctx.author.display_name) + pile + " \n\n```")
+            await ctx.send("```ansi\n\n (Reply with the full or partial name of item 1 to select for forging. Try to be specific.)```")
             try:
                 reply = await ctx.bot.wait_for("message", check=MessagePredicate.same_context(ctx), timeout=30)
             except asyncio.TimeoutError:
@@ -704,9 +720,9 @@ class GobCog(BaseCog):
             item1 = {}
             lookup = list(x for x in Userdata.users[str(user)]['items']['backpack'] if reply.content.lower() in x.lower())
             if len(lookup) > 1:
-                text = "```css\n"
+                text = "```ansi\n"
                 for num, name in enumerate(lookup, start=1):
-                    text += ("[{}]: {}\n".format(num, name))
+                    text += ("[{}]: {}\n".format(num, Color.get_color(name)))
                 text += "```"
                 await ctx.send("I found these items matching that name:\n{}Please reply with a number from the list.".format(text))
                 try:
@@ -744,19 +760,34 @@ class GobCog(BaseCog):
             for item in Userdata.users[str(user)]['items']['backpack'].keys():
                 if item not in consumed and "{.:'" not in item and "[wanderring]" not in item:
                     if len(Userdata.users[str(user)]['items']['backpack'][item]['slot']) == 1:
-                        bkpk.append(item + " (ATT "+ str(Userdata.users[str(user)]['items']['backpack'][item]['att']) + " / DPL "+ str(Userdata.users[str(user)]['items']['backpack'][item]['cha']) +") ["+ Userdata.users[str(user)]['items']['backpack'][item]['slot'][0] + " slot]")
+                        bkpk.append(Color.get_color(item) + " (" + Color.red + "ATT " + Color.green + str(Userdata.users[str(user)]['items']['backpack'][item]['att']) + Color.none + " /" + Color.blue + " DPL "+ Color.green + str(Userdata.users[str(user)]['items']['backpack'][item]['cha']) + Color.none +")"+ Color.yellow + " ["+ Userdata.users[str(user)]['items']['backpack'][item]['slot'][0] + " slot]\n")
                     else:
-                        bkpk.append(item + " (ATT "+ str(Userdata.users[str(user)]['items']['backpack'][item]['att']*2) + " / DPL "+ str(Userdata.users[str(user)]['items']['backpack'][item]['cha']*2) +") [two handed]")
-            pile = " - " + "\n - ".join(bkpk)
+                        bkpk.append(Color.get_color(item) + " (" + Color.red + "ATT " + Color.green + str(Userdata.users[str(user)]['items']['backpack'][item]['att']*2) + Color.none + " /" + Color.blue + " DPL "+ Color.green + str(Userdata.users[str(user)]['items']['backpack'][item]['cha']*2) + Color.none +")"+ Color.yellow + " [two handed]\n")
+            pile = " - " + " - ".join(bkpk)
             if len(pile) > 1900: #split dangerously long texts into chunks.
-                chunks = [pile[i:i+1900] for i in range(0, len(pile), 1900)]
-                await ctx.send("```css\n[{}´s forgeables] \n\n```".format(ctx.author.display_name))
+                chunks = []
+                while pile:
+                    if len(pile) <= 1900:
+                        chunks.append(pile)
+                        break
+                    split_index = pile.rfind("\n", 0, 1900)
+                    if split_index == -1:
+                        # The chunk is too big, so everything until the next newline is deleted
+                        try:
+                            pile = pile.split("\n", 1)[1]
+                        except IndexError:
+                            # No "\n" in textline, i.e. the end of the input text was reached
+                            break
+                    else:
+                        chunks.append(pile[:split_index+1])
+                        pile = pile[split_index+1:]
+                await ctx.send("```ansi\n"+Color.blue+"[{}´s forgeables] \n\n```".format(ctx.author.display_name))
                 for chunk in chunks:
-                    await ctx.send("```css\n" + chunk + "```")
+                    await ctx.send("```ansi\n" + chunk + "```")
                     await asyncio.sleep(0.3)
             else:
-                await ctx.send("```css\n[{}´s forgeables] \n\n".format(ctx.author.display_name) + pile + " \n\n```")
-            await ctx.send("```css\n\n (Reply with the full or partial name of item 2 to select for forging. Try to be specific.)```")
+                await ctx.send("```ansi\n"+Color.blue+"[{}´s forgeables] \n\n".format(ctx.author.display_name) + pile + " \n\n```")
+            await ctx.send("```ansi\n\n (Reply with the full or partial name of item 2 to select for forging. Try to be specific.)```")
             try:
                 reply = await ctx.bot.wait_for("message", check=MessagePredicate.same_context(ctx), timeout=30)
             except asyncio.TimeoutError:
@@ -765,10 +796,10 @@ class GobCog(BaseCog):
             item2 = {}
             lookup = list(x for x in Userdata.users[str(user)]['items']['backpack'] if reply.content.lower() in x.lower())
             if len(lookup) > 1:
-                text = "```css\n"
+                text = "```ansi\n"
                 lookup = [x for x in lookup if x not in consumed]
                 for num, name in enumerate(lookup, start=1):
-                    text += ("[{}]: {}\n".format(num, name))
+                    text += ("[{}]: {}\n".format(num, Color.get_color(name)))
                 text += "```"
                 await ctx.send("I found these items matching that name:\n{}Please reply with a number from the list.".format(text))
                 try:
@@ -808,7 +839,7 @@ class GobCog(BaseCog):
             await GobCog.sub_unequip(ctx,"{.:'")
             lookup = list(x for x in Userdata.users[str(user)]['items']['backpack'] if "{.:'" in x.lower())
             if len(lookup) > 0:
-                msg = await ctx.send("```css\n You already have a device. Do you want to replace {}? ```".format(', '.join(lookup)))
+                msg = await ctx.send("```ansi\n You already have a device. Do you want to replace {}? ```".format(Color.get_color(lookup)))
                 start_adding_reactions(msg, ReactionPredicate.YES_OR_NO_EMOJIS)
                 pred = ReactionPredicate.yes_or_no(msg, ctx.author)
                 try:
@@ -828,21 +859,21 @@ class GobCog(BaseCog):
                     for item in lookup:
                         del Userdata.users[str(user)]['items']['backpack'][item]
                         Userdata.users[str(user)]['items']['backpack'].update({newitem['itemname']: newitem['item']})
-                        await ctx.send('```css\n Your new {} consumed {} and is now lurking in your backpack. ```'.format(newitem['itemname'], ', '.join(lookup)))
+                        await ctx.send('```ansi\n Your new {} consumed {} and is now lurking in your backpack. ```'.format(Color.get_color(newitem['itemname']), Color.get_color(lookup)))
                 else:
                     roll = random.randint(1,3)
                     if roll == 3:
-                        await ctx.send('```css\n You carefully dismantle the {} and salvage its [soul essence]. ```'.format(newitem['itemname']))
+                        await ctx.send('```ansi\n You carefully dismantle the {} and salvage its '+Color.orange+'[soul essence]. ```'.format(Color.get_color(newitem['itemname'])))
                         if "[soul essence]" in Userdata.users[str(user)]['consumables'].keys():
                             Userdata.users[str(user)]['consumables']['[soul essence]']['uses'] = Userdata.users[str(user)]['consumables']['[soul essence]'].get("uses", 0) + 1
                         else:
                             Userdata.users[str(user)]['consumables'].update({'[soul essence]':{"slot":["consumable"],"uses":1}})
                     else:
-                        await ctx.send('```css\n {} got mad at your rejection and blew itself up. ```'.format(newitem['itemname']))
+                        await ctx.send('```ansi\n {} got mad at your rejection and blew itself up. ```'.format(Color.get_color(newitem['itemname'])))
                     await GobCog.save()
             else:
                 Userdata.users[str(user)]['items']['backpack'].update({newitem['itemname']: newitem['item']})
-                await ctx.send('```css\n Your new {} is lurking in your backpack. ```'.format(newitem['itemname']))
+                await ctx.send('```ansi\n Your new {} is lurking in your backpack. ```'.format(Color.get_color(newitem['itemname'])))
                 await GobCog.save()
 
 
@@ -899,7 +930,7 @@ class GobCog(BaseCog):
                                         lookup = list(x for x in Userdata.users[str(user.id)]['items']['backpack'] if "{.:'" in x.lower())
                                         for item in lookup:
                                             del Userdata.users[str(user.id)]['items']['backpack'][item]
-                                            await ctx.send('```css\n {} has run off to find a new master. ```'.format(', '.join(lookup)))
+                                            await ctx.send('```ansi\n {} has run off to find a new master. ```'.format(Color.get_color(lookup)))
                             else:
                                 ctx.command.reset_cooldown(ctx)
                                 return
@@ -1073,7 +1104,7 @@ class GobCog(BaseCog):
                     else:
                         Userdata.users[str(user.id)]['items']['backpack'].update({item['itemname']: item['item']})
                         await ctx.send("**{}** put the {} into the backpack.".format(user.display_name,item['itemname']))
-            await ctx.send("```css\n" + "You own {} normal, {} rare, {} epic and {} quest chests.```".format(
+            await ctx.send("```ansi\n You own {} normal, [2;34m{} rare[0m, [2;32m{} epic[0m and [2;33m{} quest[0m chests.```".format(
                 str(Userdata.users[str(user.id)]['treasure'][0]),str(Userdata.users[str(user.id)]['treasure'][1]),str(Userdata.users[str(user.id)]['treasure'][2]),str(Userdata.users[str(user.id)]['treasure'][3])))
             if item['equip'] == "cancel":
                 await ctx.send("**{}** cancelled the looting session.".format(user.display_name))
@@ -1121,7 +1152,7 @@ class GobCog(BaseCog):
                         await ctx.send("**{}** sold {} for {} copperpieces.".format(user.display_name,item['itemname'],price))
                     else:
                         Userdata.users[str(user.id)]['items']['backpack'].update({item['itemname']: item['item']})
-            await ctx.send("```css\n" + "You own {} normal, {} rare, {} epic and {} quest chests.```".format(
+            await ctx.send("```ansi\n You own {} normal, [2;34m{} rare[0m, [2;32m{} epic[0m and [2;33m{} quest[0m chests.```".format(
                 str(Userdata.users[str(user.id)]['treasure'][0]),str(Userdata.users[str(user.id)]['treasure'][1]),str(Userdata.users[str(user.id)]['treasure'][2]),str(Userdata.users[str(user.id)]['treasure'][3])))
         if ctx.author.id in looting:
             looting.remove(ctx.author.id)
@@ -1177,7 +1208,13 @@ class GobCog(BaseCog):
         scha = Userdata.users[str(user.id)]['skill']['cha'] + Userdata.users[str(user.id)]['buffs'].get('cha', {'bonus':0})['bonus']
         pool = Userdata.users[str(user.id)]['skill']['pool']
         hp_perc = round((Userdata.users[str(user.id)]['hp']/Userdata.users[str(user.id)]['base_hp'])*100)
-        hitpoints = "HP {}/{} ({}%)".format(Userdata.users[str(user.id)]['hp'],Userdata.users[str(user.id)]['base_hp'],hp_perc)
+        if hp_perc <= 25:
+            hp_color = Color.red
+        elif hp_perc <= 50:
+            hp_color = Color.orange
+        else:
+            hp_color = Color.green
+        hitpoints = "HP {}/{} ({}{}%{})".format(Userdata.users[str(user.id)]['hp'],Userdata.users[str(user.id)]['base_hp'],hp_color,hp_perc,Color.none)
         buffs = ""
         signa = "+" if satt > 0 else ""
         signc = "+" if scha > 0 else ""
@@ -1205,13 +1242,13 @@ class GobCog(BaseCog):
             if Userdata.users[str(user.id)]['items'][slot] and slot != "backpack":
                 item = list(Userdata.users[str(user.id)]['items'][slot].keys())[0]
                 if len(Userdata.users[str(user.id)]['items'][slot][item]['slot']) == 1:
-                    equip += item + " (ATT "+ str(Userdata.users[str(user.id)]['items'][slot][item]['att']) + " / DPL "+ str(Userdata.users[str(user.id)]['items'][slot][item]['cha']) +") ["+ Userdata.users[str(user.id)]['items'][slot][item]['slot'][0] + " slot]\n"
+                    equip += Color.get_color(item) + " ("+Color.red+"ATT "+Color.none+ str(Userdata.users[str(user.id)]['items'][slot][item]['att']) + " / "+Color.blue+"DPL "+Color.none+ str(Userdata.users[str(user.id)]['items'][slot][item]['cha']) +") "+Color.green+"["+ Userdata.users[str(user.id)]['items'][slot][item]['slot'][0] + " slot]"+Color.none+"\n"
                 else:
-                    equip += item + " (ATT "+ str(Userdata.users[str(user.id)]['items'][slot][item]['att']*2) + " / DPL "+ str(Userdata.users[str(user.id)]['items'][slot][item]['cha']*2) +") [two handed]\n"
+                    equip += Color.get_color(item) + " ("+Color.red+"ATT "+Color.none+ str(Userdata.users[str(user.id)]['items'][slot][item]['att']*2) + " / "+Color.blue+"DPL "+Color.none+ str(Userdata.users[str(user.id)]['items'][slot][item]['cha']*2) +") "+Color.green+"[two handed]"+Color.none+"\n"
                     next(i, None)
         next_lvl = int((lvl+1) ** 4)
         if Userdata.users[str(user.id)]['class'] != {} and 'name' in Userdata.users[str(user.id)]['class']:
-            clazz = Userdata.users[str(user.id)]['class']['name'] + "\n\n" + Userdata.users[str(user.id)]['class']['desc']
+            clazz = Color.pink + Userdata.users[str(user.id)]['class']['name'] +Color.yellow + "\n\n" + Userdata.users[str(user.id)]['class']['desc']+Color.none
             if Userdata.users[str(user.id)]['class']['name'] == "Ranger" and type(Userdata.users[str(user.id)]['class']['ability']) != bool:
                 if 'pet' in Userdata.users[str(user.id)]['class']['ability']:
                     bonus = int(Userdata.users[str(user.id)]['lvl']/10)*2
@@ -1230,11 +1267,9 @@ class GobCog(BaseCog):
         else:
             clazz = "Hero."
         await ctx.send(
-            "```css\n[{}´s Character Sheet] \n\n```".format(user.display_name) + "```css\nA level {} {} \n\n- ATTACK {} [{}{}] - DIPLOMACY {} [{}{}] - {} -{}\n\n- Credits: {} {} \n- Experience: {}/{} \n- Unspent skillpoints: {} \n```".format(
-                lvl, clazz, att, signa, satt, cha, signc, scha, hitpoints, buffs, bal, currency, xp, next_lvl, pool
-            ) + "```css\n" + equip + "```" +
-            "```css\n" + "You own {} normal, {} rare, {} epic and {} quest chests.```".format(
-                str(Userdata.users[str(user.id)]['treasure'][0]),str(Userdata.users[str(user.id)]['treasure'][1]),str(Userdata.users[str(user.id)]['treasure'][2]),str(Userdata.users[str(user.id)]['treasure'][3]))
+            "```ansi\n"+Color.red+"[{}´s Character Sheet] \n\n```".format(user.display_name) + "```ansi\nA level"+Color.blue+" {}".format(lvl) +" {}".format(clazz) + " \n\n- [2;31mATTACK[0m [2;41m{} [{}{}][0m - [2;34mDIPLOMACY[0m [2;45m{} [{}{}][0m - {} -{}\n\n- Credits:".format(att, signa, satt, cha, signc, scha, hitpoints,buffs)+Color.blue+" {} ".format(bal)+Color.none+"{}".format(currency)+Color.none+" \n- Experience:"+Color.blue+" {}".format(xp)+Color.none+"/"+Color.blue+"{} ".format(next_lvl)+Color.none+"\n- Unspent skillpoints:"+Color.blue+" {} ".format(pool)+Color.none+"\n```"
+            + "```ansi\n" + equip + "```" + "```ansi\n You own {} normal, [2;34m{} rare[0m, [2;32m{} epic[0m and [2;33m{} quest[0m chests.```".format(
+            str(Userdata.users[str(user.id)]['treasure'][0]),str(Userdata.users[str(user.id)]['treasure'][1]),str(Userdata.users[str(user.id)]['treasure'][2]),str(Userdata.users[str(user.id)]['treasure'][3]))
         )
 
     @commands.command(name="backpack", aliases=['b'])
@@ -1252,59 +1287,79 @@ class GobCog(BaseCog):
         global users
         bkpk = "Items in Backpack \n"
         bkpklist = []
-        cspouch = "Consumables \n"
+        cspouch = "🍱 Consumables "
         conslist = []
-        inpouch = "⚗️ Ingredients \n"
+        inpouch = "⚗️ Ingredients "
         inslist = []
         if Userdata.users[str(user.id)]['consumables'] == {}:
             cspouch = "No Consumables owned."
-        if switch == "None":
+        if switch == "None" or switch == "cons" or switch == "ingr":
             for item in Userdata.users[str(user.id)]['items']['backpack']: # added second if level for two handed weapons so their slots show properly.
                 if len(Userdata.users[str(user.id)]['items']['backpack'][item]['slot']) == 1:
-                    bkpklist.append(item + " (ATT "+ str(Userdata.users[str(user.id)]['items']['backpack'][item]['att']) + " / DPL "+ str(Userdata.users[str(user.id)]['items']['backpack'][item]['cha']) +") ["+ Userdata.users[str(user.id)]['items']['backpack'][item]['slot'][0] + " slot]\n")
+                    bkpklist.append(Color.get_color(item) + " (" + Color.red + "ATT " + Color.green + str(Userdata.users[str(user.id)]['items']['backpack'][item]['att']) + Color.none + " /" + Color.blue + " DPL "+ Color.green + str(Userdata.users[str(user.id)]['items']['backpack'][item]['cha']) + Color.none +")"+ Color.yellow + " ["+ Userdata.users[str(user.id)]['items']['backpack'][item]['slot'][0] + " slot]\n")
                 else:
-                    bkpklist.append(item + " (ATT "+ str(Userdata.users[str(user.id)]['items']['backpack'][item]['att']*2) + " / DPL "+ str(Userdata.users[str(user.id)]['items']['backpack'][item]['cha']*2) +") [two handed]\n")
+                    bkpklist.append(Color.get_color(item) + " (" + Color.red + "ATT " + Color.green + str(Userdata.users[str(user.id)]['items']['backpack'][item]['att']*2) + Color.none + " /" + Color.blue + " DPL "+ Color.green + str(Userdata.users[str(user.id)]['items']['backpack'][item]['cha']*2) + Color.none +")"+ Color.yellow + " [two handed]\n")
             for item in Userdata.users[str(user.id)]['consumables']: # added second if level for two handed weapons so their slots show properly.
-                    conslist.append(" - " + item + " ({}x)\n".format(Userdata.users[str(user.id)]['consumables'][item]['uses']))
+                    conslist.append(" - " + Color.get_color(item) + " ({}x)\n".format(Userdata.users[str(user.id)]['consumables'][item]['uses']))
             for item in Userdata.users[str(user.id)]['ingredients']:
-                    inslist.append(" - {} ({}x)\n".format(item,Userdata.users[str(user.id)]['ingredients'][item]['uses']))
+                    inslist.append(" - {} ({}x)\n".format(Color.get_color(item),Userdata.users[str(user.id)]['ingredients'][item]['uses']))
             conslist.sort()
             bkpklist.sort()
             inslist.sort()
-            textline = "[{}´s baggage] \n\n".format(user.display_name) + bkpk + "".join(bkpklist) + "\n (Reply with the name of an item or use !backpack equip \"name of item\" to equip it.)\n\n"
-            if len(textline) > 1900: #split dangerously long texts into chunks.
-                chunks = [textline[i:i+1900] for i in range(0, len(textline), 1900)]
-                for chunk in chunks:
-                    await ctx.send("```css\n" + chunk + "```")
-                    await asyncio.sleep(0.3)
-            else:
-                await ctx.send("```css\n"+ textline +"```")
-            await ctx.send("```css\n" + cspouch + "".join(conslist) + "\n```")
-            await ctx.send("```css\n" + inpouch + "".join(inslist) + "\n```")
-            try:
-                reply = await ctx.bot.wait_for("message", check=MessagePredicate.same_context(ctx), timeout=30)
-            except asyncio.TimeoutError:
-                return
-            if not reply:
-                return
-            else:
-                if not " sell " in reply.content.lower() and not " trade " in reply.content.lower():
-                    equip = {}
-                    for item in Userdata.users[str(user.id)]['items']['backpack']:
-                        if reply.content.lower() in item:
-                            equip = {"itemname": item,"item": Userdata.users[str(user.id)]['items']['backpack'][item]}
+            if switch == "None":
+                textline = Color.blue + "[{}´s baggage] \n\n".format(user.display_name) + Color.none + bkpk + "".join(bkpklist) + "\n (Reply with the name of an item or use !backpack equip \"name of item\" to equip it.)\n\n"
+                if len(textline) > 1900: #split dangerously long texts into chunks.
+                    chunks = []
+                    while textline:
+                        if len(textline) <= 1900:
+                            chunks.append(textline)
                             break
-                    if equip != {}: #not good to change dict size during iteration so I moved this outside the for loop.
-                        await self.equip_item(ctx, equip, True)
+                        split_index = textline.rfind("\n", 0, 1900)
+                        if split_index == -1:
+                            # The chunk is too big, so everything until the next newline is deleted
+                            try:
+                                textline = textline.split("\n", 1)[1]
+                            except IndexError:
+                                # No "\n" in textline, i.e. the end of the input text was reached
+                                break
+                        else:
+                            chunks.append(textline[:split_index+1])
+                            textline = textline[split_index+1:]
+                    for chunk in chunks:
+                        await ctx.send("```ansi\n" + chunk + "```")
+                        await asyncio.sleep(0.3)
+                else:
+                    await ctx.send("```ansi\n"+ textline +"```")
+                await ctx.send("```ansi\n"+ cspouch + "\n" + "".join(conslist) + "\n```")
+                await ctx.send("```ansi\n"+ inpouch + "\n" + "".join(inslist) + "\n```")
+                try:
+                    reply = await ctx.bot.wait_for("message", check=MessagePredicate.same_context(ctx), timeout=30)
+                except asyncio.TimeoutError:
+                    return
+                if not reply:
+                    return
+                else:
+                    if not " sell " in reply.content.lower() and not " trade " in reply.content.lower():
+                        equip = {}
+                        for item in Userdata.users[str(user.id)]['items']['backpack']:
+                            if reply.content.lower() in item:
+                                equip = {"itemname": item,"item": Userdata.users[str(user.id)]['items']['backpack'][item]}
+                                break
+                        if equip != {}: #not good to change dict size during iteration so I moved this outside the for loop.
+                            await self.equip_item(ctx, equip, True)
+            elif switch == "cons":
+                await ctx.send("```ansi\n" + Color.blue + "[{}´s ".format(user.display_name) + cspouch + "bag] \n\n" + Color.none + "".join(conslist) + "\n```")
+            elif switch == "ingr":
+                await ctx.send("```ansi\n" + Color.blue + "[{}´s ".format(user.display_name) + inpouch + "bag] \n\n" + Color.none + "".join(inslist) + "\n```")
         elif switch == "equip":
             if item == "None" or not any([x for x in Userdata.users[str(user.id)]['items']['backpack'] if item in x.lower()]):
                 await ctx.send("You have to specify an item from your backpack to equip.")
                 return
             lookup = list(x for x in Userdata.users[str(user.id)]['items']['backpack'] if item in x.lower())
             if len(lookup) > 1:
-                text = "```css\n"
+                text = "```ansi\n"
                 for num, name in enumerate(lookup, start=1):
-                    text += ("[{}]: {}\n".format(num, name))
+                    text += ("[{}]: {}\n".format(num, Color.get_color(name)))
                 text += "```"
                 await ctx.send("I found these items matching that name:\n{}Please reply with a number from the list.".format(text))
                 try:
@@ -1336,7 +1391,7 @@ class GobCog(BaseCog):
             lookup += list(x for x in Userdata.users[str(user.id)]['ingredients'] if item in x.lower())
             if any([x for x in lookup if "{.:'" in x.lower()]):
                 device = [x for x in lookup if "{.:'" in x.lower()]
-                await ctx.send("```css\n Your {} is refusing to be sold and bit your finger for trying. ```".format(device))
+                await ctx.send("```ansi\n Your {} is refusing to be sold and bit your finger for trying. ```".format(Color.get_color(device)))
                 return
             msg = await ctx.send("Do you want to sell these items {}?\n[If you are selling consumables and did not specify how many (eg. !b sell 'consumable' 3), all will be sold!]".format(str(lookup)))
             start_adding_reactions(msg, ReactionPredicate.YES_OR_NO_EMOJIS)
@@ -1401,9 +1456,9 @@ class GobCog(BaseCog):
             lookup += list(x for x in Userdata.users[str(user.id)]['consumables'] if item in x.lower())
             lookup += list(x for x in Userdata.users[str(user.id)]['ingredients'] if item in x.lower())
             if len(lookup) > 1:
-                text = "```css\n"
+                text = "```ansi\n"
                 for num, name in enumerate(lookup, start=1):
-                    text += ("[{}]: {}\n".format(num, name))
+                    text += ("[{}]: {}\n".format(num, Color.get_color(name)))
                 text += "```"
                 await ctx.send("I found these items matching that name:\n{}Please reply with a number from the list.".format(text))
                 try:
@@ -1420,7 +1475,7 @@ class GobCog(BaseCog):
             else:
                 item = lookup[0]
             if "{.:'" in item:
-                await ctx.send("```css\n Your {} does not want to leave you. ```".format(item))
+                await ctx.send("```ansi\n Your {} does not want to leave you. ```".format(Color.get_color(item)))
                 return
             if item in Consumables.consbles.keys():
                 if quant <= 0:
@@ -1509,11 +1564,32 @@ class GobCog(BaseCog):
                         Userdata.users[str(buyer.id)]['items']['backpack'].update({item: tradeitem})
                     await GobCog.save()
                     await ctx.send(
-                        "```css\n" + "{} traded to {} for {} {}```".format(
-                            item, buyer.display_name, asking, currency
+                        "```ansi\n" + "{} traded to {} for {} {}```".format(
+                            Color.get_color(item), buyer.display_name, asking, currency
                         ))
                 else:
                     await ctx.send("You do not have enough copperpieces.")
+
+    @commands.command(name="equip", aliases=['e'])
+    @commands.guild_only()
+    async def _equip(self, ctx, item: str="None"):
+        """This directly equips an item from your backpack.
+        """
+        await GobCog._backpack(self,ctx,"equip",item,0,None,1)
+
+    @commands.command(name="consumable", aliases=['c'])
+    @commands.guild_only()
+    async def _consumable(self, ctx):
+        """This draws up a list of all your consumables.
+        """
+        await GobCog._backpack(self,ctx,"cons","None",0,None,1)
+
+    @commands.command(name="ingredients", aliases=['i'])
+    @commands.guild_only()
+    async def _ingredients(self, ctx):
+        """This draws up a list of all your alchemy ingredients.
+        """
+        await GobCog._backpack(self,ctx,"ingr","None",0,None,1)
 
     @commands.command()
     @commands.guild_only()
@@ -1552,26 +1628,44 @@ class GobCog(BaseCog):
                 return await ctx.send("Lootfilter cleared.")
             if Userdata.users[str(user.id)]["lootfilter"] != []:
                 Userdata.users[str(user.id)]['lootfilter'].sort()
-                textline = "```css\n" + "[" + ctx.author.display_name + "s lootfilter]\n\n" + ",\n".join(Userdata.users[str(user.id)]['lootfilter']) + "\n```"
+                filteritems = []
+                for item in Userdata.users[str(user.id)]['lootfilter']:
+                    filteritems.append(Color.get_color(item))
+                textline = "```ansi\n" + Color.blue + "[" + ctx.author.display_name + "s lootfilter]"+Color.none+"\n\n" + ",\n".join(filteritems) + "\n```"
                 if len(textline) > 1900: #split dangerously long texts into chunks.
-                    chunks = [textline[i:i+1900] for i in range(0, len(textline), 1900)]
+                    chunks = []
+                    while textline:
+                        if len(textline) <= 1900:
+                            chunks.append(textline)
+                            break
+                        split_index = textline.rfind("\n", 0, 1900)
+                        if split_index == -1:
+                            # The chunk is too big, so everything until the next newline is deleted
+                            try:
+                                textline = textline.split("\n", 1)[1]
+                            except IndexError:
+                                # No "\n" in textline, i.e. the end of the input text was reached
+                                break
+                        else:
+                            chunks.append(textline[:split_index+1])
+                            textline = textline[split_index+1:]
                     for chunk in chunks:
-                        await ctx.send("```css\n" + chunk + "```")
+                        await ctx.send("```ansi\n" + chunk + "```")
                         await asyncio.sleep(0.3)
                     return
                 else:
-                    return await ctx.send("```css\n" + "[" + ctx.author.display_name + "s lootfilter]\n\n" + ",\n".join(Userdata.users[str(user.id)]['lootfilter']) + "\n```")
+                    return await ctx.send("```ansi\n" + Color.blue + "[" + ctx.author.display_name + "s lootfilter]\n\n" + ",\n".join(Userdata.users[str(user.id)]['lootfilter']) + "\n```")
             else:
-                return await ctx.send("```css\n" + "[" + ctx.author.display_name + "s lootfilter is currently empty.]" + "\n```")
+                return await ctx.send("```ansi\n" + Color.blue + "[" + ctx.author.display_name + "s lootfilter is currently empty.]" + "\n```")
         else:
             if comm == "add":
                 lookup = list(x for x in Userdata.users[str(user.id)]['items']['backpack'] if filteritem.lower() in x.lower())
             elif comm == "remove":
                 lookup = list(x for x in Userdata.users[str(user.id)]['lootfilter'] if filteritem.lower() in x.lower())
             if len(lookup) > 1:
-                text = "```css\n"
+                text = "```ansi\n"
                 for num, name in enumerate(lookup, start=1):
-                    text += ("[{}]: {}\n".format(num, name))
+                    text += ("[{}]: {}\n".format(num, Color.get_color(name)))
                 text += "```"
                 await ctx.send("I found these items matching that name:\n{}Please reply with a number from the list.".format(text))
                 try:
@@ -2233,9 +2327,9 @@ class GobCog(BaseCog):
         controls = {em_list[1]: 0, em_list[2]: 1, em_list[3]: 2, em_list[4]: 3}
         modRole = discord.utils.get(ctx.guild.roles, name='Goblin Adventurer!')
         if modRole is not None:
-            text = modRole.mention + "\n" + "```css\n [Alchemist Dodo is bringing the cart around!]```"
+            text = modRole.mention + "\n" + "```ansi\n"+ Color.red + "[Alchemist Dodo is bringing the cart around!]```"
         else:
-            text = "```css\n [Alchemist Dodo is bringing the cart around!]```"
+            text = "```ansi\n" + Color.red + "[Alchemist Dodo is bringing the cart around!]```"
         if GobCog.last_trade == 0 or summoned:
             GobCog.last_trade = time.time()
         elif GobCog.last_trade >= time.time()-21600: #trader can return after 6 hours have passed since last visit.
@@ -2246,7 +2340,7 @@ class GobCog(BaseCog):
             sitem = copy.deepcopy(stock[index])
             if "chest" not in sitem['itemname']:
                 if sitem['item']['slot'] == ['consumable']:
-                    text += "```css\n" + "[{}] {} for {} cp each.".format(str(index+1),sitem['itemname'],sitem['price'])+ " ```"
+                    text += "```ansi\n" + "[{}] {} for {} cp each.".format(str(index+1),Color.get_color(sitem['itemname']),sitem['price'])+ " ```"
                     continue
                 else:
                     if len(sitem['item']['slot']) == 2: # two handed weapons add their bonuses twice
@@ -2260,9 +2354,9 @@ class GobCog(BaseCog):
                             hand = sitem['item']['slot'][0] + " slot"
                         att = sitem['item']["att"]
                         cha = sitem['item']["cha"]
-                    text += "```css\n" + "[{}] {} (Attack: {}, Charisma: {} [{}]) for {} cp.".format(str(index+1),sitem['itemname'],str(att),str(cha),hand,sitem['price'])+ " ```"
+                    text += "```ansi\n" + "[{}] {} ("+Color.red+"ATT"+Color.none+": {}, "+Color.blue+"DPL"+Color.none+": {} [{}]) for {} cp.".format(str(index+1),Color.get_color(sitem['itemname']),str(att),str(cha),hand,sitem['price'])+ " ```"
             else:
-                text += "```css\n" + "[{}] {} for {} cp.".format(str(index+1),sitem['itemname'],sitem['price'])+ " ```"
+                text += "```ansi\n" + "[{}] {} for {} cp.".format(str(index+1),Color.get_color(sitem['itemname']),sitem['price'])+ " ```"
         text += "Do you want to buy any of these fine items? Tell me which one below:"
         channel = ctx.bot.get_channel(865203053777780766) #restrict trader to loot-spam channel on live server
         #channel = ctx.bot.get_channel(504934418289262597) #restrict trader to general channel on test server

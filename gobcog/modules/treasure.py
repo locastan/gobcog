@@ -8,6 +8,7 @@ from typing import Union, Iterable, Optional
 from redbot.core.utils.predicates import ReactionPredicate
 from redbot.core.utils.menus import start_adding_reactions
 from .userdata import Userdata
+from .color import Color
 
 class Treasure:
 
@@ -170,9 +171,9 @@ class Treasure:
         if item['slot'] == ['consumable']:
             item['uses'] = random.randint(1,item['uses'])
             if hasattr(user, "display_name"):
-                await ctx.send("```css\n{} found {} ({}x).```".format(user.display_name,itemname,item['uses']))
+                await ctx.send("```ansi\n{} found {} ({}x).```".format(user.display_name,Color.get_color(itemname),item['uses']))
             else:
-                await ctx.send("```css\nYour {} found {} ({}x).```".format(user,itemname,item['uses']))
+                await ctx.send("```ansi\nYour {} found {} ({}x).```".format(user,Color.get_color(itemname),item['uses']))
             msg = await ctx.send("Do you want to use, put in backpack or sell this item?")
             start_adding_reactions(msg, Treasure.controls.keys())
             if hasattr(user, "id"):
@@ -213,9 +214,9 @@ class Treasure:
                 att = item["att"]
                 cha = item["cha"]
             if hasattr(user, "display_name"):
-                await ctx.send("```css\n{} found a {}. (Attack: {}, Charisma: {} [{}])```".format(user.display_name,itemname,str(att),str(cha),hand))
+                await ctx.send("```ansi\n{} found a {}. ([2;31mATT[0m: [2;34m{}[0m, [2;34mDPL[0m: [2;34m{} [2;36m[{}][0m)```".format(user.display_name,Color.get_color(itemname),str(att),str(cha),hand))
             else:
-                await ctx.send("```css\nYour {} found a {}. (Attack: {}, Charisma: {} [{}])```".format(user,itemname,str(att),str(cha),hand))
+                await ctx.send("```ansi\nYour {} found a {}. ([2;31mATT[0m: [2;34m{}[0m, [2;34mDPL[0m: [2;34m{} [2;36m[{}][0m)```".format(user,Color.get_color(itemname),str(att),str(cha),hand))
             msg = await ctx.send("Do you want to equip, put in backpack or sell this item?")
             start_adding_reactions(msg, Treasure.controls.keys())
             if hasattr(user, "id"):
@@ -319,7 +320,7 @@ class Treasure:
             if item['slot'] == ['consumable']:
                 item['uses'] = random.randint(1,item['uses'])
                 if hasattr(user, "display_name"):
-                    conspile.append("{} ({}x)".format(itemname,item['uses']))
+                    conspile.append("{} ({}x)".format(Color.get_color(itemname),item['uses']))
             else:
                 if len(item["slot"]) == 2: # two handed weapons add their bonuses twice
                     hand = "two handed"
@@ -332,21 +333,36 @@ class Treasure:
                         hand = item["slot"][0] + " slot"
                     att = item["att"]
                     cha = item["cha"]
-                itempile.append("{} (Attack: {}, Charisma: {} [{}])".format(itemname,str(att),str(cha),hand))
+                itempile.append("{} ([2;31mATT[0m: [2;34m{}[0m, [2;34mDPL[0m: [2;34m{} [2;36m[{}][0m)".format(Color.get_color(itemname),str(att),str(cha),hand))
         conspile.sort()
         itempile.sort()
         consreport = " - " + "\n - ".join(conspile) + "```"
         pilereport = " - " + "\n - ".join(itempile)
         if len(pilereport) > 1900: #split dangerously long texts into chunks.
-            chunks = [pilereport[i:i+1900] for i in range(0, len(pilereport), 1900)]
-            await ctx.send("```css\n The following items were added to your backpack:\n```")
+            chunks = []
+            while pilereport:
+                if len(pilereport) <= 1900:
+                    chunks.append(pilereport)
+                    break
+                split_index = pilereport.rfind("\n", 0, 1900)
+                if split_index == -1:
+                    # The chunk is too big, so everything until the next newline is deleted
+                    try:
+                        pilereport = pilereport.split("\n", 1)[1]
+                    except IndexError:
+                        # No "\n" in textline, i.e. the end of the input text was reached
+                        break
+                else:
+                    chunks.append(pilereport[:split_index+1])
+                    pilereport = pilereport[split_index+1:]
+            await ctx.send("```ansi\n"+Color.yellow+"The following items were added to your backpack:\n```")
             for chunk in chunks:
-                await ctx.send("```css\n" + chunk + "```")
+                await ctx.send("```ansi\n" + chunk + "```")
                 await asyncio.sleep(0.3)
         else:
-            await ctx.send("```css\n The following items were added to your backpack:\n" + pilereport + "```")
-        await ctx.send("```css\n Added consumables:\n" + consreport)
-        await ctx.send("```css\n You also received {} copperpieces from selling items.```".format(moneypile))
+            await ctx.send("```ansi\n"+Color.yellow+"The following items were added to your backpack:\n" + pilereport + "```")
+        await ctx.send("```ansi\n Added consumables:\n" + consreport)
+        await ctx.send("```ansi\n You also received [2;36m{}[0m copperpieces from selling items.```".format(moneypile))
         return lootpile
 
     async def one_from(ctx,user,list): #user needs to be a discord.member object. list is a namestring of a droplist of items here.
@@ -355,7 +371,7 @@ class Treasure:
         item = chance[itemname]
         if item['slot'] == ['consumable']:
             item['uses'] = random.randint(1,item['uses'])
-            await ctx.send("```css\n{} found {} ({}x).```".format(user.display_name,itemname,item['uses']))
+            await ctx.send("```ansi\n{} found {} ({}x).```".format(user.display_name,Color.get_color(itemname),item['uses']))
             msg = await ctx.send("Do you want to use, put in backpack or sell this item?")
             start_adding_reactions(msg, Treasure.controls.keys())
             if hasattr(user, "id"):
@@ -388,7 +404,7 @@ class Treasure:
                     hand = item["slot"][0] + " slot"
                 att = item["att"]
                 cha = item["cha"]
-            await ctx.send("```css\n{} found a {}. (Attack: {}, Charisma: {} [{}])```".format(user.display_name,itemname,str(att),str(cha),hand))
+            await ctx.send("```ansi\n{} found a {}. (Attack: {}, Charisma: {} [{}])```".format(user.display_name,Color.get_color(itemname),str(att),str(cha),hand))
             msg = await ctx.send("Do you want to equip, put in backpack or sell this item?")
             start_adding_reactions(msg, Treasure.controls.keys())
             pred = ReactionPredicate.with_emojis(tuple(Treasure.controls.keys()), msg, user)
