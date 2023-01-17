@@ -353,7 +353,7 @@ class Adventure:
                     fumblelist.append(user)
                     if Userdata.users[str(member.id)]['class']['name']=="Berserker" and Userdata.users[str(member.id)]['class']['ability']:
                         bonus = random.randint(max(5,int(Userdata.users[str(member.id)]['lvl']/2)),max(15,int(Userdata.users[str(member.id)]['lvl'])))
-                        r_penalty = random.randint(5,int(bonus/2))
+                        r_penalty = random.randint(5,max(6,int(bonus/2)))
                         duration = int(max(2,bonus/10))
                         attack += -roll -bonus -att_value + monster_value
                         report += "**" + user + "**: " +  "- 🎲({}) -".format(roll) + " 💥{} ".format(bonus) + "- 🗡" + str(att_value) + monster_string + " | "
@@ -367,7 +367,7 @@ class Adventure:
                     if Userdata.users[str(member.id)]['class']['name']=="Berserker" and Userdata.users[str(member.id)]['class']['ability']:
                         ability = "🗯️"
                         bonus = random.randint(max(5,int(Userdata.users[str(member.id)]['lvl']/2)),max(15,int(Userdata.users[str(member.id)]['lvl'])))
-                        r_penalty = random.randint(5,int(bonus/2))
+                        r_penalty = random.randint(5,max(6,int(bonus/2)))
                         duration = int(max(2,bonus/10))
                         await Userdata.debuff(ctx,str(member.id),"Your Rage",r_penalty,duration,'att')
                     elif Userdata.users[str(member.id)]['class']['name']=="Ranger" and any("bow" in k for k in Userdata.users[str(member.id)]['items']['right'].keys()):
