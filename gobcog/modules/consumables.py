@@ -6,6 +6,7 @@ from .userdata import Userdata
 from .adventure import Adventure
 from .treasure import Treasure
 from .alchemy import Alchemy
+from .color import Color
 
 class Consumables:
     #Name table to assign effects to consumables. Consumable items themselfes are defined in treasure.py
@@ -89,19 +90,34 @@ class Consumables:
             for item in Userdata.users[str(user.id)]['items']['backpack']:
                 if "{.:'" not in item and ")*" not in item and "[wanderring]" not in item:
                     if len(Userdata.users[str(user.id)]['items']['backpack'][item]['slot']) == 1:
-                        bkpk.append(item + " (ATT "+ str(Userdata.users[str(user.id)]['items']['backpack'][item]['att']) + " / DPL "+ str(Userdata.users[str(user.id)]['items']['backpack'][item]['cha']) +") ["+ Userdata.users[str(user.id)]['items']['backpack'][item]['slot'][0] + " slot]")
+                        bkpk.append(Color.get_color(item) + " (" + Color.red + "ATT " + Color.green + str(Userdata.users[str(user.id)]['items']['backpack'][item]['att']) + Color.none + " /" + Color.blue + " DPL "+ Color.green + str(Userdata.users[str(user.id)]['items']['backpack'][item]['cha']) + Color.none +")"+ Color.yellow + " ["+ Userdata.users[str(user.id)]['items']['backpack'][item]['slot'][0] + " slot]\n")
                     else:
-                        bkpk.append(item + " (ATT "+ str(Userdata.users[str(user.id)]['items']['backpack'][item]['att']*2) + " / DPL "+ str(Userdata.users[str(user.id)]['items']['backpack'][item]['cha']*2) +") [two handed]")
+                        bkpk.append(Color.get_color(item) + " (" + Color.red + "ATT " + Color.green + str(Userdata.users[str(user.id)]['items']['backpack'][item]['att']*2) + Color.none + " /" + Color.blue + " DPL "+ Color.green + str(Userdata.users[str(user.id)]['items']['backpack'][item]['cha']*2) + Color.none +")"+ Color.yellow + " [two handed]\n")
             pile = " " + "\n ".join(bkpk)
             if len(pile) > 1900: #split dangerously long texts into chunks.
-                chunks = [pile[i:i+1900] for i in range(0, len(pile), 1900)]
-                await ctx.send("```css\n[{}´s augmentables] \n\n```".format(ctx.author.display_name))
+                chunks = []
+                while pile:
+                    if len(pile) <= 1900:
+                        chunks.append(pile)
+                        break
+                    split_index = pile.rfind("\n", 0, 1900)
+                    if split_index == -1:
+                        # The chunk is too big, so everything until the next newline is deleted
+                        try:
+                            pile = pile.split("\n", 1)[1]
+                        except IndexError:
+                            # No "\n" in textline, i.e. the end of the input text was reached
+                            break
+                    else:
+                        chunks.append(pile[:split_index+1])
+                        pile = pile[split_index+1:]
+                await ctx.send("```ansi\n"+Color.blue+"[{}´s augmentables] \n\n```".format(ctx.author.display_name))
                 for chunk in chunks:
-                    await ctx.send("```css\n" + chunk + "```")
+                    await ctx.send("```ansi\n" + chunk + "```")
                     await asyncio.sleep(0.3)
             else:
-                await ctx.send("```css\n[{}´s augmentables] \n\n".format(ctx.author.display_name) + pile + " \n\n```")
-            await ctx.send("```css\n\n (Reply with the full or partial name of the item to select for augmenting. Try to be specific.)```")
+                await ctx.send("```ansi\n"+Color.blue+"[{}´s augmentables] \n\n".format(ctx.author.display_name) + pile + " \n\n```")
+            await ctx.send("```ansi\n\n (Reply with the full or partial name of the item to select for augmenting. Try to be specific.)```")
             try:
                 reply = await ctx.bot.wait_for("message", check=MessagePredicate.same_context(ctx), timeout=30)
             except asyncio.TimeoutError:
@@ -110,9 +126,9 @@ class Consumables:
             item1 = {}
             lookup = list(x for x in Userdata.users[str(user.id)]['items']['backpack'] if reply.content.lower() in x.lower() and "{.:'" not in x and ")*" not in x and "[wanderring]" not in x)
             if len(lookup) > 1:
-                text = "```css\n"
+                text = "```ansi\n"
                 for num, name in enumerate(lookup, start=1):
-                    text += ("[{}]: {}\n".format(num, name))
+                    text += ("[{}]: {}\n".format(num, Color.get_color(name)))
                 text += "```"
                 await ctx.send("I found these items matching that name:\n{}Please reply with a number from the list.".format(text))
                 try:

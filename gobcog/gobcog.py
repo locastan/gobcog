@@ -839,7 +839,7 @@ class GobCog(BaseCog):
             await GobCog.sub_unequip(ctx,"{.:'")
             lookup = list(x for x in Userdata.users[str(user)]['items']['backpack'] if "{.:'" in x.lower())
             if len(lookup) > 0:
-                msg = await ctx.send("```ansi\n You already have a device. Do you want to replace {}? ```".format(Color.get_color(str(lookup))))
+                msg = await ctx.send("```ansi\n You already have a device. Do you want to replace {}? ```".format(Color.get_color(str(lookup[0]))))
                 start_adding_reactions(msg, ReactionPredicate.YES_OR_NO_EMOJIS)
                 pred = ReactionPredicate.yes_or_no(msg, ctx.author)
                 try:
