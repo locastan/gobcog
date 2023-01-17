@@ -371,8 +371,9 @@ class Adventure:
                         duration = int(max(2,bonus/10))
                         await Userdata.debuff(ctx,str(member.id),"Your Rage",r_penalty,duration,'att')
                     elif Userdata.users[str(member.id)]['class']['name']=="Ranger" and any("bow" in k for k in Userdata.users[str(member.id)]['items']['right'].keys()):
-                        ability = "🏹"
-                        bonus = random.randint(max(5,int(Userdata.users[str(member.id)]['lvl']/2)),max(15,int(Userdata.users[str(member.id)]['lvl'])))
+                        bowbonus = int(Userdata.users[str(member.id)]['lvl']/10)*2
+                        bonus = random.randint(max(5,int(Userdata.users[str(member.id)]['lvl']/2)),max(15,int(Userdata.users[str(member.id)]['lvl']))) + bowbonus
+                        bow_bonus = "🏹{} + ".format(bowbonus)
                     else:
                         bonus = random.randint(5,15)
                     attack += roll + bonus + att_value + monster_value

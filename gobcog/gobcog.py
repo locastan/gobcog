@@ -285,11 +285,11 @@ class GobCog(BaseCog):
                 m = int(m)
                 h = int(h)
                 if h == 0 and m == 0:
-                    out = "{:02d}s".format(s)
+                    out = "{:02d} seconds".format(s)
                 elif h == 0:
-                    out = "{:02d}m:{:02d}s".format(m, s)
+                    out = "{:02d} minutes and {:02d} seconds".format(m, s)
                 else:
-                    out = "{:01d}h:{:02d}m:{:02d}s".format(h, m, s)
+                    out = "{:01d} hours, {:02d} minutes and {:02d} seconds".format(h, m, s)
                 await ctx.send("```css\n You are now resting for {}.```".format(out))
                 await Userdata.save()
         else:

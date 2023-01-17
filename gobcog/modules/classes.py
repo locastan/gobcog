@@ -69,12 +69,15 @@ class Classes:
 
     async def calc_monkbonus(ctx, id):
         mbonus=[0,0]
+        balancing = 0.5
         lvl = Userdata.users[str(id)]['lvl']
         if Userdata.users[str(id)]['items']['left'] == {} and Userdata.users[str(id)]['items']['right'] == {}:
             att1 = att2 = dipl1 = dipl2 = 0
+            balancing = 0.3
         if Userdata.users[str(id)]['items']['right'] != {}:
             if len(Userdata.users[str(id)]['items']['right'][list(Userdata.users[str(id)]['items']['right'].keys())[0]]["slot"]) == 2:
                 att1 = att2 = dipl1 = dipl2 = 0
+                balancing = 0.3
         try:
             weapon1 = list(Userdata.users[str(id)]['items']['left'].keys())[0]
         except IndexError:
@@ -89,8 +92,8 @@ class Classes:
         att2 = Userdata.users[str(id)]['items']['right'].get(weapon2, {'att':0})['att']
         dipl2 = Userdata.users[str(id)]['items']['right'].get(weapon2, {'cha':0})['cha']
         overall_balance = (1/math.cosh((att1+dipl1)-(att2+dipl2)))*1.2
-        mbonus[0] = int(round(lvl*(-math.sinh((float(att1+att2)/10))+overall_balance)))
-        mbonus[1] = int(round(lvl*(-math.sinh((float(dipl1+dipl2)/10))+overall_balance)))
+        mbonus[0] = int(round(balancing*lvl*(-math.sinh((float(att1+att2)/10))+overall_balance)))
+        mbonus[1] = int(round(balancing*lvl*(-math.sinh((float(dipl1+dipl2)/10))+overall_balance)))
         #print(att1,dipl1,att2,dipl2,overall_balance,-math.sinh((float(att1+att2)/10)),-math.sinh((float(dipl1+dipl2)/10)))
         return mbonus
 
