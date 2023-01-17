@@ -863,7 +863,7 @@ class GobCog(BaseCog):
                 else:
                     roll = random.randint(1,3)
                     if roll == 3:
-                        await ctx.send('```ansi\n You carefully dismantle the {} and salvage its '+Color.orange+'[soul essence]. ```'.format(Color.get_color(newitem['itemname'])))
+                        await ctx.send('```ansi\n You carefully dismantle the {} and salvage its '.format(Color.get_color(newitem['itemname']))+Color.orange+'[soul essence]. ```')
                         if "[soul essence]" in Userdata.users[str(user)]['consumables'].keys():
                             Userdata.users[str(user)]['consumables']['[soul essence]']['uses'] = Userdata.users[str(user)]['consumables']['[soul essence]'].get("uses", 0) + 1
                         else:

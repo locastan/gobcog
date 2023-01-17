@@ -93,7 +93,7 @@ class Consumables:
                         bkpk.append(Color.get_color(item) + " (" + Color.red + "ATT " + Color.green + str(Userdata.users[str(user.id)]['items']['backpack'][item]['att']) + Color.none + " /" + Color.blue + " DPL "+ Color.green + str(Userdata.users[str(user.id)]['items']['backpack'][item]['cha']) + Color.none +")"+ Color.yellow + " ["+ Userdata.users[str(user.id)]['items']['backpack'][item]['slot'][0] + " slot]\n")
                     else:
                         bkpk.append(Color.get_color(item) + " (" + Color.red + "ATT " + Color.green + str(Userdata.users[str(user.id)]['items']['backpack'][item]['att']*2) + Color.none + " /" + Color.blue + " DPL "+ Color.green + str(Userdata.users[str(user.id)]['items']['backpack'][item]['cha']*2) + Color.none +")"+ Color.yellow + " [two handed]\n")
-            pile = " " + "\n ".join(bkpk)
+            pile = " " + "".join(bkpk)
             if len(pile) > 1900: #split dangerously long texts into chunks.
                 chunks = []
                 while pile:
