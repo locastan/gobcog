@@ -73,25 +73,26 @@ class Classes:
         lvl = Userdata.users[str(id)]['lvl']
         if Userdata.users[str(id)]['items']['left'] == {} and Userdata.users[str(id)]['items']['right'] == {}:
             att1 = att2 = dipl1 = dipl2 = 0
-            balancing = 0.3
-        if Userdata.users[str(id)]['items']['right'] != {}:
-            if len(Userdata.users[str(id)]['items']['right'][list(Userdata.users[str(id)]['items']['right'].keys())[0]]["slot"]) == 2:
-                att1 = att2 = dipl1 = dipl2 = 0
-                balancing = 0.3
-        try:
-            weapon1 = list(Userdata.users[str(id)]['items']['left'].keys())[0]
-        except IndexError:
-            #fill with non-existing name, so the default value will be returned by the following .get(weapon...)
-            weapon1 = "empty"
-        try:
-            weapon2 = list(Userdata.users[str(id)]['items']['right'].keys())[0]
-        except IndexError:
-            weapon2 = "empty"
-        att1 = Userdata.users[str(id)]['items']['left'].get(weapon1, {'att':0})['att']
-        dipl1 = Userdata.users[str(id)]['items']['left'].get(weapon1, {'cha':0})['cha']
-        att2 = Userdata.users[str(id)]['items']['right'].get(weapon2, {'att':0})['att']
-        dipl2 = Userdata.users[str(id)]['items']['right'].get(weapon2, {'cha':0})['cha']
-        overall_balance = (1/math.cosh((att1+dipl1)-(att2+dipl2)))*1.2
+            balancing = 0.4
+        #elif Userdata.users[str(id)]['items']['right'] != {}: #removed penalty for two handed as those are now inherently imbalanced and affected by the new overall balance
+            #if len(Userdata.users[str(id)]['items']['right'][list(Userdata.users[str(id)]['items']['right'].keys())[0]]["slot"]) == 2:
+                #att1 = att2 = dipl1 = dipl2 = 0
+                #balancing = 0.3
+        else:
+            try:
+                weapon1 = list(Userdata.users[str(id)]['items']['left'].keys())[0]
+            except IndexError:
+                #fill with non-existing name, so the default value will be returned by the following .get(weapon...)
+                weapon1 = "empty"
+            try:
+                weapon2 = list(Userdata.users[str(id)]['items']['right'].keys())[0]
+            except IndexError:
+                weapon2 = "empty"
+            att1 = Userdata.users[str(id)]['items']['left'].get(weapon1, {'att':0})['att']
+            dipl1 = Userdata.users[str(id)]['items']['left'].get(weapon1, {'cha':0})['cha']
+            att2 = Userdata.users[str(id)]['items']['right'].get(weapon2, {'att':0})['att']
+            dipl2 = Userdata.users[str(id)]['items']['right'].get(weapon2, {'cha':0})['cha']
+        overall_balance = (1/math.cosh((att1+att2)-(dipl1+dipl2)))*2.5
         mbonus[0] = int(round(balancing*lvl*(-math.sinh((float(att1+att2)/10))+overall_balance)))
         mbonus[1] = int(round(balancing*lvl*(-math.sinh((float(dipl1+dipl2)/10))+overall_balance)))
         #print(att1,dipl1,att2,dipl2,overall_balance,-math.sinh((float(att1+att2)/10)),-math.sinh((float(dipl1+dipl2)/10)))
