@@ -594,15 +594,18 @@ class Quest:
                         bonus = random.randint(max(5,int(Userdata.users[str(member.id)]['lvl']/2)),max(15,int(Userdata.users[str(member.id)]['lvl'])))
                         r_penalty = random.randint(5,max(6,int(bonus/2)))
                         duration = int(max(2,bonus/10))
+                        bonus_str = ability + str(bonus)
                         await Userdata.debuff(ctx,str(member.id),"Your Rage",r_penalty,duration,'att')
                     elif Userdata.users[str(member.id)]['class']['name']=="Ranger" and any("bow" in k for k in Userdata.users[str(member.id)]['items']['right'].keys()):
                         bowbonus = int(Userdata.users[str(member.id)]['lvl']/10)*2
                         bonus = random.randint(max(5,int(Userdata.users[str(member.id)]['lvl']/2)),max(15,int(Userdata.users[str(member.id)]['lvl']))) + bowbonus
-                        ability = "incl.🏹{}: + ".format(bowbonus)
+                        basebonus = bonus - bowbonus
+                        ability = "🏹{} + 🎯{} + ".format(bowbonus,basebonus)
+                        bonus_str = ability
                     else:
                         bonus = random.randint(5,15)
+                        bonus_str = ability + str(bonus)
                     attack += roll + bonus + att_value + monster_value
-                    bonus_str = ability + str(bonus)
                     if Userdata.users[str(member.id)]['class']['name']=="Berserker" and Userdata.users[str(member.id)]['items']['right'] != {}:
                         if len(Userdata.users[str(member.id)]['items']['right'][list(Userdata.users[str(member.id)]['items']['right'].keys())[0]]["slot"]) == 2 and "bow" not in list(Userdata.users[str(member.id)]['items']['right'].keys())[0]:
                             barb_bonus = Userdata.users[str(member.id)]['items']['right'][list(Userdata.users[str(member.id)]['items']['right'].keys())[0]]["att"]*2
