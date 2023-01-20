@@ -375,7 +375,7 @@ class Adventure:
                         bowbonus = int(Userdata.users[str(member.id)]['lvl']/10)*2
                         bonus = random.randint(max(5,int(Userdata.users[str(member.id)]['lvl']/2)),max(15,int(Userdata.users[str(member.id)]['lvl']))) + bowbonus
                         basebonus = bonus - bowbonus
-                        ability = "🏹{} + 🎯{} + ".format(bowbonus,basebonus)
+                        ability = "🏹{} + 🎯{} ".format(bowbonus,basebonus)
                         bonus_str = ability
                     else:
                         bonus = random.randint(5,15)
@@ -391,7 +391,7 @@ class Adventure:
                         monkbonus = await Classes.calc_monkbonus(ctx, member.id)
                         bonus_roll = random.randrange(min(1,monkbonus[0]),max(1,monkbonus[0]))
                         attack += bonus_roll
-                        monk_bonus_str = " ⚖️{} + ".format(bonus_roll)
+                        monk_bonus_str = " ⚖️{} ".format(bonus_roll)
                         bonus_str += monk_bonus_str
                     report += "**" + user + "**: " +  "🎲({}) +".format(roll) + " {} + ".format(bonus_str) + "🗡" + str(att_value) + monster_string + " | "
                 else:

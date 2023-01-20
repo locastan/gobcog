@@ -93,8 +93,8 @@ class Classes:
             att2 = Userdata.users[str(id)]['items']['right'].get(weapon2, {'att':0})['att']
             dipl2 = Userdata.users[str(id)]['items']['right'].get(weapon2, {'cha':0})['cha']
         overall_balance = (1/math.cosh((att1+att2)-(dipl1+dipl2)))*2.5
-        mbonus[0] = int(round(balancing*lvl*(-math.sinh((float(att1+att2)/10))+overall_balance)))
-        mbonus[1] = int(round(balancing*lvl*(-math.sinh((float(dipl1+dipl2)/10))+overall_balance)))
+        mbonus[0] = max(1,int(round(balancing*lvl*(-math.sinh((float(att1+att2)/10))+overall_balance))))
+        mbonus[1] = max(1,int(round(balancing*lvl*(-math.sinh((float(dipl1+dipl2)/10))+overall_balance))))
         #print(att1,dipl1,att2,dipl2,overall_balance,-math.sinh((float(att1+att2)/10)),-math.sinh((float(dipl1+dipl2)/10)))
         return mbonus
 
