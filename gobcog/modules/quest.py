@@ -765,7 +765,7 @@ class Quest:
                         await ctx.send("A steady resolve prevented **" + user + "**" + "from a fumble.")
                     monkbonus = await Classes.calc_monkbonus(ctx, member.id)
                     bonus_roll = random.randrange(min(1,monkbonus[1]),max(1,monkbonus[1]))
-                    diplomacy += bonus_roll
+                    diplomacy += bonus_roll + roll + dipl_value + monster_value
                     monk_bonus_str = " ⚖️{} + ".format(bonus_roll)
                     bonus_str = monk_bonus_str
                     report += "**" + user + "**: " +  "🎲({}) + ".format(roll) + "{} + ".format(bonus_str) + "🗨" +str(dipl_value) + monster_string + " | "
