@@ -2259,18 +2259,22 @@ class GobCog(BaseCog):
             #channel = ctx.bot.get_channel(504934418289262597) #restrict trader to general channel on test server
             if channel is not None:
                 calcprice = 0
-                await channel.send("Tell me **{}**, how many {} do you want?".format(user.display_name, titem['itemname']))
-                try:
-                    reply = await ctx.bot.wait_for("message", check=MessagePredicate.same_context(ctx,channel,user), timeout=30)
-                except asyncio.TimeoutError:
-                    await channel.send("I don't have all day, you know.")
-                if reply != None:
-                    if reply.content.isdigit() and int(reply.content) > 0:
-                        calcprice = int(titem['price'])*int(reply.content)
-                    else:
-                        await channel.send("Sorry, but that is not a proper number. Try again.")
+                if titem['item']['slot'] == ['consumable']:
+                    await channel.send("Tell me **{}**, how many {} do you want?".format(user.display_name, titem['itemname']))
+                    try:
+                        reply = await ctx.bot.wait_for("message", check=MessagePredicate.same_context(ctx,channel,user), timeout=30)
+                    except asyncio.TimeoutError:
+                        await channel.send("I don't have all day, you know.")
+                    if reply != None:
+                        if reply.content.isdigit() and int(reply.content) > 0:
+                            calcprice = int(titem['price'])*int(reply.content)
+                        else:
+                            await channel.send("Sorry, but that is not a proper number. Try again.")
+                else:
+                    calcprice = int(titem['price'])
                 if calcprice != 0 and await bank.can_spend(spender,calcprice):
                     await bank.withdraw_credits(spender, calcprice)
+                    wasted = False
                     if 'chest' in titem['itemname']:
                         if titem['itemname'] == ".rare_chest":
                             Userdata.users[str(user.id)]['treasure'][1] += int(reply.content)
@@ -2289,18 +2293,16 @@ class GobCog(BaseCog):
                     else:
                         if titem['itemname'] in Userdata.users[str(user.id)]['items']['backpack'].keys() or titem['itemname'] in Userdata.users[str(user.id)]['lootfilter']:
                             price = await GobCog.sell(user,titem)
-                            price = price * int(reply.content)
-                            await channel.send("**{}** sold for {} copperpieces.".format(titem['itemname'],price))
+                            wasted = True
+                            await channel.send("**{}** was automatically sold for {} copperpieces.".format(titem['itemname'],price))
                         else:
                             Userdata.users[str(user.id)]['items']['backpack'].update(copy.deepcopy({titem['itemname']:titem['item']}))
-                            price = await GobCog.sell(user,titem)
-                            price = price * (int(reply.content)-1)
-                            await channel.send("Excess **{}** sold for {} copperpieces.".format(titem['itemname'],price))
                     await GobCog.save()
-                    if titem['itemname'] in Consumables.consbles.keys():
-                        await channel.send("{} paid {} cp and put {}x {} into the backpack.".format(user.display_name,str(calcprice),int(reply.content),titem['itemname']))
-                    else:
-                        await channel.send("{} bought the {} for {} cp and put it into the backpack.".format(user.display_name,titem['itemname'],str(calcprice)))
+                    if not wasted:
+                        if titem['itemname'] in Consumables.consbles.keys():
+                            await channel.send("{} paid {} cp and put {}x {} into the backpack.".format(user.display_name,str(calcprice),int(reply.content),titem['itemname']))
+                        else:
+                            await channel.send("{} bought the {} for {} cp and put it into the backpack.".format(user.display_name,titem['itemname'],str(calcprice)))
                 elif calcprice != 0 and not await bank.can_spend(spender,calcprice):
                     await channel.send("You do not have enough copperpieces.")
                 try:
@@ -2354,7 +2356,7 @@ class GobCog(BaseCog):
                             hand = sitem['item']['slot'][0] + " slot"
                         att = sitem['item']["att"]
                         cha = sitem['item']["cha"]
-                    text += "```ansi\n" + "[{}] {} ("+Color.red+"ATT"+Color.none+": {}, "+Color.blue+"DPL"+Color.none+": {} [{}]) for {} cp.".format(str(index+1),Color.get_color(sitem['itemname']),str(att),str(cha),hand,sitem['price'])+ " ```"
+                    text += "```ansi\n" + "[{}] {} (".format(str(index+1),Color.get_color(sitem['itemname']))+Color.red+"ATT"+Color.none+": {}, ".format(str(att))+Color.blue+"DPL"+Color.none+": {} ".format(str(cha))+Color.yellow+"[{}]".format(hand)+Color.none+") for {} cp.".format(sitem['price'])+ " ```"
             else:
                 text += "```ansi\n" + "[{}] {} for {} cp.".format(str(index+1),Color.get_color(sitem['itemname']),sitem['price'])+ " ```"
         text += "Do you want to buy any of these fine items? Tell me which one below:"

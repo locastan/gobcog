@@ -452,7 +452,7 @@ class Treasure:
                     types = ["normal chest",".rare_chest","[epic chest]"]
                     prices = [2000,5000,10000]
                     chesttext = types[treasure.index(1)]
-                    price = prices[treasure.index(1)]
+                    price = random.randint(round(prices[treasure.index(1)]/10),prices[treasure.index(1)])
                     if chesttext not in items:
                         items.update({chesttext: {"itemname": "{}".format(chesttext),"item":treasure, "price": price}})
                 else:
@@ -465,7 +465,7 @@ class Treasure:
                     types = ["normal chest",".rare_chest","[epic chest]"]
                     prices = [2000,5000,10000]
                     chesttext = types[treasure.index(1)]
-                    price = prices[treasure.index(1)]
+                    price = random.randint(round(prices[treasure.index(1)]/10),prices[treasure.index(1)])
                     if chesttext not in items:
                         items.update({chesttext: {"itemname": "{}".format(chesttext),"item":treasure, "price": price}})
                 else:
@@ -478,7 +478,7 @@ class Treasure:
                     types = ["normal chest",".rare_chest","[epic chest]"]
                     prices = [2000,5000,10000]
                     chesttext = types[treasure.index(1)]
-                    price = prices[treasure.index(1)]
+                    price = random.randint(round(prices[treasure.index(1)]/10),prices[treasure.index(1)])
                     if chesttext not in items:
                         items.update({chesttext: {"itemname": "{}".format(chesttext),"item":treasure, "price": price}})
                 else:
@@ -498,9 +498,9 @@ class Treasure:
                     if "[" in itemname:
                         base = (1000,2000)
                     elif "." in itemname:
-                        base = (200,1000)
+                        base = (300,1000)
                     else :
-                        base = (10,200)
+                        base = (50,300)
                     if len(item["slot"]) == 2: # two handed weapons add their bonuses twice
                         hand = "two handed"
                         att = item["att"]*2
@@ -511,6 +511,8 @@ class Treasure:
                     price = random.randint(base[0],base[1])*max(item['att']+item['cha'],1)
                 if itemname not in items and item['slot'] == ['consumable']:
                     items.update({itemname: {"itemname": itemname,"item":item, "price": price}})
+                elif itemname not in items and random.randint(1,10) == 10:
+                    items.update({itemname: {"itemname": itemname,"item":item, "price": price}})  # also make sure the buy price is most often higher than max autosell.
         for index, item in enumerate(items):
             output.update({index: items[item]})
         return output
