@@ -428,7 +428,7 @@ class Treasure:
         items = {}
         output = {}
         type = random.randint(1,100)
-        while len(items) < 4:
+        while len(items) < 5:
             chance = None
             roll = random.randint(1,100)
             if type <= 60:
@@ -511,7 +511,7 @@ class Treasure:
                     price = random.randint(base[0],base[1])*max(item['att']+item['cha'],1)
                 if itemname not in items and item['slot'] == ['consumable']:
                     items.update({itemname: {"itemname": itemname,"item":item, "price": price}})
-                elif itemname not in items and random.randint(1,10) == 10:
+                elif itemname not in items and random.randint(0,20) == 20:
                     items.update({itemname: {"itemname": itemname,"item":item, "price": price}})  # also make sure the buy price is most often higher than max autosell.
         for index, item in enumerate(items):
             output.update({index: items[item]})

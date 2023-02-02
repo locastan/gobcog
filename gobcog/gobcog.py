@@ -2324,9 +2324,9 @@ class GobCog(BaseCog):
                     #print(stock)
                     await handle_buy(controls[react.emoji], user, stock, msg)
 
-        em_list = ReactionPredicate.NUMBER_EMOJIS[:5]
+        em_list = ReactionPredicate.NUMBER_EMOJIS[:6]
         react = False
-        controls = {em_list[1]: 0, em_list[2]: 1, em_list[3]: 2, em_list[4]: 3}
+        controls = {em_list[1]: 0, em_list[2]: 1, em_list[3]: 2, em_list[4]: 3, em_list[5]: 4}
         modRole = discord.utils.get(ctx.guild.roles, name='Goblin Adventurer!')
         if modRole is not None:
             text = modRole.mention + "\n" + "```ansi\n"+ Color.red + "[Alchemist Dodo is bringing the cart around!]```"
