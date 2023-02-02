@@ -439,7 +439,8 @@ class Treasure:
                 elif roll >= 90:
                     chest = [1,0,0]
                     if "normal chest" not in items:
-                        items.update({"normal chest": {"itemname": "normal chest","item":chest, "price": 2000}})
+                        price = random.randint(200,2000)
+                        items.update({"normal chest": {"itemname": "normal chest","item":chest, "price": price}})
                 else:
                     chance = Treasure.common
             elif type <= 75:
