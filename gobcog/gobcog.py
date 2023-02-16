@@ -859,7 +859,7 @@ class GobCog(BaseCog):
                     for item in lookup:
                         del Userdata.users[str(user)]['items']['backpack'][item]
                         Userdata.users[str(user)]['items']['backpack'].update({newitem['itemname']: newitem['item']})
-                        await ctx.send('```ansi\n Your new {} consumed {} and is now lurking in your backpack. ```'.format(Color.get_color(newitem['itemname']), Color.get_color(lookup)))
+                        await ctx.send('```ansi\n Your new {} consumed {} and is now lurking in your backpack. ```'.format(Color.get_color(newitem['itemname']), Color.get_color(item)))
                 else:
                     roll = random.randint(1,3)
                     if roll == 3:
@@ -2259,7 +2259,7 @@ class GobCog(BaseCog):
             #channel = ctx.bot.get_channel(504934418289262597) #restrict trader to general channel on test server
             if channel is not None:
                 calcprice = 0
-                if titem['item']['slot'] == ['consumable']:
+                if titem['item']['slot'] == ['consumable'] or 'chest' in titem['itemname']:
                     await channel.send("Tell me **{}**, how many {} do you want?".format(user.display_name, titem['itemname']))
                     try:
                         reply = await ctx.bot.wait_for("message", check=MessagePredicate.same_context(ctx,channel,user), timeout=30)
