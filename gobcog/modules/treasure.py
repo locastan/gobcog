@@ -426,6 +426,7 @@ class Treasure:
 
     async def trader_get_items():
         items = {}
+        gearnumber = 0
         output = {}
         type = random.randint(1,100)
         while len(items) < 5:
@@ -437,7 +438,7 @@ class Treasure:
                 elif roll > 5 and roll <= 25:
                     chance = Treasure.rare
                 elif roll >= 90:
-                    chest = [1,0,0]
+                    chest = [1,0,0,0]
                     if "normal chest" not in items:
                         price = random.randint(200,2000)
                         items.update({"normal chest": {"itemname": "normal chest","item":chest, "price": price}})
@@ -455,7 +456,7 @@ class Treasure:
                     chesttext = types[treasure.index(1)]
                     price = random.randint(round(prices[treasure.index(1)]/10),prices[treasure.index(1)])
                     if chesttext not in items:
-                        items.update({chesttext: {"itemname": "{}".format(chesttext),"item":treasure, "price": price}})
+                        items.update({chesttext: {"itemname": chesttext,"item":treasure, "price": price}})
                 else:
                     chance = Treasure.common
             elif type <= 90:
@@ -468,7 +469,7 @@ class Treasure:
                     chesttext = types[treasure.index(1)]
                     price = random.randint(round(prices[treasure.index(1)]/10),prices[treasure.index(1)])
                     if chesttext not in items:
-                        items.update({chesttext: {"itemname": "{}".format(chesttext),"item":treasure, "price": price}})
+                        items.update({chesttext: {"itemname": chesttext,"item":treasure, "price": price}})
                 else:
                     chance = Treasure.rare
             else:
@@ -481,7 +482,7 @@ class Treasure:
                     chesttext = types[treasure.index(1)]
                     price = random.randint(round(prices[treasure.index(1)]/10),prices[treasure.index(1)])
                     if chesttext not in items:
-                        items.update({chesttext: {"itemname": "{}".format(chesttext),"item":treasure, "price": price}})
+                        items.update({chesttext: {"itemname":chesttext,"item":treasure, "price": price}})
                 else:
                     chance = Treasure.rare
             if chance != None: #item is selected from a droplist, not a manually created chest
@@ -512,8 +513,9 @@ class Treasure:
                     price = random.randint(base[0],base[1])*max(item['att']+item['cha'],1)
                 if itemname not in items and item['slot'] == ['consumable']:
                     items.update({itemname: {"itemname": itemname,"item":item, "price": price}})
-                elif itemname not in items and random.randint(0,20) == 20:
-                    items.update({itemname: {"itemname": itemname,"item":item, "price": price}})  # also make sure the buy price is most often higher than max autosell.
+                elif itemname not in items and gearnumber < 2 and random.randint(0,20) == 20:
+                    items.update({itemname: {"itemname": itemname,"item":item, "price": price}})
+                    gearnumber += 1  # also make sure the buy price is most often higher than max autosell.
         for index, item in enumerate(items):
             output.update({index: items[item]})
         return output
