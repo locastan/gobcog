@@ -10,7 +10,6 @@ from .color import Color
 
 class Consumables:
     #Name table to assign effects to consumables. Consumable items themselfes are defined in treasure.py
-    # need to figure out durations, if only for number of fights or opened chests for example.
     consbles = {".potion_of_strength":{'type':"buff", 'attrib':["att"], 'min':1, 'max':4, 'duration':1, 'desc':"Increases your attack bonus for one fight."},
                     ".vial_of_aggression":{'type':"buff", 'attrib':["att"], 'min':1, 'max':2, 'duration':1, 'desc':"Small increase of your attack bonus for one fight."},
                     ".potion_of_eloquence":{'type':"buff", 'attrib':["cha"], 'min':1, 'max':4, 'duration':1, 'desc':"Increases your diplomacy bonus for one fight."},

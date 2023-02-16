@@ -2251,7 +2251,7 @@ class GobCog(BaseCog):
         async def handle_buy(itemindex, user, stock, msg):
             global users
             titem = copy.deepcopy(stock[itemindex])
-            #print("copyitem: {}".format(item))
+            print(titem)
             spender = user
             react = None
             reply = None
@@ -2259,7 +2259,7 @@ class GobCog(BaseCog):
             #channel = ctx.bot.get_channel(504934418289262597) #restrict trader to general channel on test server
             if channel is not None:
                 calcprice = 0
-                if titem['item']['slot'] == ['consumable'] or 'chest' in titem['itemname']:
+                if titem['itemname'] in Consumables.consbles.keys() or 'chest' in titem['itemname']:
                     await channel.send("Tell me **{}**, how many {} do you want?".format(user.display_name, titem['itemname']))
                     try:
                         reply = await ctx.bot.wait_for("message", check=MessagePredicate.same_context(ctx,channel,user), timeout=30)
