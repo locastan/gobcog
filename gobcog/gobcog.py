@@ -2299,7 +2299,7 @@ class GobCog(BaseCog):
                             Userdata.users[str(user.id)]['items']['backpack'].update(copy.deepcopy({titem['itemname']:titem['item']}))
                     await GobCog.save()
                     if not wasted:
-                        if titem['itemname'] in Consumables.consbles.keys():
+                        if titem['itemname'] in Consumables.consbles.keys() or 'chest' in titem['itemname']:
                             await channel.send("{} paid {} cp and put {}x {} into the backpack.".format(user.display_name,str(calcprice),int(reply.content),titem['itemname']))
                         else:
                             await channel.send("{} bought the {} for {} cp and put it into the backpack.".format(user.display_name,titem['itemname'],str(calcprice)))
