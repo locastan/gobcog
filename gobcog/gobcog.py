@@ -1162,7 +1162,7 @@ class GobCog(BaseCog):
     async def move_wanderring(ctx, new_holder_id):
         found = False
         for id in Userdata.users:
-            if id == new_holder_id:  # this check doesn't work because numbers vs strings, users owever prefer the ring to have a mind of its own. :)
+            if id == new_holder_id:  # this check doesn't work because numbers vs strings, users however prefer the ring to have a mind of its own. :)
                 continue
             if "[wanderring]" in list(Userdata.users[str(id)]['items'].get('ring', "Empty_slot")):
                 moveitem = Userdata.users[str(id)]['items']['ring'].pop('[wanderring]')
@@ -1180,7 +1180,7 @@ class GobCog(BaseCog):
                 return
         if not found:
             Userdata.users[str(new_holder_id)]['items']['backpack'].update({"[wanderring]":{"slot":["ring"],"att":+20,"cha":+20}})
-            await ctx.send("{} found the wanderring!".format(Userdata.users[str(id)]['name']))
+            await ctx.send("{} found the wanderring!".format(Userdata.users[str(new_holder_id)]['name']))
             return
 
     @commands.command(name="stats", aliases=['s'])
