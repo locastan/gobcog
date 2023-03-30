@@ -440,7 +440,7 @@ class Treasure:
                 elif roll >= 90:
                     chest = [1,0,0,0]
                     if "normal chest" not in items:
-                        price = random.randint(200,2000)
+                        price = random.randint(400,2000)
                         items.update({"normal chest": {"itemname": "normal chest","item":chest, "price": price}})
                 else:
                     chance = Treasure.common
@@ -452,9 +452,9 @@ class Treasure:
                 elif roll >= 90:
                     treasure = random.choice([[0,1,0,0],[1,0,0,0]])
                     types = ["normal chest",".rare_chest","[epic chest]"]
-                    prices = [2000,5000,10000]
+                    prices = [4000,8000,20000]
                     chesttext = types[treasure.index(1)]
-                    price = random.randint(round(prices[treasure.index(1)]/10),prices[treasure.index(1)])
+                    price = random.randint(round(prices[treasure.index(1)]/10),prices[treasure.index(1)]/2)
                     if chesttext not in items:
                         items.update({chesttext: {"itemname": chesttext,"item":treasure, "price": price}})
                 else:
@@ -465,9 +465,9 @@ class Treasure:
                 elif roll >= 90:
                     treasure = random.choice([[0,1,0,0],[0,0,1,0]])
                     types = ["normal chest",".rare_chest","[epic chest]"]
-                    prices = [2000,5000,10000]
+                    prices = [4000,8000,20000]
                     chesttext = types[treasure.index(1)]
-                    price = random.randint(round(prices[treasure.index(1)]/10),prices[treasure.index(1)])
+                    price = random.randint(round(prices[treasure.index(1)]/10),prices[treasure.index(1)]/2)
                     if chesttext not in items:
                         items.update({chesttext: {"itemname": chesttext,"item":treasure, "price": price}})
                 else:
@@ -478,9 +478,9 @@ class Treasure:
                 elif roll >= 90:
                     treasure = random.choice([[0,1,0,0],[0,0,1,0]])
                     types = ["normal chest",".rare_chest","[epic chest]"]
-                    prices = [2000,5000,10000]
+                    prices = [4000,8000,20000]
                     chesttext = types[treasure.index(1)]
-                    price = random.randint(round(prices[treasure.index(1)]/10),prices[treasure.index(1)])
+                    price = random.randint(round(prices[treasure.index(1)]/10),prices[treasure.index(1)]/2)
                     if chesttext not in items:
                         items.update({chesttext: {"itemname":chesttext,"item":treasure, "price": price}})
                 else:
