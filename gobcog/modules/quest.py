@@ -240,7 +240,7 @@ class Quest:
     async def handle_breakup(ctx,user):
         equipped = {}
         clumsy = discord.utils.find(lambda m: m.display_name == user, ctx.guild.members)
-        if clumsy == None:
+        if clumsy != None:
             for slot in Userdata.users[str(clumsy.id)]['items']:
                 if Userdata.users[str(clumsy.id)]['items'][slot] and slot != "backpack":
                     equipped.update(Userdata.users[str(clumsy.id)]['items'][slot])

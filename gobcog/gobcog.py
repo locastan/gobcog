@@ -2292,9 +2292,9 @@ class GobCog(BaseCog):
                                 Userdata.users[str(user.id)]['consumables'].update(copy.deepcopy({titem['itemname']:titem['item']}))
                     else:
                         if titem['itemname'] in Userdata.users[str(user.id)]['items']['backpack'].keys() or titem['itemname'] in Userdata.users[str(user.id)]['lootfilter']:
-                            price = await GobCog.sell(user,titem)
+                            await bank.deposit_credits(user, calcprice)
                             wasted = True
-                            await channel.send("**{}** was automatically sold for {} copperpieces.".format(titem['itemname'],price))
+                            await channel.send("**{}** was returned to Dodo for a full refund".format(titem['itemname']))
                         else:
                             Userdata.users[str(user.id)]['items']['backpack'].update(copy.deepcopy({titem['itemname']:titem['item']}))
                     await GobCog.save()
