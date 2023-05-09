@@ -104,7 +104,7 @@ class Adventure:
         Adventure.unusual = False
         Adventure.challenge = random.choice(list(Adventure.monsters.keys())) #if you want the dict with accompanying subkeys use: Adventure.monsters[random.choice(list(Adventure.monsters.keys()))]
         Adventure.attrib = random.choice(list(Adventure.attribs.keys()))
-        if randint(1,10) == 10:
+        if random.randint(1,10) == 10:
             Adventure.str_mod = random.uniform(0.5, 2.0)
             Adventure.dipl_mod = random.uniform(0.5, 2.0)
             Adventure.str = round(Adventure.monsters[Adventure.challenge]["str"]*Adventure.attribs[Adventure.attrib][0]*Adventure.str_mod)
