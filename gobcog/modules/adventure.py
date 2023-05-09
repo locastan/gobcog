@@ -93,15 +93,26 @@ class Adventure:
     finish = 0
     timeout = 0
     started = 0
+    unusual = False
+    str_mod = 1
+    dipl_mod = 1
 
     async def simple(ctx):
         text = ""
         if Adventure.timeout != 0:
             return None
+        Adventure.unusual = False
         Adventure.challenge = random.choice(list(Adventure.monsters.keys())) #if you want the dict with accompanying subkeys use: Adventure.monsters[random.choice(list(Adventure.monsters.keys()))]
         Adventure.attrib = random.choice(list(Adventure.attribs.keys()))
-        Adventure.str = Adventure.monsters[Adventure.challenge]["str"]*Adventure.attribs[Adventure.attrib][0]
-        Adventure.dipl = Adventure.monsters[Adventure.challenge]["dipl"]*Adventure.attribs[Adventure.attrib][1]
+        if randint(1,10) == 10:
+            Adventure.str_mod = random.uniform(0.5, 2.0)
+            Adventure.dipl_mod = random.uniform(0.5, 2.0)
+            Adventure.str = round(Adventure.monsters[Adventure.challenge]["str"]*Adventure.attribs[Adventure.attrib][0]*Adventure.str_mod)
+            Adventure.dipl = round(Adventure.monsters[Adventure.challenge]["dipl"]*Adventure.attribs[Adventure.attrib][1]*Adventure.dipl_mod)
+            Adventure.unusual = True
+        else:
+            Adventure.str = Adventure.monsters[Adventure.challenge]["str"]*Adventure.attribs[Adventure.attrib][0]
+            Adventure.dipl = Adventure.monsters[Adventure.challenge]["dipl"]*Adventure.attribs[Adventure.attrib][1]
         Adventure.userslist = {"fight":[],"pray":[],"talk":[],"run":[]}
         Adventure.rewards = {}
         Adventure.dmgred = 1

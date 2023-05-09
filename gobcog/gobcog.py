@@ -2,6 +2,7 @@ import json
 from redbot.core.data_manager import cog_data_path
 import random
 import discord
+from discord import Intents
 import asyncio
 import time
 import copy
@@ -22,8 +23,12 @@ from .modules.explore import Explore
 from .modules.alchemy import Alchemy
 from .modules.color import Color
 
+intents = Intents.default()
+intents.messages = True
+intents.members = True
+
 BaseCog = getattr(commands, "Cog", object)
-client = discord.Client()
+client = discord.Client(intents=intents)
 
 def charge(amount: int):
     async def pred(ctx):
@@ -1390,7 +1395,7 @@ class GobCog(BaseCog):
             lookup += list(x for x in Userdata.users[str(user.id)]['consumables'] if item in x.lower())
             lookup += list(x for x in Userdata.users[str(user.id)]['ingredients'] if item in x.lower())
             if any([x for x in lookup if "{.:'" in x.lower()]):
-                device = [x for x in lookup if "{.:'" in x.lower()]
+                device = x for x in lookup if "{.:'" in x.lower()
                 await ctx.send("```ansi\n Your {} is refusing to be sold and bit your finger for trying. ```".format(Color.get_color(device)))
                 return
             msg = await ctx.send("Do you want to sell these items {}?\n[If you are selling consumables and did not specify how many (eg. !b sell 'consumable' 3), all will be sold!]".format(str(lookup)))
