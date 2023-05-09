@@ -1395,8 +1395,7 @@ class GobCog(BaseCog):
             lookup += list(x for x in Userdata.users[str(user.id)]['consumables'] if item in x.lower())
             lookup += list(x for x in Userdata.users[str(user.id)]['ingredients'] if item in x.lower())
             if any([x for x in lookup if "{.:'" in x.lower()]):
-                device = x for x in lookup if "{.:'" in x.lower()
-                await ctx.send("```ansi\n Your {} is refusing to be sold and bit your finger for trying. ```".format(Color.get_color(device)))
+                await ctx.send("```ansi\n Your device is refusing to be sold and bit your finger for trying. ```")
                 return
             msg = await ctx.send("Do you want to sell these items {}?\n[If you are selling consumables and did not specify how many (eg. !b sell 'consumable' 3), all will be sold!]".format(str(lookup)))
             start_adding_reactions(msg, ReactionPredicate.YES_OR_NO_EMOJIS)
