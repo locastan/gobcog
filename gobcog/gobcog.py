@@ -935,7 +935,7 @@ class GobCog(BaseCog):
                                         lookup = list(x for x in Userdata.users[str(user.id)]['items']['backpack'] if "{.:'" in x.lower())
                                         for item in lookup:
                                             del Userdata.users[str(user.id)]['items']['backpack'][item]
-                                            await ctx.send('```ansi\n {} has run off to find a new master. ```'.format(Color.get_color(lookup)))
+                                            await ctx.send('```ansi\n {} has run off to find a new master. ```'.format(Color.get_color(str(lookup)[1:-1])))
                             else:
                                 ctx.command.reset_cooldown(ctx)
                                 return
