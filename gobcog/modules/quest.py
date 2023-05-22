@@ -657,30 +657,39 @@ class Quest:
                     return (fumblelist, attack, diplomacy)
                 if Userdata.users[str(member.id)]['class']['name']=="Cleric" and Userdata.users[str(member.id)]['class']['ability']:
                     roll = random.randint(1,20)
+                    att_value = Userdata.users[str(member.id)]['att'] + Userdata.users[str(member.id)]['skill']['att'] + Userdata.users[str(member.id)]['buffs'].get('att', {'bonus':0})['bonus']
+                    dipl_value = Userdata.users[str(member.id)]['cha'] + Userdata.users[str(member.id)]['skill']['cha'] + Userdata.users[str(member.id)]['buffs'].get('cha', {'bonus':0})['bonus']
+                    monster_att = 0
+                    monster_dipl = 0
+                    monster_string = ""
+                    if "monster" in Userdata.users[str(member.id)]['buffs']:
+                        monster_att = Userdata.users[str(member.id)]['buffs'].get('monster', {'bonus':{'att':0}})['bonus']['att']
+                        monster_dipl = Userdata.users[str(member.id)]['buffs'].get('monster', {'bonus':{'cha':0}})['bonus']['cha']
+                        monster_string = " + 🦖{}🗡/{}🗨".format(monster_att,monster_dipl)
                     if len(Quest.userslist["fight"]+Quest.userslist["talk"]) == 0:
                         await ctx.send("**" + user + "**" + " blessed like mad but nobody was there to receive it.")
                         return (fumblelist, attack, diplomacy)
                     if roll == 1:
-                        attack -= 5 * len(Quest.userslist["fight"])
-                        diplomacy -= 5 * len(Quest.userslist["talk"])
+                        attack -= 5 * len(Quest.userslist["fight"]) + att_value
+                        diplomacy -= 5 * len(Quest.userslist["talk"]) + dipl_value
                         Quest.dmgred = 1
                         fumblelist.append(user)
-                        await ctx.send("**" + user + "**" + "'s sermon offended the mighty Herbert. (🎲({}) -{}🗡/-{}🗨)".format(roll, 5 * len(Quest.userslist["fight"]),5 * len(Quest.userslist["talk"])))
+                        await ctx.send("**" + user + "**" + "'s sermon offended the mighty Herbert. (🎲({}) -{}🗡/-{}🗨)".format(roll, 5 * len(Quest.userslist["fight"]) + att_value,5 * len(Quest.userslist["talk"]) + dipl_value))
                     elif roll > 1 and roll <= 10:
-                        attack += 2 * len(Quest.userslist["fight"])
-                        diplomacy += 2 * len(Quest.userslist["talk"])
+                        attack += 2 * len(Quest.userslist["fight"]) + att_value + monster_att
+                        diplomacy += 2 * len(Quest.userslist["talk"]) + dipl_value + monster_dipl
                         Quest.dmgred = 2
-                        await ctx.send("**" + user + "**" + "'s blessed you all in Herberts name. (🎲({}) +{}🗡/+{}🗨)".format(roll, 2 * len(Quest.userslist["fight"]),2 * len(Quest.userslist["talk"])))
+                        await ctx.send("**" + user + "**" + "'s blessed you all in Herberts name. (🎲({}) +{}🗡/+{}🗨)".format(roll, 2 * len(Quest.userslist["fight"]) + att_value,2 * len(Quest.userslist["talk"]) + dipl_value) + monster_string)
                     elif roll > 10 and roll <= 19:
-                        attack += 5 * len(Quest.userslist["fight"])
-                        diplomacy += 5 * len(Quest.userslist["talk"])
+                        attack += 5 * len(Quest.userslist["fight"]) + att_value + monster_att
+                        diplomacy += 5 * len(Quest.userslist["talk"]) + dipl_value + monster_dipl
                         Quest.dmgred = 4
-                        await ctx.send("**" + user + "**" + "'s blessed you all in Herberts name. (🎲({}) +{}🗡/+{}🗨)".format(roll, 5 * len(Quest.userslist["fight"]),5 * len(Quest.userslist["talk"])))
+                        await ctx.send("**" + user + "**" + "'s blessed you all in Herberts name. (🎲({}) +{}🗡/+{}🗨)".format(roll, 5 * len(Quest.userslist["fight"]) + att_value,5 * len(Quest.userslist["talk"]) + dipl_value) + monster_string)
                     else:
-                        attack += 20 * len(Quest.userslist["fight"])
-                        diplomacy += 20 * len(Quest.userslist["talk"])
+                        attack += 20 * len(Quest.userslist["fight"]) + att_value + monster_att
+                        diplomacy += 20 * len(Quest.userslist["talk"]) + dipl_value + monster_dipl
                         Quest.dmgred = 100
-                        await ctx.send("**" + user + "**" + " turned into an avatar of mighty Herbert. (🎲({}) +{}🗡/+{}🗨)".format(roll, 20 * len(Quest.userslist["fight"]),20 * len(Quest.userslist["talk"])))
+                        await ctx.send("**" + user + "**" + " turned into an avatar of mighty Herbert. (🎲({}) +{}🗡/+{}🗨)".format(roll, 20 * len(Quest.userslist["fight"]) + att_value,20 * len(Quest.userslist["talk"]) + dipl_value) + monster_string)
                 else:
                     roll = random.randint(1,4)
                     if len(Quest.userslist["fight"]+Quest.userslist["talk"]) == 0:
@@ -757,7 +766,7 @@ class Quest:
                         bonus = random.randint(low, max(low, songbonus))
                     if Userdata.users[str(member.id)]['class']['name']=="Monk":
                         monkbonus = await Classes.calc_monkbonus(ctx, member.id)
-                        bonus = random.randrange(min(1,monkbonus[1]),max(1,monkbonus[1]))
+                        bonus = random.randrange(min(1,monkbonus[1]),max(2,monkbonus[1]))
                         bonus_str = " ⚖️{} + ".format(bonus)
                     diplomacy += roll + bonus + dipl_value + monster_value
                     bonus_str = ability + str(bonus+critbonus)
@@ -768,7 +777,7 @@ class Quest:
                     elif roll == 1 and Userdata.users[str(member.id)]['class']['ability']:
                         await ctx.send("A steady resolve prevented **" + user + "**" + "from a fumble.")
                     monkbonus = await Classes.calc_monkbonus(ctx, member.id)
-                    bonus_roll = random.randrange(min(1,monkbonus[1]),max(1,monkbonus[1]))
+                    bonus_roll = random.randrange(min(1,monkbonus[1]),max(2,monkbonus[1]))
                     diplomacy += bonus_roll + roll + dipl_value + monster_value
                     monk_bonus_str = " ⚖️{} + ".format(bonus_roll)
                     bonus_str = monk_bonus_str
@@ -1007,7 +1016,7 @@ class Quest:
         if special != False:
             Quest.sumtreasure = [sum(x) for x in zip(Quest.sumtreasure, special)]
         if Quest.sumtreasure != [0,0,0,0] and sum(Quest.sumtreasure) == 1:
-            types = [" normal"," rare","n epic", "quest"]
+            types = [" normal"," rare","n epic", " quest"]
             ctype = types[Quest.sumtreasure.index(1)]
             phrase += "\nYou have {} xp and found {} copperpieces so far. You also secured **a{} treasure chest**!".format(Quest.sumxp,Quest.sumcp,ctype)
         elif Quest.sumtreasure != [0,0,0,0] and sum(Quest.sumtreasure) > 1:

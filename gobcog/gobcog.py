@@ -1662,6 +1662,7 @@ class GobCog(BaseCog):
             else:
                 return await ctx.send("```ansi\n" + Color.blue + "[" + ctx.author.display_name + "s lootfilter is currently empty.]" + "\n```")
         else:
+            lookup = []
             if comm == "add":
                 lookup = list(x for x in Userdata.users[str(user.id)]['items']['backpack'] if filteritem.lower() in x.lower())
             elif comm == "remove":
@@ -1958,6 +1959,8 @@ class GobCog(BaseCog):
         """
         global users
         party = []
+        if Userdata.users[str(ctx.author.id)]['lvl'] < 15:
+            return await ctx.send("Sorry **{}**. You need to be at least level 15 to go on a quest.".format(user))
         modRole = discord.utils.get(ctx.guild.roles, name='Goblin Adventurer!')
         if modRole is not None:
             msg = await ctx.send(modRole.mention + "\n" + "**" + ctx.author.display_name + "** just spent 500 copperpieces in the inn, looking for a party to do a mighty quest. Do you accept (2 mins)?", allowed_mentions=discord.AllowedMentions(roles=True))
@@ -1970,7 +1973,7 @@ class GobCog(BaseCog):
             reaction = next(filter(lambda x: x.emoji == "✅", message.reactions), None)
         except AttributeError:
             return await ctx.send("The message id provided is either invalid or is not from that channel.")
-        wannabees = await reaction.users().flatten()
+        wannabees = [user async for user in reaction.users()]
         for user in wannabees:
             if not user.bot:
                 party.append(user.display_name)

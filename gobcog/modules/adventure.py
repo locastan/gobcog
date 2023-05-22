@@ -442,6 +442,7 @@ class Adventure:
                     dipl_value = Userdata.users[str(member.id)]['cha'] + Userdata.users[str(member.id)]['skill']['cha'] + Userdata.users[str(member.id)]['buffs'].get('cha', {'bonus':0})['bonus']
                     monster_att = 0
                     monster_dipl = 0
+                    monster_string = ""
                     if "monster" in Userdata.users[str(member.id)]['buffs']:
                         monster_att = Userdata.users[str(member.id)]['buffs'].get('monster', {'bonus':{'att':0}})['bonus']['att']
                         monster_dipl = Userdata.users[str(member.id)]['buffs'].get('monster', {'bonus':{'cha':0}})['bonus']['cha']
@@ -459,17 +460,17 @@ class Adventure:
                         attack += 2 * len(Adventure.userslist["fight"]) + att_value + monster_att
                         diplomacy += 2 * len(Adventure.userslist["talk"]) + dipl_value + monster_dipl
                         Adventure.dmgred = 2
-                        await ctx.send("**" + user + "**" + "'s blessed you all in Herberts name. (🎲({}) +{}🗡/+{}🗨)".format(roll,2 * len(Adventure.userslist["fight"]),2 * len(Adventure.userslist["talk"])) + monster_string)
+                        await ctx.send("**" + user + "**" + "'s blessed you all in Herberts name. (🎲({}) +{}🗡/+{}🗨)".format(roll,2 * len(Adventure.userslist["fight"]) + att_value,2 * len(Adventure.userslist["talk"]) + dipl_value) + monster_string)
                     elif roll > 10 and roll <= 19:
                         attack += 5 * len(Adventure.userslist["fight"]) + att_value + monster_att
                         diplomacy += 5 * len(Adventure.userslist["talk"]) + dipl_value + monster_dipl
                         Adventure.dmgred = 4
-                        await ctx.send("**" + user + "**" + "'s blessed you all in Herberts name. (🎲({}) +{}🗡/+{}🗨)".format(roll,5 * len(Adventure.userslist["fight"]),5 * len(Adventure.userslist["talk"])) + monster_string)
+                        await ctx.send("**" + user + "**" + "'s blessed you all in Herberts name. (🎲({}) +{}🗡/+{}🗨)".format(roll,5 * len(Adventure.userslist["fight"]) + att_value,5 * len(Adventure.userslist["talk"]) + dipl_value) + monster_string)
                     else:
                         attack += 20 * len(Adventure.userslist["fight"]) + att_value + monster_att
                         diplomacy += 20 * len(Adventure.userslist["talk"]) + dipl_value + monster_dipl
                         Adventure.dmgred = 100
-                        await ctx.send("**" + user + "**" + " turned into an avatar of mighty Herbert. (🎲({}) +{}🗡/+{}🗨)".format(roll,20 * len(Adventure.userslist["fight"]),20 * len(Adventure.userslist["talk"])) + monster_string)
+                        await ctx.send("**" + user + "**" + " turned into an avatar of mighty Herbert. (🎲({}) +{}🗡/+{}🗨)".format(roll,20 * len(Adventure.userslist["fight"]) + att_value,20 * len(Adventure.userslist["talk"]) + dipl_value) + monster_string)
                 else:
                     roll = random.randint(1,4)
                     if len(Adventure.userslist["fight"]+Adventure.userslist["talk"]) == 0:
@@ -531,7 +532,7 @@ class Adventure:
                         bonus = random.randint(low, max(low, songbonus))
                     if Userdata.users[str(member.id)]['class']['name']=="Monk":
                         monkbonus = await Classes.calc_monkbonus(ctx, member.id)
-                        bonus = random.randrange(min(1,monkbonus[1]),max(1,monkbonus[1]))
+                        bonus = random.randrange(min(1,monkbonus[1]),max(2,monkbonus[1]))
                         bonus_str = " ⚖️{} + ".format(bonus)
                     diplomacy += roll + bonus + critbonus + dipl_value + monster_value
                     bonus_str = ability + str(bonus+critbonus)
@@ -540,7 +541,7 @@ class Adventure:
                     if roll == 1 and Userdata.users[str(member.id)]['class']['ability']:
                         await ctx.send("A steady resolve prevented **" + user + "**" + "from a fumble.")
                     monkbonus = await Classes.calc_monkbonus(ctx, member.id)
-                    bonus_roll = random.randrange(min(1,monkbonus[1]),max(1,monkbonus[1]))
+                    bonus_roll = random.randrange(min(1,monkbonus[1]),max(2,monkbonus[1]))
                     diplomacy += bonus_roll + roll + dipl_value + monster_value
                     bonus_str = " ⚖️{} + ".format(bonus_roll)
                     report += "**" + user + "**: " +  "🎲({}) + ".format(roll) + "{} ".format(bonus_str) + "🗨" +str(dipl_value) + monster_string + " | "
@@ -822,7 +823,7 @@ class Adventure:
             else:
                 Adventure.rewards[user]["special"] = False
         if special != False and sum(special) == 1:
-            types = [" normal"," rare","n epic", "quest"]
+            types = [" normal"," rare","n epic", " quest"]
             type = types[special.index(1)]
             phrase += "\nBase rewards: {} xp and {} copperpieces. You also secured **a{} treasure chest**!".format(xp,cp,type)
         elif special != False and sum(special) > 1:

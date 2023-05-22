@@ -14,7 +14,7 @@ class Consumables:
                     ".vial_of_aggression":{'type':"buff", 'attrib':["att"], 'min':1, 'max':2, 'duration':1, 'desc':"Small increase of your attack bonus for one fight."},
                     ".potion_of_eloquence":{'type':"buff", 'attrib':["cha"], 'min':1, 'max':4, 'duration':1, 'desc':"Increases your diplomacy bonus for one fight."},
                     ".vial_of_wit":{'type':"buff", 'attrib':["cha"], 'min':1, 'max':2, 'duration':1, 'desc':"Small increase of your diplomacy bonus for one fight."},
-                    "[phenomenal phial]":{'type':"buff", 'attrib':["att","cha"], 'min':1, 'max':3, 'duration':2, 'desc':"Small increase of oth attack and diplomacy bonus for 2 fights."},
+                    "[phenomenal phial]":{'type':"buff", 'attrib':["att","cha"], 'min':1, 'max':3, 'duration':2, 'desc':"Small increase of both attack and diplomacy bonus for 2 fights."},
                     "[jacks pot]":{'type':"buff", 'attrib':["xp","money"], 'min':20, 'max':200, 'duration':1, 'desc':"Increase of both xp and cp bonus for the next fight."},
                     "[edible chance]":{'type':"buffchance", 'attrib':["xp","money"], 'min':10, 'max':100, 'duration':1, 'desc':"Chance of either a xp or cp gain bonus next fight."},
                     "four leaf clover":{'type':"buff", 'attrib':["luck"], 'min':5, 'max':15, 'duration':1, 'desc':"This will bestow good luck during the next fight or chest opening."},
