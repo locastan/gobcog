@@ -338,6 +338,7 @@ class Treasure:
         itempile.sort()
         consreport = " - " + "\n - ".join(conspile) + "```"
         pilereport = " - " + "\n - ".join(itempile)
+        await bank.deposit_credits(user, moneypile)
         if len(pilereport) > 1900: #split dangerously long texts into chunks.
             chunks = []
             while pilereport:
@@ -440,7 +441,7 @@ class Treasure:
                 elif roll >= 90:
                     chest = [1,0,0,0]
                     if "normal chest" not in items:
-                        price = random.randint(400,2000)
+                        price = random.randint(600,2000)
                         items.update({"normal chest": {"itemname": "normal chest","item":chest, "price": price}})
                 else:
                     chance = Treasure.common
@@ -452,7 +453,7 @@ class Treasure:
                 elif roll >= 90:
                     treasure = random.choice([[0,1,0,0],[1,0,0,0]])
                     types = ["normal chest",".rare_chest","[epic chest]"]
-                    prices = [4000,8000,20000]
+                    prices = [6000,10000,60000]
                     chesttext = types[treasure.index(1)]
                     price = random.randint(round(prices[treasure.index(1)]/10),prices[treasure.index(1)]/2)
                     if chesttext not in items:
@@ -465,7 +466,7 @@ class Treasure:
                 elif roll >= 90:
                     treasure = random.choice([[0,1,0,0],[0,0,1,0]])
                     types = ["normal chest",".rare_chest","[epic chest]"]
-                    prices = [4000,8000,20000]
+                    prices = [6000,10000,60000]
                     chesttext = types[treasure.index(1)]
                     price = random.randint(round(prices[treasure.index(1)]/10),prices[treasure.index(1)]/2)
                     if chesttext not in items:
@@ -478,7 +479,7 @@ class Treasure:
                 elif roll >= 90:
                     treasure = random.choice([[0,1,0,0],[0,0,1,0]])
                     types = ["normal chest",".rare_chest","[epic chest]"]
-                    prices = [4000,8000,20000]
+                    prices = [6000,10000,60000]
                     chesttext = types[treasure.index(1)]
                     price = random.randint(round(prices[treasure.index(1)]/10),prices[treasure.index(1)]/2)
                     if chesttext not in items:
@@ -594,5 +595,4 @@ class Treasure:
             price = random.randint(base[0],base[1])*max(item['item']['uses'],1)
         else:
             price = random.randint(base[0],base[1])*max(item['item']['att']+item['item']['cha'],1)*magicmod
-        await bank.deposit_credits(user, price)
         return(price)
