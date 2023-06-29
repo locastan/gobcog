@@ -2,6 +2,7 @@ import random
 import asyncio
 import copy
 from redbot.core.utils.predicates import MessagePredicate
+from redbot.core import bank
 from .userdata import Userdata
 from .adventure import Adventure
 from .treasure import Treasure
