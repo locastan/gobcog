@@ -183,6 +183,7 @@ class Consumables:
             Userdata.users[str(user.id)]['items']['backpack'].pop(consumed)
             if newitem['itemname'] in Userdata.users[str(user.id)]['items']['backpack'].keys() or newitem['itemname'] in Userdata.users[str(user.id)]['lootfilter']:
                 price = await Treasure.t_sell(user,newitem)
+                await bank.deposit_credits(user, price)
                 await ctx.send("**{}** sold {} for {} copperpieces.".format(user.display_name,newitem['itemname'],price))
             else:
                 Userdata.users[str(user.id)]['items']['backpack'].update({newitem['itemname']: newitem['item']})
