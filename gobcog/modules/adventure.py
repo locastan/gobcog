@@ -400,7 +400,7 @@ class Adventure:
                             bonus_str += barb_bonus_str
                     elif Userdata.users[str(member.id)]['class']['name']=="Monk":
                         monkbonus = await Classes.calc_monkbonus(ctx, member.id)
-                        bonus_roll = random.randrange(min(1,monkbonus[0]),max(1,monkbonus[0]))
+                        bonus_roll = random.randrange(min(1,monkbonus[0]),max(2,monkbonus[0]))
                         attack += bonus_roll
                         monk_bonus_str = " ⚖️{} ".format(bonus_roll)
                         bonus_str += monk_bonus_str
@@ -418,7 +418,7 @@ class Adventure:
                         if roll == 1 and Userdata.users[str(member.id)]['class']['ability']:
                             await ctx.send("A steady resolve prevented **" + user + "**" + "from a fumble.")
                         monkbonus = await Classes.calc_monkbonus(ctx, member.id)
-                        bonus_roll = random.randrange(min(1,monkbonus[0]),max(1,monkbonus[0]))
+                        bonus_roll = random.randrange(min(1,monkbonus[0]),max(2,monkbonus[0]))
                         attack += bonus_roll
                         bow_bonus = " ⚖️{} + ".format(bonus_roll)
                     attack += roll + bonus + att_value + monster_value
@@ -514,7 +514,7 @@ class Adventure:
                         bonus = random.randint(5,15)
                         if songbonus != 0: #recalc if song is sung
                             low = max(5,int(Userdata.users[str(member.id)]['lvl']/4))
-                            bonus = random.randint(low, max(low, songbonus))
+                            bonus = random.randint(low, max(low, int(songbonus)))
                         diplomacy += -roll - bonus - dipl_value + monster_value
                         report += "**" + user + "**: " +  "- 🎲({}) -".format(roll) + " 💥{} - ".format(bonus) + "🗨" + str(dipl_value) + monster_string + " | "
                 elif roll == 20 or (Userdata.users[str(member.id)]['class']['name']=="Bard" and Userdata.users[str(member.id)]['class']['ability']):
@@ -529,7 +529,7 @@ class Adventure:
                         ability = "🎵"
                     if songbonus != 0: #recalc if song is sung
                         low = max(5,int(Userdata.users[str(member.id)]['lvl']/4))
-                        bonus = random.randint(low, max(low, songbonus))
+                        bonus = random.randint(low, max(low, int(songbonus)))
                     if Userdata.users[str(member.id)]['class']['name']=="Monk":
                         monkbonus = await Classes.calc_monkbonus(ctx, member.id)
                         bonus = random.randrange(min(1,monkbonus[1]),max(2,monkbonus[1]))

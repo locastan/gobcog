@@ -153,12 +153,12 @@ class Classes:
         if bonus_modifier > 1:
             bonus_percent = "(+" + str((bonus_modifier-1)*100) + "% intrument bonus.)"
         else:
-            bonus_modifier = ""
+            bonus_percent = ""
         if len(args) == 0: #user did not pass a song
             Userdata.users[str(user)]['class']['ability'] = True
             basebonus = random.randint(1,(Userdata.users[str(user)]['lvl']//2))*bonus_modifier
             Userdata.users[str(user)]['class'].update({"basebonus": basebonus})
-            await ctx.send('♪♫♬ **{}** is whipping up a random performance. {} ♬♫♪'.format(ctx.author.display_name, bonus_modifier))
+            await ctx.send('♪♫♬ **{}** is whipping up a random performance. {} ♬♫♪'.format(ctx.author.display_name, bonus_percent))
             return
         else:
             argstring = ''.join(map(str, args))
@@ -176,7 +176,7 @@ class Classes:
             for i in range(1, 10-rating+1):
                 stars += "☆"
             #await ctx.send('♪♫♬ **{}** is singing \"{}\" [{}]. ♬♫♪ (Hash:{}; Bonus:{}; Optimum: {})'.format(ctx.author.display_name, " ".join(args), stars, n, basebonus, optimal))
-            await ctx.send('♪♫♬ **{}** is singing \"{}\" [{}]. {} ♬♫♪'.format(ctx.author.display_name, " ".join(args), stars, bonus_modifier))
+            await ctx.send('♪♫♬ **{}** is singing \"{}\" [{}]. {} ♬♫♪'.format(ctx.author.display_name, " ".join(args), stars, bonus_percent))
             if optimal == 0:
                 return
             elif optimal-level <= 5:
