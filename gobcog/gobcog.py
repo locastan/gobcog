@@ -1912,13 +1912,14 @@ class GobCog(BaseCog):
     @not_resting()
     @has_hp()
     @commands.cooldown(rate=1, per=125, type=commands.BucketType.guild)
-    async def _adventure(self, ctx):
+    async def _adventure(self, ctx, type: str="easy"):
         """This will send you on an adventure!
+            (Increase difficulty by going "!a hard" or "!a insane".)
             You play by reacting with the offered emojis.
         """
         global users
         await ctx.send("You feel adventurous, " + ctx.author.display_name + "?")
-        reward, participants = await Adventure.simple(ctx)
+        reward, participants = await Adventure.simple(ctx, type)
         if reward is not None:
             print(reward, participants)
             for user in reward.keys():

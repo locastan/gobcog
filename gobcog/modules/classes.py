@@ -136,24 +136,25 @@ class Classes:
         user = ctx.author.id
         #counting instruments Equipped and calculating instrument bonus
         i_count = 0
-        if list(Userdata.users[str(user)]['items'].get('left', "Empty_slot")) in Treasure.instrument:
+        if list(Userdata.users[str(user)]['items']['right'].keys())[0].split("(")[0] in Treasure.instrument:
+            i_count += 1
+        if list(Userdata.users[str(user)]['items']['left'].keys())[0].split("(")[0] in Treasure.instrument:
             i_count += 1
         if list(Userdata.users[str(user)]['items'].get('right', "Empty_slot")) == list(Userdata.users[str(user)]['items'].get('left', "Empty_slot")):
-            pass
-        elif list(Userdata.users[str(user)]['items'].get('right', "Empty_slot")) in Treasure.instrument:
-            i_count += 1
+            i_count -= 1
         bonus_list = []
         if i_count == 1:
             bonus_list = [1.5,2]
         elif i_count == 2:
-            bonus_list = [1.5,2,2.5,3]
+            bonus_list = [1.5,2,2.5,2.5,3]
         else:
             bonus_list = [1]
         bonus_modifier = random.choice(bonus_list)
         if bonus_modifier > 1:
-            bonus_percent = "(+" + str((bonus_modifier-1)*100) + "% intrument bonus.)"
+            bonus_percent = "(+" + str(int((bonus_modifier-1)*100)) + "% instrument bonus.)"
         else:
             bonus_percent = ""
+        #print("i_count:{}, Bonus percent:{}, Bonus mod:{}".format(i_count,bonus_percent,bonus_modifier))
         if len(args) == 0: #user did not pass a song
             Userdata.users[str(user)]['class']['ability'] = True
             basebonus = random.randint(1,(Userdata.users[str(user)]['lvl']//2))*bonus_modifier

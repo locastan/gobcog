@@ -97,22 +97,27 @@ class Adventure:
     str_mod = 1
     dipl_mod = 1
 
-    async def simple(ctx):
+    async def simple(ctx, type):
         text = ""
         if Adventure.timeout != 0:
             return None
         Adventure.unusual = False
         Adventure.challenge = random.choice(list(Adventure.monsters.keys())) #if you want the dict with accompanying subkeys use: Adventure.monsters[random.choice(list(Adventure.monsters.keys()))]
         Adventure.attrib = random.choice(list(Adventure.attribs.keys()))
+        Adventure.str_mod = 1
+        Adventure.dipl_mod = 1
         if random.randint(1,10) == 10:
             Adventure.str_mod = random.uniform(0.5, 2.0)
             Adventure.dipl_mod = random.uniform(0.5, 2.0)
-            Adventure.str = round(Adventure.monsters[Adventure.challenge]["str"]*Adventure.attribs[Adventure.attrib][0]*Adventure.str_mod)
-            Adventure.dipl = round(Adventure.monsters[Adventure.challenge]["dipl"]*Adventure.attribs[Adventure.attrib][1]*Adventure.dipl_mod)
             Adventure.unusual = True
-        else:
-            Adventure.str = Adventure.monsters[Adventure.challenge]["str"]*Adventure.attribs[Adventure.attrib][0]
-            Adventure.dipl = Adventure.monsters[Adventure.challenge]["dipl"]*Adventure.attribs[Adventure.attrib][1]
+        elif type.lower() == "hard":
+            Adventure.str_mod = random.uniform(2.5, 3.5)
+            Adventure.dipl_mod = random.uniform(2.5, 3.5)
+        elif type.lower() == "insane":
+            Adventure.str_mod = random.uniform(4, 10.0)
+            Adventure.dipl_mod = random.uniform(4, 10.0)
+        Adventure.str = round(Adventure.monsters[Adventure.challenge]["str"]*Adventure.attribs[Adventure.attrib][0]*Adventure.str_mod)
+        Adventure.dipl = round(Adventure.monsters[Adventure.challenge]["dipl"]*Adventure.attribs[Adventure.attrib][1]*Adventure.dipl_mod)
         Adventure.userslist = {"fight":[],"pray":[],"talk":[],"run":[]}
         Adventure.rewards = {}
         Adventure.dmgred = 1
@@ -143,15 +148,19 @@ class Adventure:
         return (Adventure.rewards, Adventure.participants)
 
     async def choice(ctx):
+        u_txt = ""
+        if Adventure.unusual:
+            u_txt = "On top of all things, there seems to be a somewhat chaotic aura to the place."
         if "Dragon" in Adventure.challenge:
-            await Adventure.menu(ctx, [("but **a{} {}** just landed in front of you glaring! \n\nWhat will you do and will other heroes be brave enough to help you?\nHeroes participate via reaction:").format(Adventure.attrib,Adventure.challenge)], {"🗡": Adventure.fight, "🗨": Adventure.talk, "🛐": Adventure.pray, "❌": Adventure.run})
+            flavortext = ("but **a{} {}** just landed in front of you glaring! {}\n\nWhat will you do and will other heroes be brave enough to help you?\nHeroes participate via reaction:").format(Adventure.attrib,Adventure.challenge,u_txt)
         elif "Tarrasque" in Adventure.challenge:
-            await Adventure.menu(ctx, [("but **a{} {}** just reared its ugly head! \n\nDo you feel lucky today?\nHeroes participate via reaction:").format(Adventure.attrib,Adventure.challenge)], {"🗡": Adventure.fight, "🗨": Adventure.talk, "🛐": Adventure.pray, "❌": Adventure.run})
+            flavortext = ("but **a{} {}** just reared its ugly head! {}\n\nDo you feel lucky today?\nHeroes participate via reaction:").format(Adventure.attrib,Adventure.challenge,u_txt)
         elif Adventure.challenge == "Basilisk" or Adventure.challenge == "Medusa":
-            await Adventure.menu(ctx, [("but **a{} {}** stepped out looking around. \n\nWhat will you do and will other heroes help your cause?\nHeroes participate via reaction:").format(Adventure.attrib,Adventure.challenge)], {"🗡": Adventure.fight, "🗨": Adventure.talk, "🛐": Adventure.pray, "❌": Adventure.run})
+            flavortext = ("but **a{} {}** stepped out looking around. {}\n\nWhat will you do and will other heroes help your cause?\nHeroes participate via reaction:").format(Adventure.attrib,Adventure.challenge,u_txt)
         else:
             threatee = [" menace", " glee", " malice", " all means necessary", " a couple of friends", " a crosseyed squint", " steady pace"]
-            await Adventure.menu(ctx, [("but **a{} {}** is guarding it with{}. \n\nWhat will you do and will other heroes help your cause?\nHeroes participate via reaction:").format(Adventure.attrib,Adventure.challenge,random.choice(threatee))], {"🗡": Adventure.fight, "🗨": Adventure.talk, "🛐": Adventure.pray, "❌": Adventure.run})
+            flavortext = ("but **a{} {}** is guarding it with{}. {}\n\nWhat will you do and will other heroes help your cause?\nHeroes participate via reaction:").format(Adventure.attrib,Adventure.challenge,random.choice(threatee),u_txt)
+        await Adventure.menu(ctx, [flavortext], {"🗡": Adventure.fight, "🗨": Adventure.talk, "🛐": Adventure.pray, "❌": Adventure.run})
 
     async def menu(
         ctx: commands.Context,
@@ -365,7 +374,7 @@ class Adventure:
                     if Userdata.users[str(member.id)]['class']['name']=="Berserker" and Userdata.users[str(member.id)]['class']['ability']:
                         bonus = random.randint(max(5,int(Userdata.users[str(member.id)]['lvl']/2)),max(15,int(Userdata.users[str(member.id)]['lvl'])))
                         r_penalty = random.randint(5,max(6,int(bonus/2)))
-                        duration = int(max(2,bonus/10))
+                        duration =  int(min(4,max(2,bonus/10)))
                         attack += -roll -bonus -att_value + monster_value
                         report += "**" + user + "**: " +  "- 🎲({}) -".format(roll) + " 💥{} ".format(bonus) + "- 🗡" + str(att_value) + monster_string + " | "
                         await Userdata.debuff(ctx,str(member.id),"Your Rage",r_penalty,duration,'att')
@@ -379,7 +388,7 @@ class Adventure:
                         ability = "🗯️"
                         bonus = random.randint(max(5,int(Userdata.users[str(member.id)]['lvl']/2)),max(15,int(Userdata.users[str(member.id)]['lvl'])))
                         r_penalty = random.randint(5,max(6,int(bonus/2)))
-                        duration = int(max(2,bonus/10))
+                        duration =  int(min(4,max(2,bonus/10)))
                         bonus_str = ability + str(bonus)
                         await Userdata.debuff(ctx,str(member.id),"Your Rage",r_penalty,duration,'att')
                     elif Userdata.users[str(member.id)]['class']['name']=="Ranger" and any("bow" in k for k in Userdata.users[str(member.id)]['items']['right'].keys()):
