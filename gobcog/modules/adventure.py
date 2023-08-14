@@ -106,16 +106,16 @@ class Adventure:
         Adventure.attrib = random.choice(list(Adventure.attribs.keys()))
         Adventure.str_mod = 1
         Adventure.dipl_mod = 1
-        if random.randint(1,10) == 10:
-            Adventure.str_mod = random.uniform(0.5, 2.0)
-            Adventure.dipl_mod = random.uniform(0.5, 2.0)
-            Adventure.unusual = True
-        elif type.lower() == "hard":
+        if type.lower() == "hard":
             Adventure.str_mod = random.uniform(2.5, 3.5)
             Adventure.dipl_mod = random.uniform(2.5, 3.5)
         elif type.lower() == "insane":
             Adventure.str_mod = random.uniform(4, 10.0)
             Adventure.dipl_mod = random.uniform(4, 10.0)
+        elif random.randint(1,10) == 10:
+            Adventure.str_mod = random.uniform(0.5, 2.0)
+            Adventure.dipl_mod = random.uniform(0.5, 2.0)
+            Adventure.unusual = True
         Adventure.str = round(Adventure.monsters[Adventure.challenge]["str"]*Adventure.attribs[Adventure.attrib][0]*Adventure.str_mod)
         Adventure.dipl = round(Adventure.monsters[Adventure.challenge]["dipl"]*Adventure.attribs[Adventure.attrib][1]*Adventure.dipl_mod)
         Adventure.userslist = {"fight":[],"pray":[],"talk":[],"run":[]}

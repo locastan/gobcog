@@ -618,13 +618,18 @@ class GobCog(BaseCog):
         else:
             await Classes.bless(ctx)
 
+
+    def heal_cooldown(ctx):
+        cd = 3+int(Userdata.users[str(ctx.author.id)]['lvl']/20)
+        return discord.ext.commands.Cooldown(rate=cd, per=3600)
+
     @commands.command()
     @commands.guild_only()
     @not_resting()
     @has_hp()
-    @commands.cooldown(rate=3, per=3600, type=commands.BucketType.user) #can heal 4 times per hour
+    @commands.dynamic_cooldown(heal_cooldown, commands.BucketType.user)
     async def heal(self,ctx, user: discord.Member=None):
-        """This allows a Cleric to heal himself or others up to 3 times per hour.
+        """Clerics can heal themselves or others up to 3(+1 per 20 lvls) times per hour.
             Use !heal to heal yourself. !heal @user to heal others.
             (1d8 + 1 every 5 levels)
         """
