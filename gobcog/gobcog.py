@@ -1852,7 +1852,7 @@ class GobCog(BaseCog):
         """
         name = "gobcog"
         if name in ctx.bot.extensions:
-                ctx.bot.unload_extension(name)
+                await ctx.bot.unload_extension(name)
                 await ctx.bot.remove_loaded_package(name)
                 spec = await ctx.bot._cog_mgr.find_cog(name)
                 await ctx.bot.load_extension(spec)
