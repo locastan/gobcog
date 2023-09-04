@@ -168,9 +168,9 @@ class Classes:
             n = abs(int(hashlib.sha1(argstring.encode()).hexdigest(),16)) % 10000000 #take last 7 digits to get first iteration between 0 and 63?
             basebonus, optimal = await Classes.calc_song(n, level, 0)
             Userdata.users[str(user)]['class']['ability'] = True
-            Userdata.users[str(user)]['class'].update({"basebonus": basebonus})
             rating = round(basebonus/Userdata.users[str(user)]['lvl']*10)
             basebonus = basebonus*bonus_modifier #apply instrument bonus after song rating
+            Userdata.users[str(user)]['class'].update({"basebonus": basebonus})
             stars = ""
             for i in range(1, rating+1):
                 stars += "★"
