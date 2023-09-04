@@ -37,7 +37,7 @@ class Adventure:
                 " palatine":[2,2],
                 " naive":[0.9,0.3],
                 "n overpowered":[3,3]}
-monsters = {"Ghoul":{"str":10,"dipl":10},
+    monsters = {"Ghoul":{"str":10,"dipl":10},
                 "Bandit":{"str":10,"dipl":10},
                 "Gnoll":{"str":12,"dipl":8},
                 "Shrieker":{"str":11,"dipl":12},
