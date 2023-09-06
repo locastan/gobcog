@@ -655,7 +655,7 @@ class GobCog(BaseCog):
     @not_resting()
     @has_hp()
     @commands.cooldown(rate=1, per=900, type=commands.BucketType.user)
-    async def sing(self,ctx, *args):
+    async def music(self,ctx, *args):
         """This allows a Bard to add substantial diplomacy bonuses for one battle.
             You can also type in a songname or phrase you want to sing affecting your bonus.
         """
