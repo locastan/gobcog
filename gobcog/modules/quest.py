@@ -560,6 +560,7 @@ class Quest:
                 monster_string = ""
                 bow_bonus = ""
                 monster_value = 0
+                bonus = 0
                 if "monster" in Userdata.users[str(member.id)]['buffs']:
                     monster_value = Userdata.users[str(member.id)]['buffs'].get('monster', {'bonus':{'att':0}})['bonus']['att']
                     monster_string = " + 🦖{}".format(monster_value)
@@ -585,7 +586,6 @@ class Quest:
                         await Userdata.debuff(ctx,str(member.id),"Your Rage",r_penalty,duration,'att')
                 elif roll == 20 or (Userdata.users[str(member.id)]['class']['name']=="Berserker" and Userdata.users[str(member.id)]['class']['ability']):
                     ability = ""
-                    bonus = 0
                     if roll == 20:
                         await ctx.send("**" + user + "**" + " landed a critical hit.")
                         critlist.append(user)

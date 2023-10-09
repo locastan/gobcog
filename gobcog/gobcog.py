@@ -654,7 +654,7 @@ class GobCog(BaseCog):
     @commands.guild_only()
     @not_resting()
     @has_hp()
-    @commands.cooldown(rate=1, per=900, type=commands.BucketType.user)
+    @commands.cooldown(rate=1, per=600, type=commands.BucketType.user)
     async def sing(self,ctx, *args):
         """This allows a Bard to add substantial diplomacy bonuses for one battle.
             You can also type in a songname or phrase you want to sing affecting your bonus.
@@ -890,9 +890,9 @@ class GobCog(BaseCog):
     @commands.command()
     @commands.guild_only()
     @not_resting()
-    @commands.cooldown(rate=1, per=300, type=commands.BucketType.user)
+    @commands.cooldown(rate=1, per=3600, type=commands.BucketType.user)
     async def heroclass(self, ctx, clz:str=None, action:str=None):
-        """This allows you to select a class.
+        """This allows you to select or switch classes. (once every hour)
             You need to be level 10 to select one.
             For information on class use: !heroclass "classname" info
         """

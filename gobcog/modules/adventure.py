@@ -8,6 +8,7 @@ import discord
 import random
 import calendar
 import time
+import datetime
 from .custompredicate import CustomPredicate
 from .userdata import Userdata
 from .classes import Classes
@@ -78,7 +79,7 @@ class Adventure:
                 "Hydra":{"str":75,"dipl":65},
                 "Mind-Flayer":{"str":55,"dipl":85},
                 "Bulette":{"str":120,"dipl":55},
-                "Hoard Golem":{"str":160,"dipl":15},
+                "Hoard Golem":{"str":90,"dipl":15},
                 "Warforged Golem":{"str":90,"dipl":100},
                 "Brainbug":{"str":100,"dipl":155},
                 "Red Dragon":{"str":95,"dipl":95},
@@ -88,8 +89,62 @@ class Adventure:
                 "Leviathan":{"str":320,"dipl":320},
                 "Tarrasque":{"str":400,"dipl":400}}
 
+    poke_monsters = {"Gimmighoul":{"str":10,"dipl":10},
+                "Bidoof":{"str":10,"dipl":10},
+                "Sentret":{"str":12,"dipl":8},
+                "Loudred":{"str":11,"dipl":12},
+                "Abra":{"str":8,"dipl":15},
+                "Machop":{"str":16,"dipl":10},
+                "Wooper":{"str":12,"dipl":15},
+                "Ghastly":{"str":15,"dipl":12},
+                "Kangaskhan":{"str":18,"dipl":10},
+                "Duskull":{"str":13,"dipl":16},
+                "Qwilfish":{"str":16,"dipl":14},
+                "Diglet":{"str":15,"dipl":18},
+                "Vigoroth":{"str":18,"dipl":15},
+                "Meowth":{"str":15,"dipl":18},
+                "Ursaring":{"str":25,"dipl":10},
+                "Pikatchu":{"str":5,"dipl":30},
+                "Spiritomb":{"str":25,"dipl":12},
+                "Spidops":{"str":20,"dipl":20},
+                "Alolan Grimer":{"str":10,"dipl":30},
+                "Magcargo":{"str":20,"dipl":20},
+                "Swalot":{"str":12,"dipl":30},
+                "Morgrem":{"str":30,"dipl":17},
+                "Servine":{"str":20,"dipl":30},
+                "Lycanroc Dusk":{"str":19,"dipl":35},
+                "Ursaluna":{"str":30,"dipl":25},
+                "Snorlax":{"str":40,"dipl":15},
+                "Alakazam":{"str":28,"dipl":30},
+                "Golem":{"str":40,"dipl":20},
+                "Muk":{"str":30,"dipl":40},
+                "Swampert":{"str":32,"dipl":48},
+                "Heracross":{"str":35,"dipl":50},
+                "Krookodile":{"str":50,"dipl":50},
+                "Magmortar":{"str":55,"dipl":45},
+                "Abomasnow":{"str":65,"dipl":50},
+                "Alolan Persian":{"str":45,"dipl":80},
+                "Arbok":{"str":80,"dipl":55},
+                "Tangrowth":{"str":65,"dipl":65},
+                "Aerodactly":{"str":70,"dipl":60},
+                "Hydreigon":{"str":75,"dipl":65},
+                "Hypno":{"str":55,"dipl":85},
+                "Aggron":{"str":120,"dipl":55},
+                "Alolan Golem":{"str":90,"dipl":15},
+                "Mega Golem":{"str":90,"dipl":100},
+                "Gigantamax Orbeetle":{"str":100,"dipl":155},
+                "Mega Charizard Y":{"str":95,"dipl":95},
+                "Mega Garchomp":{"str":110,"dipl":100},
+                "Mega Salamence":{"str":130,"dipl":120},
+                "Mega Latios":{"str":200,"dipl":220},
+                "Primal Kyogre":{"str":320,"dipl":320},
+                "Primal Groudon":{"str":400,"dipl":400}}
+
     challenge = ""
     attrib = ""
+    alarmlist = ["Dragon","Tarrasque","Leviathan","Charizard","Garchomp","Salamence","Latios","Primal"]
+    mirrorlist = ["Basilisk", "Medusa","Tangrowth","Krookodile"]
+    dragonlist = ["Dragon","Charizard","Garchomp","Salamence","Latios"]
     userslist = {}
     emoji_lookup = {"fight": "🗡", "talk" : "🗨", "pray" : "🛐", "run" : "❌"}
     finish = 0
@@ -98,13 +153,19 @@ class Adventure:
     unusual = False
     str_mod = 1
     dipl_mod = 1
+    event = False
 
     async def simple(ctx, type):
         text = ""
         if Adventure.timeout != 0:
             return None
         Adventure.unusual = False
-        Adventure.challenge = random.choice(list(Adventure.monsters.keys())) #if you want the dict with accompanying subkeys use: Adventure.monsters[random.choice(list(Adventure.monsters.keys()))]
+        if int(datetime.date.today().strftime("%d")) >= 24 and int(datetime.date.today().strftime("%m")) == 10:
+            Adventure.event = True
+            text += random.choice(["🎃 ","👻 ","🦇 ","🕸️ ", "💀 "])
+            Adventure.challenge = random.choice(list(Adventure.poke_monsters.keys()))
+        else:
+            Adventure.challenge = random.choice(list(Adventure.monsters.keys()))
         Adventure.attrib = random.choice(list(Adventure.attribs.keys()))
         Adventure.str_mod = 1
         Adventure.dipl_mod = 1
@@ -118,14 +179,18 @@ class Adventure:
             Adventure.str_mod = random.uniform(0.5, 2.0)
             Adventure.dipl_mod = random.uniform(0.5, 2.0)
             Adventure.unusual = True
-        Adventure.str = round(Adventure.monsters[Adventure.challenge]["str"]*Adventure.attribs[Adventure.attrib][0]*Adventure.str_mod)
-        Adventure.dipl = round(Adventure.monsters[Adventure.challenge]["dipl"]*Adventure.attribs[Adventure.attrib][1]*Adventure.dipl_mod)
+        if Adventure.event == True:
+            Adventure.str = round(Adventure.poke_monsters[Adventure.challenge]["str"]*Adventure.attribs[Adventure.attrib][0]*Adventure.str_mod)
+            Adventure.dipl = round(Adventure.poke_monsters[Adventure.challenge]["dipl"]*Adventure.attribs[Adventure.attrib][1]*Adventure.dipl_mod)
+        else:
+            Adventure.str = round(Adventure.monsters[Adventure.challenge]["str"]*Adventure.attribs[Adventure.attrib][0]*Adventure.str_mod)
+            Adventure.dipl = round(Adventure.monsters[Adventure.challenge]["dipl"]*Adventure.attribs[Adventure.attrib][1]*Adventure.dipl_mod)
         Adventure.userslist = {"fight":[],"pray":[],"talk":[],"run":[]}
         Adventure.rewards = {}
         Adventure.dmgred = 1
         Adventure.participants = []
         Adventure.started = time.time()
-        if "Dragon" in Adventure.challenge or "Tarrasque" in Adventure.challenge or "Leviathan" in Adventure.challenge:
+        if any(creature in Adventure.challenge for creature in Adventure.alarmlist):
             Adventure.timeout = 120
             modRole = discord.utils.get(ctx.guild.roles, name='Goblin Adventurer!')
             if modRole is not None:
@@ -133,7 +198,7 @@ class Adventure:
                     namedesc = Adventure.attrib.split(" ")[1].capitalize()
                 else:
                     namedesc = Adventure.attrib.split(" ")[1].capitalize() + " " + Adventure.attrib.split(" ")[2].capitalize()
-                text = modRole.mention + "\n" + "```ansi\n [2;31m[{} {} Alarm!][0m```".format(namedesc,Adventure.challenge)
+                text += modRole.mention + "\n" + "```ansi\n [2;31m[{} {} Alarm!][0m```".format(namedesc,Adventure.challenge)
         elif (Adventure.str + Adventure.dipl) > 100:
             Adventure.timeout = 60
         else:
@@ -153,11 +218,11 @@ class Adventure:
         u_txt = ""
         if Adventure.unusual:
             u_txt = "On top of all things, there seems to be a somewhat chaotic aura to the place."
-        if "Dragon" in Adventure.challenge:
+        if any(creature in Adventure.challenge for creature in Adventure.dragonlist):
             flavortext = ("but **a{} {}** just landed in front of you glaring! {}\n\nWhat will you do and will other heroes be brave enough to help you?\nHeroes participate via reaction:").format(Adventure.attrib,Adventure.challenge,u_txt)
-        elif "Tarrasque" in Adventure.challenge:
+        elif "Tarrasque" in Adventure.challenge or "Primal" in Adventure.challenge:
             flavortext = ("but **a{} {}** just reared its ugly head! {}\n\nDo you feel lucky today?\nHeroes participate via reaction:").format(Adventure.attrib,Adventure.challenge,u_txt)
-        elif Adventure.challenge == "Basilisk" or Adventure.challenge == "Medusa":
+        elif any(creature in Adventure.challenge for creature in Adventure.mirrorlist):
             flavortext = ("but **a{} {}** stepped out looking around. {}\n\nWhat will you do and will other heroes help your cause?\nHeroes participate via reaction:").format(Adventure.attrib,Adventure.challenge,u_txt)
         else:
             threatee = [" menace", " glee", " malice", " all means necessary", " a couple of friends", " a crosseyed squint", " steady pace"]
@@ -367,6 +432,7 @@ class Adventure:
                 monster_string = ""
                 bow_bonus = ""
                 monster_value = 0
+                bonus = 0
                 if "monster" in Userdata.users[str(member.id)]['buffs']:
                     monster_value = Userdata.users[str(member.id)]['buffs'].get('monster', {'bonus':{'att':0}})['bonus']['att']
                     monster_string = " + 🦖{}".format(monster_value)
@@ -382,7 +448,6 @@ class Adventure:
                         await Userdata.debuff(ctx,str(member.id),"Your Rage",r_penalty,duration,'att')
                 elif roll == 20 or (Userdata.users[str(member.id)]['class']['name']=="Berserker" and Userdata.users[str(member.id)]['class']['ability']):
                     ability = ""
-                    bonus = 0
                     if roll == 20:
                         await ctx.send("**" + user + "**" + " landed a critical hit.")
                         critlist.append(user)
@@ -567,7 +632,7 @@ class Adventure:
             return (fumblelist, critlist, diplomacy)
 
         async def handle_basilisk(failed):
-            if Adventure.challenge == "Basilisk" or Adventure.challenge == "Medusa":
+            if any(creature in Adventure.challenge for creature in Adventure.mirrorlist):
                 failed = True
                 for user in Adventure.userslist["fight"]+Adventure.userslist["talk"]+Adventure.userslist["pray"]: #check if any fighter has an equipped mirror shield to give them a chance.
                     member = discord.utils.find(lambda m: m.display_name == user, ctx.guild.members)
@@ -620,11 +685,11 @@ class Adventure:
                 treasure = random.choice([[0,1,2,0],[0,2,1,0],[3,1,0,0],[0,2,2,0],[0,0,3,0]])
             elif CR >= 180: #rewards 50:50 epic:rare chest for killing hard stuff.
                 treasure = random.choice([[0,0,1,0],[0,1,0,0]])
-            elif CR >= 80 or Adventure.challenge == "Basilisk" or Adventure.challenge == "Medusa": #rewards 50:50 rare:normal chest for killing something like the basilisk
+            elif CR >= 80 or any(creature in Adventure.challenge for creature in Adventure.mirrorlist): #rewards 50:50 rare:normal chest for killing something like the basilisk
                 treasure = random.choice([[0,1,0,0],[1,0,0,0]])
-            if "Dragon" in Adventure.challenge: #always rewards an epic chest.
+            if any(creature in Adventure.challenge for creature in Adventure.dragonlist): #always rewards an epic chest.
                 treasure[2] += 1
-            elif "Tarrasque" in Adventure.challenge: #rewards up to 10 rare, 5 epic and 3 quest chests
+            elif "Tarrasque" in Adventure.challenge or "Primal" in Adventure.challenge: #rewards up to 10 rare, 5 epic and 3 quest chests
                 treasure[1] += random.randint(3,10)
                 treasure[2] += random.randint(2,5)
                 treasure[3] += random.randint(1,3)
@@ -660,12 +725,12 @@ class Adventure:
                         await ctx.send("**{}** was lucky to dig up several extra chests for the group!".format(user))
             if treasure == [0,0,0,0]:
                 treasure = False
-        if (Adventure.challenge == "Basilisk" or Adventure.challenge == "Medusa") and failed:
+        if any(creature in Adventure.challenge for creature in Adventure.mirrorlist) and failed:
             Adventure.participants= Adventure.userslist["fight"]+Adventure.userslist["talk"]+Adventure.userslist["pray"]+Adventure.userslist["run"]+fumblelist
             await ctx.send("The {}s gaze turned everyone to stone.".format(Adventure.challenge))
             await Adventure.damage(ctx,[item for item in Adventure.participants if item not in Adventure.userslist["run"]],CR*2)
             return
-        if (Adventure.challenge == "Basilisk" or Adventure.challenge == "Medusa") and not slain and not persuaded:
+        if any(creature in Adventure.challenge for creature in Adventure.mirrorlist) and not slain and not persuaded:
             Adventure.participants= Adventure.userslist["fight"]+Adventure.userslist["talk"]+Adventure.userslist["pray"]+Adventure.userslist["run"]+fumblelist
             await ctx.send("The mirror shield reflected the {}s gaze, but it still managed to defeat you.".format(Adventure.challenge))
             await Adventure.damage(ctx,[item for item in Adventure.participants if item not in Adventure.userslist["run"]],CR)
@@ -857,7 +922,7 @@ class Adventure:
         return phrase
 
     async def damage(ctx,injured,CR):
-        if "Dragon" in Adventure.challenge:
+        if any(creature in Adventure.challenge for creature in Adventure.alarmlist):
             org_dmg = max(1,round(CR/10))
         else:
             org_dmg = max(1,round(CR/20))
