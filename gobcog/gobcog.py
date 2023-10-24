@@ -1241,11 +1241,7 @@ class GobCog(BaseCog):
                     out = "{:02d}m:{:02d}s".format(m, s)
                 else:
                     out = "{:01d}h:{:02d}m:{:02d}s".format(h, m, s)
-                if lapsed >= needed:
-                    r_perc = 100
-                else:
-                    r_perc = round(lapsed/needed*100)
-                hitpoints += " You are currently resting ({} remaining)".format(r_perc)
+                hitpoints += "\nYou are currently resting ({} remaining)".format(out)
 
         buffs = ""
         signa = "+" if satt > 0 else ""
