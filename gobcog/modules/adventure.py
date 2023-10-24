@@ -104,7 +104,7 @@ class Adventure:
                 "Vigoroth":{"str":18,"dipl":15},
                 "Meowth":{"str":15,"dipl":18},
                 "Ursaring":{"str":25,"dipl":10},
-                "Pikatchu":{"str":5,"dipl":30},
+                "Pikachu":{"str":5,"dipl":30},
                 "Spiritomb":{"str":25,"dipl":12},
                 "Spidops":{"str":20,"dipl":20},
                 "Alolan Grimer":{"str":10,"dipl":30},
