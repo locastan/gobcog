@@ -1225,6 +1225,28 @@ class GobCog(BaseCog):
         else:
             hp_color = Color.green
         hitpoints = "HP {}/{} ({}{}%{})".format(Userdata.users[str(user.id)]['hp'],Userdata.users[str(user.id)]['base_hp'],hp_color,hp_perc,Color.none)
+        if Userdata.users[str(user.id)]['resting'] != {}:
+                now = time.time()
+                needed = Userdata.users[str(user.id)]['resting']['rest_end'] - Userdata.users[str(user.id)]['resting']['rest_start']
+                lapsed = now - Userdata.users[str(user.id)]['resting']['rest_start']
+                togo = Userdata.users[str(user.id)]['resting']['rest_end'] - now
+                m, s = divmod(togo, 60)
+                h, m = divmod(m, 60)
+                s = int(s)
+                m = int(m)
+                h = int(h)
+                if h == 0 and m == 0:
+                    out = "{:02d}s".format(s)
+                elif h == 0:
+                    out = "{:02d}m:{:02d}s".format(m, s)
+                else:
+                    out = "{:01d}h:{:02d}m:{:02d}s".format(h, m, s)
+                if lapsed >= needed:
+                    r_perc = 100
+                else:
+                    r_perc = round(lapsed/needed*100)
+                hitpoints += " You are currently resting ({} remaining)".format(r_perc)
+
         buffs = ""
         signa = "+" if satt > 0 else ""
         signc = "+" if scha > 0 else ""

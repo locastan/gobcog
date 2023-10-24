@@ -1,6 +1,7 @@
 import random
 import asyncio
 import copy
+import datetime
 from redbot.core.utils.predicates import MessagePredicate
 from redbot.core import bank
 from .userdata import Userdata
@@ -192,11 +193,18 @@ class Consumables:
             return True
         elif cons['type'] == "summon":
             attrib = random.choice(list(Adventure.attribs.keys()))
-            monster = random.choice(list(Adventure.monsters.keys()))
-            att = int(Adventure.monsters[monster]["str"]*Adventure.attribs[attrib][0])
-            cha = int(Adventure.monsters[monster]["dipl"]*Adventure.attribs[attrib][1])
+            if int(datetime.date.today().strftime("%d")) >= 24 and int(datetime.date.today().strftime("%m")) == 10:
+                flavoricon = random.choice([" 🎃"," 👻"," 🦇"," 🕸️", " 💀"])
+                monster = random.choice(list(Adventure.poke_monsters.keys()))
+                att = int(Adventure.poke_monsters[monster]["str"]*Adventure.attribs[attrib][0])
+                cha = int(Adventure.poke_monsters[monster]["dipl"]*Adventure.attribs[attrib][1])
+            else:
+                flavoricon = ""
+                monster = random.choice(list(Adventure.monsters.keys()))
+                att = int(Adventure.monsters[monster]["str"]*Adventure.attribs[attrib][0])
+                cha = int(Adventure.monsters[monster]["dipl"]*Adventure.attribs[attrib][1])
             Userdata.users[str(user.id)]['buffs'].update({cons['attrib'][0]:{'bonus':{'att':att,'cha':cha}, 'duration':cons['duration']}})
-            await ctx.send("**{}** summoned a{} {} (🗡 {} | 🗨 {}).".format(user.display_name,attrib,monster,att,cha))
+            await ctx.send("**{}** summoned a{}{} {} (🗡 {} | 🗨 {}).".format(user.display_name,flavoricon,attrib,monster,att,cha))
             return True
         elif cons['type'] == "medicine":
             bonus = random.randint(cons['min'],cons['max'])
