@@ -165,6 +165,7 @@ class Adventure:
             text += random.choice(["🎃 ","👻 ","🦇 ","🕸️ ", "💀 "])
             Adventure.challenge = random.choice(list(Adventure.poke_monsters.keys()))
         else:
+            Adventure.event = False
             Adventure.challenge = random.choice(list(Adventure.monsters.keys()))
         Adventure.attrib = random.choice(list(Adventure.attribs.keys()))
         Adventure.str_mod = 1
