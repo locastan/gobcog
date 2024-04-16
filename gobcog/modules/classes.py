@@ -141,12 +141,14 @@ class Classes:
         if list(Userdata.users[str(user)]['items']['left'].keys())[0].split("(")[0] in Treasure.instrument:
             i_count += 1
         if list(Userdata.users[str(user)]['items'].get('right', "Empty_slot")) == list(Userdata.users[str(user)]['items'].get('left', "Empty_slot")):
-            i_count -= 1
+            i_count += 1
         bonus_list = []
         if i_count == 1:
             bonus_list = [1.5,2]
         elif i_count == 2:
-            bonus_list = [1.5,2,2.5,2.5,3]
+            bonus_list = [1.5,2,2.5,2.5,3,4]
+        elif i_count == 3: #double handed instrument
+            bonus_list = [1.5,2,2.5,3]
         else:
             bonus_list = [1]
         bonus_modifier = random.choice(bonus_list)
@@ -237,7 +239,6 @@ class Classes:
 
     async def calc_song(n,lvl,prev):
         x = sum(int(digit) for digit in str(n))
-        if x <= lvl:
-            return x, prev
-        else:
-            return await Classes.calc_song(x,lvl,x)
+        if x > lvl:
+            x = int((x % lvl)*0.8)
+        return x, prev

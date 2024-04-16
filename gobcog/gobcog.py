@@ -2290,7 +2290,9 @@ class GobCog(BaseCog):
             #channel = ctx.bot.get_channel(504934418289262597) #restrict trader to general channel on test server
             if channel is not None:
                 calcprice = 0
-                if titem['itemname'] in Consumables.consbles.keys() or 'chest' in titem['itemname']:
+                if user.id in looting:
+                    await ctx.send("**{}**, you are currently looting, please finish that session first.".format(user.display_name))
+                elif titem['itemname'] in Consumables.consbles.keys() or 'chest' in titem['itemname']:
                     await channel.send("Tell me **{}**, how many {} do you want?".format(user.display_name, titem['itemname']))
                     try:
                         reply = await ctx.bot.wait_for("message", check=MessagePredicate.same_context(ctx,channel,user), timeout=30)

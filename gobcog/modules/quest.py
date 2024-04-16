@@ -252,14 +252,14 @@ class Quest:
                     Userdata.users[str(clumsy.id)]['items'][slot][item]['att'] -= 1
                     Userdata.users[str(clumsy.id)]['items'][slot][item]['cha'] -= 1
                 await Userdata.save()
-                await ctx.send("**{}** damaged his **{}** during the fumble (stats reduced).".format(clumsy.display_name,item))
+                await ctx.send("**{}** damaged the **{}** during the fumble (stats reduced).".format(clumsy.display_name,item))
             else:
                 for slot in equipped[item].get('slot'):
                     Userdata.users[str(clumsy.id)]['items'][slot] = {}
                     Userdata.users[str(clumsy.id)]['att'] -= int(equipped[item].get('att'))     # keep in mind that double handed items grant their bonus twice so they remove twice
                     Userdata.users[str(clumsy.id)]['cha'] -= int(equipped[item].get('cha'))
                 await Userdata.save()
-                await ctx.send("**{}** broke his **{}** during the fumble.".format(clumsy.display_name,item))
+                await ctx.send("**{}** broke the **{}** during the fumble.".format(clumsy.display_name,item))
         else:
             await ctx.send("**{}** almost broke something during the fumble, but due to divine intervention it prevailed.".format(user))
 

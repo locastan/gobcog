@@ -48,6 +48,7 @@ class Treasure:
             ".bagpipes":{"slot":["right","left"],"att":1,"cha":2},
             ".warpike":{"slot":["right"],"att":3,"cha":0},
             ".panflute":{"slot":["right"],"att":0,"cha":3},
+            ".kazoo":{"slot":["left"],"att":0,"cha":3},
             ".tinfoil_foil":{"slot":["right"],"att":-2,"cha":3},
             ".ring_of_strength":{"slot":["ring"],"att":2,"cha":0},
             ".ring_of_charisma":{"slot":["ring"],"att":0,"cha":2},
@@ -71,21 +72,27 @@ class Treasure:
             ".vial_of_aggression":{"slot":["consumable"],"uses":5},
             ".potion_of_eloquence":{"slot":["consumable"],"uses":3},
             ".vial_of_wit":{"slot":["consumable"],"uses":5},
+            ".cunning_vial":{"slot":["consumable"],"uses":3},
+            ".malevolent_vial":{"slot":["consumable"],"uses":3},
             ".dust_of_midas":{"slot":["consumable"],"uses":5},
             ".scroll_of_learning":{"slot":["consumable"],"uses":3}
             }
     unique = {"[troll banhammer]":{"slot":["right","left"],"att":2,"cha":2},
             "[scythe of death]":{"slot":["right","left"],"att":3,"cha":-2},
             "[maul of efrin]":{"slot":["right"],"att":5,"cha":0},
+            "[extremely ornate sword]":{"slot":["right"],"att":0,"cha":5},
+            "[extremely ornate shield]":{"slot":["left"],"att":0,"cha":5},
             "[longer sword]":{"slot":["right"],"att":4,"cha":1},
             "[star of ishtar]":{"slot":["charm"],"att":1,"cha":5},
             "[booklet of jokes]":{"slot":["charm"],"att":0,"cha":5},
+            "[show-off cape]":{"slot":["charm"],"att":-1,"cha":6},
             "[chain of command]":{"slot":["charm"],"att":4,"cha":2},
             "[balance scales]":{"slot":["charm"],"att":3,"cha":3},
             "[great bulwark]":{"slot":["left"],"att":5,"cha":0},
             "[taller shield]":{"slot":["left"],"att":4,"cha":1},
             "[dragon ring]":{"slot":["ring"],"att":4,"cha":3},
             "[mandachord]":{"slot":["right", "left"],"att":1,"cha":4},
+            "[trombone]":{"slot":["left"],"att":3,"cha":3},
             "[repeater crossbow]":{"slot":["right","left"],"att":3,"cha":1},
             "[elvish longbow]":{"slot":["right","left"],"att":4,"cha":2},
             "[gauntlet of balance]":{"slot":["ring"],"att":3,"cha":3},
@@ -101,18 +108,21 @@ class Treasure:
             "[cape of shadows]":{"slot":["charm"],"att":4,"cha":4},
             "[very pointy stick]":{"slot":["right"],"att":7,"cha":-1},
             "[chattering shield]":{"slot":["left"],"att":6,"cha":2},
+            "[kalimba of destiny]":{"slot":["right"],"att":2,"cha":5},
+            "[thunderous castanets]":{"slot":["left"],"att":4,"cha":4},
+            "[sundrop lantern]":{"slot":["right"],"att":2,"cha":6},
             "[isildur`s bane]":{"slot":["ring"],"att":6,"cha":3},
             "[dragon scales]":{"slot":["charm"],"att":4,"cha":5},
             "[mace of many]":{"slot":["right"],"att":6,"cha":1},
             "[mesmer ring]":{"slot":["ring"],"att":1,"cha":6},
             "[crumhorn]":{"slot":["right", "left"],"att":3,"cha":5},
             "[hydra fang]":{"slot":["charm"],"att":6,"cha":2},
-            "[mithril tongue]":{"slot":["charm"],"att":-5,"cha":+8},
-            "[some ring on a chain]":{"slot":["charm"],"att":+8,"cha":-5},
-            "[wanderring]":{"slot":["ring"],"att":+20,"cha":+20}
+            "[mithril tongue]":{"slot":["charm"],"att":-5,"cha":8},
+            "[some ring on a chain]":{"slot":["charm"],"att":8,"cha":-5},
+            "[wanderring]":{"slot":["ring"],"att":20,"cha":20}
             }
 
-    instrument = ["hornpipe","tambourine",".bagpipes",".panflute",".tuba","[mandachord]","[crumhorn]"]
+    instrument = ["hornpipe","tambourine",".bagpipes",".kazoo",".panflute",".tuba","[mandachord]","[trombone]","[crumhorn]","[kalimba of destiny]","[thunderous castanets]","[sundrop lantern]"]
 
     async def open_chest(ctx, user, type):
         if hasattr(user, "display_name"):
