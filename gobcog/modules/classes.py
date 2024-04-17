@@ -136,12 +136,16 @@ class Classes:
         user = ctx.author.id
         #counting instruments Equipped and calculating instrument bonus
         i_count = 0
-        if list(Userdata.users[str(user)]['items']['right'].keys())[0].split("(")[0] in Treasure.instrument:
-            i_count += 1
-        if list(Userdata.users[str(user)]['items']['left'].keys())[0].split("(")[0] in Treasure.instrument:
-            i_count += 1
-        if list(Userdata.users[str(user)]['items'].get('right', "Empty_slot")) == list(Userdata.users[str(user)]['items'].get('left', "Empty_slot")):
-            i_count += 1
+        rightitem = Userdata.users[str(user)]['items'].get('right', "Empty_slot")
+        leftitem = Userdata.users[str(user)]['items'].get('left', "Empty_slot")
+        if rightitem != "Empty_slot":
+            if list(rightitem.keys())[0].split("(")[0] in Treasure.instrument:
+                i_count += 1
+        if leftitem != "Empty_slot":
+            if list(leftitem.keys())[0].split("(")[0] in Treasure.instrument:
+                i_count += 1
+            if list(rightitem) == list(leftitem):
+                i_count += 1
         bonus_list = []
         if i_count == 1:
             bonus_list = [1.5,2]
@@ -164,11 +168,16 @@ class Classes:
             await ctx.send('♪♫♬ **{}** is whipping up a random performance. {} ♬♫♪'.format(ctx.author.display_name, bonus_percent))
             return
         else:
-            argstring = ''.join(map(str, args))
+            argstring = ''.join(i for i in ''.join(map(str, args)) if ord(i)<128) #removing non-unicode characters to prevent hashlib encode to trip
             level = Userdata.users[str(user)]['lvl']
             #n = int(hashlib.sha1(argstring.encode()).hexdigest(),16)
-            n = abs(int(hashlib.sha1(argstring.encode()).hexdigest(),16)) % 10000000 #take last 7 digits to get first iteration between 0 and 63?
-            basebonus, optimal = await Classes.calc_song(n, level, 0)
+            n = abs(int(hashlib.sha1(argstring.encode()).hexdigest(),16))
+            random.seed(n) #using the hashed string as seed for the next rng use
+            optimal = random.randint(1,level+50) #generate a random number between 1 and player lvl+50 based on the seed.
+            if optimal > level:
+                basebonus = optimal % (level + 1)
+            else:
+                basebonus = optimal
             Userdata.users[str(user)]['class']['ability'] = True
             rating = round(basebonus/Userdata.users[str(user)]['lvl']*10)
             basebonus = basebonus*bonus_modifier #apply instrument bonus after song rating
@@ -180,8 +189,10 @@ class Classes:
                 stars += "☆"
             #await ctx.send('♪♫♬ **{}** is singing \"{}\" [{}]. ♬♫♪ (Hash:{}; Bonus:{}; Optimum: {})'.format(ctx.author.display_name, " ".join(args), stars, n, basebonus, optimal))
             await ctx.send('♪♫♬ **{}** is singing \"{}\" [{}]. {} ♬♫♪'.format(ctx.author.display_name, " ".join(args), stars, bonus_percent))
-            if optimal == 0:
+            if optimal-level == 0:
                 return
+            elif optimal-level < 0:
+                await ctx.send("You have outgrown this simple song. Time to find a new challenge!")
             elif optimal-level <= 5:
                 await ctx.send("This needs just a little more practice.")
             elif optimal-level <= 10:
@@ -236,9 +247,3 @@ class Classes:
                 ctx.command.reset_cooldown(ctx)
                 await ctx.send('You already have a pet. Try foraging.')
                 return None
-
-    async def calc_song(n,lvl,prev):
-        x = sum(int(digit) for digit in str(n))
-        if x > lvl:
-            x = int((x % lvl)*0.8)
-        return x, prev
