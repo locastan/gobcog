@@ -81,7 +81,7 @@ class Treasure:
             "[scythe of death]":{"slot":["right","left"],"att":3,"cha":-2},
             "[maul of efrin]":{"slot":["right"],"att":5,"cha":0},
             "[extremely ornate sword]":{"slot":["right"],"att":0,"cha":5},
-            "[extremely ornate shield]":{"slot":["left"],"att":0,"cha":5},
+            "[impractically ornate shield]":{"slot":["left"],"att":0,"cha":5},
             "[longer sword]":{"slot":["right"],"att":4,"cha":1},
             "[star of ishtar]":{"slot":["charm"],"att":1,"cha":5},
             "[booklet of jokes]":{"slot":["charm"],"att":0,"cha":5},
