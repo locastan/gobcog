@@ -258,6 +258,9 @@ class Treasure:
     async def autoopen_chest(ctx, user, type, many):
         lootpile = {}
         moneypile = 0
+        if many > 50:
+            many = 50
+            await ctx.send("Due to performance issues, I had to cap the maximum amount of chests per command to 50. Sorry.")
         if hasattr(user, "display_name"):
             await ctx.send("{} is opening {} treasure chests. What riches hide inside those?".format(user.display_name, many))
         #enter for range many loop.
