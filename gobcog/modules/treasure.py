@@ -207,7 +207,6 @@ class Treasure:
                     luckbonus = 0
                 else:
                     Userdata.users[str(user.id)]['buffs']['luck']['duration'] = Userdata.users[str(user.id)]['buffs']['luck']['duration'] - 1
-            await Userdata.save()
             if react != None:
                 react_emoji = react.emoji
             return {"itemname": itemname,"item":item,"equip":Treasure.controls[react_emoji]}
@@ -250,7 +249,6 @@ class Treasure:
                     luckbonus = 0
                 else:
                     Userdata.users[str(user.id)]['buffs']['luck']['duration'] = Userdata.users[str(user.id)]['buffs']['luck']['duration'] - 1
-            await Userdata.save()
             if react != None:
                 react_emoji = react.emoji
             return {"itemname": itemname,"item":item,"equip":Treasure.controls[react_emoji]}
@@ -258,9 +256,6 @@ class Treasure:
     async def autoopen_chest(ctx, user, type, many):
         lootpile = {}
         moneypile = 0
-        if many > 50:
-            many = 50
-            await ctx.send("Due to performance issues, I had to cap the maximum amount of chests per command to 50. Sorry.")
         if hasattr(user, "display_name"):
             await ctx.send("{} is opening {} treasure chests. What riches hide inside those?".format(user.display_name, many))
         #enter for range many loop.
@@ -308,7 +303,6 @@ class Treasure:
                         luckbonus = 0
                     else:
                         Userdata.users[str(user.id)]['buffs']['luck']['duration'] = Userdata.users[str(user.id)]['buffs']['luck']['duration'] - 1
-                await Userdata.save()
                 if itemname in lootpile.keys():
                     lootpile[itemname]['item']['uses'] = lootpile[itemname]['item'].get("uses", 0) + item['uses']
                 else:
@@ -320,7 +314,6 @@ class Treasure:
                         luckbonus = 0
                     else:
                         Userdata.users[str(user.id)]['buffs']['luck']['duration'] = Userdata.users[str(user.id)]['buffs']['luck']['duration'] - 1
-                await Userdata.save()
                 if itemname in lootpile.keys() or itemname in Userdata.users[str(user.id)]['items']['backpack'].keys() or itemname in Userdata.users[str(user.id)]['lootfilter']:
                     moneypile += await Treasure.t_sell(user, {"itemname": itemname,"item":item})
                 else:

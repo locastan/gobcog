@@ -598,7 +598,6 @@ class Explore:
                             Userdata.users[str(user.id)]['hp'] = 0
                             text = "** The Na-palm exploded! You took {} damage and need to rest now.**".format(damage)
                         await Explore.statusmsg.edit(content=text)
-                        await Userdata.save()
                         await asyncio.sleep(0.2)
                         return await Explore.result(ctx, pages, controls, message, page, Explore.timeout, user)
                     else:
@@ -645,7 +644,6 @@ class Explore:
                             Userdata.users[str(user.id)]['hp'] = 0
                             text = "** You fell into the lava! You took {} damage and need to rest now.**".format(damage)
                         await Explore.statusmsg.edit(content=text)
-                        await Userdata.save()
                         await asyncio.sleep(0.2)
                         return await Explore.result(ctx, pages, controls, message, page, Explore.timeout, user)
                     else:
@@ -665,7 +663,6 @@ class Explore:
                         if not 'treasure' in Userdata.users[str(user.id)].keys():
                             Userdata.users[str(user.id)]['treasure'] = [0,0,0,0]
                         Userdata.users[str(user.id)]['treasure'] = [sum(x) for x in zip(Userdata.users[str(user.id)]['treasure'], treasure)]
-                        await Userdata.save()
                 elif tilename == "Fountain" or tilename == "Crystal Ball" or tilename == "Scroll" or tilename == "Campsite" or tilename == "Volcano":
                     pass #nothing to do here
                 else:
@@ -757,7 +754,6 @@ class Explore:
                             Userdata.users[str(user.id)]['ingredients'][key]['uses'] = Userdata.users[str(user.id)]['ingredients'][key].get("uses", 0) + Explore.loot.get(key)
                         else:
                             Userdata.users[str(user.id)]['ingredients'].update({key:{'uses':Explore.loot.get(key)}})
-                    await Userdata.save()
                 else:
                     text += "returned empty handed."
                 await Explore.intro.edit(content=text)
@@ -799,7 +795,6 @@ class Explore:
                         Userdata.users[str(user.id)]['ingredients'][key]['uses'] = Userdata.users[str(user.id)]['ingredients'][key].get("uses", 0) + Explore.loot.get(key)
                     else:
                         Userdata.users[str(user.id)]['ingredients'].update({key:{'uses':Explore.loot.get(key)}})
-                await Userdata.save()
             else:
                 text += "returned empty handed."
             await Explore.intro.edit(content=text)

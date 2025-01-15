@@ -251,14 +251,12 @@ class Quest:
                     Userdata.users[str(clumsy.id)]['cha'] -= int(equipped[item].get('cha'))
                     Userdata.users[str(clumsy.id)]['items'][slot][item]['att'] -= 1
                     Userdata.users[str(clumsy.id)]['items'][slot][item]['cha'] -= 1
-                await Userdata.save()
                 await ctx.send("**{}** damaged the **{}** during the fumble (stats reduced).".format(clumsy.display_name,item))
             else:
                 for slot in equipped[item].get('slot'):
                     Userdata.users[str(clumsy.id)]['items'][slot] = {}
                     Userdata.users[str(clumsy.id)]['att'] -= int(equipped[item].get('att'))     # keep in mind that double handed items grant their bonus twice so they remove twice
                     Userdata.users[str(clumsy.id)]['cha'] -= int(equipped[item].get('cha'))
-                await Userdata.save()
                 await ctx.send("**{}** broke the **{}** during the fumble.".format(clumsy.display_name,item))
         else:
             await ctx.send("**{}** almost broke something during the fumble, but due to divine intervention it prevailed.".format(user))
@@ -1060,7 +1058,6 @@ class Quest:
                 Quest.partyIDs.remove(member.id) #user is dead and can no longer participate with reactions
                 if user in Quest.rewards:
                     Quest.rewards.pop(user)
-        await Userdata.save()
         incapacitated = " and ".join([", ".join(incap[:-1]),incap[-1]] if len(incap) > 2 else incap)
         inj_txt = " and ".join([", ".join(injured[:-1]),injured[-1]] if len(injured) > 2 else injured)
         preachermen = " and ".join([", ".join(Quest.userslist["pray"][:-1]),Quest.userslist["pray"][-1]] if len(Quest.userslist["pray"]) > 2 else Quest.userslist["pray"])

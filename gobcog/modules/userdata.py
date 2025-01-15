@@ -3,10 +3,12 @@ from redbot.core.data_manager import cog_data_path
 import random
 import discord
 import asyncio
+from datetime import date
 
 class Userdata:
     users = {}
     fp = cog_data_path(None, "gobcog") / 'users.json'  # this looks for users.json inside your RedBot/cogs/gobcog folder. Needs to be setup once: create the folder, make a users.json with just an empty {} inside.
+    bu = cog_data_path(None, "gobcog") / 'users_backup_{}.json'.format(str(date.today().day))
     with fp.open('r') as f:
         users = json.load(f)
     sleepers = set()
@@ -14,6 +16,8 @@ class Userdata:
     @staticmethod
     async def save():
         with Userdata.fp.open('w') as f:
+            json.dump(Userdata.users, f, indent=4, default=lambda o: '<not serializable>', sort_keys=True)
+        with Userdata.bu.open('w+') as f:
             json.dump(Userdata.users, f, indent=4, default=lambda o: '<not serializable>', sort_keys=True)
 
     @staticmethod

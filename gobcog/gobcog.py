@@ -528,7 +528,6 @@ class GobCog(BaseCog):
                 if pet != None:
                     ctx.command.reset_cooldown(ctx) #reset cooldown so ppl can forage right after taming a new pet.
                     Userdata.users[str(user)]['class']['ability'] = {'active': True, 'pet': pet}
-                    await GobCog.save()
             elif switch == "pet":
                 ctx.command.reset_cooldown(ctx)
                 return await ctx.send("Your {} enjoyed this very much.".format(Userdata.users[str(user)]['class']['ability']['pet']['name']))
@@ -562,10 +561,8 @@ class GobCog(BaseCog):
                             else:
                                 Userdata.users[str(user)]['items']['backpack'].update({item['itemname']: item['item']})
                                 await ctx.send("{} put the {} into the backpack.".format(ctx.author.display_name,item['itemname']))
-                        await GobCog.save()
             elif switch == 'free':
                 await Classes.pet(ctx, switch)
-                await GobCog.save()
             else:
                 ctx.command.reset_cooldown(ctx)
                 return await ctx.send("Check your spelling.")
@@ -648,7 +645,6 @@ class GobCog(BaseCog):
                 return await ctx.send("**{}** is already at full health.".format(user.display_name))
             else:
                 await Classes.heal(ctx,ctx.author,user)
-                await GobCog.save()
 
     @commands.command()
     @commands.guild_only()
@@ -1034,7 +1030,6 @@ class GobCog(BaseCog):
                         del Userdata.users[str(user.id)]['consumables'][cons]
                     else:
                         Userdata.users[str(user.id)]['consumables'][cons]['uses'] = Userdata.users[str(user.id)]['consumables'][cons]['uses'] - 1
-        await GobCog.save()
 
     @commands.command()
     @commands.guild_only()
@@ -1470,7 +1465,6 @@ class GobCog(BaseCog):
                     else:
                         Userdata.users[str(user.id)]['items']['backpack'].pop(item)
                 await ctx.send("Sold {} for {} copperpieces.".format(str(lookup),moneypile))
-                await GobCog.save()
         elif switch == "trade":
             item = item.lower() #lowercasing in case some german put in captialized items. ;)
             if item == "None" or not any([x for x in Userdata.users[str(user.id)]['items']['backpack'] if item in x.lower()]+[x for x in Userdata.users[str(user.id)]['consumables'] if item in x.lower()]+[x for x in Userdata.users[str(user.id)]['ingredients'] if item in x.lower()]):
@@ -1589,7 +1583,6 @@ class GobCog(BaseCog):
                     else:
                         tradeitem = Userdata.users[str(user.id)]['items']['backpack'].pop(item)
                         Userdata.users[str(buyer.id)]['items']['backpack'].update({item: tradeitem})
-                    await GobCog.save()
                     await ctx.send(
                         "```ansi\n" + "{} traded to {} for {} {}```".format(
                             Color.get_color(item), buyer.display_name, asking, currency
@@ -2122,11 +2115,12 @@ class GobCog(BaseCog):
             await self.update_data(Userdata.users, message.author)
             if GobCog.last_trade == 0: #this shuts hawls bro up for 3 hours after a cog reload
                 GobCog.last_trade = time.time()
-            if "rpg-game" in message.channel.name: #restrict hawls bro to rpg-game channel.
-                roll = random.randint(1,20)
-                if roll == 20:
-                    ctx = await self.bot.get_context(message)
-                    await self.trader(ctx, False)
+            if hasattr(message.channel, 'name'):
+                if "rpg-game" in message.channel.name: #restrict hawls bro to rpg-game channel.
+                    roll = random.randint(1,20)
+                    if roll == 20:
+                        ctx = await self.bot.get_context(message)
+                        await self.trader(ctx, False)
 
     @commands.Cog.listener()
     async def on_member_join(self, member):
@@ -2173,7 +2167,6 @@ class GobCog(BaseCog):
         if from_backpack:
             del Userdata.users[str(user.id)]['items']['backpack'][item['itemname']]
         await GobCog.calcstats(ctx,user.id)
-        await GobCog.save()
 
     @staticmethod
     async def calcstats(ctx,userID):
@@ -2214,7 +2207,6 @@ class GobCog(BaseCog):
             Userdata.users[str(user.id)]['class'] = {'name': "Hero", 'ability': False, 'desc': "Your basic adventuring hero."}
             Userdata.users[str(user.id)]['skill'] = {}
             Userdata.users[str(user.id)]['skill'] = {'pool': 0, 'att': 0, 'cha': 0}
-            await GobCog.save()
 
 
     @staticmethod
@@ -2330,7 +2322,6 @@ class GobCog(BaseCog):
                             await channel.send("**{}** was returned to Dodo for a full refund".format(titem['itemname']))
                         else:
                             Userdata.users[str(user.id)]['items']['backpack'].update(copy.deepcopy({titem['itemname']:titem['item']}))
-                    await GobCog.save()
                     if not wasted:
                         if titem['itemname'] in Consumables.consbles.keys() or 'chest' in titem['itemname']:
                             await channel.send("{} paid {} cp and put {}x {} into the backpack.".format(user.display_name,str(calcprice),int(reply.content),titem['itemname']))
